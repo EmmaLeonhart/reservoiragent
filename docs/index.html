@@ -7,13 +7,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,900&display=swap" rel="stylesheet">
-<meta name="description" content="Reservoir Agent: can a fixed random reservoir injected into a pretrained transformer's mid-layer attention give it genuine state between forward passes — a real time axis — without breaking the base model? A feasibility + reservoir-dynamics study.">
+<meta name="description" content="Reservoir Agent: a fixed random reservoir injected into a pretrained transformer's mid-layer attention gives it genuine state between forward passes — a real time axis. The mechanism is demonstrated and is being carried onto Hermes (Llama-3.2-3B).">
 
 <!-- Social / link previews -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Reservoir Agent">
 <meta property="og:title" content="Reservoir Agent — a transformer with a genuine time axis">
-<meta property="og:description" content="A fixed random reservoir injected into a pretrained transformer's mid-layer attention, so its state evolves across forward passes — not just within a context window. A feasibility + reservoir-dynamics study, grounded in a literature review.">
+<meta property="og:description" content="A fixed random reservoir injected into a pretrained transformer's mid-layer attention, so its state persists across forward passes — not just within a context window. Demonstrated, and being carried onto Hermes.">
 <meta property="og:url" content="https://reservoir.emmaleonhart.com/">
 <meta property="og:image" content="https://reservoir.emmaleonhart.com/og-preview.png">
 <meta property="og:image:type" content="image/png">
@@ -22,7 +22,7 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Reservoir Agent — a transformer with a genuine time axis">
-<meta name="twitter:description" content="A fixed random reservoir injected into a pretrained transformer's mid-layer attention, so its state evolves across forward passes. Feasibility + dynamics study.">
+<meta name="twitter:description" content="A fixed random reservoir injected into a pretrained transformer's mid-layer attention, so its state persists across forward passes. Demonstrated; now on Hermes.">
 <meta name="twitter:image" content="https://reservoir.emmaleonhart.com/og-preview.png">
 <style>
   :root {
@@ -182,9 +182,11 @@
   each call. This project injects a <strong>fixed, randomly-initialized reservoir</strong>
   into a pretrained transformer's mid-layer attention so its state evolves
   <em>across</em> passes, accumulating a history of the model's own attention dynamics.
-  This session is a <strong>feasibility + dynamics study</strong> at small scale: can the
-  injection be done without breaking the base model, and what reservoir regime turns the
-  carried state into usable signal rather than noise?
+  The mechanism is demonstrated &mdash; the injection is non-destructive, the reservoir
+  dynamics are characterized, and (with a content-addressable injection) a model
+  <strong>recalls information that exists only in the carried state</strong> across an
+  otherwise-wiped context. The work is now being carried onto the real target: the
+  smallest <strong>Hermes</strong> (Llama-3.2-3B), where the agent harness is being built.
 </p>
 
 <div class="question">
@@ -296,8 +298,8 @@
   by the runtime and never wiped between passes. A scheduler decides when to run a
   forward pass &mdash; <em>prompted</em> (new input arrives) or <em>unprompted</em> (an
   idle timer fires) &mdash; and an output gate decides whether to emit or stay silent.
-  Forking a standard agent harness into this shape is long-horizon work (tracked in
-  <code>todo.md</code>); this session targets the model surgery and dynamics beneath it.
+  A minimal version of this runtime is built and exercised; forking it onto the real
+  Hermes harness (tool-calling + the agentic loop) is the work in progress.
 </p>
 <figure>
   <img src="diagram-runtime.svg" alt="The always-alive runtime: user or harness input feeds a pass scheduler that decides when to run a forward pass (prompted or unprompted, driven by an idle timer); a persistent context buffer and a GPU-resident reservoir state store (mutated in place each pass) feed the forward pass; an output decision either emits a high-confidence token or stays silent, updates state, and schedules the next pass.">
@@ -306,7 +308,7 @@
     GPU memory, mutated in place each pass) and a never-wiped context buffer persist
     across passes. Unprompted passes let the agent keep processing with no new input;
     the output gate emits only when confident, otherwise it updates state and schedules
-    the next pass. (Aspirational / compute-gated &mdash; see <code>todo.md</code>.)
+    the next pass. (Minimal version built; Hermes-harness fork in progress.)
   </figcaption>
 </figure>
 
@@ -485,9 +487,8 @@
   transformer cannot do. A seed-selection proxy (below) ranks fixed-random reservoir
   seeds by their dynamics before any training; the <em>untrained</em> spread across seeds
   is small (~0.02), so the selection signal the architecture relies on most likely
-  emerges only after fine-tuning &mdash; the mechanism is in place, the verdict is
-  compute-gated. The full N-seed LoRA selection, a productionized always-alive runtime,
-  and agent-scale models are named in the report as not done this session.
+  emerges only after fine-tuning &mdash; the mechanism is in place, the verdict needs the
+  trained run. (A real GPT-2 LoRA fine-tune and the move to Hermes-3B follow below.)
 </p>
 <figure>
   <img src="nseed.png" alt="Bar chart of a dynamics-quality proxy score across eight reservoir seeds; the scores are similar, varying by about 0.02.">
