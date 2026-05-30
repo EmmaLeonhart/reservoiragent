@@ -228,6 +228,25 @@ model's* next-token entropy, so its emit/silence decisions and the generated tex
 self-initiation policy needs the trained readout/LoRA. The point of this step is that
 the whole loop is now testable before spending compute on training.
 
+## Compute-gated: a real LoRA fine-tune on GPU
+
+The culminating run, on local CUDA (RTX 4070): a genuine **LoRA + W_out fine-tune** of
+GPT-2 with the *differentiable* reservoir injection (`src/reservoir/torch_inject.py`;
+`scripts/run.py finetune`). Across **3 reservoir seeds × 60 steps**, training loss falls
+decisively (≈ **6.3 → 0.85–1.1**) with **491,520 trainable parameters** (LoRA on the
+attention projections + the reservoir readout W_out), and the best seed is selected by
+trained loss. So the full pipeline — inject, freeze the backbone, train W_out + LoRA,
+select across seeds — **runs end-to-end on the real architecture**, on the GPU. With
+W_out zero-initialised the fine-tune starts exactly at the base model (H1 preserved).
+
+**The honest boundary, named plainly:** the injection hook fires *once per forward pass*
+(a transformer processes the whole sequence through each layer once), so this
+single-forward fine-tune exercises the *training machinery on the real model*, not the
+reservoir's distinctive **cross-pass** value. Exercising that requires the multi-pass
+differentiable harness — backprop through passes on a reservoir-requiring (cross-context)
+task — which is the next compute step, now unblocked by everything above (working
+injection, the always-alive harness, the trained readout, and this fine-tune pipeline).
+
 ## Limitations (current)
 
 - Small-scale only this session; the agentic claims (H3/H4) and the full runtime are

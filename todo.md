@@ -54,6 +54,15 @@ rather than noise?
   healthy regime (H2). Metrics → `results/`, figures → `docs/`.
 
 ### Mid-term (the real architecture)
+- **Multi-pass differentiable harness — exercise the reservoir's cross-pass value.**
+  The single-forward LoRA fine-tune (`scripts/run.py finetune`) trains the pipeline but
+  not the cross-pass time axis (the hook ticks once per forward). Build a differentiable
+  multi-pass loop (backprop-through-passes) on a **reservoir-requiring cross-context
+  task** — e.g. show a fact on pass 1, truncate context, recall it on pass N from the
+  reservoir alone — and train W_out (+ LoRA) so the injected model beats a stateless
+  baseline. This is the experiment that would empirically demonstrate the reservoir's
+  distinctive value. Substantial; now unblocked by the working injection + harness +
+  fine-tune pipeline.
 - **Minimal harness fork — the proof-of-concept moment.** Two forward passes in
   sequence *without* reinitialising the reservoir; show r(t) at pass 2 depends on
   pass 1. The smallest demonstration of a genuine time axis.

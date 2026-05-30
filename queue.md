@@ -31,11 +31,11 @@ _Round 2 work items are complete (see `devlog.md`). Per the user, the next work 
 **compute-gated** experiments (N-seed selection + a real GPT-2 LoRA fine-tune); these are
 pulled from `todo.md` and decomposed below._
 
-1. **Real GPT-2 LoRA fine-tune (compute-gated, the culminating run).** With local CUDA
-   (RTX 4070) + peft available, run a genuine small LoRA fine-tune to demonstrate the
-   fine-tuning pipeline end-to-end. Honestly scope and report what it shows — and name
-   plainly whatever needs a differentiable reservoir-through-LM or more compute than this
-   session affords. Metrics → `results/`; FINDINGS note.
+_Round 3 (compute-gated) is complete: N-seed selection + a real GPT-2 LoRA fine-tune both
+ran (the latter on the RTX 4070). The next compute step — the **multi-pass differentiable
+harness** (backprop through passes on a reservoir-requiring cross-context task, to exercise
+the reservoir's cross-pass value) — is in `todo.md` §B; it is a substantial build, left
+for a dedicated session rather than rushed here._
 
 **Refill rule (per the user):** keep this queue topped up from `todo.md` as items drain
 — when the list runs low, pull and decompose the next `todo.md` destination here rather

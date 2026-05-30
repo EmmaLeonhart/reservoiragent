@@ -429,3 +429,25 @@ untrained participation ratio has **no rank correlation** with trained memory ca
 "can dynamics pre-select seeds before training?" question (for this proxy): no, the
 training can't be shortcut this way. FINDINGS Results + docs Findings updated. Full suite
 42 passed locally. Resolves queue item (N-seed selection).
+
+## 2026-05-30 — Round 3.2: real GPT-2 LoRA fine-tune on GPU (compute-gated)
+
+The culminating compute-gated run. `src/reservoir/torch_inject.py` — a *differentiable*
+reservoir injection (torch reservoir; W_r/W_in fixed buffers; trainable zero-init W_out
+readout) into GPT-2, with peft LoRA on the attention projections; `train_finetune` +
+a `finetune` subcommand. `tests/test_torch_inject.py` (1, torch+peft-gated): the pipeline
+reduces loss.
+
+**Ran on local CUDA (RTX 4070):** 3 reservoir seeds × 60 steps, training loss **6.3 →
+0.85–1.1**, 491,520 trainable params (LoRA + W_out), best seed selected by trained loss
+(`results/finetune.json`). The full pipeline — inject, freeze backbone, train W_out +
+LoRA, select across seeds — runs end-to-end on the real architecture. W_out zero-init
+keeps H1 at step 0.
+
+**Honest boundary (named):** the hook ticks once per forward pass, so this single-forward
+fine-tune exercises the *training machinery*, not the reservoir's *cross-pass* value —
+that needs a multi-pass differentiable harness (backprop-through-passes on a
+reservoir-requiring cross-context task), now queued in `todo.md` §B as the next compute
+step. FINDINGS gained a "## Compute-gated: a real LoRA fine-tune on GPU" section. Full
+suite 43 passed locally. Resolves queue item (GPT-2 LoRA fine-tune) — **drains the
+compute-gated queue.**
