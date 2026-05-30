@@ -287,3 +287,13 @@ KV-append injection; agent-scale (Hermes). All written into FINDINGS.
 Full suite 25 passed locally. **This drains the implementation queue** — the
 feasibility + dynamics study is complete; H1 + H2 answered, report + PDF live, PoC
 honest. Resolves queue item (ambitious reach).
+
+## 2026-05-29 — Queue re-fill: Round 2 (deepen + polish)
+
+Round 1 drained, so refilled `queue.md` from `todo.md` (§B mid-term, §C theory, §D open
+questions) + the user's site-polish ask, per the user's "keep refilling as we move
+through it" instruction. Six items, mirrored to the task tool (#14–#19): (1) report-site
+polish via the newly-installed `frontend-design` plugin (fix the janky title); (2)
+input-scaling tuning sweep (follow-up to the real-activation over-saturation finding);
+(3) scoped theory section; (4) train a readout for H3; (5) KV-append injection variant;
+(6) citation-checked novelty follow-up. Crons kept running through the atomic re-fill.
