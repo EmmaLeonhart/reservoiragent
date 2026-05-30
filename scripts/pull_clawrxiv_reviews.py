@@ -3,9 +3,15 @@
 Mirrors the Sutra repo's review-pull mechanism, scoped to this project's single
 paper. Reads the post id from paper/.post_id, GETs
 `https://clawrxiv.io/api/posts/{id}/review` (singular — verified against the
-Sutra puller and the live API), and writes the review to paper/reviews/.
-Idempotent: re-running does nothing once a review is saved. A 404 means the AI
-review hasn't been generated yet — treated as "try again later", not an error.
+Sutra puller and the live API: singular returns 200, plural /reviews 404s), and
+writes the review to paper/reviews/. Idempotent: re-running does nothing once a
+review is saved. A 404 means the AI review hasn't been generated yet — treated
+as "try again later", not an error.
+
+Filename scheme: `post{post_id}_review{review_id}.json`, keyed by the review's
+own id. This dedups multiple reviews per post (e.g. a fresh review after a
+/revise) by review id rather than by a running version counter — strictly more
+precise than Sutra's `v{N}_post{id}_review` scheme for our single-paper case.
 
 Required env: CLAWRXIV_API_KEY (the same secret the submit workflow uses).
 Exit 0 even when no review is ready yet — that's "try again later", not an error.
@@ -18,10 +24,51 @@ import sys
 import urllib.error
 import urllib.request
 from pathlib import Path
+from typing import Any
 
 API_BASE = "https://clawrxiv.io"
 ROOT = Path(__file__).resolve().parent.parent
 REVIEWS_DIR = ROOT / "paper" / "reviews"
+
+# Keys that mark a payload (or an item) as an ACTUAL review rather than an empty
+# "not generated yet" envelope. Mirrors the Sutra puller's readiness check
+# (paper_submit_and_fetch.fetch_review), which accepts review/body/content/
+# rating — so a bare-object response with the review fields at top level (no
+# {"review": ...} wrapper) isn't silently missed.
+REVIEW_MARKERS = ("rating", "recommendation", "review", "body", "content", "summary")
+
+
+def _looks_like_review(obj: Any) -> bool:
+    """True if `obj` is a dict carrying at least one review content field."""
+    return isinstance(obj, dict) and any(obj.get(k) for k in REVIEW_MARKERS)
+
+
+def extract_reviews(payload: Any) -> list[dict[str, Any]]:
+    """Normalize the /review endpoint's several response shapes into a list of
+    review dicts. Returns [] when nothing is ready (never invents a review).
+
+    Handled shapes:
+      - {"review": null}                  -> []      (not generated yet)
+      - {"review": {...}}                 -> [inner]
+      - {"review": [..]}                  -> inner list
+      - {"reviews": [..]}                 -> that list
+      - a bare review object {rating:..}  -> [it]
+      - a list of review objects          -> that list
+      - anything else / falsy            -> []
+    """
+    if isinstance(payload, list):
+        return [r for r in payload if r]
+    if isinstance(payload, dict):
+        if "review" in payload:
+            body = payload["review"]
+            items = body if isinstance(body, list) else ([body] if body else [])
+            return [r for r in items if r]
+        if "reviews" in payload:
+            return [r for r in (payload["reviews"] or []) if r]
+        # No envelope key — treat the dict itself as a review only if it has
+        # review content (so a {"message": "Server Error"} envelope is ignored).
+        return [payload] if _looks_like_review(payload) else []
+    return []
 
 
 def _get(url: str, key: str, timeout: int = 30):
@@ -54,16 +101,7 @@ def main() -> int:
               f"{e.read().decode()[:300]}")
         return 0
 
-    # The endpoint returns {"review": null} (HTTP 200) until the AI review is
-    # generated, then {"review": {...}} (or a bare object / a list).
-    if isinstance(review, dict) and "review" in review:
-        body = review["review"]
-        items = body if isinstance(body, list) else ([body] if body else [])
-    elif isinstance(review, dict) and "reviews" in review:
-        items = review["reviews"] or []
-    else:
-        items = [review] if review else []
-    items = [r for r in items if r]
+    items = extract_reviews(review)
     if not items:
         print(f"No review ready yet for post {post_id} (server returned null).")
         return 0
