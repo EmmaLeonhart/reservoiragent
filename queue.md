@@ -35,6 +35,13 @@ recall** vs **chance (0.17)** for the stateless baseline. The Reservoir Agent's
 statefulness *does* the desired thing when the reservoir is **attended to, not added**.
 See `FINDINGS.md` "## C: cross-pass recall" + `docs/crosspass.png`._
 
+_**(D) resolved.** A trained gate on reservoir state implements a real silence policy on
+an unresolved-thread task (F1 ≈ 0.96) while a stateless gate degenerates to always-speak
+(F1 ≈ 0.34). FINDINGS "## D" also documents the user's conceptual framing (default =
+respond; silence ↔ an active/novel reservoir state; ESP decay → revert to baseline) and
+the honest difficulty of this "brain surgery" on a pretrained model. (Fixed the red CI
+left by a premature commit of the unverified test + a flaky finetune smoke test.)_
+
 1. **(E) Fork the real Hermes harness (tool-calling + agentic loop).** Build a fork of the
    actual Nous Hermes harness — Hermes tool-call/ChatML formatting and the agentic loop —
    wrapping the always-alive runtime (prompted + unprompted passes, the trained gate),

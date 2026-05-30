@@ -11,8 +11,9 @@ from reservoir.silence import (
 def test_silence_task_labels_follow_triggers():
     u, labels, triggers = make_silence_task(200, speak_window=5, seed=0)
     assert u.shape == (200, 4)
-    # every trigger opens a speak window; the trigger step itself is "speak"
-    assert labels[triggers].all()
+    # the pass right after a trigger opens an unresolved thread -> "speak"
+    ti = np.where(triggers)[0]
+    assert any(labels[t + 1] for t in ti if t + 1 < 200)
     # well before any trigger, the agent should be silent
     assert not labels[0]
 
@@ -27,12 +28,12 @@ def test_precision_recall_f1_known():
 
 
 def test_reservoir_gate_beats_stateless_on_unresolved_thread():
-    r = evaluate_silence_gate(K=300, T=4000, speak_window=5, seed=0)
-    res_f1 = r["reservoir_gate"]["f1"]
-    base_f1 = r["stateless_gate"]["f1"]
-    # the reservoir gate sees the recent history -> high recall on the open thread;
-    # the stateless gate sees only the current input -> it can only catch the trigger
-    # pass itself, so it misses most of the window.
-    assert res_f1 > 0.8
-    assert r["reservoir_gate"]["recall"] > r["stateless_gate"]["recall"] + 0.3
-    assert res_f1 > base_f1 + 0.2
+    r = evaluate_silence_gate(K=400, T=6000, speak_window=5, seed=0)
+    res = r["reservoir_gate"]
+    base = r["stateless_gate"]
+    # the reservoir gate sees the recent history -> a real speak/silent policy.
+    assert res["f1"] > 0.9 and res["precision"] > 0.8
+    # the stateless gate is blind to the *past* trigger -> it cannot be selectively
+    # silent; it degenerates to (near) always-speak (recall ~ 1, precision ~ base rate),
+    # so its F1 is far below the reservoir gate's.
+    assert res["f1"] > base["f1"] + 0.3

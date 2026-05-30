@@ -586,3 +586,28 @@ the feasibility study.
 - Added figures to the website, including the Hermes 3B recall plateau.
 - Updated status to "Feasibility Study Complete". Pushing to trigger PDF generation.
 
+
+## 2026-05-30 — Phase H · D: trained silence policy + the conceptual point (+ CI fix)
+
+The user prematurely committed an unverified silence WIP (8c8575f), leaving a FAILING
+test / red CI. Fixed it honestly rather than papering over:
+
+- `src/reservoir/silence.py`: the silence gate now (a) uses a **clean dedicated trigger
+  channel** and a **past-only** speak window (the cue is strictly in the past, so the task
+  is genuinely reservoir-requiring), and (b) **tunes its decision threshold on the train
+  set** (part of training the gate). Result: reservoir-state gate **F1 ≈ 0.96** (P 0.93,
+  R 1.00); the stateless gate collapses to **F1 ≈ 0.34** (always-speak — it cannot see the
+  past trigger). A stateless model cannot implement selective silence at all.
+  `scripts/run.py silence` + `docs/silence.png`. Reconciled the duplicate `silence`
+  command (the user had also added one).
+- Fixed a **flaky** `test_finetune_pipeline_reduces_loss` (tiny model, too few steps →
+  borderline) by giving it enough steps to converge reliably. Full suite **49 passed**.
+
+**The user's conceptual point — documented in FINDINGS "## D":** the *default* should be
+to **respond** (a decayed/empty reservoir ≈ the base model's prior); **silence** should
+attach to an *active, novel* reservoir state (the natural handle to fine-tune a new
+"still processing" behaviour onto); the **echo state property** empties the reservoir over
+time, so the agent **reverts to baseline responding** as activity subsides; and teaching a
+pretrained model this new behavioural axis is aggressive **brain surgery** — genuinely
+hard (the same difficulty that kept Hermes recall from bootstrapping). Mirrored a condensed
+version into the docs Findings. Resolves Phase H item D.

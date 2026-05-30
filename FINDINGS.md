@@ -336,6 +336,50 @@ stream of events where a rare trigger opens a thread that should be addressed (l
   keep speaking after the input has returned to baseline. (`src/reservoir/silence.py`;
   `scripts/run.py silence`.)
 
+## D: a trained silence policy — and why this is hard brain surgery
+
+A real agent must sometimes **stay silent** and sometimes **speak on its own**. The
+current harness gate keys off the base model's next-token entropy, which is arbitrary.
+So we trained a gate on the **reservoir state** for a task the reservoir is suited to —
+an *unresolved thread*: a rare trigger event opens a thread the agent should address for
+the next few passes, then it should fall silent. The "speak" passes are *strictly after*
+the trigger, so the cue is in the **past** — invisible to the current input.
+
+A linear gate on the reservoir state reaches **F1 ≈ 0.96** (precision 0.93, recall 1.00);
+the **stateless gate** — the same gate on the current input — collapses to F1 ≈ 0.34
+because it cannot see the past trigger, so it can only *always speak* (recall ≈ 1,
+precision ≈ the base rate). The point is not the exact number: a stateless model **cannot
+implement a selective silence policy at all**, while a reservoir-state gate can.
+(`scripts/run.py silence`; `docs/silence.png`.)
+
+**The harder conceptual point (the intended behaviour, and why it is difficult).** This
+experiment trains a gate to read silence off the reservoir, but the *intended* behaviour
+of the real agent is subtler and worth stating plainly:
+
+- **The default should be to respond, not to be silent.** With no prompt and a *decayed,
+  near-empty* reservoir, the base model's prior is to produce a response. Absent any
+  internal activity, an automatic, context-driven response is the natural default — the
+  reservoir does not need to *cause* speech.
+- **Silence should attach to an *active, novel* reservoir state.** A reservoir carrying
+  strong state is a genuinely new internal condition the base model never saw in
+  training. That novelty is precisely what makes it the natural handle to fine-tune a new
+  behaviour onto — "I am still processing, stay silent" — because a fresh state is far
+  easier to attach a new response to than the model's well-worn defaults. So, perhaps
+  counter-intuitively, **reservoir activity is more naturally associated with silence**,
+  and its *absence* with the model's historical responding.
+- **The echo state property makes the agent revert to baseline over time.** Because the
+  reservoir empties (its state decays toward zero), the agent eventually reaches a state
+  close to what the base model was historically trained on — so it naturally *stops* and
+  drifts back to default, context-driven responding once the internal activity subsides.
+- **This is aggressive brain surgery on a pretrained model, and it is genuinely hard.**
+  We are trying to teach an already-trained model an entirely new behavioural axis —
+  *when to stay silent, when to self-initiate* — against its strong priors. The fact that
+  the Hermes cross-pass recall would not bootstrap (above) is the same difficulty showing
+  up: rewiring a pretrained model's behaviour through an injected reservoir is a hard
+  optimization problem even when the mechanism is verified-wired. The clean GPT-2 results
+  show the mechanism *can* carry and use state; making a large pretrained agent
+  *behave* differently is the real, hard frontier this project is pushing on.
+
 ## Limitations (current)
 
 - Small-scale only this session; the agentic claims (H3/H4) and the full runtime are
