@@ -3,7 +3,19 @@
 > A **research project** scaffolded with
 > [cleanvibe](https://github.com/Immanuelle/cleanvibe) `research`.
 
-**Research question:** _(not yet defined — the bootstrap queue's first research step pins this down with you)_
+**Research question:** Can a fixed, randomly-initialized reservoir injected into a
+pretrained transformer's mid-layer attention give the model genuine state between
+forward passes — a real time axis — without degrading its base capabilities, and what
+reservoir-dynamics regime (spectral radius, size, injection depth) makes that injected
+state usable signal rather than noise?
+
+This session scopes the question as a **feasibility + dynamics study** at small scale
+(GPT-2-scale base, single machine): inject the reservoir, regression-test that base
+behavior survives, characterize reservoir dynamics across spectral radius, and write up
+the theory (genuine time dimension; Turing-completeness via recurrence). The full vision
+— forking the Hermes harness into an always-alive runtime and N-seed LoRA selection at
+agent scale — is the long-horizon target tracked in `todo.md`. The originating spec is
+`data_lake/reservoir_agent_plan.md`.
 
 ## About
 

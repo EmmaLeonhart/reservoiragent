@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>reservoiragent</title>
-<meta name="description" content="A cleanvibe research project: _(not yet defined — the bootstrap queue's first research step pins this down with you)_">
+<meta name="description" content="Reservoir Agent: can a fixed random reservoir injected into a pretrained transformer's mid-layer attention give it genuine state between forward passes — a real time axis — without breaking the base model? A feasibility + reservoir-dynamics study.">
 <style>
   :root {
     --bg: #f6f2ec;
@@ -136,16 +136,25 @@
      CONTENT as the project progresses; keep the theme/chrome. The build step in
      .github/workflows/pages.yml also drops a transportable report.pdf alongside. -->
 
-<h1>reservoiragent</h1>
+<h1>Reservoir Agent</h1>
 <p class="lede">
-  A <strong>cleanvibe research project</strong>. <em>TODO: replace this lede with a
-  one-paragraph plain-language summary of what this project investigates and what
-  it found.</em>
+  A transformer with a genuine <strong>time axis</strong>. Standard transformers are
+  stateless between forward passes — they re-derive everything from the context window
+  each call. This project injects a <strong>fixed, randomly-initialized reservoir</strong>
+  into a pretrained transformer's mid-layer attention so its state evolves
+  <em>across</em> passes, accumulating a history of the model's own attention dynamics.
+  This session is a <strong>feasibility + dynamics study</strong> at small scale: can the
+  injection be done without breaking the base model, and what reservoir regime turns the
+  carried state into usable signal rather than noise?
 </p>
 
 <div class="question">
   <span class="kicker">Research question</span>
-  _(not yet defined — the bootstrap queue's first research step pins this down with you)_
+  Can a fixed, randomly-initialized reservoir injected into a pretrained transformer's
+  mid-layer attention give the model genuine state between forward passes — a real time
+  axis — without degrading its base capabilities, and what reservoir-dynamics regime
+  (spectral radius, size, injection depth) makes that injected state usable signal
+  rather than noise?
 </div>
 
 <div class="actions">
@@ -176,7 +185,11 @@
 <div class="pillars">
   <div class="pillar">
     <h3>1 &middot; The question</h3>
-    <p>_(not yet defined — the bootstrap queue's first research step pins this down with you)_</p>
+    <p>
+      Whether a fixed random reservoir, injected into a pretrained transformer's
+      mid-layer attention, can give it real cross-pass state without breaking the
+      base model — and which reservoir-dynamics regime makes that state useful.
+    </p>
   </div>
   <div class="pillar">
     <h3>2 &middot; Grounded in the literature</h3>
