@@ -308,7 +308,7 @@ def cmd_crosspass(args) -> int:
             r = run_cross_pass_kv(args.model, n_keys=args.n_keys, steps=args.steps,
                                   lr=args.lr, seed=args.seed, stateful=stateful,
                                   load_in_4bit=args.bits4,
-                                  input_scaling=args.input_scaling)
+                                  input_scaling=args.input_scaling, dtype=args.dtype)
         else:
             r = run_cross_pass(args.model, n_keys=args.n_keys, steps=args.steps,
                                lr=args.lr, seed=args.seed, stateful=stateful,
@@ -478,6 +478,8 @@ def main(argv=None) -> int:
                     help="load the base in 4-bit (for large models like Hermes 3B)")
     cp.add_argument("--input-scaling", type=float, default=0.5,
                     help="reservoir input scaling (lower for large-activation models)")
+    cp.add_argument("--dtype", choices=["float16", "bfloat16"], default=None,
+                    help="non-4-bit base dtype (bf16 fits a 3B model and trains more stably)")
     cp.set_defaults(func=cmd_crosspass, bits4=False)
 
     ft = sub.add_parser("finetune", help="real LoRA + W_out fine-tune (GPU)")
