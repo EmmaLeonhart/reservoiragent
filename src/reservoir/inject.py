@@ -50,10 +50,11 @@ class ReservoirInjectedLM:
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.model = AutoModelForCausalLM.from_pretrained(model_name).to(self.device).eval()
 
-        self.blocks = self.model.transformer.h
+        from ._arch import decoder_blocks, hidden_size
+        self.blocks = decoder_blocks(self.model)
         n_layers = len(self.blocks)
         self.layer = n_layers // 2 if layer is None else int(layer)
-        self.d_model = self.model.config.n_embd
+        self.d_model = hidden_size(self.model.config)
         self.n_reservoir = int(n_reservoir)
 
         self.reservoir = EchoStateReservoir(self.n_reservoir, self.d_model,
@@ -121,7 +122,8 @@ def extract_layer_stream(model_name: str, text: str, *, layer: int | None = None
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
     tok = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForCausalLM.from_pretrained(model_name).to(device).eval()
-    n_layers = len(model.transformer.h)
+    from ._arch import decoder_blocks
+    n_layers = len(decoder_blocks(model))
     layer = n_layers // 2 if layer is None else int(layer)
     ids = tok(text, return_tensors="pt").to(device)
     with torch.no_grad():

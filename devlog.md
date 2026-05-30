@@ -468,3 +468,14 @@ the 4070 + verify H1; (C) multi-pass differentiable harness (cross-pass training
 load-bearing condition); (D) trained silence policy; (E) real Hermes-harness fork
 (tool-calling). Mirrored to tasks #23–27. Preconditions confirmed (8.6 GB VRAM,
 bitsandbytes 0.49.2, peft, accelerate, 768 GB free). Crons kept running.
+
+## 2026-05-30 — Phase H · A: injection generalized to Llama/Hermes arch
+
+`src/reservoir/_arch.py` — `decoder_blocks(model)` (locates `transformer.h` for GPT-2 vs
+`model.model.layers` for Llama, unwrapping peft) + `hidden_size(config)` (`n_embd` vs
+`hidden_size`). Refactored `inject.py` (+ `extract_layer_stream`) and `torch_inject.py`
+to use them instead of the hardcoded GPT-2 paths. `tests/test_inject.py` gained
+`test_h1_holds_on_llama_architecture` — **H1 verified on a tiny Llama**
+(`hf-internal-testing/tiny-random-LlamaForCausalLM`) as well as tiny-gpt2 (zeroed readout
+→ logits identical). The injection is now architecture-agnostic, so it can host Hermes
+(Llama-3.2). Full suite 44 passed locally. Resolves Phase H item A.
