@@ -296,6 +296,28 @@ def cmd_nseed_select(args) -> int:
     return 0
 
 
+def cmd_finetune(args) -> int:
+    from reservoir.torch_inject import train_finetune
+
+    print(f"Real LoRA + W_out fine-tune of {args.model} with reservoir injection, "
+          f"{args.n} seeds x {args.steps} steps…")
+    recs = train_finetune(args.model, seeds=tuple(range(args.n)), steps=args.steps,
+                          lr=args.lr)
+    out = ROOT / "results" / "finetune.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps({"params": {"model": args.model, "n": args.n,
+                                          "steps": args.steps, "lr": args.lr},
+                               "records": recs}, indent=2))
+    print(f"wrote {out.relative_to(ROOT)}")
+    for r in recs:
+        print(f"seed {r['seed']}: loss {r['loss_start']:.3f} -> {r['loss_end']:.3f} "
+              f"({r['n_trainable_params']:,} trainable params, {r['device']})")
+    best = min(recs, key=lambda r: r["loss_end"])
+    print(f"best seed = {best['seed']} (final loss {best['loss_end']:.3f}) — N-seed "
+          f"selection by trained loss, the full pipeline on the real architecture.")
+    return 0
+
+
 def cmd_agent(args) -> int:
     from reservoir.runtime import AliveAgent, ConfidenceGate
 
@@ -390,6 +412,13 @@ def main(argv=None) -> int:
     ss.add_argument("--n", type=int, default=16)
     ss.add_argument("--washout", type=int, default=20)
     ss.set_defaults(func=cmd_sweep_scaling)
+
+    ft = sub.add_parser("finetune", help="real LoRA + W_out fine-tune (GPU)")
+    ft.add_argument("--model", default="gpt2")
+    ft.add_argument("--n", type=int, default=3)
+    ft.add_argument("--steps", type=int, default=60)
+    ft.add_argument("--lr", type=float, default=5e-4)
+    ft.set_defaults(func=cmd_finetune)
 
     nss = sub.add_parser("nseed-select", help="N-seed selection + pre-selection proxy")
     nss.add_argument("--n", type=int, default=12)
