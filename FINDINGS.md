@@ -263,6 +263,41 @@ wants, already agent-fine-tuned).
   training on the RTX 4070. So the architecture transplant is non-destructive on the real
   model. (`scripts/hermes_h1.py`; `results/hermes_h1.json`.)
 
+## C: cross-pass training — a negative result that defines the next work
+
+The load-bearing experiment, and the most important honest finding so far. The
+multi-pass differentiable harness **is built and works mechanically**: it backprops
+through two forward passes, training the readout W_out (+ LoRA) on a task a stateless
+model structurally cannot do — show a secret word on pass 1, **wipe the context**, recall
+it on pass 2 from the carried reservoir state alone (`src/reservoir/crosspass.py`;
+`scripts/run.py crosspass`).
+
+**But the model does not learn to use the reservoir.** Across configurations (mean- and
+last-token reservoir drive, mid- and last-layer injection, up to 500 steps), the
+reservoir-**stateful** model and the **stateless baseline** (reservoir wiped between
+passes) reach the *same* recall accuracy — **chance, 0.17 = 1/6** — and the training loss
+settles at roughly ln 6 (the marginal). The model learns the *prior* over keys (emit
+some color word), not the *conditional recall*. Because stateful ≈ baseline, the carried
+state is contributing nothing.
+
+This is the **Block-Recurrent "model learns to ignore the recurrent state" failure mode,
+reproduced empirically** — and it is precisely the central risk the plan and the
+literature review flagged. The likely cause is diagnostic, not a bug: a single additive
+readout vector at one layer, driven by a *pooled* hidden, does not preserve enough
+*discriminative, content-specific* information about an in-context token for a downstream
+readout to recover it — the fixed random reservoir captures coarse *process/temporal*
+state well (the H3 delay-memory result), but not *which specific word* appeared.
+
+**What this means (named plainly):** the reservoir's statefulness does **not yet "do the
+desired thing"** for content recall. The path forward this result points to: (i) a
+**content-addressable** injection — the **KV-append** variant, so upper layers can
+*attend* to reservoir nodes rather than receive one additive bias (the mechanism is
+already built and tested in `kv_inject.py`; wiring it into the live model is the
+documented blocker); and/or (ii) tasks matched to what reservoirs are actually good at —
+**temporal/process** features (elapsed-time, unresolved-thread, state-change detection)
+rather than specific-content recall. This negative result is a real contribution: it
+rules out the simplest injection for content recall and redirects the effort.
+
 ## Limitations (current)
 
 - Small-scale only this session; the agentic claims (H3/H4) and the full runtime are

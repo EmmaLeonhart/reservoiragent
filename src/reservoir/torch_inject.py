@@ -42,7 +42,8 @@ class TorchReservoirInjectedLM:
                  n_reservoir: int = 256, spectral_radius: float = 0.9,
                  input_scaling: float = 0.25, sparsity: float = 0.1, leak: float = 1.0,
                  seed: int = 0, device: str | None = None,
-                 lora_r: int = 8, lora_alpha: int = 16):
+                 lora_r: int = 8, lora_alpha: int = 16, summary: str = "mean"):
+        self.summary = summary  # how the block output drives the reservoir: "mean"|"last"
         import torch
         import torch.nn as nn
         from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -89,7 +90,10 @@ class TorchReservoirInjectedLM:
 
         def hook(module, inputs, output):
             hidden = output[0] if isinstance(output, tuple) else output
-            x = hidden.mean(dim=1).mean(dim=0).to(self.W_in.dtype)  # (d_model,)
+            if self.summary == "last":
+                x = hidden[:, -1, :].mean(dim=0).to(self.W_in.dtype)   # last token
+            else:
+                x = hidden.mean(dim=1).mean(dim=0).to(self.W_in.dtype)  # mean over seq
             pre = self.W_r @ self._state + self.W_in @ x
             self._state = (1.0 - self.leak) * self._state + self.leak * torch.tanh(pre)
             add = self.W_out(self._state.to(self.W_out.weight.dtype))  # (d_model,)

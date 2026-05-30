@@ -28,22 +28,21 @@ things plainly; the model-download/GPU steps are local-only (torch-gated tests s
 **Crons:** the three (work-loop :03, auto-flush :15, status-report :42) are running and
 kept running through this re-fill (atomic edit). The pinned `## Always last` keeps them alive.
 
-1. **(C) Multi-pass differentiable harness — the load-bearing condition.** Build a
-   differentiable multi-pass loop (backprop **through passes**) on a **reservoir-requiring
-   cross-context task**: show a fact on pass 1, truncate context, recall it on pass N from
-   the reservoir alone; train W_out (+ LoRA) so the injected model beats a **stateless
-   baseline**. This is what makes statefulness actually *do* something. Develop on a small
-   model for iteration speed, then run on Hermes. Honest metric → `results/` + `FINDINGS.md`.
-   Substantial; if a piece is genuinely blocked, document it precisely. Commit.
+_**(C) is built and ran — with an honest negative result.** The multi-pass differentiable
+harness works mechanically, but the model does **not** learn to use the reservoir for
+cross-context content recall (stateful ≈ stateless baseline ≈ chance) — the "ignore the
+recurrent state" failure mode, reproduced. See `FINDINGS.md` "## C: cross-pass training".
+The result redirects the work (KV-append / process-feature tasks); follow-ups added to
+`todo.md`. This changes the calculus for D/E — see the checkpoint question to the user._
 
-2. **(D) Trained silence policy (meaningful "sometimes no response").** Replace the
+1. **(D) Trained silence policy (meaningful "sometimes no response").** Replace the
    base-entropy gate with a **learned** gate (a head on r(t) and/or logit features) trained
    with labelled correct-silence / correct-speech data — so silence is a real decision, not
    entropy noise. Requires designing the silence training data (correct-silence labels) —
    ties to C. Measure precision/recall of the speak/stay-silent decision. `results/` +
    `FINDINGS.md`. Commit.
 
-3. **(E) Fork the real Hermes harness (tool-calling + agentic loop).** Build a fork of the
+2. **(E) Fork the real Hermes harness (tool-calling + agentic loop).** Build a fork of the
    actual Nous Hermes harness — Hermes tool-call/ChatML formatting and the agentic loop —
    wrapping the always-alive runtime (prompted + unprompted passes, the trained gate),
    preserving Hermes' tool-call behaviour (regression vs vanilla Hermes is an explicit
