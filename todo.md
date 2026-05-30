@@ -54,6 +54,15 @@ rather than noise?
   healthy regime (H2). Metrics → `results/`, figures → `docs/`.
 
 ### Mid-term (the real architecture)
+- **Make the reservoir actually USED across passes (redirect from the C negative).**
+  The cross-pass *content-recall* experiment showed the model ignores the reservoir
+  (stateful ≈ stateless ≈ chance). Two directions the result points to: (1) **wire
+  KV-append into the live model** so upper layers *attend* to reservoir nodes
+  (content-addressable) instead of one additive bias (mechanism built in `kv_inject.py`;
+  see `GPT2_INTEGRATION_BLOCKER` — now also needs the Llama path); (2) target **temporal/
+  process** cross-pass tasks (elapsed-pass-count, unresolved-thread, state-change) that
+  match what reservoirs encode well (per the H3 delay-memory result), rather than
+  specific-content recall. These are the path to "statefulness that does something".
 - **Multi-pass differentiable harness — exercise the reservoir's cross-pass value.**
   The single-forward LoRA fine-tune (`scripts/run.py finetune`) trains the pipeline but
   not the cross-pass time axis (the hook ticks once per forward). Build a differentiable

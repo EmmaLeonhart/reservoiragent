@@ -39,16 +39,20 @@ def _single_token_keys(tokenizer, n: int):
 
 def run_cross_pass(model_name: str = "gpt2", *, n_keys: int = 6, steps: int = 200,
                    lr: float = 1e-3, seed: int = 0, device: str | None = None,
-                   stateful: bool = True) -> dict:
+                   stateful: bool = True, layer: int | None = None,
+                   summary: str = "last", n_reservoir: int = 512) -> dict:
     """Train cross-pass recall and return train losses + final recall accuracy.
 
     ``stateful=False`` is the baseline: the reservoir is reset between pass 1 and pass 2,
-    so the carried state is destroyed and the key cannot survive into pass 2.
+    so the carried state is destroyed and the key cannot survive into pass 2. ``summary``
+    selects how the block output drives the reservoir ("last" token preserves the key
+    better than "mean" pooling).
     """
     import torch
     from .torch_inject import TorchReservoirInjectedLM
 
-    lm = TorchReservoirInjectedLM(model_name, seed=seed, device=device)
+    lm = TorchReservoirInjectedLM(model_name, seed=seed, device=device, layer=layer,
+                                  summary=summary, n_reservoir=n_reservoir)
     tok = lm.tokenizer
     keys = _single_token_keys(tok, n_keys)
     rng = np.random.default_rng(seed)

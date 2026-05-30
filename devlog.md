@@ -491,3 +491,22 @@ on the real Hermes, with ample VRAM headroom on the RTX 4070 for LoRA + training
 FINDINGS gained a "## Porting to the real target: Hermes (Phase H)" section. Resolves
 Phase H item B. (Also added — pending its GPU run — the C cross-pass pipeline:
 `src/reservoir/crosspass.py` + `crosspass` subcommand + smoke test.)
+
+## 2026-05-30 — Phase H · C: cross-pass training — HONEST NEGATIVE RESULT
+
+The load-bearing experiment, run on the GPU. The multi-pass differentiable harness
+**works mechanically** (backprop through two passes, training W_out + LoRA on a
+secret-word-recall-after-context-wipe task). **But the model does not learn to use the
+reservoir:** across mean/last-token drive and mid/last-layer injection, up to 500 steps,
+the stateful model and the stateless baseline both reach **chance (0.17 = 1/6)** with loss
+at the marginal (~ln 6). stateful ≈ baseline ⇒ the carried state contributes nothing —
+the **Block-Recurrent "learns to ignore the recurrent state" failure mode, reproduced
+empirically.** Diagnosis (not a bug): a single additive readout driven by a pooled hidden
+preserves coarse *process* state (cf. H3) but not *which specific word* appeared.
+
+Reported honestly in FINDINGS ("## C: cross-pass training") + docs Findings (figure
+`docs/crosspass.png`, both bars at chance). Redirects the work: KV-append
+(content-addressable attention to reservoir nodes) and/or temporal/process tasks — added
+to `todo.md` §B. **This changes the calculus for D/E** (the desired behaviour does not yet
+work), so I paused to checkpoint with the user rather than barrel into D/E on a broken
+core. C is built + ran + reported; not a faked pass.
