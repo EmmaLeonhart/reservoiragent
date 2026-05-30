@@ -415,6 +415,24 @@
     <code>python scripts/run.py h3</code>.
   </figcaption>
 </figure>
+<p>
+  <strong>N-seed selection: it works, but you can&rsquo;t shortcut it.</strong> Training
+  each of 12 fixed reservoir seeds&rsquo; readout and ranking by memory capacity, the seeds
+  genuinely differ (17.4&ndash;20.7, ~19% spread) &mdash; so keeping the best is worth it.
+  But the plan&rsquo;s open question &mdash; can a cheap <em>untrained</em> dynamics metric
+  predict which seed trains best, to skip training? &mdash; gets a clean <strong>no</strong>
+  for the participation-ratio proxy: no rank correlation with trained performance
+  (Spearman ρ = 0.08, p = 0.80). The N-seed training does real work this proxy can&rsquo;t
+  pre-empt.
+</p>
+<figure>
+  <img src="nseed_select.png" alt="Scatter of untrained participation-ratio proxy versus trained memory capacity across 12 reservoir seeds; the points show no trend (Spearman rho 0.08).">
+  <figcaption>
+    <strong>N-seed pre-selection</strong>. Untrained dynamics proxy vs. trained memory
+    capacity across 12 seeds &mdash; no correlation. Regenerate with
+    <code>python scripts/run.py nseed-select</code>.
+  </figcaption>
+</figure>
 
 <p>
   <strong>The over-saturation is fixable by input scaling.</strong> Sweeping the input

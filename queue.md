@@ -31,14 +31,7 @@ _Round 2 work items are complete (see `devlog.md`). Per the user, the next work 
 **compute-gated** experiments (N-seed selection + a real GPT-2 LoRA fine-tune); these are
 pulled from `todo.md` and decomposed below._
 
-1. **N-seed selection by trained-readout performance + seed-pre-selection proxy
-   (`todo.md` §A/§D).** For N reservoir seeds, train each one's readout on the
-   delay-memory task (real training), rank by memory capacity, keep the best; and test
-   whether a cheap *untrained* dynamics metric predicts the trained ranking (Spearman) —
-   the plan's seed-pre-selection open question. `results/` + `docs/` figure; FINDINGS.
-   TDD the selection logic. (`src/reservoir/selection.py` already drafted.)
-
-2. **Real GPT-2 LoRA fine-tune (compute-gated, the culminating run).** With local CUDA
+1. **Real GPT-2 LoRA fine-tune (compute-gated, the culminating run).** With local CUDA
    (RTX 4070) + peft available, run a genuine small LoRA fine-tune to demonstrate the
    fine-tuning pipeline end-to-end. Honestly scope and report what it shows — and name
    plainly whatever needs a differentiable reservoir-through-LM or more compute than this

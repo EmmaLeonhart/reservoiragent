@@ -133,6 +133,19 @@ cannot match it. (Figure: `docs/h3_memory.png`; `scripts/run.py h3`.) This is th
 mechanism on a clean synthetic task; doing it on a *semantic* agent task (unresolved
 thread, elapsed time) is future work that needs the readout trained through the LM.
 
+### N-seed selection — the mechanism works; the cheap pre-selection proxy does not
+
+Running the plan's N-seed selection at small scale (train each of 12 fixed reservoir
+seeds' readout on the delay-memory task, rank by memory capacity, keep the best): the
+seeds genuinely differ — memory capacity ranges **17.4 to 20.7** (~19% spread) — so the
+selection is worth doing. But the open "seed pre-selection proxy" question (can a cheap
+*untrained* dynamics metric predict which seed trains best, to skip training?) gets a
+clean **negative answer for this proxy**: the untrained participation ratio has **no
+rank correlation** with trained memory capacity (**Spearman ρ = 0.08, p = 0.80**, n=12).
+So seeds cannot be pre-filtered by participation ratio — the N-seed *training* does real
+work this dynamics proxy can't shortcut. (Figure: `docs/nseed_select.png`;
+`scripts/run.py nseed-select`. Other proxies remain untested.)
+
 ### H2 — the reservoir-dynamics regime
 
 Sweeping spectral radius ρ ∈ [0.1, 2.0] (figures: `docs/sweep_synthetic.png`,
