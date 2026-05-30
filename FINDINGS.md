@@ -3,6 +3,9 @@
 **Status: feasibility phase complete.** This document is the project's write-up.
 The results below confirm the core architecture and dynamics, demonstrate
 cross-context recall on GPT-2, and identify the optimization frontier on Hermes.
+This is a **feasibility + dynamics study, not an agentic-capability demonstration**:
+the tasks are deliberately minimal probes, each chosen to isolate one mechanism, and
+the broader agentic vision is named throughout as future, compute-gated work.
 
 ## Question
 
@@ -16,6 +19,33 @@ This session scopes the question as a **feasibility + dynamics study** at small 
 (GPT-2-scale base, single machine). The full vision — forking an agent harness into an
 always-alive runtime and N-seed LoRA selection at agent scale — is the long-horizon
 target (see `todo.md`).
+
+## Scope, and what this study does and does not claim
+
+This revision sharpens the scope in response to peer review. To be explicit about the
+boundary of the claims:
+
+- **The tasks are minimal mechanism-isolating probes, not agentic demonstrations.**
+  Secret-word recall and the trigger-based silence policy are intentionally the
+  *simplest* tasks that a stateless model **structurally cannot** do — their job is to
+  isolate one variable (does carried state become usable signal, and under which
+  injection design), not to exhibit organism-like reasoning. We make **no** claim of
+  complex agentic behaviour at this scale; that is named as future work, not shown here.
+- **The complexity-theory argument is motivation, not a result.** The TC⁰ / FO(M)
+  framing explains *why* cross-pass state is the interesting lever; we state plainly that
+  there is **no proof** a finite-precision reservoir lifts the per-pass bound, and we
+  treat it as the project's central open theoretical question, not an established finding.
+- **The Hermes-3B negative and the KV-append integration blocker are limitations, stated
+  as such.** The cross-pass recall result is GPT-2-only; on Hermes-3B it is a
+  well-diagnosed, verified-wired non-convergence (a bootstrapping/scale wall, plausibly
+  signal dilution through depth), and the most effective injection variant (KV-append)
+  has a documented HuggingFace-integration blocker that currently limits its
+  reproducibility. Neither is hidden; both bound the contribution honestly.
+- **The contribution is the injection-design finding.** What this study *does*
+  establish, decisively and reproducibly on GPT-2, is that **how** the reservoir is
+  injected is the deciding factor: additive injection is ignored (chance recall), while
+  content-addressable KV-prefix injection gives 100% cross-context recall. That negative-
+  then-positive result is the load-bearing contribution.
 
 ## Architecture
 
@@ -143,7 +173,11 @@ clean **negative answer for this proxy**: the untrained participation ratio has 
 rank correlation** with trained memory capacity (**Spearman ρ = 0.08, p = 0.80**, n=12).
 So seeds cannot be pre-filtered by participation ratio — the N-seed *training* does real
 work this dynamics proxy can't shortcut. (Figure: `docs/nseed_select.png`;
-`scripts/run.py nseed-select`. Other proxies remain untested.)
+`scripts/run.py nseed-select`. Other proxies remain untested.) **The cost implication,
+stated plainly (per review):** because this proxy fails, selecting a good fixed reservoir
+currently requires training each seed's readout — i.e. genuine trial-and-error, not a
+cheap pre-filter. Finding an untrained proxy that *does* correlate is open work; until
+then the selection cost scales with the number of seeds tried.
 
 ### H2 — the reservoir-dynamics regime
 
@@ -389,7 +423,10 @@ of the real agent is subtler and worth stating plainly:
   reservoir nodes as extra attention keys/values) — the latter is implemented and
   unit-tested in isolation with a clean H1 *masking* property, but **wiring it into HF
   GPT-2 (transformers 5.4) is a documented blocker** (`GPT2_INTEGRATION_BLOCKER`), left
-  for a focused future item rather than a fragile patch of attention internals.
+  for a focused future item rather than a fragile patch of attention internals. This is a
+  **reproducibility limitation** (flagged in review): the variant that delivers the 100%
+  recall result (`kv_live.py`) runs through a bespoke path, not stock HF attention, so
+  reproducing it requires that path rather than a standard `transformers` model.
 - Input scaling for real-activation injection has now been **characterized** (sweet
   spot ≈ 0.08–0.24 at ρ = 0.95); it has not yet been wired as the default in the
   injection hook, and the optimum's dependence on layer/model/ρ is not yet mapped.
