@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="100%" viewBox="0 0 680 860" role="img" style="max-width: 680px; display: block; margin-inline: auto;">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%" viewBox="0 0 680 860" role="img" style="max-width: 680px; display: block; margin-inline: auto;">
 <title>Reservoir tick architecture — full attention matrix read per layer pass</title>
 <desc>At a chosen mid-depth layer, every forward pass writes the complete attention matrix into the reservoir. The reservoir state evolves chaotically across many passes (ticks), and its current state is injected back as additional tokens into that same layer's attention on the next pass.</desc>
 <defs>

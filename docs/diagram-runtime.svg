@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="100%" viewBox="0 0 680 900" role="img" style="max-width: 680px; display: block; margin-inline: auto;">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%" viewBox="0 0 680 900" role="img" style="max-width: 680px; display: block; margin-inline: auto;">
 <title>Reservoir agent runtime architecture</title>
 <desc>The agent runtime owns persistent reservoir state and a running context buffer. It decides when to trigger forward passes — either from external input or autonomously — and manages the forked Hermes harness which can no longer be a stateless request-response server.</desc>
 <defs>
