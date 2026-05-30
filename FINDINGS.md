@@ -299,6 +299,18 @@ isolates the injection design as the decisive factor, ruling out the naive varia
 validating the attention-based one. (Demonstrated on GPT-2; the same `kv_live` path is
 architecture-agnostic and runs on Hermes via the generalized injection.)
 
+**Transfer to Hermes 3B — not yet (honest).** The same content-addressable experiment was
+run on the real target, Hermes-3-Llama-3.2-3B in 4-bit, across two principled attempts
+(input scaling 0.5 then 0.1 per the H2 result; 300 then 600 steps). Both came back at
+**chance (0.17), stateful ≈ baseline** — and, unlike GPT-2, the **training loss did not
+converge** (it plateaued around 2.9, vs GPT-2's 0.02). So this is not merely the
+over-saturation knob: the LoRA-on-4-bit-Hermes + prefix setup is not optimizing the recall
+in this compute budget. Likely needs more steps / a higher learning rate / full-precision
+(non-4-bit) training / or a stronger injection on the larger frozen model — documented as
+the open transfer step, not a faked pass. The result **holds on GPT-2**; its transfer to
+Hermes is unverified. (`results/crosspass_hermes-3-llama-3-2-3b.json`,
+`docs/crosspass_hermes-3-llama-3-2-3b.png`.)
+
 ## Limitations (current)
 
 - Small-scale only this session; the agentic claims (H3/H4) and the full runtime are
