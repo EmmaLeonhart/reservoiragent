@@ -71,6 +71,7 @@ cron is a guaranteed escalation/kickoff point, not the only start.
    `xfail`, never a faked or weakened result.
 
 8. Make an svg version of this one data_lake\diagrams\transformer-diagram-misconceptions-claude-preview-03.webp that demonstrates this thing but with the reservoir included
+9. Make new svgs or restore them. The blackness is a visual thing and I think it is just a product of a different svg version and not missing content. With the images provided and currently on the page I think it is clear how you fix them up using those references.
 
 **Stop condition (then hand back):** the research question has a defensible answer or a
 clearly-reported partial result; `FINDINGS.md` and the published `docs/` report reflect
