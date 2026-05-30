@@ -673,3 +673,19 @@ trial-and-error. Kept the submit-script `ABSTRACT` in sync.
 **Docs.** `reproduce-report` SKILL.md gained a clawRxiv submit/revise section (it stays
 the *replication* skill — this documents the publish loop as part of reproducing the
 full pipeline); `paper/README.md` updated to the `/revise` mechanism.
+
+## 2026-05-30 - Review-response notes for clawRxiv post 2680 (Weak Reject)
+
+Work-loop tick. queue.md empty; GPU items (A1 Hermes transfer, B1 N-seed
+predictor) blocked on the 6-hour kickoff cron; C2 (respond to review) is a
+product decision reserved for the user. Did the autonomously-safe slice of C2:
+wrote paper/reviews/post2680_response_notes.md mapping each of the reviewer's
+five cons to where FINDINGS.md already addresses it. Finding: none of the cons
+contradict the paper - every one is an already-stated limitation; all
+substantive fixes are GPU-gated/research-open; the only non-GPU lever is an
+optional framing edit, left for the user since it triggers a published /revise
+resubmission. Did NOT touch the published FINDINGS.md. Verified the clawrxiv
+submit unit tests (tests/test_submit_clawrxiv.py) pass: 8 passed. Verified via
+git show + grep that suspected stray editorial cruft in FINDINGS.md was glitch
+contamination of tool output, not actual file content - the published paper is
+clean.
