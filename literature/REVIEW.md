@@ -125,12 +125,22 @@ through a readout + light LoRA. Two corroborating specifics from the prior art:
 
 ## 4. Open questions / caveats (carried into `todo.md`)
 
-- **Novelty is provisional.** "No one has done exactly this" is established only
-  *against the verified set* (reservoir foundations + expressivity). The
-  reservoir-×-transformer and always-on-agent literatures (§4–§5 of `sources.md`)
-  were **not** verification-complete; a dedicated, citation-checked follow-up is
-  required before publishing a hard novelty claim. (Some search-returned arXiv IDs in
-  those areas did not resolve and were discarded rather than cited.)
+- **Novelty — now verified against the searched prior art (with caveats).** A dedicated
+  citation-verified follow-up (§4–§5 of `sources.md`) surveyed the reservoir-×-transformer
+  and always-on-agent literatures. **Verdict: the project's core combination is genuinely
+  novel against the verified set.** The four close items — *Reservoir Transformers* (Shen
+  et al. 2021, arXiv:2012.15045), *Echo State Transformer* (2025, arXiv:2507.02917),
+  *Echo Flow Networks* (2025, arXiv:2509.24122), *FreezeTST* (2025, arXiv:2508.18130) —
+  each fail on at least one of the three load-bearing axes: injection into a *pretrained/
+  frozen* backbone, a *fixed-random* reservoir with only a readout trained, and state
+  *across independent forward passes*. All four are trained-from-scratch and
+  within-sequence; none injects into a pretrained LLM's attention; none persists endogenous
+  state across independent/idle passes. **Caveats:** these are recent 2025 preprints (the
+  field moves fast); verified absence in the searched set is not proof of global absence;
+  the frozen-backbone-adapter cluster was the weakest-covered corner; *Echo State
+  Transformer* trains its reservoir leak rates, so it is the item nearest to blurring the
+  trained-vs-fixed line (still within-sequence only). Unreliable / non-resolving IDs were
+  discarded, not cited.
 - **Does finite-precision cross-pass reservoir state provably lift the TC⁰/FO(M)
   bound?** The known escape routes need arbitrary precision and token-level feedback,
   not continuous hidden-state feedback. This is an **open theoretical question**, not

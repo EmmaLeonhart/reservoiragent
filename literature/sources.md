@@ -201,18 +201,81 @@ empty cell is where the Reservoir Agent sits.
 
 ---
 
-## §4 — Reservoir × transformer / reservoir-in-pretrained-net  *(partially surveyed — open)*
+## §4 — Reservoir × transformer / reservoir-in-pretrained-net  *(verified — the novelty axis)*
 
-The deep-research pass surfaced candidate sources in this area but they were
-**budget-dropped before verification**, and several returned arXiv IDs that did not
-resolve to confirmable papers. No *verified* source documents a fixed random
-reservoir injected into a *pretrained* transformer's internal activations with
-attention as the readout. **This is the decisive novelty question and is flagged
-OPEN** (see `REVIEW.md`) — it needs a dedicated, citation-verified follow-up before
-any "genuinely novel" claim is published.
+A dedicated, citation-verified second pass (18 sources → 25 claims adversarially
+verified, 18 confirmed). The four close items below each merge a reservoir with a
+transformer, but **every one fails on at least one of the three load-bearing axes**:
+(a) injection into a *pretrained/frozen* backbone, (b) the recurrent part kept
+*fixed-random* while only a readout is trained, (c) state persisting *across
+independent forward passes*.
 
-## §5 — Endogenous / always-on / between-request computation  *(open)*
+### Shen, Baevski, Morcos, Keutzer, Auli & Kiela 2021 — "Reservoir Transformers"
+ACL-IJCNLP 2021. <https://arxiv.org/abs/2012.15045> · <https://aclanthology.org/2021.acl-long.331/>
+- **Key claim:** "transformers obtain impressive performance even when some of the
+  layers are randomly initialized and never updated" — non-linear *reservoir* layers
+  interspersed with regular transformer layers, with "subsequent transformer layers
+  acting as readout functions"; improves wall-clock time-to-convergence on MT/MLM.
+- **Differs on all three axes:** trained end-to-end **from scratch** (not injected into
+  a pretrained backbone); reservoir is a **frozen feed-forward layer in the stack**, not
+  an ESN injected into attention as keys/values; **no cross-pass state** (one sequence
+  per pass). The closest-named prior art on "fixed-random layers inside a transformer."
 
-Likewise not verified in this pass. The notion of a model that keeps computing
-between requests (unprompted passes) is core to the Reservoir Agent's runtime but
-was not grounded against verified prior art here. OPEN.
+### Bendi-Ouis & Hinaut 2025 — "Echo State Transformer" (EST)
+Inria/Mnemosyne. <https://arxiv.org/abs/2507.02917>
+- **Key claim:** several parallel random recurrent reservoirs as a fixed-size working
+  memory, with **attention applied over the reservoir units instead of input tokens**
+  (attention-as-readout, linear complexity). The most direct reservoir+attention hybrid.
+- **Differs:** trained **from scratch**; reservoirs **not purely fixed** ("classical
+  reservoir hyperparameters controlling the dynamics are now trained" — adaptive leak
+  rate); state persists **within a sequence** per timestep, no cross-pass/idle axis.
+  (The item nearest to blurring the trained-vs-fixed line.)
+
+### Liu & Xu 2025 — "Echo Flow Networks" (EFN / EchoFormer)
+Stevens Institute. <https://arxiv.org/html/2509.24122>
+- **Key claim:** a **fixed** randomly-initialized streaming reservoir (X-ESN, updated
+  without backprop) fused with a **trainable** transformer forecaster (PatchTST) via a
+  **trained cross-attention** readout.
+- **Differs:** dual-stream, fused at the **input** level (not an ESN in a frozen
+  transformer's internal attention); **backbone is trainable**, not frozen-pretrained;
+  reservoir state is **within-sequence** (rolling windows, reinitialised); time-series
+  forecasting, not LLM agents.
+
+### Singh, Sharma, Dey & Raman 2025 — "FreezeTST (Frozen in Time)"
+ECAI 2025. <https://arxiv.org/abs/2508.18130>
+- **Key claim:** frozen random-feature ("reservoir") blocks interleaved with trainable
+  transformer layers that "query this memory through self-attention" — nonlinear memory
+  at zero optimisation cost.
+- **Differs:** "reservoir" = fixed random **feature expansion recomputed each pass**
+  (not even a recurrent ESN state), trained **from scratch**, time-series, **no cross-pass
+  persistence**.
+
+### Gallicchio & Scardapane 2020 — "Deep Randomized Neural Networks" (+ DeepESN)
+Springer 2020 / <https://arxiv.org/abs/2002.12287>; DeepESN survey <https://arxiv.org/abs/1712.04323>
+- **Key claim:** the recurrent layer "can be left untrained after initialization,
+  provided the Echo State Property is in place… the only trainable part is the output
+  readout," trained by ridge regression; extends to *deep* stacks of fixed reservoirs.
+- **Relation:** foundational canon the project **builds on** (fixed reservoir + trained
+  readout, incl. deep stacks). Recurrence is within-sequence; none of it involves a
+  pretrained transformer, attention readout, or cross-pass state. (This survey itself
+  cites "Reservoir Transformers" as the recognised "fixed layers in a transformer" work.)
+
+**Verdict (verified, high confidence):** no source in the verified set does all three
+of (a)+(b)+(c); the project's specific topology is **not pre-empted**. *Caveats:* the
+close items are very recent 2025 preprints (fast-moving field); verified absence within
+the searched set is not proof of global absence; the frozen-backbone-adapter cluster was
+the weakest-covered corner (negative claims there were split/refuted). Several
+search-returned IDs were unreliable / didn't resolve and were **discarded, not cited**.
+
+## §5 — Endogenous / always-on / between-request computation  *(verified-absent in the searched set)*
+
+The dedicated pass specifically searched "persistent / always-on stateful LLM agents
+across independent calls." **No verified source** persists endogenous LLM state across
+*independent* forward passes (a genuine cross-pass / between-request time axis, including
+computation with **no input**) in the sense the Reservoir Agent's runtime intends — as
+distinct from a KV cache, a context window, or external memory/RAG. This is reported as
+*verified-absent within the searched set* (not proof of global absence); the
+cross-pass / always-on setting is the project's least-pre-empted axis. (Open question
+carried forward in `REVIEW.md`: whether recurrent-memory-transformer / SSM-agent /
+test-time-training literatures, which these reservoir-focused searches would not surface,
+contain a cross-pass-state system.)

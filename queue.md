@@ -27,11 +27,22 @@ verify CI green, not just local; name compute-blocked work plainly.
 running and are kept running through this re-fill (written atomically in one edit, so
 there is no half-written-queue window). The pinned `## Always last` keeps them alive.
 
-1. **Citation-checked novelty follow-up (`todo.md` §D).** Run a focused, verified review
-   of the areas the first lit-review pass left unverified (reservoir × transformer /
-   fixed-reservoir-in-pretrained-net; always-on / between-request agents). Confirm or
-   qualify the novelty claim; fold verified sources into `literature/` and tighten
-   `REVIEW.md` §4–§5. Use `deep-research` if helpful.
+_Round 2 work items are complete (see `devlog.md`). Per the user, the next work is the
+**compute-gated** experiments (N-seed selection + a real GPT-2 LoRA fine-tune); these are
+pulled from `todo.md` and decomposed below._
+
+1. **N-seed selection by trained-readout performance + seed-pre-selection proxy
+   (`todo.md` §A/§D).** For N reservoir seeds, train each one's readout on the
+   delay-memory task (real training), rank by memory capacity, keep the best; and test
+   whether a cheap *untrained* dynamics metric predicts the trained ranking (Spearman) —
+   the plan's seed-pre-selection open question. `results/` + `docs/` figure; FINDINGS.
+   TDD the selection logic. (`src/reservoir/selection.py` already drafted.)
+
+2. **Real GPT-2 LoRA fine-tune (compute-gated, the culminating run).** With local CUDA
+   (RTX 4070) + peft available, run a genuine small LoRA fine-tune to demonstrate the
+   fine-tuning pipeline end-to-end. Honestly scope and report what it shows — and name
+   plainly whatever needs a differentiable reservoir-through-LM or more compute than this
+   session affords. Metrics → `results/`; FINDINGS note.
 
 **Refill rule (per the user):** keep this queue topped up from `todo.md` as items drain
 — when the list runs low, pull and decompose the next `todo.md` destination here rather
