@@ -24,18 +24,27 @@ from .tasks import fit_ridge
 
 
 def make_silence_task(T: int, *, n_input: int = 4, trigger_prob: float = 0.06,
-                      speak_window: int = 5, seed: int = 0):
-    """Return (inputs (T, n_input), speak_labels (T,) bool, triggers (T,) bool)."""
+                      speak_window: int = 5, trigger_mag: float = 6.0, seed: int = 0):
+    """Return (inputs (T, n_input), speak_labels (T,) bool, triggers (T,) bool).
+
+    Dim 0 is a dedicated trigger channel (0 except a spike on trigger passes); the other
+    dims are background noise. So the trigger is a clean event the reservoir can encode.
+    """
     rng = np.random.default_rng(seed)
-    u = rng.standard_normal((T, n_input))
+    u = rng.standard_normal((T, n_input)) * 0.5
+    u[:, 0] = 0.0                                  # dedicated trigger channel
     triggers = rng.random(T) < trigger_prob
-    u[triggers, 0] += 3.0                         # the trigger is a spike on dim 0
+    u[triggers, 0] = trigger_mag                   # the trigger event (a clean spike)
     labels = np.zeros(T, dtype=bool)
     last = -10 ** 9
     for t in range(T):
+        # speak in the passes STRICTLY AFTER a trigger (an unresolved thread the agent
+        # should now address). The trigger step itself is not "speak", so at every speak
+        # step the trigger is in the *past* — invisible to the current input, and only
+        # recoverable from the carried reservoir state.
+        labels[t] = 0 < (t - last) <= speak_window
         if triggers[t]:
             last = t
-        labels[t] = (t - last) < speak_window     # unresolved thread open
     return u, labels, triggers
 
 
@@ -66,14 +75,20 @@ def evaluate_silence_gate(K: int = 300, *, T: int = 4000, washout: int = 100,
     y = labels[washout:].astype(float)[:, None]
     n = X.shape[0]
     h = n // 2
+    y_train = y[:h, 0].astype(bool)
     y_test = y[h:, 0].astype(bool)
 
-    Wr = fit_ridge(X[:h], y[:h])
-    pred_r = (X[h:] @ Wr)[:, 0] > 0.5
-    Wb = fit_ridge(Xb[:h], y[:h])
-    pred_b = (Xb[h:] @ Wb)[:, 0] > 0.5
+    def gate(features):
+        W = fit_ridge(features[:h], y[:h])
+        s_train = (features[:h] @ W)[:, 0]
+        s_test = (features[h:] @ W)[:, 0]
+        # pick the decision threshold on TRAIN to maximize F1 (part of training the gate)
+        thr, best = 0.5, -1.0
+        for t in np.quantile(s_train, np.linspace(0.02, 0.98, 49)):
+            f1 = precision_recall_f1(y_train, s_train > t)["f1"]
+            if f1 > best:
+                best, thr = f1, t
+        return precision_recall_f1(y_test, s_test > thr)
 
-    base_rate = float(y_test.mean())
-    return {"reservoir_gate": precision_recall_f1(y_test, pred_r),
-            "stateless_gate": precision_recall_f1(y_test, pred_b),
-            "speak_base_rate": base_rate, "K": K, "T": T}
+    return {"reservoir_gate": gate(X), "stateless_gate": gate(Xb),
+            "speak_base_rate": float(y_test.mean()), "K": K, "T": T}

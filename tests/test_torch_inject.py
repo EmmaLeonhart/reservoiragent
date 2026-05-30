@@ -8,8 +8,9 @@ def test_finetune_pipeline_reduces_loss():
     pytest.importorskip("peft")
     from reservoir.torch_inject import train_finetune
 
-    # tiny model, few steps, CPU — just prove the pipeline trains (loss decreases)
-    recs = train_finetune("sshleifer/tiny-gpt2", seeds=(0,), steps=12, lr=1e-3,
+    # tiny model, CPU — just prove the pipeline trains (loss decreases). Enough steps
+    # that the decrease is reliable rather than borderline on a tiny random model.
+    recs = train_finetune("sshleifer/tiny-gpt2", seeds=(0,), steps=30, lr=2e-3,
                           device="cpu")
     assert len(recs) == 1
     r = recs[0]

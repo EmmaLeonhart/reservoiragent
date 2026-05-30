@@ -438,6 +438,26 @@ def cmd_silence(args) -> int:
         import json as _json
         _json.dump(r, f, indent=2)
     print(f"\nwrote {out.relative_to(ROOT)}")
+
+    import numpy as np
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    g, b = r["reservoir_gate"], r["stateless_gate"]
+    metrics = ["precision", "recall", "f1"]
+    x = np.arange(len(metrics))
+    fig, ax = plt.subplots(figsize=(6.5, 4.5))
+    ax.bar(x - 0.2, [g[m] for m in metrics], 0.4, label="reservoir gate", color="#5b7a4a")
+    ax.bar(x + 0.2, [b[m] for m in metrics], 0.4, label="stateless gate", color="#b8553a")
+    ax.set_xticks(x); ax.set_xticklabels(metrics)
+    ax.set_ylim(0, 1.05); ax.set_ylabel("score")
+    ax.set_title("Silence policy: speak only on an unresolved thread")
+    ax.legend(fontsize=9)
+    fig.tight_layout()
+    figp = ROOT / "docs" / "silence.png"
+    fig.savefig(figp, dpi=130)
+    plt.close(fig)
+    print(f"wrote {figp.relative_to(ROOT)}")
     return 0
 
 

@@ -493,6 +493,33 @@
 </figure>
 
 <p>
+  <strong>A trained silence policy &mdash; and why this is hard brain surgery.</strong> A
+  real agent must sometimes stay silent. On an <em>unresolved-thread</em> task (speak for a
+  few passes after a trigger, whose cue is strictly in the past), a gate on the reservoir
+  state reaches <strong>F1 ≈ 0.96</strong>, while a stateless gate collapses to F1 ≈ 0.34
+  &mdash; it cannot see the past trigger, so it can only <em>always speak</em>. A stateless
+  model can&rsquo;t implement selective silence at all; a reservoir-state gate can.
+</p>
+<figure>
+  <img src="silence.png" alt="Bar chart of precision, recall, F1 for a reservoir-state silence gate (near 1.0) versus a stateless gate (low F1, always-speak).">
+  <figcaption>
+    <strong>Silence policy</strong>. A gate on reservoir state vs. a stateless gate on the
+    unresolved-thread task. Regenerate with <code>python scripts/run.py silence</code>.
+  </figcaption>
+</figure>
+<p>
+  The deeper point (documented in <code>FINDINGS.md</code>): the <em>default</em> should be
+  to <strong>respond</strong> &mdash; with a decayed, near-empty reservoir the base model&rsquo;s
+  prior is to speak. Silence should attach to an <em>active, novel</em> reservoir state (a
+  condition the base model never saw, and so the natural handle to teach &ldquo;still
+  processing, stay silent&rdquo;); and because the echo state property empties the reservoir
+  over time, the agent naturally reverts to baseline responding once the activity subsides.
+  Teaching an already-trained model this new behavioural axis is aggressive brain surgery
+  &mdash; the same difficulty that kept Hermes recall from bootstrapping &mdash; and it is
+  the real, hard frontier this project pushes on.
+</p>
+
+<p>
   <strong>The over-saturation is fixable by input scaling.</strong> Sweeping the input
   scaling at ρ = 0.95, saturation is a clean sigmoid: near zero below ≈ 0.05, crossing
   0.5 at ≈ 0.24, while separation and dimensionality stay high. There&rsquo;s a sweet spot
