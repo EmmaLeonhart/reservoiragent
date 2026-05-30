@@ -35,7 +35,7 @@ class TorchReservoirPrefixInjectedLM:
                  n_prefix: int = 8, layer: int | None = None, spectral_radius: float = 0.9,
                  input_scaling: float = 0.5, sparsity: float = 0.1, leak: float = 1.0,
                  seed: int = 0, device: str | None = None, lora_r: int = 8,
-                 lora_alpha: int = 16, summary: str = "last"):
+                 lora_alpha: int = 16, summary: str = "last", load_in_4bit: bool = False):
         import torch
         import torch.nn as nn
         from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -47,7 +47,22 @@ class TorchReservoirPrefixInjectedLM:
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
-        base = AutoModelForCausalLM.from_pretrained(model_name)
+        if load_in_4bit:
+            from transformers import BitsAndBytesConfig
+            from peft import prepare_model_for_kbit_training
+            bnb = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4",
+                                     bnb_4bit_use_double_quant=True,
+                                     bnb_4bit_compute_dtype=torch.float16)
+            base = AutoModelForCausalLM.from_pretrained(
+                model_name, quantization_config=bnb, device_map={"": 0})
+            # gradient checkpointing is OFF on purpose: it re-runs block forwards during
+            # backward, which would re-fire the reservoir read hook and double-tick the
+            # state. The cross-pass prompts are tiny, so full activations fit anyway.
+            base = prepare_model_for_kbit_training(
+                base, use_gradient_checkpointing=False)
+            self.device = "cuda"
+        else:
+            base = AutoModelForCausalLM.from_pretrained(model_name)
 
         d_model = hidden_size(base.config)
         self.d_model, self.n_reservoir, self.n_prefix = d_model, n_reservoir, n_prefix
@@ -66,7 +81,9 @@ class TorchReservoirPrefixInjectedLM:
         target = ["c_attn"] if hasattr(base.config, "n_embd") else ["q_proj", "v_proj"]
         lcfg = LoraConfig(r=lora_r, lora_alpha=lora_alpha, target_modules=target,
                           lora_dropout=0.0, bias="none", task_type="CAUSAL_LM")
-        self.model = get_peft_model(base, lcfg).to(self.device)
+        self.model = get_peft_model(base, lcfg)
+        if not load_in_4bit:
+            self.model.to(self.device)
         self.W_res.to(self.device)
         self.W_r = self.W_r.to(self.device)
         self.W_in = self.W_in.to(self.device)
