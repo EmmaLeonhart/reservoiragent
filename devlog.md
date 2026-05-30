@@ -44,3 +44,21 @@ and protected privacy:
 - Recovered SVGs use Claude's dark-theme CSS vars, so they render black-boxed
   standalone (labels/structure intact); they'll be re-themed for the `docs/`
   report. `data_lake/README.md` documents provenance.
+
+## 2026-05-29 — Bootstrap 3: research question defined
+
+After reading the plan + transcripts, pinned the question with the user (who chose
+a **feasibility + dynamics study** scope for this session via a scoping checkpoint):
+
+> Can a fixed, randomly-initialized reservoir injected into a pretrained transformer's
+> mid-layer attention give the model genuine state between forward passes — a real time
+> axis — without degrading its base capabilities, and what reservoir-dynamics regime
+> (spectral radius, size, injection depth) makes that injected state usable signal
+> rather than noise?
+
+Scope this session: GPT-2-scale base on a single CUDA machine — inject the reservoir,
+regression-test base behavior, characterize dynamics across spectral radius, write up
+theory (time dimension; Turing-completeness via recurrence). Full Hermes-fork +
+always-alive runtime + N-seed LoRA selection is the long-horizon `todo.md` target.
+Written into `README.md`, `CLAUDE.md` (Project Description + Research question), and
+`docs/index.html` (lede, question block, pillar 1).
