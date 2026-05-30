@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100%" viewBox="0 0 680 900" role="img" style="max-width: 680px; display: block; margin-inline: auto;">
+<title>Reservoir agent runtime architecture</title>
+<desc>The agent runtime owns persistent reservoir state and a running context buffer. It decides when to trigger forward passes — either from external input or autonomously — and manages the forked Hermes harness which can no longer be a stateless request-response server.</desc>
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+  </marker>
+<mask id="imagine-text-gaps-lvdof8" maskUnits="userSpaceOnUse"><rect x="0" y="0" width="680" height="900" fill="white"></rect><rect x="59.359375" y="38" width="142.29486083984375" height="22" fill="black" rx="2"></rect><rect x="52.984375" y="55.5" width="153.85574340820312" height="19" fill="black" rx="2"></rect><rect x="520.59375" y="38" width="58.8189697265625" height="22" fill="black" rx="2"></rect><rect x="466.4296875" y="55.5" width="167.1917724609375" height="19" fill="black" rx="2"></rect><rect x="45" y="106" width="218.65969848632812" height="19" fill="black" rx="2"></rect><rect x="126.265625" y="156" width="108.70892333984375" height="22" fill="black" rx="2"></rect><rect x="75.5" y="175.5" width="209.83770751953125" height="19" fill="black" rx="2"></rect><rect x="104.296875" y="191.5" width="151.9597930908203" height="19" fill="black" rx="2"></rect><rect x="408.109375" y="156" width="164.307861328125" height="22" fill="black" rx="2"></rect><rect x="415.0078125" y="175.5" width="151.13177490234375" height="19" fill="black" rx="2"></rect><rect x="415.1171875" y="191.5" width="149.601806640625" height="19" fill="black" rx="2"></rect><rect x="402.3359375" y="263" width="176.5667724609375" height="22" fill="black" rx="2"></rect><rect x="399.75" y="282.5" width="181.6417236328125" height="19" fill="black" rx="2"></rect><rect x="402.9921875" y="300.5" width="174.851806640625" height="19" fill="black" rx="2"></rect><rect x="416.421875" y="373" width="147.9698486328125" height="22" fill="black" rx="2"></rect><rect x="396.5234375" y="392.5" width="188.10369873046875" height="19" fill="black" rx="2"></rect><rect x="408.4765625" y="410.5" width="163.8778076171875" height="19" fill="black" rx="2"></rect><rect x="143.9296875" y="263" width="72.94393920898438" height="22" fill="black" rx="2"></rect><rect x="82.8515625" y="282.5" width="194.84771728515625" height="19" fill="black" rx="2"></rect><rect x="63.6171875" y="300.5" width="233.74362182617188" height="19" fill="black" rx="2"></rect><rect x="54" y="357" width="228.97772216796875" height="19" fill="black" rx="2"></rect><rect x="131.2890625" y="395" width="98.15193176269531" height="22" fill="black" rx="2"></rect><rect x="87.4453125" y="414.5" width="186.2677001953125" height="19" fill="black" rx="2"></rect><rect x="95.53125" y="432.5" width="170.0948486328125" height="19" fill="black" rx="2"></rect><rect x="118.1953125" y="450.5" width="124.44583129882812" height="19" fill="black" rx="2"></rect><rect x="84.0234375" y="468.5" width="192.99972534179688" height="19" fill="black" rx="2"></rect><rect x="346" y="434" width="41.091949462890625" height="19" fill="black" rx="2"></rect><rect x="346" y="448" width="39.83197021484375" height="19" fill="black" rx="2"></rect><rect x="121.140625" y="561" width="117.2388916015625" height="22" fill="black" rx="2"></rect><rect x="91.203125" y="580.5" width="178.56777954101562" height="19" fill="black" rx="2"></rect><rect x="86.5234375" y="598.5" width="188.11773681640625" height="19" fill="black" rx="2"></rect><rect x="89.5625" y="612.5" width="180.71173095703125" height="19" fill="black" rx="2"></rect><rect x="31" y="466" width="41.1119384765625" height="19" fill="black" rx="2"></rect><rect x="32" y="480" width="34.00396728515625" height="19" fill="black" rx="2"></rect><rect x="163.3203125" y="671" width="333.0916748046875" height="22" fill="black" rx="2"></rect><rect x="66" y="690" width="343.15625" height="19" fill="black" rx="2"></rect><rect x="66" y="708" width="424.316162109375" height="19" fill="black" rx="2"></rect><rect x="66" y="726" width="499.3399658203125" height="19" fill="black" rx="2"></rect><rect x="66" y="744" width="415.23211669921875" height="19" fill="black" rx="2"></rect></mask></defs>
+
+<!-- ══ EXTERNAL WORLD ══ -->
+<g class="node c-gray" onclick="sendPrompt(&#39;What external inputs can trigger a prompted pass?&#39;)">
+  <rect x="40" y="30" width="180" height="44" rx="6" stroke-width="0.5"></rect>
+  <text class="th" x="130" y="49" text-anchor="middle" dominant-baseline="central">User / harness input</text>
+  <text class="ts" x="130" y="65" text-anchor="middle" dominant-baseline="central">Tool results, new prompts</text>
+</g>
+
+<g class="node c-gray" onclick="sendPrompt(&#39;What does the agent produce as output?&#39;)">
+  <rect x="460" y="30" width="180" height="44" rx="6" stroke-width="0.5"></rect>
+  <text class="th" x="550" y="49" text-anchor="middle" dominant-baseline="central">Output</text>
+  <text class="ts" x="550" y="65" text-anchor="middle" dominant-baseline="central">Tool calls, messages, silence</text>
+</g>
+
+<!-- ══ AGENT RUNTIME OUTER BOUNDARY ══ -->
+<rect x="30" y="100" width="620" height="680" rx="14" stroke="var(--color-border-secondary)" stroke-width="1" fill="var(--color-background-secondary)" stroke-dasharray="6 3"></rect>
+<text class="ts" x="50" y="120" style="fill:var(--color-text-tertiary)">Agent runtime process (always-alive)</text>
+
+<!-- Input router -->
+<line x1="130" y1="74" x2="130" y2="144" class="arr" marker-end="url(#arrow)" stroke="var(--color-text-tertiary)" mask="url(#imagine-text-gaps-lvdof8)"></line>
+<g class="node c-teal" onclick="sendPrompt(&#39;What does the pass scheduler decide?&#39;)">
+  <rect x="50" y="144" width="260" height="70" rx="8" stroke-width="0.5"></rect>
+  <text class="th" x="180" y="167" text-anchor="middle" dominant-baseline="central">Pass scheduler</text>
+  <text class="ts" x="180" y="185" text-anchor="middle" dominant-baseline="central">Decides when to run a forward pass</text>
+  <text class="ts" x="180" y="201" text-anchor="middle" dominant-baseline="central">Prompted or unprompted</text>
+</g>
+
+<!-- Timer / idle trigger -->
+<g class="node c-gray" onclick="sendPrompt(&#39;How does the agent decide to run an unprompted pass?&#39;)">
+  <rect x="370" y="144" width="240" height="70" rx="8" stroke-width="0.5"></rect>
+  <text class="th" x="490" y="167" text-anchor="middle" dominant-baseline="central">Idle timer / event watch</text>
+  <text class="ts" x="490" y="185" text-anchor="middle" dominant-baseline="central">No input for N seconds →</text>
+  <text class="ts" x="490" y="201" text-anchor="middle" dominant-baseline="central">trigger unprompted pass</text>
+</g>
+<line x1="370" y1="179" x2="312" y2="179" class="arr" marker-end="url(#arrow)" stroke="var(--color-text-tertiary)"></line>
+
+<!-- Context buffer -->
+<g class="node c-purple" onclick="sendPrompt(&#39;What lives in the persistent context buffer?&#39;)">
+  <rect x="370" y="250" width="240" height="80" rx="8" stroke-width="0.5"></rect>
+  <text class="th" x="490" y="274" text-anchor="middle" dominant-baseline="central">Persistent context buffer</text>
+  <text class="ts" x="490" y="292" text-anchor="middle" dominant-baseline="central">Full conversation + tool history</text>
+  <text class="ts" x="490" y="310" text-anchor="middle" dominant-baseline="central">Never wiped between passes</text>
+</g>
+
+<!-- Reservoir state store -->
+<g class="node c-amber" onclick="sendPrompt(&#39;How is reservoir state stored between forward passes?&#39;)">
+  <rect x="370" y="360" width="240" height="80" rx="8" stroke-width="0.5"></rect>
+  <text class="th" x="490" y="384" text-anchor="middle" dominant-baseline="central">Reservoir state store</text>
+  <text class="ts" x="490" y="402" text-anchor="middle" dominant-baseline="central">r(t) tensor, lives in GPU memory</text>
+  <text class="ts" x="490" y="420" text-anchor="middle" dominant-baseline="central">Mutated in-place each pass</text>
+</g>
+
+<!-- Pass type branch -->
+<line x1="180" y1="214" x2="180" y2="250" class="arr" marker-end="url(#arrow)" stroke="var(--color-text-tertiary)"></line>
+
+<g class="node c-teal" onclick="sendPrompt(&#39;What is different about a prompted vs unprompted forward pass?&#39;)">
+  <rect x="50" y="250" width="260" height="70" rx="8" stroke-width="0.5"></rect>
+  <text class="th" x="180" y="274" text-anchor="middle" dominant-baseline="central">Pass type</text>
+  <text class="ts" x="180" y="292" text-anchor="middle" dominant-baseline="central">Prompted: new tokens appended</text>
+  <text class="ts" x="180" y="310" text-anchor="middle" dominant-baseline="central">Unprompted: context only, no new input</text>
+</g>
+
+<!-- Context + reservoir feed into forward pass -->
+<line x1="180" y1="320" x2="180" y2="380" class="arr" marker-end="url(#arrow)" stroke="var(--color-text-tertiary)" mask="url(#imagine-text-gaps-lvdof8)"></line>
+<path d="M370,290 Q320,290 310,340" stroke="var(--color-text-tertiary)" stroke-width="1" fill="none" stroke-dasharray="3 2" marker-end="url(#arrow)"></path>
+<path d="M370,400 Q318,400 310,420" stroke="#BA7517" stroke-width="1" fill="none" stroke-dasharray="3 2" marker-end="url(#arrow)"></path>
+
+<!-- Forward pass box -->
+<rect x="44" y="375" width="272" height="130" rx="10" stroke="#BA7517" stroke-width="1.5" fill="none" stroke-dasharray="5 3"></rect>
+<text class="ts" x="58" y="371" style="fill:#BA7517">Hermes (forked) — always-live process</text>
+<g class="node c-amber" onclick="sendPrompt(&#39;What changes in the forked Hermes to support the reservoir?&#39;)">
+  <rect x="56" y="382" width="248" height="116" rx="7" stroke-width="0.5"></rect>
+  <text class="th" x="180" y="406" text-anchor="middle" dominant-baseline="central">Forward pass</text>
+  <text class="ts" x="180" y="424" text-anchor="middle" dominant-baseline="central">Lower layers → injection layer →</text>
+  <text class="ts" x="180" y="442" text-anchor="middle" dominant-baseline="central">reservoir read + write at Lₖ →</text>
+  <text class="ts" x="180" y="460" text-anchor="middle" dominant-baseline="central">upper layers → logits</text>
+  <text class="ts" x="180" y="478" text-anchor="middle" dominant-baseline="central">Reservoir state mutated in-place</text>
+</g>
+
+<!-- Reservoir state updated -->
+<path d="M310,430 Q342,430 368,400" stroke="#BA7517" stroke-width="1.2" fill="none" marker-end="url(#arrow)"></path>
+<text class="ts" x="350" y="448" text-anchor="start" style="fill:#BA7517">r(t) →</text>
+<text class="ts" x="350" y="462" text-anchor="start" style="fill:#BA7517">r(t+1)</text>
+
+<!-- Output decision -->
+<line x1="180" y1="498" x2="180" y2="548" class="arr" marker-end="url(#arrow)" stroke="var(--color-text-tertiary)"></line>
+
+<g class="node c-teal" onclick="sendPrompt(&#39;How does the agent decide whether to emit output or stay silent after an unprompted pass?&#39;)">
+  <rect x="50" y="548" width="260" height="80" rx="8" stroke-width="0.5"></rect>
+  <text class="th" x="180" y="572" text-anchor="middle" dominant-baseline="central">Output decision</text>
+  <text class="ts" x="180" y="590" text-anchor="middle" dominant-baseline="central">High-confidence token → emit</text>
+  <text class="ts" x="180" y="608" text-anchor="middle" dominant-baseline="central">Low confidence → update state,</text>
+  <text class="ts" x="180" y="622" text-anchor="middle" dominant-baseline="central">stay silent, schedule next pass</text>
+</g>
+
+<!-- Output path -->
+<path d="M310,588 Q410,588 460,62" stroke="var(--color-text-tertiary)" stroke-width="1" fill="none" stroke-dasharray="3 2" marker-end="url(#arrow)" mask="url(#imagine-text-gaps-lvdof8)"></path>
+
+<!-- Silent pass feedback -->
+<path d="M50,600 Q30,600 30,440 Q30,295 50,290" stroke="#0F6E56" stroke-width="1.2" fill="none" marker-end="url(#arrow)"></path>
+<text class="ts" x="36" y="480" style="fill:#0F6E56">silent</text>
+<text class="ts" x="36" y="494" text-anchor="start" style="fill:#0F6E56">loop</text>
+
+<!-- ══ WHAT NEEDS REWRITING ══ -->
+<rect x="50" y="660" width="560" height="106" rx="8" stroke="var(--color-border-secondary)" stroke-width="0.5" fill="var(--color-background-primary)"></rect>
+<text class="th" x="330" y="682" text-anchor="middle" dominant-baseline="central">What the fork has to rewrite vs standard Hermes</text>
+<text class="ts" x="70" y="704" style="fill:var(--color-text-secondary)">✕  Stateless request handler → stateful always-alive process</text>
+<text class="ts" x="70" y="722" style="fill:var(--color-text-secondary)">✕  Model loaded per-request → model pinned in GPU memory permanently</text>
+<text class="ts" x="70" y="740" style="fill:var(--color-text-secondary)">✕  Context built from scratch each call → context buffer owned by runtime, appended to</text>
+<text class="ts" x="70" y="758" style="fill:var(--color-text-secondary)">✕  No between-pass logic → scheduler, idle timer, output confidence gate</text>
+</svg>

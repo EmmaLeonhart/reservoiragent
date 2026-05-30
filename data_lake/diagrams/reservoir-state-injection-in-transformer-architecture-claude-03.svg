@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100%" viewBox="0 0 690 820" role="img" style="max-width: 690px; display: block; margin-inline: auto;">
+<title>Reservoir-augmented transformer agent architecture</title>
+<desc>A transformer (Hermes base) with a dense randomly-initialized reservoir injected at mid-depth. Reservoir nodes attend to transformer tokens and to each other via the standard attention mechanism, producing implicit temporal state that feeds back into later layers.</desc>
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+  </marker>
+  <marker id="arrow-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="#BA7517" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+  </marker>
+  <marker id="arrow-teal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="#0F6E56" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+  </marker>
+<mask id="imagine-text-gaps-ld2kry" maskUnits="userSpaceOnUse"><rect x="0" y="0" width="690" height="820" fill="white"></rect><rect x="223.421875" y="12" width="233.29559326171875" height="19" fill="black" rx="2"></rect><rect x="262.515625" y="42" width="114.972900390625" height="22" fill="black" rx="2"></rect><rect x="222.8203125" y="109" width="195.08786010742188" height="22" fill="black" rx="2"></rect><rect x="206.6875" y="130.5" width="227.44564819335938" height="19" fill="black" rx="2"></rect><rect x="117.921875" y="158.5" width="63.97991943359375" height="19" fill="black" rx="2"></rect><rect x="274.125" y="158.5" width="31.75" height="19" fill="black" rx="2"></rect><rect x="394.3359375" y="158.5" width="71.86590576171875" height="19" fill="black" rx="2"></rect><rect x="239.9375" y="214" width="200.27569580078125" height="19" fill="black" rx="2"></rect><rect x="167.921875" y="253" width="304.45770263671875" height="22" fill="black" rx="2"></rect><rect x="161.6171875" y="272.5" width="316.5994873046875" height="19" fill="black" rx="2"></rect><rect x="139.6953125" y="350.5" width="16.829986572265625" height="19" fill="black" rx="2"></rect><rect x="211.3828125" y="320.5" width="17.829986572265625" height="19" fill="black" rx="2"></rect><rect x="291.4609375" y="365.5" width="17.829986572265625" height="19" fill="black" rx="2"></rect><rect x="381.2890625" y="320.5" width="17.829986572265625" height="19" fill="black" rx="2"></rect><rect x="461.4453125" y="355.5" width="17.829986572265625" height="19" fill="black" rx="2"></rect><rect x="531.4375" y="328.5" width="17.8299560546875" height="19" fill="black" rx="2"></rect><rect x="248.09375" y="467" width="144.05780029296875" height="22" fill="black" rx="2"></rect><rect x="158.8828125" y="488.5" width="322.279541015625" height="19" fill="black" rx="2"></rect><rect x="196.15625" y="564" width="247.98883056640625" height="22" fill="black" rx="2"></rect><rect x="177.5859375" y="585.5" width="285.6575622558594" height="19" fill="black" rx="2"></rect><rect x="117.921875" y="609.5" width="63.97991943359375" height="19" fill="black" rx="2"></rect><rect x="274.125" y="609.5" width="31.75" height="19" fill="black" rx="2"></rect><rect x="386.8203125" y="609.5" width="86.9139404296875" height="19" fill="black" rx="2"></rect><rect x="228.5390625" y="682" width="183.9307861328125" height="22" fill="black" rx="2"></rect><rect x="215.5078125" y="697.5" width="208.82159423828125" height="19" fill="black" rx="2"></rect><rect x="628.3499755859375" y="352" width="40.033935546875" height="19" fill="black" rx="2"></rect><rect x="629.3499755859375" y="366" width="54.10791015625" height="19" fill="black" rx="2"></rect><rect x="140.59375" y="748" width="398.78338623046875" height="19" fill="black" rx="2"></rect><rect x="78" y="775" width="120.58184814453125" height="19" fill="black" rx="2"></rect><rect x="208" y="775" width="149.06781005859375" height="19" fill="black" rx="2"></rect><rect x="367" y="775" width="126.90185546875" height="19" fill="black" rx="2"></rect></mask></defs>
+
+<!-- ── Input tokens ── -->
+<text class="ts" x="340" y="26" text-anchor="middle" style="fill:var(--color-text-secondary)">Input context (tools, observations, task)</text>
+<g class="node c-gray" onclick="sendPrompt(&#39;What kind of input does the agent receive?&#39;)">
+  <rect x="120" y="34" width="400" height="38" rx="6" stroke-width="0.5"></rect>
+  <text class="th" x="320" y="53" text-anchor="middle" dominant-baseline="central">Tokenised input</text>
+</g>
+<line x1="320" y1="72" x2="320" y2="96" class="arr" marker-end="url(#arrow)" stroke="var(--color-text-tertiary)"></line>
+
+<!-- ── Lower transformer block (frozen / lightly trained) ── -->
+<g class="node c-purple" onclick="sendPrompt(&#39;Which layers of Hermes are frozen vs fine-tuned?&#39;)">
+  <rect x="60" y="96" width="520" height="110" rx="10" stroke-width="0.5"></rect>
+  <text class="th" x="320" y="120" text-anchor="middle" dominant-baseline="central">Hermes base — lower layers</text>
+  <text class="ts" x="320" y="140" text-anchor="middle" dominant-baseline="central">Pre-trained agent model, mostly frozen</text>
+  <rect x="90" y="152" width="120" height="32" rx="4" stroke-width="0" style="fill:#AFA9EC;opacity:0.5"></rect>
+  <text class="ts" x="150" y="168" text-anchor="middle" dominant-baseline="central">Attention</text>
+  <rect x="230" y="152" width="120" height="32" rx="4" stroke-width="0" style="fill:#AFA9EC;opacity:0.5"></rect>
+  <text class="ts" x="290" y="168" text-anchor="middle" dominant-baseline="central">FFN</text>
+  <rect x="370" y="152" width="120" height="32" rx="4" stroke-width="0" style="fill:#AFA9EC;opacity:0.5"></rect>
+  <text class="ts" x="430" y="168" text-anchor="middle" dominant-baseline="central">Layer norm</text>
+</g>
+
+<line x1="320" y1="206" x2="320" y2="236" class="arr" marker-end="url(#arrow)" stroke="var(--color-text-tertiary)" mask="url(#imagine-text-gaps-ld2kry)"></line>
+
+<!-- ── Reservoir injection zone ── -->
+<text class="ts" x="340" y="228" text-anchor="middle" style="fill:var(--color-text-secondary)">↓  reservoir nodes injected here  ↓</text>
+
+<!-- Reservoir container -->
+<g class="node c-amber" onclick="sendPrompt(&#39;How is the reservoir initialized and what are its weights?&#39;)">
+  <rect x="60" y="240" width="520" height="180" rx="10" stroke-width="0.8"></rect>
+  <text class="th" x="320" y="264" text-anchor="middle" dominant-baseline="central">Reservoir (dense, randomly initialised, fixed)</text>
+  <text class="ts" x="320" y="282" text-anchor="middle" dominant-baseline="central">Chaotic internal dynamics · recurrent self-connections</text>
+</g>
+
+<!-- Reservoir nodes -->
+<g class="node c-amber" onclick="sendPrompt(&#39;What do individual reservoir neurons represent?&#39;)">
+  <circle cx="148" cy="360" r="22" stroke-width="0.8"></circle>
+  <text class="ts" x="148" y="360" text-anchor="middle" dominant-baseline="central">r₁</text>
+</g>
+<g class="node c-amber" onclick="sendPrompt(&#39;What do individual reservoir neurons represent?&#39;)">
+  <circle cx="220" cy="330" r="22" stroke-width="0.8"></circle>
+  <text class="ts" x="220" y="330" text-anchor="middle" dominant-baseline="central">r₂</text>
+</g>
+<g class="node c-amber" onclick="sendPrompt(&#39;What do individual reservoir neurons represent?&#39;)">
+  <circle cx="300" cy="375" r="22" stroke-width="0.8"></circle>
+  <text class="ts" x="300" y="375" text-anchor="middle" dominant-baseline="central">r₃</text>
+</g>
+<g class="node c-amber" onclick="sendPrompt(&#39;What do individual reservoir neurons represent?&#39;)">
+  <circle cx="390" cy="330" r="22" stroke-width="0.8"></circle>
+  <text class="ts" x="390" y="330" text-anchor="middle" dominant-baseline="central">r₄</text>
+</g>
+<g class="node c-amber" onclick="sendPrompt(&#39;What do individual reservoir neurons represent?&#39;)">
+  <circle cx="470" cy="365" r="22" stroke-width="0.8"></circle>
+  <text class="ts" x="470" y="365" text-anchor="middle" dominant-baseline="central">r₅</text>
+</g>
+<g class="node c-amber" onclick="sendPrompt(&#39;What do individual reservoir neurons represent?&#39;)">
+  <circle cx="540" cy="338" r="22" stroke-width="0.8"></circle>
+  <text class="ts" x="540" y="338" text-anchor="middle" dominant-baseline="central">r₆</text>
+</g>
+
+<!-- Reservoir internal connections (sparse wires) -->
+<line x1="170" y1="358" x2="198" y2="340" stroke="#BA7517" stroke-width="0.8" opacity="0.5" fill="none"></line>
+<line x1="242" y1="336" x2="278" y2="362" stroke="#BA7517" stroke-width="0.8" opacity="0.5" fill="none"></line>
+<line x1="322" y1="368" x2="368" y2="342" stroke="#BA7517" stroke-width="0.8" opacity="0.5" fill="none"></line>
+<line x1="412" y1="336" x2="448" y2="352" stroke="#BA7517" stroke-width="0.8" opacity="0.5" fill="none"></line>
+<line x1="492" y1="360" x2="518" y2="346" stroke="#BA7517" stroke-width="0.8" opacity="0.5" fill="none"></line>
+<!-- cross connections -->
+<path d="M168 345 Q250 295 380 322" stroke="#BA7517" stroke-width="0.8" opacity="0.3" fill="none" mask="url(#imagine-text-gaps-ld2kry)"></path>
+<path d="M222 342 Q350 400 448 368" stroke="#BA7517" stroke-width="0.8" opacity="0.3" fill="none" mask="url(#imagine-text-gaps-ld2kry)"></path>
+
+<!-- ── Attention bridge arrows (reservoir ↔ transformer hidden states) ── -->
+<!-- upward arrows: reservoir attends to transformer representations -->
+<path d="M148,338 Q130,270 200,228" stroke="#BA7517" stroke-width="1" opacity="0.6" fill="none" stroke-dasharray="4 3" marker-end="url(#arrow-amber)"></path>
+<path d="M470,343 Q490,270 440,228" stroke="#BA7517" stroke-width="1" opacity="0.6" fill="none" stroke-dasharray="4 3" marker-end="url(#arrow-amber)" mask="url(#imagine-text-gaps-ld2kry)"></path>
+
+<!-- ── Attention layer bridging transformer + reservoir ── -->
+<line x1="320" y1="420" x2="320" y2="452" class="arr" marker-end="url(#arrow)" stroke="var(--color-text-tertiary)"></line>
+
+<g class="node c-teal" onclick="sendPrompt(&#39;How does the joint attention layer work over both token and reservoir states?&#39;)">
+  <rect x="60" y="452" width="520" height="70" rx="10" stroke-width="0.5"></rect>
+  <text class="th" x="320" y="478" text-anchor="middle" dominant-baseline="central">Joint attention layer</text>
+  <text class="ts" x="320" y="498" text-anchor="middle" dominant-baseline="central">Tokens + reservoir nodes as unified key/value sequence</text>
+</g>
+
+<line x1="320" y1="522" x2="320" y2="552" class="arr" marker-end="url(#arrow)" stroke="var(--color-text-tertiary)"></line>
+
+<!-- ── Upper transformer block (fine-tuned) ── -->
+<g class="node c-purple" onclick="sendPrompt(&#39;What is fine-tuned in the upper layers?&#39;)">
+  <rect x="60" y="552" width="520" height="90" rx="10" stroke-width="0.5"></rect>
+  <text class="th" x="320" y="575" text-anchor="middle" dominant-baseline="central">Hermes — upper layers (fine-tuned)</text>
+  <text class="ts" x="320" y="595" text-anchor="middle" dominant-baseline="central">Reads temporal state from reservoir via attention</text>
+  <rect x="90" y="608" width="120" height="22" rx="4" stroke-width="0" style="fill:#AFA9EC;opacity:0.5"></rect>
+  <text class="ts" x="150" y="619" text-anchor="middle" dominant-baseline="central">Attention</text>
+  <rect x="230" y="608" width="120" height="22" rx="4" stroke-width="0" style="fill:#AFA9EC;opacity:0.5"></rect>
+  <text class="ts" x="290" y="619" text-anchor="middle" dominant-baseline="central">FFN</text>
+  <rect x="370" y="608" width="120" height="22" rx="4" stroke-width="0" style="fill:#AFA9EC;opacity:0.5"></rect>
+  <text class="ts" x="430" y="619" text-anchor="middle" dominant-baseline="central">Readout head</text>
+</g>
+
+<line x1="320" y1="642" x2="320" y2="672" class="arr" marker-end="url(#arrow)" stroke="var(--color-text-tertiary)"></line>
+
+<!-- ── Output ── -->
+<g class="node c-teal" onclick="sendPrompt(&#39;What outputs can a reservoir-augmented agent produce?&#39;)">
+  <rect x="120" y="672" width="400" height="44" rx="8" stroke-width="0.5"></rect>
+  <text class="th" x="320" y="693" text-anchor="middle" dominant-baseline="central">Next action / token output</text>
+  <text class="ts" x="320" y="707" text-anchor="middle" dominant-baseline="central">Tool calls, reasoning, self-interrupts</text>
+</g>
+
+<!-- ── Recurrent feedback arrow (reservoir state persists across steps) ── -->
+<path d="M580,452 Q630,460 630,380 Q630,290 580,270" stroke="#0F6E56" stroke-width="1.5" fill="none" marker-end="url(#arrow-teal)" mask="url(#imagine-text-gaps-ld2kry)"></path>
+<text class="ts" x="633.35" y="366" text-anchor="start" style="fill:#0F6E56">State</text>
+<text class="ts" x="633.35" y="380" text-anchor="start" style="fill:#0F6E56">persists</text>
+
+<!-- ── Ensemble label ── -->
+<text class="ts" x="340" y="762" text-anchor="middle" style="fill:var(--color-text-secondary)">Training: run N random reservoir seeds → keep best-performing agent</text>
+
+<!-- Legend -->
+<rect x="62" y="780" width="14" height="10" rx="2" style="fill:#534AB7;opacity:0.7"></rect>
+<text class="ts" x="82" y="789" style="fill:var(--color-text-secondary)">Frozen / base model</text>
+<rect x="192" y="780" width="14" height="10" rx="2" style="fill:#BA7517;opacity:0.7"></rect>
+<text class="ts" x="212" y="789" style="fill:var(--color-text-secondary)">Reservoir (fixed random)</text>
+<rect x="352" y="780" width="14" height="10" rx="2" style="fill:#0F6E56;opacity:0.7"></rect>
+<text class="ts" x="372" y="789" style="fill:var(--color-text-secondary)">Temporal recurrence</text>
+</svg>
