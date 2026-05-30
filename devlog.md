@@ -392,3 +392,24 @@ must be a *masking* property, not a zero-weights one. `GPT2_INTEGRATION_BLOCKER`
 documents the exact remaining step; moved to `todo.md` §B. FINDINGS Limitations updated.
 Full suite 39 passed locally. Resolves queue item (KV-append: mechanism done, integration
 documented-blocked).
+
+## 2026-05-30 — Round 2.7: citation-checked novelty follow-up (verified)
+
+Ran a focused, adversarially-verified deep-research pass (100 agents; 18 sources → 25
+claims verified, 18 confirmed / 7 killed) on the three areas the first lit-review left
+open. **Verdict: the project's core combination is genuinely novel against the verified
+prior art.** The four real close items each fail ≥1 of the three load-bearing axes
+(pretrained-injection / fixed-random reservoir / cross-pass state): **Reservoir
+Transformers** (Shen et al., ACL 2021, arXiv:2012.15045), **Echo State Transformer**
+(2025, arXiv:2507.02917 — attention-over-reservoir but from-scratch + trained leak rates
++ within-sequence), **Echo Flow Networks** (2025, arXiv:2509.24122 — fixed reservoir +
+trainable backbone, within-sequence, time-series), **FreezeTST** (2025, arXiv:2508.18130
+— frozen random feature expansion, from-scratch, time-series). Foundational canon
+(DeepESN, arXiv:2002.12287) is what the project builds on.
+
+Folded into `literature/sources.md` §4 (verified, per-source) + §5 (always-on:
+verified-absent in the searched set) and tightened `REVIEW.md` §4 from "provisional" to
+"verified, with caveats" (recent 2025 preprints; absence-in-set ≠ global absence; EST
+blurs trained-vs-fixed; unreliable IDs discarded not cited). Resolves queue item (novelty
+follow-up) — **drains the Round 2 work items**; next is the compute-gated experiments
+(N-seed selection + GPT-2 LoRA), pulled into the queue from todo.md per the user.
