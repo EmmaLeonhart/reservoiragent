@@ -119,6 +119,20 @@ reservoir and its state is written back into the residual stream (`h' = h + W_ou
   state after two forward passes differs from after one — a genuine cross-pass time
   axis. (`tests/test_inject.py`.)
 
+### H3 — a trained readout extracts history a stateless model cannot
+
+On the delay-memory task (drive the reservoir with i.i.d. input u(t); train a linear
+ridge readout to reproduce u(t−τ)), the readout on the **reservoir state** recovers the
+input from **~18 steps back at R² > 0.5** and ~12 steps back at R² ≈ 1, with a total
+linear memory capacity of **17.4** (Σ R² over τ ≥ 1). The **stateless baseline** —
+the same readout trained on the *current* input u(t) — scores **exactly 0** at every
+delay ≥ 1, because i.i.d. inputs carry no information about their own past. So the
+information needed to answer is provably *in the carried state, not the input*: a light
+trained readout makes the reservoir's history usable, and a stateless model structurally
+cannot match it. (Figure: `docs/h3_memory.png`; `scripts/run.py h3`.) This is the H3
+mechanism on a clean synthetic task; doing it on a *semantic* agent task (unresolved
+thread, elapsed time) is future work that needs the readout trained through the LM.
+
 ### H2 — the reservoir-dynamics regime
 
 Sweeping spectral radius ρ ∈ [0.1, 2.0] (figures: `docs/sweep_synthetic.png`,

@@ -226,6 +226,34 @@ def cmd_sweep_scaling(args) -> int:
     return 0
 
 
+def cmd_h3(args) -> int:
+    from reservoir.tasks import delay_memory_curve, plot_memory_curve, memory_capacity
+
+    print(f"H3 delay-memory task: train a readout to recover u(t-τ) from the reservoir "
+          f"state (K={args.K})…")
+    recs = delay_memory_curve(K=args.K, delays=range(0, args.max_delay + 1),
+                              rho=args.rho, input_scaling=args.input_scaling, seed=args.seed)
+    out = ROOT / "results" / "h3_memory.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps({"params": {"K": args.K, "rho": args.rho,
+                                          "input_scaling": args.input_scaling},
+                               "records": recs,
+                               "memory_capacity_reservoir": memory_capacity(recs, "reservoir_r2"),
+                               "memory_capacity_baseline": memory_capacity(recs, "baseline_r2")},
+                              indent=2))
+    print(f"wrote {out.relative_to(ROOT)}")
+    figp = ROOT / "docs" / "h3_memory.png"
+    plot_memory_curve(recs, str(figp))
+    print(f"wrote {figp.relative_to(ROOT)}")
+    mc_r = memory_capacity(recs, "reservoir_r2")
+    mc_b = memory_capacity(recs, "baseline_r2")
+    print(f"memory capacity (Σ R² over τ≥1): reservoir = {mc_r:.2f}, "
+          f"stateless baseline = {mc_b:.2f}")
+    print(f"reservoir recovers input ~{sum(1 for r in recs if r['delay']>=1 and r['reservoir_r2']>0.5)} "
+          f"steps back at R²>0.5; the stateless baseline recovers 0.")
+    return 0
+
+
 def cmd_agent(args) -> int:
     from reservoir.runtime import AliveAgent, ConfidenceGate
 
@@ -320,6 +348,14 @@ def main(argv=None) -> int:
     ss.add_argument("--n", type=int, default=16)
     ss.add_argument("--washout", type=int, default=20)
     ss.set_defaults(func=cmd_sweep_scaling)
+
+    h3 = sub.add_parser("h3", help="train a readout for the delay-memory task (H3)")
+    h3.add_argument("--K", type=int, default=200)
+    h3.add_argument("--max-delay", type=int, default=30)
+    h3.add_argument("--rho", type=float, default=0.9)
+    h3.add_argument("--input-scaling", type=float, default=0.5)
+    h3.add_argument("--seed", type=int, default=0)
+    h3.set_defaults(func=cmd_h3)
 
     ag = sub.add_parser("agent", help="run a scripted always-alive session")
     ag.add_argument("--model", default="gpt2")

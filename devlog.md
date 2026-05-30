@@ -356,3 +356,20 @@ lever; reservoir ∈ Siegelmann–Sontag) **stated with the arbitrary-precision 
 posed as the project's central OPEN question, not asserted**; (3) the organism analogy
 as one bounded paragraph (structural-capacity claim only, no general-intelligence
 claim). No new empirical claims. HTML tags verified balanced. Resolves queue item (theory).
+
+## 2026-05-29 — Round 2.5: train a readout for H3 (state is informative)
+
+`src/reservoir/tasks.py` — the delay-memory task + a closed-form ridge readout
+(`fit_ridge`, `r2_score`, `delay_memory_curve`, `memory_capacity`, `plot_memory_curve`)
+and an `h3` subcommand; all numpy/CPU → CI-testable. `tests/test_tasks.py` (3): ridge
+recovers a linear map, r2 bounds, and the reservoir-has-memory-baseline-lacks check.
+
+**H3 result:** a linear readout on the reservoir state recovers the input from **~18
+steps back at R²>0.5** (R²≈1 to ~12; total linear memory capacity **17.4**), while the
+**stateless baseline** (same readout on the current input) scores **exactly 0** at every
+delay ≥ 1 — i.i.d. inputs carry no information about their own past, so the answer is
+provably in the carried state, not the input. `results/h3_memory.json` +
+`docs/h3_memory.png`; folded into FINDINGS Results (### H3) + docs Findings. Named the
+limit plainly: this is the mechanism on a clean synthetic task; a *semantic* agent task
+(unresolved thread / elapsed time) needs the readout trained through the LM (future).
+Full suite 35 passed locally. Resolves queue item (H3 readout).

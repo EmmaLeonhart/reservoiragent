@@ -398,6 +398,25 @@
   </figcaption>
 </figure>
 <p>
+  <strong>H3 &mdash; the state is usable: a trained readout reads off history a stateless
+  model can&rsquo;t.</strong> On a delay-memory task (drive the reservoir with random
+  input, train a linear readout to reproduce the input from τ steps ago), the readout on
+  the reservoir state recovers the input from <strong>~18 steps back</strong> (R²&gt;0.5;
+  total memory capacity 17.4), while the stateless baseline &mdash; the same readout on the
+  <em>current</em> input &mdash; scores <strong>exactly 0</strong> at every delay ≥ 1. The
+  answer lives in the carried state, not the input, and a light trained readout makes it
+  usable.
+</p>
+<figure>
+  <img src="h3_memory.png" alt="Delay-memory recovery R-squared vs delay: the readout on the reservoir state stays near 1 out to delay ~12 and decays through ~23; the stateless baseline drops to zero at delay 1 and stays there.">
+  <figcaption>
+    <strong>H3 &mdash; delay memory</strong> (K=200). Recovery R² vs delay for a readout on
+    the reservoir state vs a stateless baseline. Regenerate with
+    <code>python scripts/run.py h3</code>.
+  </figcaption>
+</figure>
+
+<p>
   <strong>The over-saturation is fixable by input scaling.</strong> Sweeping the input
   scaling at ρ = 0.95, saturation is a clean sigmoid: near zero below ≈ 0.05, crossing
   0.5 at ≈ 0.24, while separation and dimensionality stay high. There&rsquo;s a sweet spot
