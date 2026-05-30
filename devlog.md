@@ -413,3 +413,19 @@ verified-absent in the searched set) and tightened `REVIEW.md` §4 from "provisi
 blurs trained-vs-fixed; unreliable IDs discarded not cited). Resolves queue item (novelty
 follow-up) — **drains the Round 2 work items**; next is the compute-gated experiments
 (N-seed selection + GPT-2 LoRA), pulled into the queue from todo.md per the user.
+
+## 2026-05-30 — Round 3.1: N-seed selection + seed-pre-selection proxy (negative result)
+
+`src/reservoir/selection.py` + `nseed-select` subcommand: train each of N fixed seeds'
+readout on the delay-memory task, rank by memory capacity, keep the best; and Spearman-
+correlate a cheap untrained dynamics proxy (participation ratio) against the trained
+ranking. `tests/test_selection.py` (3, numpy/CI). Ran N=12, K=200 →
+`results/nseed_select.json` + `docs/nseed_select.png`.
+
+**Result:** seeds genuinely differ (memory capacity 17.4–20.7, ~19% spread) so the
+N-seed selection is worth doing; but the **seed-pre-selection proxy fails** — the
+untrained participation ratio has **no rank correlation** with trained memory capacity
+(**Spearman ρ = 0.08, p = 0.80**, n=12). A clean negative answer to the plan's open
+"can dynamics pre-select seeds before training?" question (for this proxy): no, the
+training can't be shortcut this way. FINDINGS Results + docs Findings updated. Full suite
+42 passed locally. Resolves queue item (N-seed selection).

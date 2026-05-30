@@ -254,6 +254,48 @@ def cmd_h3(args) -> int:
     return 0
 
 
+def cmd_nseed_select(args) -> int:
+    from reservoir.selection import select_seeds, proxy_correlation
+
+    print(f"N-seed selection: train each of {args.n} seeds' readout on the delay-memory "
+          f"task, rank by memory capacity (K={args.K})…")
+    ranked = select_seeds(range(args.n), K=args.K)
+    corr = proxy_correlation(ranked, "pr_frac")
+    out = ROOT / "results" / "nseed_select.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps({"params": {"n": args.n, "K": args.K}, "ranked": ranked,
+                               "proxy_correlation": corr}, indent=2))
+    print(f"wrote {out.relative_to(ROOT)}")
+
+    best, worst = ranked[0], ranked[-1]
+    print(f"best seed = {best['seed']} (MC={best['memory_capacity']:.2f}), "
+          f"worst = {worst['seed']} (MC={worst['memory_capacity']:.2f}), "
+          f"spread = {best['memory_capacity'] - worst['memory_capacity']:.2f}")
+    print(f"pre-selection proxy (participation ratio) vs trained memory capacity: "
+          f"Spearman ρ = {corr['spearman']:.2f} (p={corr['p_value']:.3f}, n={corr['n']})")
+
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(figsize=(7, 5))
+    ax.scatter([r["pr_frac"] for r in ranked], [r["memory_capacity"] for r in ranked],
+               color="#5b7a4a", s=40)
+    for r in ranked:
+        ax.annotate(str(r["seed"]), (r["pr_frac"], r["memory_capacity"]),
+                    fontsize=8, xytext=(3, 3), textcoords="offset points", color="#6e6a61")
+    ax.set_xlabel("untrained dynamics proxy  (participation ratio / K)")
+    ax.set_ylabel("trained memory capacity")
+    ax.set_title(f"N-seed pre-selection: proxy vs trained performance "
+                 f"(Spearman ρ={corr['spearman']:.2f})")
+    ax.grid(alpha=0.25)
+    fig.tight_layout()
+    figp = ROOT / "docs" / "nseed_select.png"
+    fig.savefig(figp, dpi=130)
+    plt.close(fig)
+    print(f"wrote {figp.relative_to(ROOT)}")
+    return 0
+
+
 def cmd_agent(args) -> int:
     from reservoir.runtime import AliveAgent, ConfidenceGate
 
@@ -348,6 +390,11 @@ def main(argv=None) -> int:
     ss.add_argument("--n", type=int, default=16)
     ss.add_argument("--washout", type=int, default=20)
     ss.set_defaults(func=cmd_sweep_scaling)
+
+    nss = sub.add_parser("nseed-select", help="N-seed selection + pre-selection proxy")
+    nss.add_argument("--n", type=int, default=12)
+    nss.add_argument("--K", type=int, default=200)
+    nss.set_defaults(func=cmd_nseed_select)
 
     h3 = sub.add_parser("h3", help="train a readout for the delay-memory task (H3)")
     h3.add_argument("--K", type=int, default=200)
