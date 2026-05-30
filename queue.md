@@ -12,30 +12,62 @@ See `CLAUDE.md` § "Workflow Rules" and § "Research workflow" for how this file
 
 ---
 
-## Active — Round 2: deepen the study + polish the report
+## Active — Phase H: port to Hermes + make the behaviour real (A–E)
 
-Round 1 (feasibility + dynamics) is complete: H1 (non-destruction) and H2 (the ρ ≈ 1
-echo-state regime on synthetic and real activations) are answered, the report + PDF are
-live, and the time-axis / seed-selection PoC is in. This round is decomposed from
-`todo.md` (§B mid-term, §C theory, §D open questions) plus the user's site-polish ask.
-Work top to bottom; **delete each item in the same commit that completes it and append a
-dated entry to `devlog.md`**; push; let CI run. Hold the hard rails: TDD where there is
-logic; never fake or weaken a test; a real defect → strict `xfail` / documented blocker;
-verify CI green, not just local; name compute-blocked work plainly.
+Rounds 1–3 validated the *mechanisms on GPT-2*. This phase moves to the real target —
+the smallest Hermes (**NousResearch/Hermes-3-Llama-3.2-3B**, Llama-3.2 arch) — and builds
+the conditions for the desired behaviour (statefulness that *does* something; meaningful
+silence; responding without a system prompt over time). The user asked for A–E **in
+order**. Preconditions confirmed: RTX 4070 (8.6 GB VRAM), bitsandbytes 0.49.2 (4-bit
+works on Windows), peft, accelerate, 768 GB free. Work top to bottom; **delete each item
+in the same commit that completes it and append a dated entry to `devlog.md`**; push; let
+CI run. Hard rails: TDD where there is logic; never fake/weaken a test; a real defect →
+strict `xfail` / documented blocker; verify CI green, not just local; name hard/unbuilt
+things plainly; the model-download/GPU steps are local-only (torch-gated tests skip in CI).
 
-**Crons:** the three crons (work-loop :03, auto-flush :15, status-report :42) are
-running and are kept running through this re-fill (written atomically in one edit, so
-there is no half-written-queue window). The pinned `## Always last` keeps them alive.
+**Crons:** the three (work-loop :03, auto-flush :15, status-report :42) are running and
+kept running through this re-fill (atomic edit). The pinned `## Always last` keeps them alive.
 
-_Round 2 work items are complete (see `devlog.md`). Per the user, the next work is the
-**compute-gated** experiments (N-seed selection + a real GPT-2 LoRA fine-tune); these are
-pulled from `todo.md` and decomposed below._
+1. **(A) Generalize the injection to any decoder architecture (GPT-2 + Llama/Hermes).**
+   Both `inject.py` and `torch_inject.py` hardcode `model.transformer.h` (GPT-2). Add a
+   `_decoder_blocks(model)` helper that detects the block list across architectures
+   (`transformer.h` for GPT-2; `model.model.layers` for Llama). Make the injection +
+   hidden-state handling architecture-agnostic. **Verify H1** (zeroed readout → identical
+   logits) on BOTH `sshleifer/tiny-gpt2` AND a tiny Llama model (e.g.
+   `trl-internal-testing/tiny-random-LlamaForCausalLM` or similar). TDD; torch-gated. Commit.
 
-_Round 3 (compute-gated) is complete: N-seed selection + a real GPT-2 LoRA fine-tune both
-ran (the latter on the RTX 4070). The next compute step — the **multi-pass differentiable
-harness** (backprop through passes on a reservoir-requiring cross-context task, to exercise
-the reservoir's cross-pass value) — is in `todo.md` §B; it is a substantial build, left
-for a dedicated session rather than rushed here._
+2. **(B) Load Hermes-3-Llama-3.2-3B on the 4070 + verify H1.** Load with a 4-bit base
+   (bitsandbytes `BitsAndBytesConfig`) + the generalized injection; inject at a mid layer;
+   **verify H1 holds on Hermes** (zeroed readout → logits identical to the un-injected
+   Hermes, to numerical tolerance). Manage VRAM (4-bit base ≈ 2 GB + LoRA + activations).
+   Capture a result note in `results/` + `FINDINGS.md`. Local-only. Commit.
+
+3. **(C) Multi-pass differentiable harness — the load-bearing condition.** Build a
+   differentiable multi-pass loop (backprop **through passes**) on a **reservoir-requiring
+   cross-context task**: show a fact on pass 1, truncate context, recall it on pass N from
+   the reservoir alone; train W_out (+ LoRA) so the injected model beats a **stateless
+   baseline**. This is what makes statefulness actually *do* something. Develop on a small
+   model for iteration speed, then run on Hermes. Honest metric → `results/` + `FINDINGS.md`.
+   Substantial; if a piece is genuinely blocked, document it precisely. Commit.
+
+4. **(D) Trained silence policy (meaningful "sometimes no response").** Replace the
+   base-entropy gate with a **learned** gate (a head on r(t) and/or logit features) trained
+   with labelled correct-silence / correct-speech data — so silence is a real decision, not
+   entropy noise. Requires designing the silence training data (correct-silence labels) —
+   ties to C. Measure precision/recall of the speak/stay-silent decision. `results/` +
+   `FINDINGS.md`. Commit.
+
+5. **(E) Fork the real Hermes harness (tool-calling + agentic loop).** Build a fork of the
+   actual Nous Hermes harness — Hermes tool-call/ChatML formatting and the agentic loop —
+   wrapping the always-alive runtime (prompted + unprompted passes, the trained gate),
+   preserving Hermes' tool-call behaviour (regression vs vanilla Hermes is an explicit
+   check). This is the runtime the serious training/eval runs in. Name plainly whatever
+   part of the real harness is too large for this session and document it. Commit.
+
+**Reality note (kept honest):** A+B are bounded engineering. **C is research-substantial**
+(it's the condition that makes the idea work), **D depends on training-data design**, and
+**E is a real systems build**. They are sequenced A→E per the user; each lands as real,
+tested, committed work or a precise documented blocker — never a faked "it works".
 
 **Refill rule (per the user):** keep this queue topped up from `todo.md` as items drain
 — when the list runs low, pull and decompose the next `todo.md` destination here rather

@@ -451,3 +451,20 @@ reservoir-requiring cross-context task), now queued in `todo.md` §B as the next
 step. FINDINGS gained a "## Compute-gated: a real LoRA fine-tune on GPU" section. Full
 suite 43 passed locally. Resolves queue item (GPT-2 LoRA fine-tune) — **drains the
 compute-gated queue.**
+
+## 2026-05-30 — Phase H planned: port to Hermes + make the behaviour real (A–E)
+
+State assessment for the user (verified in code, not memory): the repo's mechanisms work
+**only on GPT-2** — both injection modules hardcode `model.transformer.h`; there is **no
+Hermes / tool-call / real-harness code anywhere**; and the desired behaviour isn't real
+yet (the silence gate keys off base entropy, untrained; the reservoir's cross-pass value
+is untrained, so the model would currently ignore it). So we are **not** ready to seriously
+train — the user's instinct was right.
+
+Per the user's decisions (port to Hermes 3B now; fork the real Hermes harness) and "do
+A–E in order", re-filled `queue.md` with **Phase H**: (A) generalize injection to
+Llama/Hermes arch + verify H1 on a tiny Llama; (B) load **Hermes-3-Llama-3.2-3B** 4-bit on
+the 4070 + verify H1; (C) multi-pass differentiable harness (cross-pass training — the
+load-bearing condition); (D) trained silence policy; (E) real Hermes-harness fork
+(tool-calling). Mirrored to tasks #23–27. Preconditions confirmed (8.6 GB VRAM,
+bitsandbytes 0.49.2, peft, accelerate, 768 GB free). Crons kept running.
