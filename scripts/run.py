@@ -306,7 +306,8 @@ def cmd_crosspass(args) -> int:
         tag = "stateful" if stateful else "baseline (reservoir wiped between passes)"
         if args.mode == "kv":
             r = run_cross_pass_kv(args.model, n_keys=args.n_keys, steps=args.steps,
-                                  lr=args.lr, seed=args.seed, stateful=stateful)
+                                  lr=args.lr, seed=args.seed, stateful=stateful,
+                                  load_in_4bit=args.bits4)
         else:
             r = run_cross_pass(args.model, n_keys=args.n_keys, steps=args.steps,
                                lr=args.lr, seed=args.seed, stateful=stateful,
@@ -466,7 +467,9 @@ def main(argv=None) -> int:
     cp.add_argument("--seed", type=int, default=0)
     cp.add_argument("--layer", type=int, default=None)
     cp.add_argument("--mode", choices=["additive", "kv"], default="additive")
-    cp.set_defaults(func=cmd_crosspass)
+    cp.add_argument("--4bit", dest="bits4", action="store_true",
+                    help="load the base in 4-bit (for large models like Hermes 3B)")
+    cp.set_defaults(func=cmd_crosspass, bits4=False)
 
     ft = sub.add_parser("finetune", help="real LoRA + W_out fine-tune (GPU)")
     ft.add_argument("--model", default="gpt2")
