@@ -63,6 +63,14 @@ No need to somehow get the credentials to post under the same name. My thought r
 
 We are going to have one initial go. 
 
+We are going to have one initial go where we are going to submit whatever it is that our current paper is, once we implement this stuff. Then we will add to the queue afterwards that we will look at the critiques and address them and publish a second version
+
+## Make second version of paper
+
+Wait one hour after the previous task before doing this one. 
+
+Address whatever the reviewer critiques are for the paper and edit up the paper and stuff properly. Also edit the website, if need be, to address all the critiques, and then commit and push so the CI/CD sends it to the website and gets more reviews
+
 ## Other notes (not sure if they should be in the queue)
 
 **Reality note (kept honest):** each item landed as real, tested, committed work or a
