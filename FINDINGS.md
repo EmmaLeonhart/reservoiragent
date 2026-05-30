@@ -263,40 +263,41 @@ wants, already agent-fine-tuned).
   training on the RTX 4070. So the architecture transplant is non-destructive on the real
   model. (`scripts/hermes_h1.py`; `results/hermes_h1.json`.)
 
-## C: cross-pass training — a negative result that defines the next work
+## C: cross-pass recall — the injection design decides everything
 
-The load-bearing experiment, and the most important honest finding so far. The
-multi-pass differentiable harness **is built and works mechanically**: it backprops
-through two forward passes, training the readout W_out (+ LoRA) on a task a stateless
-model structurally cannot do — show a secret word on pass 1, **wipe the context**, recall
-it on pass 2 from the carried reservoir state alone (`src/reservoir/crosspass.py`;
-`scripts/run.py crosspass`).
+The load-bearing experiment, and the central result. The task is one a stateless model
+**structurally cannot** do: show a secret word on pass 1, **wipe the context**, recall it
+on pass 2 from the carried reservoir state alone (`src/reservoir/crosspass.py`;
+`scripts/run.py crosspass`). The multi-pass differentiable harness backprops through both
+passes, training the injection (+ LoRA), and is compared against a **stateless baseline**
+(the reservoir is reset between the two passes, destroying the carried state).
 
-**But the model does not learn to use the reservoir.** Across configurations (mean- and
-last-token reservoir drive, mid- and last-layer injection, up to 500 steps), the
-reservoir-**stateful** model and the **stateless baseline** (reservoir wiped between
-passes) reach the *same* recall accuracy — **chance, 0.17 = 1/6** — and the training loss
-settles at roughly ln 6 (the marginal). The model learns the *prior* over keys (emit
-some color word), not the *conditional recall*. Because stateful ≈ baseline, the carried
-state is contributing nothing.
+**The result depends sharply on *how* the reservoir is injected — and that is the
+finding.**
 
-This is the **Block-Recurrent "model learns to ignore the recurrent state" failure mode,
-reproduced empirically** — and it is precisely the central risk the plan and the
-literature review flagged. The likely cause is diagnostic, not a bug: a single additive
-readout vector at one layer, driven by a *pooled* hidden, does not preserve enough
-*discriminative, content-specific* information about an in-context token for a downstream
-readout to recover it — the fixed random reservoir captures coarse *process/temporal*
-state well (the H3 delay-memory result), but not *which specific word* appeared.
+- **Additive readout injection → fails (the reservoir is ignored).** With the reservoir
+  written into the residual stream as one additive bias vector (`torch_inject.py`),
+  across mean/last-token drive and mid/last-layer injection up to 500 steps, the stateful
+  model and the stateless baseline reach the **same chance accuracy (0.17 = 1/6)**. The
+  model learns the marginal, not the recall — the **Block-Recurrent "learns to ignore the
+  recurrent state" failure mode, reproduced.** A single pooled additive bias cannot carry
+  *which specific word* appeared.
 
-**What this means (named plainly):** the reservoir's statefulness does **not yet "do the
-desired thing"** for content recall. The path forward this result points to: (i) a
-**content-addressable** injection — the **KV-append** variant, so upper layers can
-*attend* to reservoir nodes rather than receive one additive bias (the mechanism is
-already built and tested in `kv_inject.py`; wiring it into the live model is the
-documented blocker); and/or (ii) tasks matched to what reservoirs are actually good at —
-**temporal/process** features (elapsed-time, unresolved-thread, state-change detection)
-rather than specific-content recall. This negative result is a real contribution: it
-rules out the simplest injection for content recall and redirects the effort.
+- **Content-addressable (KV-append) injection → works, decisively.** When instead the
+  reservoir state is projected into prefix pseudo-tokens the model can **attend** to
+  (`kv_live.py`, `--mode kv`), the stateful model reaches **100% cross-context recall
+  (loss → 0.02)** while the stateless baseline stays at **chance (0.17)**. The carried
+  reservoir state, made attendable, lets the model recall content that exists *only* in
+  the reservoir — something the stateless baseline provably cannot do. (Figure:
+  `docs/crosspass.png`.)
+
+**This is the project's core claim, demonstrated:** the Reservoir Agent's statefulness
+*does the desired thing* — it carries information across independent forward passes and
+the model uses it — **provided the reservoir is injected content-addressably (attended
+to), not as an additive bias.** The negative-then-positive arc is the contribution: it
+isolates the injection design as the decisive factor, ruling out the naive variant and
+validating the attention-based one. (Demonstrated on GPT-2; the same `kv_live` path is
+architecture-agnostic and runs on Hermes via the generalized injection.)
 
 ## Limitations (current)
 

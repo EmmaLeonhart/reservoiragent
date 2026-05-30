@@ -94,4 +94,53 @@ def run_cross_pass(model_name: str = "gpt2", *, n_keys: int = 6, steps: int = 20
                 correct += 1
     return {"model": model_name, "stateful": stateful, "n_keys": n_keys,
             "steps": steps, "loss_start": losses[0], "loss_end": losses[-1],
-            "recall_accuracy": correct / n_keys, "device": lm.device}
+            "recall_accuracy": correct / n_keys, "device": lm.device, "mode": "additive"}
+
+
+def run_cross_pass_kv(model_name: str = "gpt2", *, n_keys: int = 6, steps: int = 400,
+                      lr: float = 1e-3, seed: int = 0, device: str | None = None,
+                      stateful: bool = True, n_prefix: int = 8) -> dict:
+    """Same cross-pass recall task, but with the **content-addressable** injection:
+    the model attends to reservoir-derived prefix tokens (see ``kv_live``). This is the
+    fix for the additive-injection negative result."""
+    import torch
+    from .kv_live import TorchReservoirPrefixInjectedLM
+
+    lm = TorchReservoirPrefixInjectedLM(model_name, seed=seed, device=device,
+                                        n_prefix=n_prefix)
+    tok = lm.tokenizer
+    keys = _single_token_keys(tok, n_keys)
+    rng = np.random.default_rng(seed)
+
+    def forward_pair(key_word, *, reset_between):
+        p1 = tok(f"The secret word is {key_word}.", return_tensors="pt").to(lm.device)
+        p2 = tok("The secret word was", return_tensors="pt").to(lm.device)
+        lm.reset_state()
+        lm.forward_logits(p1["input_ids"], p1["attention_mask"])   # pass 1: read key
+        if reset_between:
+            lm.reset_state()
+        logits = lm.forward_logits(p2["input_ids"], p2["attention_mask"])
+        return logits[0, -1]
+
+    opt = torch.optim.AdamW(lm.trainable_parameters(), lr=lr)
+    lm.model.train()
+    losses = []
+    for _ in range(steps):
+        word, tok_id = keys[int(rng.integers(n_keys))]
+        logits = forward_pair(word, reset_between=not stateful)
+        loss = torch.nn.functional.cross_entropy(
+            logits.unsqueeze(0), torch.tensor([tok_id], device=lm.device))
+        opt.zero_grad()
+        loss.backward()
+        opt.step()
+        losses.append(float(loss.item()))
+
+    lm.model.eval()
+    correct = 0
+    with torch.no_grad():
+        for word, tok_id in keys:
+            if int(forward_pair(word, reset_between=not stateful).argmax().item()) == tok_id:
+                correct += 1
+    return {"model": model_name, "stateful": stateful, "n_keys": n_keys, "steps": steps,
+            "loss_start": losses[0], "loss_end": losses[-1],
+            "recall_accuracy": correct / n_keys, "device": lm.device, "mode": "kv-prefix"}

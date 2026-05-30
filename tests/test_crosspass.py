@@ -18,3 +18,16 @@ def test_cross_pass_pipeline_runs():
     assert 0.0 <= r["recall_accuracy"] <= 1.0
     assert r["n_keys"] == 4
     assert "loss_end" in r
+
+
+def test_cross_pass_kv_pipeline_runs():
+    pytest.importorskip("torch")
+    pytest.importorskip("transformers")
+    pytest.importorskip("peft")
+    from reservoir.crosspass import run_cross_pass_kv
+
+    # the content-addressable (KV-prefix) path must run end-to-end too
+    r = run_cross_pass_kv("sshleifer/tiny-gpt2", n_keys=4, steps=4, lr=1e-2,
+                          device="cpu", stateful=True, n_prefix=4)
+    assert r["mode"] == "kv-prefix"
+    assert 0.0 <= r["recall_accuracy"] <= 1.0

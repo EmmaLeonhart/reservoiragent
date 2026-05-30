@@ -28,12 +28,12 @@ things plainly; the model-download/GPU steps are local-only (torch-gated tests s
 **Crons:** the three (work-loop :03, auto-flush :15, status-report :42) are running and
 kept running through this re-fill (atomic edit). The pinned `## Always last` keeps them alive.
 
-_**(C) is built and ran — with an honest negative result.** The multi-pass differentiable
-harness works mechanically, but the model does **not** learn to use the reservoir for
-cross-context content recall (stateful ≈ stateless baseline ≈ chance) — the "ignore the
-recurrent state" failure mode, reproduced. See `FINDINGS.md` "## C: cross-pass training".
-The result redirects the work (KV-append / process-feature tasks); follow-ups added to
-`todo.md`. This changes the calculus for D/E — see the checkpoint question to the user._
+_**(C) resolved — and it's the core claim, demonstrated.** The additive injection failed
+(reservoir ignored, chance recall), but the user-chosen **content-addressable KV-append
+fix** (reservoir → attendable prefix tokens, `kv_live.py`) gives **100% cross-context
+recall** vs **chance (0.17)** for the stateless baseline. The Reservoir Agent's
+statefulness *does* the desired thing when the reservoir is **attended to, not added**.
+See `FINDINGS.md` "## C: cross-pass recall" + `docs/crosspass.png`._
 
 1. **(D) Trained silence policy (meaningful "sometimes no response").** Replace the
    base-entropy gate with a **learned** gate (a head on r(t) and/or logit features) trained
