@@ -9,6 +9,8 @@ Reservoir Agent idea and are preserved here.
 - **`reservoir_agent_plan.md`** — the user-authored research & engineering plan.
   The clean, canonical spec of the architecture, training pipeline, benchmarks,
   open questions, and build order. Start here.
+- **`start of the convo.md`** — the user's originating prompt: the pasted message
+  that opened the first chat and kicked off the whole Reservoir Agent idea.
 - **`transcripts/`** — clean Markdown transcripts of the three originating Claude
   chats (User/Claude turns only). Extracted from the raw HTML exports below.
   - `reservoir-state-injection-in-transformer-architecture-claude.md` (longest; the core design discussion)

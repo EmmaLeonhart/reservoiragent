@@ -33,6 +33,10 @@ data_lake/*_files/
 # Derived raster renders of the dark-theme SVGs (regenerable; render as black boxes)
 data_lake/diagrams/*.png
 
+# Session-local cron/scheduler state (transient, machine-specific)
+.claude/scheduled_tasks.lock
+.claude/scheduled_tasks.json
+
 # IDE / OS / env
 .vscode/
 .idea/
