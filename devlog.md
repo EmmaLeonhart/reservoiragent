@@ -179,3 +179,14 @@ with torch+transformers behind a `models` extra for the later model-surgery work
 `pytest` 2 passed; `python scripts/run.py --version` → 0.0.1. (Used pyproject with a
 `models` extra rather than a single requirements.txt with torch/transformers, so CI
 stays fast and green; the heavy deps install only where needed.) Resolves queue item 1.
+
+## 2026-05-29 — Implementation 2: echo-state reservoir core (TDD)
+
+`src/reservoir/echo_state.py` — `EchoStateReservoir`: fixed sparse `W_r` rescaled to a
+target spectral radius, fixed `W_in`, leaky update
+`r(t)=(1−a)·r(t−1)+a·tanh(W_r·r(t−1)+W_in·x(t))`; `step`/`run`/`reset` +
+`spectral_radius_actual`. Tests written first (`tests/test_echo_state.py`, 7):
+spectral-radius scaling accurate to 1e-6; echo-state contraction (ρ<1, zero input →
+forgets initial condition, decays to null state); state bounded/finite even at ρ=1.5;
+shapes/dtype; seed reproducibility; leak-rate=0 freezes state; sparsity controls
+density. Full suite 9 passed locally. Resolves queue item 1 (was item 2).
