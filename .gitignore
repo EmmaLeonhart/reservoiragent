@@ -24,6 +24,15 @@ build/
 venv/
 env/
 
+# Raw Claude chat exports — kept LOCAL, never published. They embed a private
+# "Recents" sidebar of unrelated conversations and ~10MB of web chrome each.
+# Publishable, distilled context lives in data_lake/transcripts/ + diagrams/
+# (committed), produced by data_lake/extract_chat_context.py.
+data_lake/*.html
+data_lake/*_files/
+# Derived raster renders of the dark-theme SVGs (regenerable; render as black boxes)
+data_lake/diagrams/*.png
+
 # IDE / OS / env
 .vscode/
 .idea/
