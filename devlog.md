@@ -240,3 +240,27 @@ KV-append variant is the ambitious reach). `tests/test_inject.py` (3, torch+tran
 
 Full suite 22 passed locally (3 inject tests skip in CI). Resolves queue item
 (model surgery, H1).
+
+## 2026-05-29 — Implementation 6: sweep on real GPT-2 activations + FINDINGS write-up
+
+Added a stream-driven sweep (`run_sweep_stream`/`measure_point_stream` in
+`src/reservoir/sweep.py`, z-scoring the input) and a real-activation extractor
+(`extract_layer_stream` in `inject.py`), plus a `sweep-real` subcommand. Ran it on
+real GPT-2 mid-layer activations (two 198-token streams, K=150) →
+`results/sweep_real.json` + `docs/sweep_real.png`.
+
+**Results (written into `FINDINGS.md` + `docs/` Findings):**
+- The **ρ ≈ 1 echo-state boundary survives on real activations** — even sharper
+  (autonomous forgetting 0.000 for ρ ≤ 0.9 → 0.10 at ρ = 1 → ~0.95 above).
+- **Real activations over-drive the reservoir**: saturation ≈ 0.86 (vs < 0.15 on
+  synthetic) and participation ratio ≈ 0.41·K (vs ~0.05·K) — so input scaling must be
+  tuned down for transformer-scale injection (the plan's anticipated open question).
+- FINDINGS Results now reports H1 (non-destruction ✓) and H2 (the dynamics regime);
+  Limitations note the residual-stream (vs KV-append) injection, untrained readout, and
+  untuned input scaling.
+
+A real-data subtlety handled honestly: the autonomous forgetting transition is sharp
+for large K but noisy in the ρ∈[1,1.6] band for small K (two inits can share a basin),
+so the stream-sweep test pins the two ends (forgets at ρ=0.4, retains at ρ=2.0) rather
+than over-specifying the transition width — no test was weakened to pass. Full suite 23
+passed locally. Resolves queue item (real sweep + write-up).

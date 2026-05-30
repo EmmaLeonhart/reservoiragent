@@ -62,6 +62,76 @@ def cmd_sweep(args) -> int:
     return 0
 
 
+TEXT_A = (
+    "The history of science is a long chain of revolutions, each overturning the "
+    "settled assumptions of the era before it. Copernicus moved the Earth from the "
+    "centre of the cosmos, and the heavens lost their fixed and human centre. Darwin "
+    "gave life a branching history, descent with modification replacing special "
+    "creation, and the boundary between humans and other animals grew porous. Quantum "
+    "mechanics dissolved the comfortable determinism of the clockwork universe, "
+    "replacing certain trajectories with amplitudes and probabilities. Relativity bent "
+    "space and time into a single fabric that curves around mass and energy. In every "
+    "case the new picture was first resisted as absurd, then debated, then slowly "
+    "absorbed into the textbooks, and finally taken so thoroughly for granted that the "
+    "old worldview became difficult even to reconstruct. The lesson the historians "
+    "draw is not that knowledge is arbitrary, but that it is provisional: a structure "
+    "always under renovation, load-bearing yet never finished, built by people who "
+    "could rarely see the shape of the building they were adding to."
+)
+TEXT_B = (
+    "In the kitchen the morning light fell across the worn wooden table, where a pot "
+    "of coffee cooled beside a bowl of ripe oranges and a small blue jug of milk. "
+    "Outside, a tram rattled past the bakery on the corner, and the smell of warm "
+    "bread drifted in through the open window with the sound of pigeons settling on "
+    "the sill. She turned the page of her notebook, smoothed it flat with the side of "
+    "her hand, and began, slowly, to write the day's first line. The pen caught once "
+    "on the rough paper and then ran smooth. A neighbour's radio murmured a weather "
+    "report through the thin wall, promising rain by the afternoon and a wind off the "
+    "harbour. She wrote about none of it directly, but it all seeped in: the light, "
+    "the bread, the tram, the small domestic weather of an ordinary Tuesday that would "
+    "never come again in quite the same arrangement, and that was, she decided, reason "
+    "enough to set it down."
+)
+
+
+def cmd_sweep_real(args) -> int:
+    import numpy as np
+    from reservoir.inject import extract_layer_stream
+    from reservoir.sweep import run_sweep_stream, plot_sweep, healthy_regime
+
+    print(f"Extracting GPT-2 ({args.model}) mid-layer activation streams…")
+    stream_a = extract_layer_stream(args.model, TEXT_A)
+    stream_b = extract_layer_stream(args.model, TEXT_B)
+    print(f"stream A: {stream_a.shape}, stream B: {stream_b.shape} (T x d_model)")
+
+    rhos = list(np.round(np.linspace(args.rho_min, args.rho_max, args.n), 4))
+    records = run_sweep_stream(rhos, stream_a, stream_b, K=args.K,
+                               washout=args.washout, seed=args.seed)
+
+    out = ROOT / args.out
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(
+        {"params": {"model": args.model, "K": args.K, "washout": args.washout,
+                    "seed": args.seed, "rhos": rhos,
+                    "stream_shapes": [list(stream_a.shape), list(stream_b.shape)]},
+         "records": records}, indent=2))
+    print(f"wrote {out.relative_to(ROOT)}")
+
+    fig = ROOT / args.fig
+    fig.parent.mkdir(parents=True, exist_ok=True)
+    plot_sweep(records, str(fig),
+               title="Reservoir dynamics vs ρ — real GPT-2 mid-layer activations")
+    print(f"wrote {fig.relative_to(ROOT)}")
+
+    healthy = healthy_regime(records)
+    if healthy:
+        lo, hi = min(h["rho"] for h in healthy), max(h["rho"] for h in healthy)
+        best = max(healthy, key=lambda r: r["input_separation"])
+        print(f"healthy regime: ρ ∈ [{lo}, {hi}]; most responsive ρ = {best['rho']} "
+              f"(sep={best['input_separation']:.3f}, PR/K={best['participation_ratio_frac']:.2f})")
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="Reservoir Agent experiment runner")
     parser.add_argument("--version", action="store_true", help="print version and exit")
@@ -78,6 +148,18 @@ def main(argv=None) -> int:
     s.add_argument("--out", default="results/sweep_synthetic.json")
     s.add_argument("--fig", default="docs/sweep_synthetic.png")
     s.set_defaults(func=cmd_sweep)
+
+    sr = sub.add_parser("sweep-real", help="sweep driven by real GPT-2 activations")
+    sr.add_argument("--model", default="gpt2")
+    sr.add_argument("--K", type=int, default=150)
+    sr.add_argument("--rho-min", type=float, default=0.1)
+    sr.add_argument("--rho-max", type=float, default=2.0)
+    sr.add_argument("--n", type=int, default=20)
+    sr.add_argument("--washout", type=int, default=20)
+    sr.add_argument("--seed", type=int, default=0)
+    sr.add_argument("--out", default="results/sweep_real.json")
+    sr.add_argument("--fig", default="docs/sweep_real.png")
+    sr.set_defaults(func=cmd_sweep_real)
 
     args = parser.parse_args(argv)
     if args.version:

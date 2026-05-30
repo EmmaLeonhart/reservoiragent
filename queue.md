@@ -29,12 +29,7 @@ one edit, so there is no half-written-queue window to protect against). The pinn
 (`0bacbec1`, ~2026-05-30 04:24 local) both draw from the top of this queue** — the 8h
 cron is a guaranteed escalation/kickoff point, not the only start.
 
-1. **Dynamics sweep on REAL attention streams + write up.** Drive the sweep (item 4) with
-   real GPT-2 mid-layer activations; capture `results/sweep_real.json` + figures. Write
-   `FINDINGS.md` (question → method → results → limitations) and fill the `docs/` Findings
-   section + pillar 3 with the headline dynamics result. Commit; verify Pages updates.
-
-2. **Ambitious reach (per `todo.md` §B note — "just to see if we can").** Attempt the
+1. **Ambitious reach (per `todo.md` §B note — "just to see if we can").** Attempt the
    harder build beyond local-compute comfort and **report honestly how far it gets**:
    the minimal harness fork (two forward passes without reinitialising the reservoir =
    the genuine-time-axis proof-of-concept), and, if it runs at all, a tiny N-seed (3–5)

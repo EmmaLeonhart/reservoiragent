@@ -324,6 +324,26 @@
     <code>python scripts/run.py sweep</code>.
   </figcaption>
 </figure>
+<p>
+  <strong>It holds on real GPT-2 activations &mdash; and H1 holds too.</strong> Driving
+  the reservoir with <em>real</em> GPT-2 mid-layer activation streams, the same ρ ≈ 1
+  echo-state boundary appears, even more sharply. And the reservoir injects into a
+  pretrained GPT-2 block without breaking it: with the readout zeroed, the model&rsquo;s
+  next-token logits are identical to vanilla GPT-2 (H1 non-destruction), while a nonzero
+  readout perturbs them and the reservoir state differs after two passes vs one &mdash; a
+  genuine cross-pass time axis. One practical finding: real activations <em>over-drive</em>
+  the reservoir (saturation ≈ 0.86 vs &lt; 0.15 on synthetic noise), so the input scaling
+  must be tuned down for injection at transformer scale.
+</p>
+<figure>
+  <img src="sweep_real.png" alt="Reservoir dynamics versus spectral radius driven by real GPT-2 mid-layer activations: init-forgetting steps sharply at rho=1; saturation is high and flat (~0.86); participation ratio flat (~0.41 K); input separation high and flat.">
+  <figcaption>
+    <strong>Same sweep, real GPT-2 activations</strong> (K=150, 198-token streams). The
+    echo-state boundary at ρ ≈ 1 survives the move to real transformer activations;
+    saturation and dimensionality are far higher than on synthetic noise. Regenerate with
+    <code>python scripts/run.py sweep-real</code>.
+  </figcaption>
+</figure>
 
 <footer>
   <p>

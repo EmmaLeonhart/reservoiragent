@@ -64,15 +64,50 @@ The full survey with citations is in [`literature/REVIEW.md`](literature/REVIEW.
 
 ## Results
 
-*No experimental results yet.* The reservoir core, dynamics sweep, and model-surgery
-regression are implemented and run in the steps that follow; their metrics
-(`results/*.json`) and figures will be reported here as they land. This section will
-not claim a result until one has been measured.
+### H1 — the reservoir injects without breaking the base model
+
+Hooking a mid-depth block of pretrained GPT-2 so the block's hidden states drive the
+reservoir and its state is written back into the residual stream (`h' = h + W_out·r(t)`):
+
+- **Non-destruction holds.** With the readout `W_out = 0`, the injected model's
+  next-token logits are *identical* to vanilla GPT-2 (`allclose`, atol 1e-5) — the
+  architecture degrades gracefully to the base model.
+- **The injection is live.** A nonzero `W_out` changes the logits, and the reservoir
+  state after two forward passes differs from after one — a genuine cross-pass time
+  axis. (`tests/test_inject.py`.)
+
+### H2 — the reservoir-dynamics regime
+
+Sweeping spectral radius ρ ∈ [0.1, 2.0] (figures: `docs/sweep_synthetic.png`,
+`docs/sweep_real.png`):
+
+- **The echo state property breaks sharply at ρ ≈ 1.** Using an autonomous
+  (zero-input) probe — two random initial states under no input — the reservoir forgets
+  where it started (init-forgetting ≈ 0) for ρ < 1 and abruptly retains it for ρ > 1.
+  This edge-of-chaos boundary appears on *both* synthetic input and **real GPT-2
+  mid-layer activations** (on real data: 0.000 for ρ ≤ 0.9 → 0.10 at ρ = 1 → ~0.95
+  above). The classical ρ ≈ 1 boundary survives the move to transformer-scale input.
+- **The input regime decides whether ρ matters.** Under unit-scale input *drive* the
+  reservoir forgets its initial state across *all* ρ (strong input enforces the ESP),
+  so the ρ ≈ 1 boundary is the regime that governs **unprompted, input-free passes** —
+  exactly where the agent would run on reservoir state alone.
+- **Real activations over-drive the reservoir.** Compared with synthetic noise, real
+  GPT-2 activations push the reservoir to much higher saturation (~0.86 of units pinned
+  near ±1, vs < 0.15) and higher effective dimensionality (participation ratio ≈ 0.41·K
+  vs ~0.05·K). So a unit-input-scaled reservoir is *over-saturated* by real attention
+  activations: the input scaling has to be tuned down for injection at transformer
+  scale — the precise concern the plan anticipated ("feeding a large attention tensor
+  may require different scaling").
 
 ## Limitations (current)
 
 - Small-scale only this session; the agentic claims (H3/H4) and the full runtime are
   out of scope and compute-gated.
+- The injection writes the reservoir state into the **residual stream**, not yet as
+  appended **key/value** entries the upper layers attend to (the richer variant in the
+  architecture); the readout `W_out` is not yet **trained** (H3 is future work).
+- Input scaling for real-activation injection is **untuned** (the reservoir is
+  over-saturated at unit scale); tuning it is the natural next dynamics experiment.
 - The novelty claim is provisional: the reservoir-×-transformer and always-on-agent
   literatures were not yet verification-complete (see `literature/REVIEW.md` open
   questions); a citation-checked follow-up precedes any hard novelty claim.

@@ -42,3 +42,21 @@ def test_healthy_regime_filters():
     healthy = healthy_regime(recs)
     assert all(h["init_forgetting"] <= 0.2 for h in healthy)
     assert any(r["rho"] < 1.0 for r in healthy)  # the sub-unit ones qualify
+
+
+def test_stream_sweep_runs_and_preserves_esp_boundary():
+    # exercise the real-activation code path with a synthetic stand-in stream (no
+    # torch needed): the autonomous ESP boundary at rho~1 must still hold.
+    import numpy as np
+    from reservoir.sweep import run_sweep_stream
+
+    rng = np.random.default_rng(0)
+    stream_a = rng.standard_normal((300, 16))
+    stream_b = rng.standard_normal((300, 16))
+    # ESP holds well below 1 and is clearly broken well above it. (The exact
+    # sharpness near rho=1 is K-dependent and noisy for small K, so the test pins
+    # the two ends, not the transition width.)
+    recs = run_sweep_stream([0.4, 2.0], stream_a, stream_b, K=80, washout=80)
+    assert len(recs) == 2
+    assert recs[0]["init_forgetting"] < 0.01      # rho=0.4 forgets its init
+    assert recs[1]["init_forgetting"] > 0.1       # rho=2.0 retains it
