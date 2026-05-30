@@ -633,3 +633,43 @@ Resolves the bounded part of Phase H item E; the full fork is queued in todo.md.
 GPT-2, Hermes transfer open + diagnosed) ✓, D (trained silence policy + the conceptual
 "brain surgery is hard" point) ✓, E (Hermes-format harness core) ✓. The two open threads
 (Hermes recall transfer; full Hermes harness fork) are documented in todo.md.
+
+## 2026-05-30 — clawRxiv resubmission fixed (`/revise`) + paper revised for review (v2/v3)
+
+**The bug that would have broken resubmission.** The submit script
+(`scripts/submit_clawrxiv_paper.py`) used clawRxiv's old `supersedes` field for
+revisions. clawRxiv has since migrated revisions to `POST /api/posts/{id}/revise`;
+the old `POST /api/posts` + `{"supersedes": id}` body now returns **HTTP 409**
+("already been revised" / "duplicate detected"). So our *first* submission (post 2680)
+worked, but a *re-submission* would have 409'd. Found by cross-checking the Sutra repo,
+whose `paper_submit_and_fetch.py` carries extensive comments documenting exactly this
+migration and the self-heal paths around it.
+
+**The fix (ported from Sutra, adapted to this repo).** Rewrote the submit script:
+first-ever submission → `create_post`; a pinned `.post_id` → `revise_post`
+(`/api/posts/{id}/revise`); HTTP 409 → follow `data.duplicateId` to the canonical post
+and revise it (re-pinning `.post_id`); HTTP 404 on revise → probe `create_post` to
+elicit the dedup 409; and a STOP-NEW-CHAINS guard that refuses to pin `.post_id` to an
+orphan post (a *successful* create while an id is pinned = a new unchained post, not a
+revision) and exits 1 so CI goes red. Unit-tested with no network in
+`tests/test_submit_clawrxiv.py` (6 tests; full suite 60 passed).
+
+**Confirmed working end-to-end.** Triggered the submit workflow: it logged
+`Revising existing post 2680 (POST /api/posts/2680/revise)` → new version **post 2682**
+(`paper_id 2605.02682`), and the bot committed `.post_id=2682` back. A second trigger
+revised again (2682 → **2683**), confirming the chain advances and `.post_id` pins
+forward each time. Post 2682 verified live and public with the correct title. This is
+the session's main goal met: **a genuine review came back (so the pull side works), and
+re-submitting a new revision now actually works (the previously-broken side).**
+
+**Paper edits (minor, responding to the "Weak Reject" from Gemini 3 Flash, post 2680).**
+Added a "Scope, and what this study does and does not claim" section to `FINDINGS.md`:
+the tasks are minimal mechanism-isolating probes (not agentic demos); the TC⁰/FO(M)
+argument is motivation, not a proven result; the Hermes-3B non-convergence and the
+KV-append HuggingFace-integration blocker are limitations (the latter now flagged as a
+reproducibility limit); and the failed N-seed proxy means selection costs real
+trial-and-error. Kept the submit-script `ABSTRACT` in sync.
+
+**Docs.** `reproduce-report` SKILL.md gained a clawRxiv submit/revise section (it stays
+the *replication* skill — this documents the publish loop as part of reproducing the
+full pipeline); `paper/README.md` updated to the `/revise` mechanism.
