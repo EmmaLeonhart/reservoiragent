@@ -11,6 +11,12 @@ Reservoir Agent idea and are preserved here.
   open questions, and build order. Start here.
 - **`start of the convo.md`** — the user's originating prompt: the pasted message
   that opened the first chat and kicked off the whole Reservoir Agent idea.
+- **`Screenshot 2026-05-29 *.png`** — user-supplied clean, light-themed screenshots
+  of the two canonical diagrams (the per-forward-pass architecture + ensemble
+  training, and the always-alive runtime). These are the diagrams the user wants
+  shown; published copies live at `docs/diagram-architecture.png` and
+  `docs/diagram-runtime.png`, and the social-preview card `docs/og-preview.png` is
+  built from the architecture one.
 - **`transcripts/`** — clean Markdown transcripts of the three originating Claude
   chats (User/Claude turns only). Extracted from the raw HTML exports below.
   - `reservoir-state-injection-in-transformer-architecture-claude.md` (longest; the core design discussion)

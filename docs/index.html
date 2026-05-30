@@ -5,6 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>reservoiragent</title>
 <meta name="description" content="Reservoir Agent: can a fixed random reservoir injected into a pretrained transformer's mid-layer attention give it genuine state between forward passes — a real time axis — without breaking the base model? A feasibility + reservoir-dynamics study.">
+
+<!-- Social / link previews -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Reservoir Agent">
+<meta property="og:title" content="Reservoir Agent — a transformer with a genuine time axis">
+<meta property="og:description" content="A fixed random reservoir injected into a pretrained transformer's mid-layer attention, so its state evolves across forward passes — not just within a context window. A feasibility + reservoir-dynamics study, grounded in a literature review.">
+<meta property="og:url" content="https://emmaleonhart.github.io/reservoiragent/">
+<meta property="og:image" content="https://emmaleonhart.github.io/reservoiragent/og-preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Reservoir Agent — a transformer with a genuine time axis">
+<meta name="twitter:description" content="A fixed random reservoir injected into a pretrained transformer's mid-layer attention, so its state evolves across forward passes. Feasibility + dynamics study.">
+<meta name="twitter:image" content="https://emmaleonhart.github.io/reservoiragent/og-preview.png">
 <style>
   :root {
     --bg: #f6f2ec;
@@ -49,6 +63,15 @@
   th, td { border: 1px solid var(--border); padding: 0.5rem 0.7rem; text-align: left; }
   th { background: var(--surface); font-weight: 600; }
   img { max-width: 100%; height: auto; border-radius: 6px; }
+  figure { margin: 1.8rem 0; }
+  figure img {
+    display: block; margin: 0 auto; border: 1px solid var(--border);
+    background: #f6f2ec; padding: 0.5rem;
+  }
+  figcaption {
+    color: var(--dim); font-size: 0.88rem; margin-top: 0.6rem;
+    text-align: center; line-height: 1.5;
+  }
   .lede { color: var(--dim); font-size: 1.1rem; margin-top: 0.8rem; line-height: 1.65; }
   /* Replication verdict banner (driven by paper.json `status`). */
   .status-badge {
@@ -157,6 +180,19 @@
   rather than noise?
 </div>
 
+<figure>
+  <img src="diagram-architecture.png" alt="Reservoir Agent architecture: input tokens flow through frozen lower layers into a mid-depth injection layer Lk where attention runs jointly over tokens and reservoir nodes; the reservoir reads the attention matrix (fixed W_in) and writes its state back (learned readout) each forward pass, with state persisting across passes; upper layers are fine-tuned; reservoir weights are random and fixed, and the best of N seeds is kept.">
+  <figcaption>
+    <strong>The architecture.</strong> Every forward pass is one reservoir tick: at the
+    injection layer L<sub>k</sub>, attention runs over the token hidden states <em>and</em>
+    the reservoir nodes (extra keys/values). The reservoir reads the attention matrix
+    through fixed <code>W_in</code> and writes its state back through a learned readout —
+    both at the same layer, every pass — so state accumulates across passes
+    (&ldquo;implicit elapsed time&rdquo;). Only the transformer&rsquo;s fine-tune changes;
+    reservoir weights are random and fixed, and the best of N seeds is kept.
+  </figcaption>
+</figure>
+
 <div class="actions">
   <a class="action" href="#findings">
     <div class="kicker">Read</div>
@@ -172,7 +208,7 @@
       Full write-up, typeset. <span class="arrow">&darr;</span>
     </div>
   </a>
-  <a class="action" href="#">
+  <a class="action" href="https://github.com/EmmaLeonhart/reservoiragent">
     <div class="kicker">Source</div>
     <div class="title">GitHub repository</div>
     <div class="desc">
@@ -208,9 +244,35 @@
   </div>
   <div class="pillar">
     <h3>3 &middot; The finding</h3>
-    <p>TODO: one line on the headline result, once there is one.</p>
+    <p>
+      <em>In progress.</em> This session builds the reservoir core, performs the
+      model surgery, and characterizes reservoir dynamics across spectral radius;
+      the headline result lands here once the experiments run.
+    </p>
   </div>
 </div>
+
+<h2>The always-alive runtime</h2>
+<p>
+  The architecture implies a different execution model from standard inference. A
+  stateless transformer is a request&ndash;response handler; the Reservoir Agent is a
+  persistent, always-alive process whose reservoir state and context buffer are owned
+  by the runtime and never wiped between passes. A scheduler decides when to run a
+  forward pass &mdash; <em>prompted</em> (new input arrives) or <em>unprompted</em> (an
+  idle timer fires) &mdash; and an output gate decides whether to emit or stay silent.
+  Forking a standard agent harness into this shape is long-horizon work (tracked in
+  <code>todo.md</code>); this session targets the model surgery and dynamics beneath it.
+</p>
+<figure>
+  <img src="diagram-runtime.png" alt="The always-alive runtime: user or harness input feeds a pass scheduler that decides when to run a forward pass (prompted or unprompted, driven by an idle timer); a persistent context buffer and a GPU-resident reservoir state store (mutated in place each pass) feed the forward pass; an output decision either emits a high-confidence token or stays silent, updates state, and schedules the next pass.">
+  <figcaption>
+    <strong>The runtime.</strong> The reservoir state store (<code>r(t)</code>, pinned in
+    GPU memory, mutated in place each pass) and a never-wiped context buffer persist
+    across passes. Unprompted passes let the agent keep processing with no new input;
+    the output gate emits only when confident, otherwise it updates state and schedules
+    the next pass. (Aspirational / compute-gated &mdash; see <code>todo.md</code>.)
+  </figcaption>
+</figure>
 
 <h2 id="findings">Findings</h2>
 <p>
