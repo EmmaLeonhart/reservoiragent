@@ -510,3 +510,21 @@ Reported honestly in FINDINGS ("## C: cross-pass training") + docs Findings (fig
 to `todo.md` §B. **This changes the calculus for D/E** (the desired behaviour does not yet
 work), so I paused to checkpoint with the user rather than barrel into D/E on a broken
 core. C is built + ran + reported; not a faked pass.
+
+## 2026-05-30 — Phase H · C resolved: content-addressable (KV-append) injection works
+
+The user chose to build the KV-append fix the negative pointed to. `src/reservoir/kv_live.py`
+— `TorchReservoirPrefixInjectedLM`: the robust content-addressable injection — the
+reservoir state is projected (trainable `W_res`) into **prefix pseudo-tokens prepended to
+the sequence** (via `inputs_embeds`), so attention **reads them content-addressably** with
+no fragile mid-layer attention surgery (the standard mask/positions handle the extended
+length; prefix stripped from the output). A read hook still ticks the reservoir each pass.
+`run_cross_pass_kv` + `crosspass --mode kv`; smoke test added.
+
+**Result (decisive POSITIVE, on the same task that failed additively):** stateful recall
+**1.00** (loss → 0.02) vs stateless baseline **0.17** (chance). So the additive injection
+fails (reservoir ignored) but the content-addressable one makes the model **use** the
+cross-pass reservoir state perfectly. **The negative→positive arc is the core finding:
+the injection design is the decisive factor — the reservoir must be *attended to*, not
+*added*.** FINDINGS "## C" rewritten as the resolved arc; docs Findings + figure updated.
+Full suite 46 passed locally. Resolves the KV-append item.

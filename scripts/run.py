@@ -297,16 +297,20 @@ def cmd_nseed_select(args) -> int:
 
 
 def cmd_crosspass(args) -> int:
-    from reservoir.crosspass import run_cross_pass
+    from reservoir.crosspass import run_cross_pass, run_cross_pass_kv
 
-    print(f"Cross-pass recall: train {args.model} to recall a wiped secret word from "
-          f"reservoir state ({args.n_keys} keys, {args.steps} steps)…")
+    print(f"Cross-pass recall [{args.mode}]: train {args.model} to recall a wiped secret "
+          f"word from reservoir state ({args.n_keys} keys, {args.steps} steps)…")
     recs = {}
     for stateful in (True, False):
         tag = "stateful" if stateful else "baseline (reservoir wiped between passes)"
-        r = run_cross_pass(args.model, n_keys=args.n_keys, steps=args.steps,
-                           lr=args.lr, seed=args.seed, stateful=stateful,
-                           layer=args.layer)
+        if args.mode == "kv":
+            r = run_cross_pass_kv(args.model, n_keys=args.n_keys, steps=args.steps,
+                                  lr=args.lr, seed=args.seed, stateful=stateful)
+        else:
+            r = run_cross_pass(args.model, n_keys=args.n_keys, steps=args.steps,
+                               lr=args.lr, seed=args.seed, stateful=stateful,
+                               layer=args.layer)
         recs["stateful" if stateful else "baseline"] = r
         print(f"  {tag}: recall accuracy = {r['recall_accuracy']:.2f} "
               f"(loss {r['loss_start']:.2f}->{r['loss_end']:.2f}, {r['device']})")
@@ -461,6 +465,7 @@ def main(argv=None) -> int:
     cp.add_argument("--lr", type=float, default=1e-3)
     cp.add_argument("--seed", type=int, default=0)
     cp.add_argument("--layer", type=int, default=None)
+    cp.add_argument("--mode", choices=["additive", "kv"], default="additive")
     cp.set_defaults(func=cmd_crosspass)
 
     ft = sub.add_parser("finetune", help="real LoRA + W_out fine-tune (GPU)")
