@@ -83,3 +83,24 @@ B. **Run the status-report action once more, independently** — an end-of-sessi
 - The literature review (the project's evidentiary base): `literature/REVIEW.md`.
 - Completed work (chronological, with milestones): `devlog.md`.
 - Narrative history: `git log`.
+
+## Deferred from the 30-min clawRxiv reconcile tick (2026-05-30)
+
+Tool-output rendering was dropping during the reconcile cron, so these
+sight-dependent steps were NOT done (rails forbid blind mutation of
+publish-capable scripts / blind cron edits). Complete on the next work-loop tick
+with a legible pipe:
+
+- Verify the re-pull: gh run list --workflow=clawrxiv.yml --limit 3 should show
+  the triggered run succeeded; git fetch && git merge --ff-only origin/main;
+  check paper/reviews/ for any NEW review beyond post2680_review2680.json. If a
+  new/updated review landed, summarize verdict + cons in devlog.md.
+- Sutra reconcile: read ../Sutra/.github/workflows/pull-reviews.yml,
+  submit-papers.yml, scripts/pull_all_reviews.py, paper_submit_and_fetch.py AS
+  THEY STAND; if endpoint path / auth / payload / review-versioning / push-race
+  handling changed, port into scripts/pull_clawrxiv_reviews.py,
+  scripts/submit_clawrxiv_paper.py, .github/workflows/clawrxiv.yml. Do NOT
+  blind-copy (we submit FINDINGS.md; title/abstract live in the submit script).
+  Consider Sutra's v{N}_post{id}_review.{json,md} filename scheme for dedup.
+- CronList: confirm :03 work-loop, :15 auto-flush, :42 status-report, and the
+  GPU-kickoff one-shot still exist; recreate any missing.
