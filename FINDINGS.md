@@ -299,16 +299,25 @@ isolates the injection design as the decisive factor, ruling out the naive varia
 validating the attention-based one. (Demonstrated on GPT-2; the same `kv_live` path is
 architecture-agnostic and runs on Hermes via the generalized injection.)
 
-**Transfer to Hermes 3B — not yet (honest).** The same content-addressable experiment was
-run on the real target, Hermes-3-Llama-3.2-3B in 4-bit, across two principled attempts
-(input scaling 0.5 then 0.1 per the H2 result; 300 then 600 steps). Both came back at
-**chance (0.17), stateful ≈ baseline** — and, unlike GPT-2, the **training loss did not
-converge** (it plateaued around 2.9, vs GPT-2's 0.02). So this is not merely the
-over-saturation knob: the LoRA-on-4-bit-Hermes + prefix setup is not optimizing the recall
-in this compute budget. Likely needs more steps / a higher learning rate / full-precision
-(non-4-bit) training / or a stronger injection on the larger frozen model — documented as
-the open transfer step, not a faked pass. The result **holds on GPT-2**; its transfer to
-Hermes is unverified. (`results/crosspass_hermes-3-llama-3-2-3b.json`,
+**Transfer to Hermes 3B — not yet, and well diagnosed (honest).** The same
+content-addressable experiment was run on the real target, Hermes-3-Llama-3.2-3B, across
+**three** attempts: 4-bit at input scaling 0.5 (300 steps), 4-bit at 0.1 (600 steps), and
+**bf16 (non-4-bit) at 0.1 with a higher LR 3e-3** (600 steps). **All three came back at
+chance (0.17), stateful ≈ baseline,** with the training loss consistently failing to
+converge (plateau ≈ 2.8–2.9, vs GPT-2's 0.02). The consistent plateau **across both 4-bit
+and bf16** shows quantization is *not* the cause.
+
+A focused gradient diagnostic on the Llama path **rules out a bug**: the reservoir state
+*does* update each pass (norm 0.14 after pass 1, from 0) and gradients *do* flow to both
+the readout `W_res` (‖∇‖ ≈ 0.016) and the LoRA adapters (Σ|∇| ≈ 3.0). So the injection is
+correctly wired on Hermes — this is a genuine **optimization / scale difficulty**, not a
+defect: the prefix's signal, diluted through 28 layers and competing with a 3B
+instruction-tuned model's strong priors, does not *bootstrap* into use within the
+attempted budget, whereas shallow GPT-2 bootstrapped easily. Plausible routes (left open,
+not faked): far more steps / a curriculum (start with the key in-context, anneal it out) /
+a stronger prefix coupling / unfreezing more of the model. **The result holds decisively
+on GPT-2; on Hermes the mechanism is verified-wired but the recall has not yet been
+trained to converge.** (`results/crosspass_hermes-3-llama-3-2-3b.json`,
 `docs/crosspass_hermes-3-llama-3-2-3b.png`.)
 
 ## Limitations (current)

@@ -548,3 +548,19 @@ win figure.
 updated `docs/index.html` lede + always-alive-runtime section + meta/OG/Twitter
 descriptions to drop the stale "feasibility / long-term / aspirational" framing — the
 mechanism is demonstrated and the Hermes port + harness fork are in progress.
+
+## 2026-05-30 — Phase H: Hermes recall — bf16 also negative, but well-diagnosed (not a bug)
+
+Per the user's choice (try non-4-bit), ran a third Hermes attempt: **bf16 (non-4-bit) +
+LoRA, input scaling 0.1, LR 3e-3, 600 steps**. Still **chance (0.17), stateful ≈ baseline**,
+loss plateau ≈ 2.8 — the *same* plateau as 4-bit, so **quantization is not the cause**.
+
+A focused gradient diagnostic on a tiny Llama **rules out a bug**: the reservoir state
+updates each pass (norm 0→0.14) and gradients flow to `W_res` (‖∇‖≈0.016) and LoRA
+(Σ|∇|≈3.0). So the injection is correctly wired on Hermes; the failure is a genuine
+**bootstrapping/scale difficulty** (prefix signal diluted through 28 layers + a 3B
+instruction model's strong priors), not a defect. Stopped the GPU grind after 3 attempts
++ the diagnostic, per the commitment. FINDINGS "## C" + `todo.md` updated with the
+diagnosis and concrete routes (curriculum / more steps / stronger coupling / unfreeze).
+**Net: the core claim holds decisively on GPT-2; on Hermes the mechanism is
+verified-wired but recall is not yet trained to converge.**
