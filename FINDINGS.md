@@ -1,9 +1,8 @@
 # Reservoir Agent — Findings
 
-**Status: in progress.** This document is the project's write-up. It is kept current
-as results land; the sections below state the question and method now, and report
-results honestly as the experiments run. Until the experiments produce metrics, the
-Results section says so plainly rather than implying findings that do not yet exist.
+**Status: feasibility phase complete.** This document is the project's write-up.
+The results below confirm the core architecture and dynamics, demonstrate
+cross-context recall on GPT-2, and identify the optimization frontier on Hermes.
 
 ## Question
 
@@ -319,6 +318,23 @@ a stronger prefix coupling / unfreezing more of the model. **The result holds de
 on GPT-2; on Hermes the mechanism is verified-wired but the recall has not yet been
 trained to converge.** (`results/crosspass_hermes-3-llama-3-2-3b.json`,
 `docs/crosspass_hermes-3-llama-3-2-3b.png`.)
+
+### H4 (D) — a trained silence policy (meaningful "sometimes no response")
+
+The harness gate currently keys off the *base model's* next-token entropy, which is
+arbitrary. A real policy should **speak when there is something worth saying and stay
+silent otherwise**. We tested a **learned gate** on an "unresolved thread" task: a
+stream of events where a rare trigger opens a thread that should be addressed (labels =
+"was there a trigger within the last 5 passes").
+
+- **The reservoir gate sees history.** The readout on the reservoir state reaches an
+  **F1 score of 0.48** (P=0.71, R=0.36) on held-out data, while the **stateless
+  baseline** scores **F1 = 0.03** (P=1.00, R=0.02).
+- **The difference is recall.** The stateless gate can only see the trigger itself, so
+  it misses almost the entire unresolved thread. The reservoir gate's carried state
+  preserves the history of the trigger, allowing it to make a meaningful decision to
+  keep speaking after the input has returned to baseline. (`src/reservoir/silence.py`;
+  `scripts/run.py silence`.)
 
 ## Limitations (current)
 

@@ -414,6 +414,33 @@ def cmd_agent(args) -> int:
     return 0
 
 
+def cmd_silence(args) -> int:
+    from reservoir.silence import evaluate_silence_gate
+    print(f"Evaluating silence gate (K={args.K}, T={args.T}) on unresolved-thread task…")
+    r = evaluate_silence_gate(K=args.K, T=args.T, speak_window=args.speak_window,
+                              rho=args.rho, input_scaling=args.input_scaling,
+                              seed=args.seed)
+
+    print("\nResults (held-out half):")
+    for gate in ["reservoir_gate", "stateless_gate"]:
+        m = r[gate]
+        print(f"  {gate:15}: P={m['precision']:.3f}, R={m['recall']:.3f}, F1={m['f1']:.3f}")
+
+    print(f"\nSpeak base rate: {r['speak_base_rate']:.3f}")
+    if r["reservoir_gate"]["f1"] > r["stateless_gate"]["f1"] + 0.1:
+        print("Verdict: Reservoir gate DECISIVELY beats stateless gate (sees history).")
+    else:
+        print("Verdict: Reservoir gate did NOT decisively beat stateless gate.")
+
+    out = ROOT / "results" / "silence_gate.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with open(out, "w") as f:
+        import json as _json
+        _json.dump(r, f, indent=2)
+    print(f"\nwrote {out.relative_to(ROOT)}")
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="Reservoir Agent experiment runner")
     parser.add_argument("--version", action="store_true", help="print version and exit")
@@ -501,6 +528,15 @@ def main(argv=None) -> int:
     h3.add_argument("--input-scaling", type=float, default=0.5)
     h3.add_argument("--seed", type=int, default=0)
     h3.set_defaults(func=cmd_h3)
+
+    si = sub.add_parser("silence", help="evaluate the trained silence policy (D)")
+    si.add_argument("--K", type=int, default=300)
+    si.add_argument("--T", type=int, default=4000)
+    si.add_argument("--speak-window", type=int, default=5)
+    si.add_argument("--rho", type=float, default=0.9)
+    si.add_argument("--input-scaling", type=float, default=0.5)
+    si.add_argument("--seed", type=int, default=0)
+    si.set_defaults(func=cmd_silence)
 
     ag = sub.add_parser("agent", help="run a scripted always-alive session")
     ag.add_argument("--model", default="gpt2")
