@@ -118,3 +118,18 @@ preview", "use the diagrams I added"):
   hero, and `docs/diagram-runtime.png` in a new "always-alive runtime" section.
   (Discarded an earlier hand-authored schematic in favour of the user's diagrams.)
 - Provenance for the user-supplied screenshots noted in `data_lake/README.md`.
+
+## 2026-05-29 — Bootstrap 7: bootstrap complete; real implementation queue set
+
+Replaced the bootstrap `## Active` section with the real implementation queue,
+decomposed from `todo.md` §B near-term (feasibility + dynamics): (1) scaffold pkg+CI,
+(2) reservoir core TDD, (3) dynamics metrics TDD, (4) synthetic spectral-radius sweep,
+(5) model surgery / reservoir injection into GPT-2-small with H1 regression, (6) real-
+attention sweep + FINDINGS write-up, (7) ambitious reach (2-pass PoC + tiny N-seed,
+per the user's "just to see if we can" todo note). Mirrored all seven into the task
+tool (#7–#13). The three crons are kept running through the re-fill (written atomically),
+and `## Always last` keeps them alive. The work-loop and the one-shot 8h kickoff cron
+(`0bacbec1`, ~2026-05-30 04:24 local) both draw from the top of this queue.
+
+**Bootstrap is complete.** From here the autonomous loop executes the implementation
+queue; the next code change is the package/CI scaffold (item 1).

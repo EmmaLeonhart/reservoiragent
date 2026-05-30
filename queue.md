@@ -12,13 +12,68 @@ See `CLAUDE.md` § "Workflow Rules" and § "Research workflow" for how this file
 
 ---
 
-## Active — First-session bootstrap (research)
+## Active — Implementation: feasibility + dynamics study
 
-Work these top to bottom. **Delete each item from this file in the same commit that completes it, and append a dated entry to `devlog.md`.** Push after every step. When this whole section is gone, the project has finished bootstrap and the queue is ready to be repopulated with the real research/experiment work (see the final item).
+Bootstrap is complete (see `devlog.md`). This is the real research queue, decomposed
+from `todo.md` §B near-term (feasibility + dynamics). Work top to bottom; **delete each
+item in the same commit that completes it and append a dated entry to `devlog.md`**;
+push; let CI run. Build under `src/`, entry point `scripts/run.py`, metrics → `results/`,
+figures → `docs/`. Hold the hard rails: TDD where there is logic; never fake or weaken a
+test; a real defect → strict `xfail` or a documented blocker; verify CI green, not just
+local; name compute-blocked work plainly.
 
-1. **Replace this bootstrap queue with the real research queue.** Pull the first item(s) from `todo.md` and decompose them into a concrete, ordered list of experiment / implementation tasks under a new `## Active` section (deleting this bootstrap section as part of the same edit). Mirror into the task tool. **Keep the `## Always last` section pinned at the very bottom.** The real queue's FIRST work item should **start the three crons** — unless this is a mid-session large-scale re-fill while they are already running, in which case the first item is instead to **kill them** (the pinned tail restarts them). Commit the new queue.
+**Crons:** the three crons (work-loop :03, auto-flush :15, status-report :42) are
+already running and are kept running through this re-fill (it is written atomically in
+one edit, so there is no half-written-queue window to protect against). The pinned
+`## Always last` keeps them alive. **The work-loop and the one-shot 8h kickoff cron
+(`0bacbec1`, ~2026-05-30 04:24 local) both draw from the top of this queue** — the 8h
+cron is a guaranteed escalation/kickoff point, not the only start.
 
-2. **Work the queue until the stop condition.** Pull the top item, do it, **delete it from `queue.md` AND append a dated entry to `devlog.md`** in the same commit, push, let CI run. Build under `src/`, run via `scripts/run.py`, capture metrics to `results/`, and keep `FINDINGS.md` + the themed `docs/` report current as results land. When `queue.md` empties, refill from `todo.md`. **Stop** when: the research question has a defensible answer (or a clearly reported partial result), `FINDINGS.md` and the published `docs/` report reflect it, `queue.md` is empty, and the repo is online with green CI/Pages. At that point, hand back to the user.
+1. **Scaffold the package, tests, and CI.** Create `src/reservoir/` (package),
+   `scripts/run.py` (entry point), `tests/`, and `.github/workflows/ci.yml` (install +
+   `pytest`). Add a `requirements.txt` (numpy, torch, transformers, pytest, matplotlib).
+   A trivial passing smoke test proves CI green before any real logic. Commit; confirm
+   the CI workflow runs green on GitHub (not just locally).
+
+2. **Reservoir core (TDD).** `src/reservoir/echo_state.py`: fixed sparse `W_r` scaled to a
+   target spectral radius ρ, fixed `W_in`, leaky update `r(t)=(1−a)·r(t−1)+a·tanh(W_r·r(t−1)+W_in·x(t))`.
+   **Tests first:** spectral-radius scaling is correct to tolerance; echo-state /
+   contraction (with ρ<1 the state forgets its initial condition under zero input);
+   shape/dtype; seed reproducibility; no NaN/Inf at high ρ. Commit.
+
+3. **Reservoir observability / dynamics metrics (TDD).** `src/reservoir/metrics.py`:
+   state variance, saturation fraction (|r|>0.99), effective rank (participation ratio),
+   and trajectory distinguishability between two input histories. Tests on synthetic
+   signals with known answers. Commit.
+
+4. **Spectral-radius dynamics sweep on synthetic input.** `scripts/run.py` drives the
+   reservoir across a grid of ρ (and reservoir size K) with synthetic input streams;
+   logs metrics to `results/sweep_synthetic.json`; renders figures to `docs/`. Identify
+   the healthy regime (H2) — non-saturating, non-exploding, distinguishable trajectories;
+   check whether the optimum sits at the classical edge-of-chaos prior. Commit.
+
+5. **Model surgery: inject the reservoir into a small pretrained transformer (H1).**
+   Hook a mid-depth layer of GPT-2-small (HF `transformers`): read its hidden states into
+   the reservoir via fixed `W_in`, write `r(t)` back into that layer's key/value sequence
+   via readout `W_out`. **Regression test (H1):** with `W_out=0` the base model's logits
+   are unchanged vs vanilla GPT-2 (graceful degradation). Commit.
+
+6. **Dynamics sweep on REAL attention streams + write up.** Drive the sweep (item 4) with
+   real GPT-2 mid-layer activations; capture `results/sweep_real.json` + figures. Write
+   `FINDINGS.md` (question → method → results → limitations) and fill the `docs/` Findings
+   section + pillar 3 with the headline dynamics result. Commit; verify Pages updates.
+
+7. **Ambitious reach (per `todo.md` §B note — "just to see if we can").** Attempt the
+   harder build beyond local-compute comfort and **report honestly how far it gets**:
+   the minimal harness fork (two forward passes without reinitialising the reservoir =
+   the genuine-time-axis proof-of-concept), and, if it runs at all, a tiny N-seed (3–5)
+   reservoir comparison. Anything compute-blocked → a precise documented blocker / strict
+   `xfail`, never a faked or weakened result.
+
+**Stop condition (then hand back):** the research question has a defensible answer or a
+clearly-reported partial result; `FINDINGS.md` and the published `docs/` report reflect
+it; `queue.md` is empty (refill from `todo.md` if more is in scope); repo online with
+green CI/Pages.
 
 ---
 
