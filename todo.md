@@ -74,6 +74,7 @@ rather than noise?
   vanilla Hermes throughout.
 - **Scale-up to an agentic model (Hermes).** The original target; requires real GPU
   budget. Tracked here as the destination, not a near-term step.
+- Still do this as a part of the workflow run even though I might not have enough local compute. Just to see if we can do it.
 
 ## C. Theory to write (correctly scoped)
 - The genuine time-dimension argument: r(t) is causally downstream of every pass.
