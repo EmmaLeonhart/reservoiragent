@@ -189,6 +189,43 @@ def cmd_nseed(args) -> int:
     return 0
 
 
+def cmd_sweep_scaling(args) -> int:
+    import numpy as np
+    from reservoir.inject import extract_layer_stream
+    from reservoir.sweep import run_scaling_sweep, plot_scaling
+
+    print(f"Extracting GPT-2 ({args.model}) activation streams for input-scaling sweep…")
+    a = extract_layer_stream(args.model, TEXT_A)
+    b = extract_layer_stream(args.model, TEXT_B)
+    scalings = list(np.round(np.geomspace(args.s_min, args.s_max, args.n), 5))
+    records = run_scaling_sweep(scalings, a, b, K=args.K, rho=args.rho,
+                                washout=args.washout)
+
+    out = ROOT / "results" / "sweep_scaling.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps({"params": {"model": args.model, "K": args.K,
+                                          "rho": args.rho, "scalings": scalings},
+                               "records": records}, indent=2))
+    print(f"wrote {out.relative_to(ROOT)}")
+    figp = ROOT / "docs" / "sweep_scaling.png"
+    plot_scaling(records, str(figp),
+                 title=f"Reservoir dynamics vs input scaling — real GPT-2 (ρ={args.rho})")
+    print(f"wrote {figp.relative_to(ROOT)}")
+
+    healthy = [r for r in records if r["saturation"] < 0.5]
+    if healthy:
+        best = max(healthy, key=lambda r: r["input_separation"])
+        print(f"healthy (saturation<0.5) input scalings: "
+              f"[{min(h['input_scaling'] for h in healthy)}, "
+              f"{max(h['input_scaling'] for h in healthy)}]")
+        print(f"best (most responsive, non-saturated) input_scaling = {best['input_scaling']} "
+              f"(saturation={best['saturation']:.3f}, sep={best['input_separation']:.3f}, "
+              f"PR/K={best['participation_ratio_frac']:.2f})")
+    else:
+        print("no input scaling kept saturation below 0.5 in this grid")
+    return 0
+
+
 def cmd_agent(args) -> int:
     from reservoir.runtime import AliveAgent, ConfidenceGate
 
@@ -273,6 +310,16 @@ def main(argv=None) -> int:
     ns.add_argument("--rho", type=float, default=0.95)
     ns.add_argument("--K", type=int, default=150)
     ns.set_defaults(func=cmd_nseed)
+
+    ss = sub.add_parser("sweep-scaling", help="input-scaling sweep on real activations")
+    ss.add_argument("--model", default="gpt2")
+    ss.add_argument("--K", type=int, default=150)
+    ss.add_argument("--rho", type=float, default=0.95)
+    ss.add_argument("--s-min", type=float, default=0.01)
+    ss.add_argument("--s-max", type=float, default=2.0)
+    ss.add_argument("--n", type=int, default=16)
+    ss.add_argument("--washout", type=int, default=20)
+    ss.set_defaults(func=cmd_sweep_scaling)
 
     ag = sub.add_parser("agent", help="run a scripted always-alive session")
     ag.add_argument("--model", default="gpt2")

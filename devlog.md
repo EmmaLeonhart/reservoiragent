@@ -330,3 +330,18 @@ meaningful — the harness is the mechanism; a real self-initiation policy needs
 trained readout/LoRA. FINDINGS gained a "## The always-alive runtime (harness)" section.
 Full suite 31 passed locally. Resolves queue item (agent harness). NOT compute-gated;
 fine-tuning is the next, compute-gated, step the user will start.
+
+## 2026-05-29 — Round 2.3: input-scaling tuning sweep (over-saturation fixed)
+
+Follow-up to the real-activation over-saturation finding. Added `run_scaling_sweep` +
+`plot_scaling` to `src/reservoir/sweep.py` and a `sweep-scaling` subcommand; measure_point_stream
+now records `input_scaling`. `tests/test_sweep.py` gained `test_input_scaling_controls_saturation`.
+Ran on real GPT-2 activations (ρ=0.95, K=150) → `results/sweep_scaling.json` +
+`docs/sweep_scaling.png`.
+
+**Result:** saturation is a clean sigmoid in the input scaling — near zero below ≈ 0.05,
+crossing 0.5 at ≈ 0.24, ~0.86 at unit scale — while input separation and dimensionality
+stay high. **Sweet spot ≈ input scaling 0.08–0.24** (saturation 0.08–0.49, separation
+1.03–1.26, PR ≈ 0.39·K): real attention activations should be fed at ~¼–⅒ of unit scale,
+not 1.0. Folded into FINDINGS (H2 + Limitations) and the docs Findings (figure). Full
+suite 32 passed locally. Resolves queue item (input-scaling sweep).

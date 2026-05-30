@@ -60,3 +60,16 @@ def test_stream_sweep_runs_and_preserves_esp_boundary():
     assert len(recs) == 2
     assert recs[0]["init_forgetting"] < 0.01      # rho=0.4 forgets its init
     assert recs[1]["init_forgetting"] > 0.1       # rho=2.0 retains it
+
+
+def test_input_scaling_controls_saturation():
+    import numpy as np
+    from reservoir.sweep import run_scaling_sweep
+
+    rng = np.random.default_rng(0)
+    a = rng.standard_normal((300, 16)) * 8.0   # large-magnitude (real-activation-like)
+    b = rng.standard_normal((300, 16)) * 8.0
+    recs = run_scaling_sweep([0.02, 1.0], a, b, K=80, rho=0.9, washout=60)
+    # smaller input scaling -> less drive -> less saturation
+    assert recs[0]["saturation"] < recs[1]["saturation"]
+    assert recs[0]["input_scaling"] == 0.02
