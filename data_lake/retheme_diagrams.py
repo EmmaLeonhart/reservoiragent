@@ -58,6 +58,14 @@ GLYPHS = {
 
 
 def retheme(t: str) -> str:
+    # The recovered <svg> tag has no namespace; browsers loading an SVG via <img>
+    # require xmlns or they render nothing (cairosvg is lenient, which hid this).
+    t = re.sub(
+        r"<svg\b(?![^>]*\bxmlns=)",
+        '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"',
+        t,
+        count=1,
+    )
     for bad, good in GLYPHS.items():
         t = t.replace(bad, good)
     # strip interactive handlers + pointer cursor
