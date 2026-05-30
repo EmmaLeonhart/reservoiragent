@@ -42,17 +42,21 @@ respond; silence ↔ an active/novel reservoir state; ESP decay → revert to ba
 the honest difficulty of this "brain surgery" on a pretrained model. (Fixed the red CI
 left by a premature commit of the unverified test + a flaky finetune smoke test.)_
 
-1. **(E) Fork the real Hermes harness (tool-calling + agentic loop).** Build a fork of the
-   actual Nous Hermes harness — Hermes tool-call/ChatML formatting and the agentic loop —
-   wrapping the always-alive runtime (prompted + unprompted passes, the trained gate),
-   preserving Hermes' tool-call behaviour (regression vs vanilla Hermes is an explicit
-   check). This is the runtime the serious training/eval runs in. Name plainly whatever
-   part of the real harness is too large for this session and document it. Commit.
+_**(E) core built; full fork documented as remaining.** `src/reservoir/hermes_harness.py`
+provides the Hermes-format layer — ChatML rendering, the function-calling system prompt,
+`<tool_call>`/`<tool_response>` parse/format — and a `HermesHarness` that drives the
+reservoir-injected model through the agentic tool loop (parse → execute → respond). Pure
+logic is CI-tested (5 tests); the model integration is torch-gated. **NOT a full Nous
+fork** (named in `HERMES_HARNESS_REMAINING` + `todo.md`): streaming + exact Nous
+scaffolding, fusing the unprompted/idle pass + trained silence gate into the loop, and the
+regression-vs-vanilla-Hermes generation check (a Hermes GPU run) remain._
 
-**Reality note (kept honest):** A+B are bounded engineering. **C is research-substantial**
-(it's the condition that makes the idea work), **D depends on training-data design**, and
-**E is a real systems build**. They are sequenced A→E per the user; each lands as real,
-tested, committed work or a precise documented blocker — never a faked "it works".
+**Phase H status:** A ✓ B ✓ C ✓ (GPT-2; Hermes transfer open) D ✓ E core ✓. The remaining
+threads (Hermes recall transfer; the full Hermes-harness fork) are in `todo.md` and need
+real GPU work / a dedicated session.
+
+**Reality note (kept honest):** each item landed as real, tested, committed work or a
+precise documented blocker — never a faked "it works".
 
 **Refill rule (per the user):** keep this queue topped up from `todo.md` as items drain
 — when the list runs low, pull and decompose the next `todo.md` destination here rather

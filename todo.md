@@ -133,3 +133,12 @@ rather than noise?
   land; the themed `docs/` GitHub Pages site + built `report.pdf`. Capability first,
   mechanism second, formal claims third (scoped), organism framing last. Re-theme the
   recovered `data_lake/diagrams/*.svg` (or redraw) for the published site.
+
+### Phase H remaining (after the A–E core)
+- **Full Nous Hermes harness fork.** The Hermes-format core is built
+  (`src/reservoir/hermes_harness.py`); the full fork needs: streaming + the exact Nous
+  system-prompt scaffolding/stop strings; fusing the unprompted/idle pass + the trained
+  silence gate into the loop (the always-alive behaviour, using `runtime.py` + `silence.py`);
+  a regression suite vs vanilla Hermes (tool-call formatting unchanged with the reservoir
+  injected — H1 at generation level, a Hermes GPU run); multi-tool routing + error recovery.
+  See `HERMES_HARNESS_REMAINING`.
