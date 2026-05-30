@@ -308,6 +308,45 @@
   </figcaption>
 </figure>
 
+<h2>Theory — a real time axis, scoped honestly</h2>
+<p>
+  Three claims about the <em>kind</em> of capability, not the level. Full grounding +
+  citations in <code>literature/REVIEW.md</code>.
+</p>
+<div class="pillars">
+  <div class="pillar">
+    <h3>1 &middot; A genuine time dimension</h3>
+    <p>
+      A transformer represents time as token <em>position</em> &mdash; an index, not a
+      dimension it evolves along. r(t) evolves across forward passes and is causally
+      downstream of every pass since t=0, decoupled from the context window (it survives
+      context truncation). Not positional encoding, not context length.
+    </p>
+  </div>
+  <div class="pillar">
+    <h3>2 &middot; The expressivity gap (with its caveat)</h3>
+    <p>
+      A finite-precision transformer is bounded to TC&#8304;/FO(M) <em>per pass</em>
+      (Merrill&ndash;Sabharwal; Hahn); state carried across steps is the documented lever
+      past that ceiling, and finite recurrent nets are Turing-complete (Siegelmann&ndash;Sontag).
+      The reservoir is such a recurrent system &mdash; the structural ingredient is present.
+      <strong>But</strong> the transformer Turing-completeness results need <em>arbitrary
+      precision</em>; whether a <em>finite-precision</em> reservoir state lifts the bound
+      is the project&rsquo;s central <em>open</em> question, posed not asserted.
+    </p>
+  </div>
+  <div class="pillar">
+    <h3>3 &middot; The organism analogy</h3>
+    <p>
+      Endogenous state that evolves independently of input is shared with living
+      organisms and absent from stateless transformers. No claim about general
+      intelligence &mdash; only that this <em>capacity</em> may be a precondition for
+      agentic behaviours (noticing an unresolved thread, estimating elapsed time,
+      self-initiating) inaccessible to a stateless model at any capability level.
+    </p>
+  </div>
+</div>
+
 <h2 id="findings">Findings</h2>
 <p>
   <strong>In progress.</strong> The full write-up lives in

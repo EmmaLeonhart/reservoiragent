@@ -48,6 +48,49 @@ Block-Recurrent, Mamba, Titans, …) uses *trained* recurrence carrying state *w
 sequence; none uses a *fixed-random* reservoir with state across *independent* passes.
 The full survey with citations is in [`literature/REVIEW.md`](literature/REVIEW.md).
 
+## Theory (formal claims, scoped)
+
+Three claims, stated at the level of *kind* of capability, not level of capability.
+Grounding and citations are in [`literature/REVIEW.md`](literature/REVIEW.md).
+
+**1 · A genuine time dimension.** A standard transformer represents time as token
+*position* — an index into a sequence, not a dimension the model evolves along. With
+the reservoir, the state r(t) evolves continuously across forward passes:
+r(t) = (1−a)·r(t−1) + a·tanh(W_r·r(t−1) + W_in·x(t)), so r at pass N is causally
+downstream of every pass since t=0. This is not positional encoding and not context
+length — both reset or slide with the input. The reservoir state is decoupled from the
+context window (it survives context truncation), which is precisely what a "time axis"
+means here: an endogenous variable the model accumulates along, independent of the
+input sequence.
+
+**2 · The expressivity gap, and where the reservoir sits in it (with a caveat).**
+A fixed-depth, finite-precision transformer is, *per forward pass*, confined to a low
+complexity class: saturated/log-precision transformers ⊆ TC⁰ and are exactly captured
+by first-order logic with majority quantifiers, FO(M) (Merrill & Sabharwal 2022/2023),
+and fixed-size self-attention cannot model unbounded hierarchical structure without
+growing depth (Hahn 2020). The documented lever out of that ceiling is **state carried
+across steps**: the TC⁰/FO(M) upper-bound proof explicitly breaks once generated output
+is fed back into the next step, and finite recurrent nets are Turing-complete in
+principle (Siegelmann & Sontag 1992/1995). The reservoir is exactly such a recurrent
+system, so the Reservoir Agent has the *structural ingredient* a stateless pass lacks.
+**The caveat we do not paper over:** the transformer Turing-completeness results
+(Pérez et al. 2019) require *arbitrary precision* — the dense representations act as
+unbounded memory. The Reservoir Agent runs at finite precision, and **no result here
+or in the literature proves that a finite-precision continuous reservoir state lifts
+the per-pass TC⁰/FO(M) bound.** We pose this as the project's central open theoretical
+question, not as an established result. The honest claim is narrow and true: the
+architecture has a *capacity for endogenous cross-pass state evolution that a single
+finite-precision transformer pass structurally lacks.*
+
+**3 · The organism analogy (one paragraph, bounded).** The reservoir introduces
+endogenous state that evolves independently of external input — a property shared with
+living organisms and absent from stateless transformers. No claim about general
+intelligence is made or implied. The claim is structural: this architecture has a
+capacity for organism-like state evolution, and that capacity may be a precondition for
+certain classes of genuinely agentic behaviour (noticing an unresolved thread,
+estimating elapsed time, self-initiating) that are inaccessible to a stateless model
+regardless of its capability level.
+
 ## Method (this session)
 
 1. **Reservoir core.** A tested echo-state reservoir with spectral-radius control and

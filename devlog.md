@@ -345,3 +345,14 @@ stay high. **Sweet spot ≈ input scaling 0.08–0.24** (saturation 0.08–0.49,
 1.03–1.26, PR ≈ 0.39·K): real attention activations should be fed at ~¼–⅒ of unit scale,
 not 1.0. Folded into FINDINGS (H2 + Limitations) and the docs Findings (figure). Full
 suite 32 passed locally. Resolves queue item (input-scaling sweep).
+
+## 2026-05-29 — Round 2.4: theory section (scoped formal claims)
+
+Wrote the theory into `FINDINGS.md` (## Theory) + a condensed `docs/` pillar section,
+grounded in `literature/REVIEW.md`: (1) genuine time dimension (r(t) causal across
+passes, decoupled from context — not positional encoding); (2) the expressivity gap
+(finite-precision transformer ⊆ TC⁰/FO(M) per pass; cross-pass state the documented
+lever; reservoir ∈ Siegelmann–Sontag) **stated with the arbitrary-precision caveat and
+posed as the project's central OPEN question, not asserted**; (3) the organism analogy
+as one bounded paragraph (structural-capacity claim only, no general-intelligence
+claim). No new empirical claims. HTML tags verified balanced. Resolves queue item (theory).
