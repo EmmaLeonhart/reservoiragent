@@ -1,9 +1,10 @@
 # Publishes the docs/ folder as a GitHub Pages site (the themed research
 # report) and builds a transportable PDF from FINDINGS.md into docs/report.pdf.
 #
-# TODO (one-time, by the repo owner):
-#   1. Make this repository public (free GitHub Pages).
-#   2. Settings -> Pages -> Source: "GitHub Actions".
+# Pages is auto-enabled by the `actions/configure-pages` step below
+# (enablement: true), so there is NO manual "Settings -> Pages" toggle to do —
+# the only requirement is that the repo is PUBLIC (free GitHub Pages). The first
+# push that runs this workflow turns Pages on and deploys.
 
 name: pages
 
@@ -26,6 +27,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Configure Pages (auto-enables Pages if not already on)
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - name: Install pandoc
         run: sudo apt-get update && sudo apt-get install -y pandoc
       - name: Build report PDF into docs/
