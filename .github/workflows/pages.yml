@@ -31,13 +31,22 @@ jobs:
         uses: actions/configure-pages@v5
         with:
           enablement: true
-      - name: Install pandoc
-        run: sudo apt-get update && sudo apt-get install -y pandoc
+      - name: Install pandoc + weasyprint (PDF engine, isolated venv)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc libpango-1.0-0 libpangoft2-1.0-0 libcairo2 libffi-dev fonts-dejavu
+          python3 -m venv /tmp/wp
+          /tmp/wp/bin/pip install --upgrade pip weasyprint
       - name: Build report PDF into docs/
         run: |
           mkdir -p docs
           if [ -f FINDINGS.md ]; then
-            pandoc FINDINGS.md -s -o docs/report.pdf || echo "PDF render skipped"
+            pandoc FINDINGS.md -f gfm --standalone \
+              --metadata title="Reservoir Agent — Findings" \
+              --include-in-header report-print.html \
+              -o docs/report.pdf --pdf-engine=/tmp/wp/bin/weasyprint \
+              || { echo "::error::report.pdf build failed"; exit 1; }
+            echo "Built docs/report.pdf ($(du -h docs/report.pdf | cut -f1))"
           else
             echo "No FINDINGS.md yet; skipping PDF build"
           fi

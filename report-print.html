@@ -1,0 +1,29 @@
+<style>
+  /* Print stylesheet for the report PDF (pandoc -> weasyprint). Mirrors the
+     docs/ site's warm "paper" theme. */
+  @page {
+    size: A4;
+    margin: 2.2cm 2cm;
+    @bottom-center { content: counter(page); color: #8a877f; font-size: 9pt; }
+  }
+  html { font-size: 11pt; }
+  body {
+    font-family: "DejaVu Serif", Georgia, "Times New Roman", serif;
+    color: #2d2a26; line-height: 1.5; max-width: none;
+  }
+  h1, h2, h3 { font-family: "DejaVu Sans", Helvetica, Arial, sans-serif; color: #2d2a26; line-height: 1.25; }
+  h1 { font-size: 22pt; border-bottom: 2px solid #b8553a; padding-bottom: 0.2em; }
+  h2 { font-size: 15pt; color: #3f6487; margin-top: 1.4em; border-bottom: 1px solid #d8d4cb; padding-bottom: 0.15em; }
+  h3 { font-size: 12.5pt; }
+  a { color: #3f6487; text-decoration: none; }
+  code, pre {
+    font-family: "DejaVu Sans Mono", Consolas, monospace; font-size: 9.5pt;
+    background: #f3f1ec; border: 1px solid #e0dccf; border-radius: 3px;
+  }
+  code { padding: 0.05em 0.3em; }
+  pre { padding: 0.7em 0.9em; overflow-x: auto; }
+  pre code { background: none; border: none; padding: 0; }
+  hr { border: none; border-top: 1px solid #d8d4cb; margin: 1.6em 0; }
+  blockquote { border-left: 3px solid #d8d4cb; padding-left: 1em; color: #54515a; }
+  em { color: #54515a; }
+</style>
