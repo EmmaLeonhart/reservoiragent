@@ -100,7 +100,8 @@ def run_cross_pass(model_name: str = "gpt2", *, n_keys: int = 6, steps: int = 20
 def run_cross_pass_kv(model_name: str = "gpt2", *, n_keys: int = 6, steps: int = 400,
                       lr: float = 1e-3, seed: int = 0, device: str | None = None,
                       stateful: bool = True, n_prefix: int = 8,
-                      load_in_4bit: bool = False, input_scaling: float = 0.5) -> dict:
+                      load_in_4bit: bool = False, input_scaling: float = 0.5,
+                      dtype: str | None = None) -> dict:
     """Same cross-pass recall task, but with the **content-addressable** injection:
     the model attends to reservoir-derived prefix tokens (see ``kv_live``). This is the
     fix for the additive-injection negative result."""
@@ -109,7 +110,7 @@ def run_cross_pass_kv(model_name: str = "gpt2", *, n_keys: int = 6, steps: int =
 
     lm = TorchReservoirPrefixInjectedLM(model_name, seed=seed, device=device,
                                         n_prefix=n_prefix, load_in_4bit=load_in_4bit,
-                                        input_scaling=input_scaling)
+                                        input_scaling=input_scaling, dtype=dtype)
     tok = lm.tokenizer
     keys = _single_token_keys(tok, n_keys)
     rng = np.random.default_rng(seed)

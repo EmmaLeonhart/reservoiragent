@@ -35,7 +35,8 @@ class TorchReservoirPrefixInjectedLM:
                  n_prefix: int = 8, layer: int | None = None, spectral_radius: float = 0.9,
                  input_scaling: float = 0.5, sparsity: float = 0.1, leak: float = 1.0,
                  seed: int = 0, device: str | None = None, lora_r: int = 8,
-                 lora_alpha: int = 16, summary: str = "last", load_in_4bit: bool = False):
+                 lora_alpha: int = 16, summary: str = "last", load_in_4bit: bool = False,
+                 dtype: str | None = None):
         import torch
         import torch.nn as nn
         from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -62,7 +63,10 @@ class TorchReservoirPrefixInjectedLM:
                 base, use_gradient_checkpointing=False)
             self.device = "cuda"
         else:
-            base = AutoModelForCausalLM.from_pretrained(model_name)
+            kw = {}
+            if dtype in ("float16", "bfloat16"):
+                kw["torch_dtype"] = getattr(torch, dtype)   # fp16/bf16 so a 3B base fits
+            base = AutoModelForCausalLM.from_pretrained(model_name, **kw)
 
         d_model = hidden_size(base.config)
         self.d_model, self.n_reservoir, self.n_prefix = d_model, n_reservoir, n_prefix
