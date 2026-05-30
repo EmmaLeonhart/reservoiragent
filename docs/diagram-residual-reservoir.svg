@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 660" role="img" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif">
+<title>Reservoir-augmented residual stream</title>
+<desc>Token residual streams predicting "Paris" from "The capital of France is", with FFN-query, attention and FFN-value neurons, plus a reservoir column whose fixed random nodes enter the attention layer as extra keys/values and persist across passes.</desc>
+<defs>
+<marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#6e6a61" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker>
+<marker id="ah-b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#2a9bb5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker>
+<marker id="ah-r" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#c98f2e" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker>
+<marker id="ah-g" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#6f9a44" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker>
+<marker id="ah-p" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#b85a5a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker>
+</defs>
+<rect x="0" y="0" width="960" height="660" fill="#f6f2ec"/>
+<text x="480" y="34" font-size="15" fill="#2d2a26" text-anchor="middle" font-weight="600">One attention layer reads and writes the reservoir as extra keys / values</text>
+<rect x="89" y="547" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="89" y="492" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="89" y="437" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="89" y="379" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="89" y="321" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="89" y="263" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="89" y="205" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<line x1="110" y1="547" x2="110" y2="518" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<line x1="110" y1="492" x2="110" y2="463" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<line x1="110" y1="437" x2="110" y2="405" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<line x1="110" y1="379" x2="110" y2="347" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<line x1="110" y1="321" x2="110" y2="289" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<line x1="110" y1="263" x2="110" y2="231" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<text x="110" y="600" font-size="13" fill="#2d2a26" text-anchor="middle" font-weight="600">The</text>
+<line x1="110" y1="588" x2="110" y2="575" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<rect x="229" y="547" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="229" y="492" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="229" y="437" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="229" y="379" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="229" y="321" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="229" y="263" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="229" y="205" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<line x1="250" y1="547" x2="250" y2="518" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<line x1="250" y1="492" x2="250" y2="463" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<line x1="250" y1="437" x2="250" y2="405" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<line x1="250" y1="379" x2="250" y2="347" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<line x1="250" y1="321" x2="250" y2="289" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<line x1="250" y1="263" x2="250" y2="231" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<text x="250" y="600" font-size="13" fill="#2d2a26" text-anchor="middle" font-weight="600">capital</text>
+<line x1="250" y1="588" x2="250" y2="575" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<rect x="369" y="547" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="369" y="492" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="369" y="437" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="369" y="379" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="369" y="321" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="369" y="263" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="369" y="205" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<line x1="390" y1="547" x2="390" y2="518" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<line x1="390" y1="492" x2="390" y2="463" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<line x1="390" y1="437" x2="390" y2="405" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<line x1="390" y1="379" x2="390" y2="347" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<line x1="390" y1="321" x2="390" y2="289" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<line x1="390" y1="263" x2="390" y2="231" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<text x="390" y="600" font-size="13" fill="#2d2a26" text-anchor="middle" font-weight="600">of</text>
+<line x1="390" y1="588" x2="390" y2="575" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<rect x="509" y="547" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="509" y="492" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="509" y="437" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="509" y="379" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="509" y="321" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="509" y="263" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="509" y="205" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<line x1="530" y1="547" x2="530" y2="518" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<line x1="530" y1="492" x2="530" y2="463" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<line x1="530" y1="437" x2="530" y2="405" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<line x1="530" y1="379" x2="530" y2="347" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<line x1="530" y1="321" x2="530" y2="289" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<line x1="530" y1="263" x2="530" y2="231" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<text x="530" y="600" font-size="13" fill="#2d2a26" text-anchor="middle" font-weight="600">France</text>
+<line x1="530" y1="588" x2="530" y2="575" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<rect x="649" y="547" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="649" y="492" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="649" y="437" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="649" y="379" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="649" y="321" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="649" y="263" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<rect x="649" y="205" width="42" height="26" rx="5" fill="#eceae4" stroke="#cfccc4" stroke-width="1"/>
+<line x1="670" y1="547" x2="670" y2="518" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<line x1="670" y1="492" x2="670" y2="463" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<line x1="670" y1="437" x2="670" y2="405" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<line x1="670" y1="379" x2="670" y2="347" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<line x1="670" y1="321" x2="670" y2="289" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<line x1="670" y1="263" x2="670" y2="231" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<text x="670" y="600" font-size="13" fill="#2d2a26" text-anchor="middle" font-weight="600">is</text>
+<line x1="670" y1="588" x2="670" y2="575" stroke="#b9b5ab" stroke-width="1.3" marker-end="url(#ah)"/>
+<rect x="131" y="496" width="18" height="18" rx="4" fill="#7ba35a" stroke="#5b7a3a" stroke-width="1"/>
+<line x1="131" y1="505" x2="131" y2="505" stroke="#6f9a44" stroke-width="1.4" marker-end="url(#ah-g)"/>
+<rect x="131" y="441" width="18" height="18" rx="4" fill="#7ba35a" stroke="#5b7a3a" stroke-width="1"/>
+<line x1="131" y1="450" x2="131" y2="450" stroke="#6f9a44" stroke-width="1.4" marker-end="url(#ah-g)"/>
+<rect x="271" y="496" width="18" height="18" rx="4" fill="#7ba35a" stroke="#5b7a3a" stroke-width="1"/>
+<line x1="271" y1="505" x2="271" y2="505" stroke="#6f9a44" stroke-width="1.4" marker-end="url(#ah-g)"/>
+<rect x="271" y="441" width="18" height="18" rx="4" fill="#7ba35a" stroke="#5b7a3a" stroke-width="1"/>
+<line x1="271" y1="450" x2="271" y2="450" stroke="#6f9a44" stroke-width="1.4" marker-end="url(#ah-g)"/>
+<rect x="411" y="496" width="18" height="18" rx="4" fill="#7ba35a" stroke="#5b7a3a" stroke-width="1"/>
+<line x1="411" y1="505" x2="411" y2="505" stroke="#6f9a44" stroke-width="1.4" marker-end="url(#ah-g)"/>
+<rect x="411" y="441" width="18" height="18" rx="4" fill="#7ba35a" stroke="#5b7a3a" stroke-width="1"/>
+<line x1="411" y1="450" x2="411" y2="450" stroke="#6f9a44" stroke-width="1.4" marker-end="url(#ah-g)"/>
+<rect x="551" y="496" width="18" height="18" rx="4" fill="#7ba35a" stroke="#5b7a3a" stroke-width="1"/>
+<line x1="551" y1="505" x2="551" y2="505" stroke="#6f9a44" stroke-width="1.4" marker-end="url(#ah-g)"/>
+<rect x="551" y="441" width="18" height="18" rx="4" fill="#7ba35a" stroke="#5b7a3a" stroke-width="1"/>
+<line x1="551" y1="450" x2="551" y2="450" stroke="#6f9a44" stroke-width="1.4" marker-end="url(#ah-g)"/>
+<rect x="691" y="496" width="18" height="18" rx="4" fill="#7ba35a" stroke="#5b7a3a" stroke-width="1"/>
+<line x1="691" y1="505" x2="691" y2="505" stroke="#6f9a44" stroke-width="1.4" marker-end="url(#ah-g)"/>
+<rect x="691" y="441" width="18" height="18" rx="4" fill="#7ba35a" stroke="#5b7a3a" stroke-width="1"/>
+<line x1="691" y1="450" x2="691" y2="450" stroke="#6f9a44" stroke-width="1.4" marker-end="url(#ah-g)"/>
+<polygon points="97,379 123,379 130,405 90,405" fill="#7f9fcb" stroke="#3f6487" stroke-width="1"/>
+<polygon points="237,379 263,379 270,405 230,405" fill="#7f9fcb" stroke="#3f6487" stroke-width="1"/>
+<polygon points="377,379 403,379 410,405 370,405" fill="#7f9fcb" stroke="#3f6487" stroke-width="1"/>
+<polygon points="517,379 543,379 550,405 510,405" fill="#7f9fcb" stroke="#3f6487" stroke-width="1"/>
+<polygon points="657,379 683,379 690,405 650,405" fill="#7f9fcb" stroke="#3f6487" stroke-width="1"/>
+<line x1="110" y1="379" x2="664" y2="378" stroke="#2a9bb5" stroke-width="1.6" marker-end="url(#ah-b)"/>
+<line x1="250" y1="379" x2="664" y2="378" stroke="#2a9bb5" stroke-width="1.6" marker-end="url(#ah-b)"/>
+<line x1="390" y1="379" x2="664" y2="378" stroke="#2a9bb5" stroke-width="1.6" marker-end="url(#ah-b)"/>
+<line x1="530" y1="379" x2="664" y2="378" stroke="#2a9bb5" stroke-width="1.6" marker-end="url(#ah-b)"/>
+<rect x="691" y="325" width="18" height="18" rx="4" fill="#d98f8f" stroke="#b85a5a" stroke-width="1"/>
+<line x1="691" y1="334" x2="691" y2="334" stroke="#b85a5a" stroke-width="1.4" marker-end="url(#ah-p)"/>
+<rect x="691" y="267" width="18" height="18" rx="4" fill="#d98f8f" stroke="#b85a5a" stroke-width="1"/>
+<line x1="691" y1="276" x2="691" y2="276" stroke="#b85a5a" stroke-width="1.4" marker-end="url(#ah-p)"/>
+<line x1="670" y1="205" x2="670" y2="150" stroke="#b9b5ab" stroke-width="1.5" marker-end="url(#ah)"/>
+<text x="670" y="140" font-size="15" fill="#2d2a26" text-anchor="middle" font-weight="700">Paris</text>
+<rect x="812" y="292" width="92" height="184" rx="12" fill="#faf1dd" stroke="#a07a2b" stroke-width="1.3" stroke-dasharray="5 3"/>
+<text x="858" y="284" font-size="12.5" fill="#7d5e1c" text-anchor="middle" font-weight="700">Reservoir</text>
+<circle cx="858" cy="314" r="9" fill="#e8b85c" stroke="#a07a2b" stroke-width="1"/>
+<circle cx="858" cy="342" r="9" fill="#e8b85c" stroke="#a07a2b" stroke-width="1"/>
+<circle cx="858" cy="370" r="9" fill="#e8b85c" stroke="#a07a2b" stroke-width="1"/>
+<circle cx="858" cy="398" r="9" fill="#e8b85c" stroke="#a07a2b" stroke-width="1"/>
+<circle cx="858" cy="426" r="9" fill="#e8b85c" stroke="#a07a2b" stroke-width="1"/>
+<circle cx="858" cy="454" r="9" fill="#e8b85c" stroke="#a07a2b" stroke-width="1"/>
+<path d="M904 362 q34 -16 34 18 q0 34 -30 24" fill="none" stroke="#c98f2e" stroke-width="1.5" marker-end="url(#ah-r)"/>
+<text x="944" y="388" font-size="11" fill="#7d5e1c" text-anchor="middle" font-weight="normal">Wr</text>
+<text x="858" y="488" font-size="10.5" fill="#8a6a24" text-anchor="middle" font-weight="normal">fixed · random</text>
+<text x="858" y="504" font-size="10.5" fill="#8a6a24" text-anchor="middle" font-weight="normal" font-style="italic">persists across passes</text>
+<line x1="692" y1="388" x2="810" y2="374" stroke="#c98f2e" stroke-width="1.7" marker-end="url(#ah-r)"/>
+<text x="764" y="362" font-size="11" fill="#7d5e1c" text-anchor="middle" font-weight="normal">W_in (read, fixed)</text>
+<line x1="810" y1="408" x2="692" y2="414" stroke="#b85a5a" stroke-width="1.7" marker-end="url(#ah-p)"/>
+<text x="764" y="434" font-size="11" fill="#b85a5a" text-anchor="middle" font-weight="normal">W_out (write, learned)</text>
+<rect x="70" y="625" width="15" height="15" rx="3" fill="#7ba35a" stroke="#5b7a3a"/>
+<text x="91" y="637" font-size="11.5" fill="#2d2a26" text-anchor="start" font-weight="normal">FFN query</text>
+<rect x="173.0" y="625" width="15" height="15" rx="3" fill="#7f9fcb" stroke="#3f6487"/>
+<text x="194" y="637" font-size="11.5" fill="#2d2a26" text-anchor="start" font-weight="normal">attention</text>
+<rect x="276.0" y="625" width="15" height="15" rx="3" fill="#d98f8f" stroke="#b85a5a"/>
+<text x="297" y="637" font-size="11.5" fill="#2d2a26" text-anchor="start" font-weight="normal">FFN value</text>
+<rect x="379.0" y="625" width="15" height="15" rx="3" fill="#e8b85c" stroke="#a07a2b"/>
+<text x="400" y="637" font-size="11.5" fill="#2d2a26" text-anchor="start" font-weight="normal">reservoir node (fixed, random)</text>
+</svg>

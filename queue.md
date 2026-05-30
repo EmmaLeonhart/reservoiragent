@@ -70,8 +70,6 @@ cron is a guaranteed escalation/kickoff point, not the only start.
    reservoir comparison. Anything compute-blocked → a precise documented blocker / strict
    `xfail`, never a faked or weakened result.
 
-8. Make an svg version of this one data_lake\diagrams\transformer-diagram-misconceptions-claude-preview-03.webp that demonstrates this thing but with the reservoir included
-
 **Stop condition (then hand back):** the research question has a defensible answer or a
 clearly-reported partial result; `FINDINGS.md` and the published `docs/` report reflect
 it; `queue.md` is empty (refill from `todo.md` if more is in scope); repo online with

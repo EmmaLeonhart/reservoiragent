@@ -148,3 +148,22 @@ Outputs `docs/diagram-architecture.svg` (forward-pass) and `docs/diagram-runtime
 from the recovered `-01`/`-02` sources; the page now embeds the SVGs and the
 social-preview card is rebuilt from the crisp SVG render. Old raster diagram PNGs
 removed. (Resolves queue item 9.)
+
+## 2026-05-29 — Report PDF build fixed
+
+`docs/report.pdf` was never produced (workflow only built it if `FINDINGS.md`
+existed — it didn't — and installed no PDF engine). Wrote an honest in-progress
+`FINDINGS.md`; `pages.yml` now builds the PDF via weasyprint in an isolated venv
+(full Unicode) with `report-print.html` styling the paper theme, and fails loudly
+rather than silently skipping. Verified: live `report.pdf` is HTTP 200,
+`application/pdf`, `%PDF-1.7`, ~29 KB; Pages build green.
+
+## 2026-05-29 — New diagram: reservoir-augmented residual stream (queue item 8)
+
+`data_lake/build_residual_reservoir_svg.py` generates
+`docs/diagram-residual-reservoir.svg` — an SVG recreation of the residual-stream
+picture (`…preview-03.webp`: token streams + FFN-query/attention/FFN-value neurons
+predicting "Paris") **with the reservoir added**: a fixed-random amber reservoir
+column that joins the attention layer as extra keys/values (read W_in, write W_out),
+with a recurrence loop and state persisting across passes. Embedded on the report
+page under a new "How the reservoir enters attention" section. Resolves queue item 8.

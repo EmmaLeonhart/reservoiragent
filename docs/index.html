@@ -252,6 +252,25 @@
   </div>
 </div>
 
+<h2>How the reservoir enters attention</h2>
+<p>
+  At the neuron level, the mechanism is small: the reservoir nodes simply join the
+  attention layer's key/value sequence. The same attention that moves information
+  between token residual streams now also reads from and writes to the reservoir &mdash;
+  via a fixed projection in and a learned readout out &mdash; and unlike the token
+  streams, the reservoir state carries across forward passes.
+</p>
+<figure>
+  <img src="diagram-residual-reservoir.svg" alt="A residual-stream view: five token columns (The, capital, of, France, is) of gray residual nodes with green FFN-query neurons, a blue attention layer whose neurons attend toward the final column to predict 'Paris', and pink FFN-value neurons; a reservoir column of fixed random amber nodes joins the attention layer as extra keys/values, read via W_in and written via W_out, with a recurrence loop and state that persists across passes.">
+  <figcaption>
+    <strong>The mechanism, at the neuron level.</strong> A reservoir-augmented view of
+    the classic residual-stream picture: the attention layer that predicts
+    &ldquo;Paris&rdquo; also takes the fixed-random reservoir nodes as extra keys/values
+    (read via <code>W_in</code>, written via the learned <code>W_out</code>), and the
+    reservoir state &mdash; unlike the token streams &mdash; persists across passes.
+  </figcaption>
+</figure>
+
 <h2>The always-alive runtime</h2>
 <p>
   The architecture implies a different execution model from standard inference. A
