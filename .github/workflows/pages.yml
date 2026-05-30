@@ -1,0 +1,51 @@
+# Publishes the docs/ folder as a GitHub Pages site (the themed research
+# report) and builds a transportable PDF from FINDINGS.md into docs/report.pdf.
+#
+# TODO (one-time, by the repo owner):
+#   1. Make this repository public (free GitHub Pages).
+#   2. Settings -> Pages -> Source: "GitHub Actions".
+
+name: pages
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pandoc
+        run: sudo apt-get update && sudo apt-get install -y pandoc
+      - name: Build report PDF into docs/
+        run: |
+          mkdir -p docs
+          if [ -f FINDINGS.md ]; then
+            pandoc FINDINGS.md -s -o docs/report.pdf || echo "PDF render skipped"
+          else
+            echo "No FINDINGS.md yet; skipping PDF build"
+          fi
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
