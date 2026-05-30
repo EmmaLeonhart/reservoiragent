@@ -181,7 +181,7 @@
 </div>
 
 <figure>
-  <img src="diagram-architecture.png" alt="Reservoir Agent architecture: input tokens flow through frozen lower layers into a mid-depth injection layer Lk where attention runs jointly over tokens and reservoir nodes; the reservoir reads the attention matrix (fixed W_in) and writes its state back (learned readout) each forward pass, with state persisting across passes; upper layers are fine-tuned; reservoir weights are random and fixed, and the best of N seeds is kept.">
+  <img src="diagram-architecture.svg" alt="Reservoir Agent architecture: input tokens flow through frozen lower layers into a mid-depth injection layer Lk where attention runs jointly over tokens and reservoir nodes; the reservoir reads the attention matrix (fixed W_in) and writes its state back (learned readout) each forward pass, with state persisting across passes; upper layers are fine-tuned; reservoir weights are random and fixed, and the best of N seeds is kept.">
   <figcaption>
     <strong>The architecture.</strong> Every forward pass is one reservoir tick: at the
     injection layer L<sub>k</sub>, attention runs over the token hidden states <em>and</em>
@@ -264,7 +264,7 @@
   <code>todo.md</code>); this session targets the model surgery and dynamics beneath it.
 </p>
 <figure>
-  <img src="diagram-runtime.png" alt="The always-alive runtime: user or harness input feeds a pass scheduler that decides when to run a forward pass (prompted or unprompted, driven by an idle timer); a persistent context buffer and a GPU-resident reservoir state store (mutated in place each pass) feed the forward pass; an output decision either emits a high-confidence token or stays silent, updates state, and schedules the next pass.">
+  <img src="diagram-runtime.svg" alt="The always-alive runtime: user or harness input feeds a pass scheduler that decides when to run a forward pass (prompted or unprompted, driven by an idle timer); a persistent context buffer and a GPU-resident reservoir state store (mutated in place each pass) feed the forward pass; an output decision either emits a high-confidence token or stays silent, updates state, and schedules the next pass.">
   <figcaption>
     <strong>The runtime.</strong> The reservoir state store (<code>r(t)</code>, pinned in
     GPU memory, mutated in place each pass) and a never-wiped context buffer persist
