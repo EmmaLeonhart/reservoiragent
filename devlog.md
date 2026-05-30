@@ -133,3 +133,18 @@ and `## Always last` keeps them alive. The work-loop and the one-shot 8h kickoff
 
 **Bootstrap is complete.** From here the autonomous loop executes the implementation
 queue; the next code change is the package/CI scaffold (item 1).
+
+## 2026-05-29 — Report diagrams converted to real SVGs (was raster PNG)
+
+User feedback: the page figures should be SVG, and the recovered SVGs render
+black-boxed (correctly diagnosed as a theming artifact, not missing content). Root
+cause: the recovered diagrams use Claude's CSS classes (`node c-teal`, …) + CSS
+custom properties that are undefined standalone — and cairosvg/PDF don't resolve
+`var()` or class selectors even though browsers do. `data_lake/retheme_diagrams.py`
+now **bakes literal fill/stroke** onto every box (per the `c-*` colour) and resolves
+every `var(--…)`, in the report's light palette matching the user's screenshots; it
+also normalises a few glyphs (subscripts, heavy ✕) the headless/PDF fonts lack.
+Outputs `docs/diagram-architecture.svg` (forward-pass) and `docs/diagram-runtime.svg`
+from the recovered `-01`/`-02` sources; the page now embeds the SVGs and the
+social-preview card is rebuilt from the crisp SVG render. Old raster diagram PNGs
+removed. (Resolves queue item 9.)

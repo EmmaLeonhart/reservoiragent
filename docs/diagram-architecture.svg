@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100%" viewBox="0 0 680 860" role="img" style="max-width: 680px; display: block; margin-inline: auto;">
+<title>Reservoir tick architecture — full attention matrix read per layer pass</title>
+<desc>At a chosen mid-depth layer, every forward pass writes the complete attention matrix into the reservoir. The reservoir state evolves chaotically across many passes (ticks), and its current state is injected back as additional tokens into that same layer's attention on the next pass.</desc>
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="#8a877f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+  </marker>
+<mask id="imagine-text-gaps-wb8cgb" maskUnits="userSpaceOnUse"><rect x="0" y="0" width="680" height="860" fill="white"></rect><rect x="229.265625" y="6" width="221.6656494140625" height="19" fill="black" rx="2"></rect><rect x="146.078125" y="39.5" width="87.84375" height="23" fill="black" rx="2"></rect><rect x="118.71875" y="108.5" width="142.5625" height="23" fill="black" rx="2"></rect><rect x="92.546875" y="130.5" width="194.73974609375" height="19" fill="black" rx="2"></rect><rect x="96.140625" y="148.5" width="187.86172485351562" height="19" fill="black" rx="2"></rect><rect x="120.0390625" y="165.5" width="140.747802734375" height="19" fill="black" rx="2"></rect><rect x="44" y="208" width="100.433837890625" height="19" fill="black" rx="2"></rect><rect x="90.6875" y="244.5" width="197.625" height="23" fill="black" rx="2"></rect><rect x="78.765625" y="264.5" width="223.295654296875" height="19" fill="black" rx="2"></rect><rect x="71.3515625" y="282.5" width="238.12762451171875" height="19" fill="black" rx="2"></rect><rect x="98.7734375" y="300.5" width="182.99771118164062" height="19" fill="black" rx="2"></rect><rect x="113.1171875" y="370.5" width="153.765625" height="23" fill="black" rx="2"></rect><rect x="100.921875" y="390.5" width="178.98974609375" height="19" fill="black" rx="2"></rect><rect x="71.6328125" y="408.5" width="238.16168212890625" height="19" fill="black" rx="2"></rect><rect x="116.0625" y="475.5" width="147.8017578125" height="23" fill="black" rx="2"></rect><rect x="77.8515625" y="493.5" width="224.27359008789062" height="19" fill="black" rx="2"></rect><rect x="483.1328125" y="6" width="94.785888671875" height="19" fill="black" rx="2"></rect><rect x="486.5078125" y="40.5" width="106.984375" height="23" fill="black" rx="2"></rect><rect x="455.9375" y="60.5" width="168.9537353515625" height="19" fill="black" rx="2"></rect><rect x="385.015625" y="196" width="53.79791259765625" height="19" fill="black" rx="2"></rect><rect x="383.3828125" y="210" width="58.0599365234375" height="19" fill="black" rx="2"></rect><rect x="482.09375" y="142.5" width="116.365234375" height="23" fill="black" rx="2"></rect><rect x="483.609375" y="162.5" width="112.9298095703125" height="19" fill="black" rx="2"></rect><rect x="477.453125" y="178.5" width="125.2418212890625" height="19" fill="black" rx="2"></rect><rect x="494.1875" y="260.5" width="92.55859375" height="23" fill="black" rx="2"></rect><rect x="361.6640625" y="244" width="60.64794921875" height="19" fill="black" rx="2"></rect><rect x="353.7421875" y="258" width="76.347900390625" height="19" fill="black" rx="2"></rect><rect x="462.015625" y="338" width="156.12982177734375" height="19" fill="black" rx="2"></rect><rect x="460.6953125" y="358" width="158.4317626953125" height="19" fill="black" rx="2"></rect><rect x="466.7734375" y="376" width="146.4918212890625" height="19" fill="black" rx="2"></rect><rect x="471.015625" y="394" width="138.019775390625" height="19" fill="black" rx="2"></rect><rect x="481.046875" y="412" width="117.94989013671875" height="19" fill="black" rx="2"></rect><rect x="471.96875" y="430" width="135.1578369140625" height="19" fill="black" rx="2"></rect><rect x="251.1484375" y="564.5" width="178.5859375" height="23" fill="black" rx="2"></rect><rect x="101.5234375" y="588.5" width="477.779296875" height="19" fill="black" rx="2"></rect><rect x="166.5703125" y="608.5" width="347.00738525390625" height="19" fill="black" rx="2"></rect><rect x="200.546875" y="628.5" width="279.9456481933594" height="19" fill="black" rx="2"></rect><rect x="137.171875" y="648.5" width="406.6334228515625" height="19" fill="black" rx="2"></rect><rect x="74" y="790" width="171.5597381591797" height="19" fill="black" rx="2"></rect><rect x="289" y="790" width="182.61972045898438" height="19" fill="black" rx="2"></rect><rect x="187.3203125" y="814" width="306.185546875" height="19" fill="black" rx="2"></rect></mask></defs>
+
+<!-- ── Title annotation ── -->
+<text class="ts" fill="#54515a" font-size="11" x="340" y="20" text-anchor="middle" style="fill:#54515a">One forward pass = one reservoir tick</text>
+
+<!-- ══ FORWARD PASS COLUMN (left) ══ -->
+
+<!-- Input -->
+<g class="node c-gray">
+  <rect fill="#f2f1ed" stroke="#cdc9c0" x="40" y="32" width="300" height="38" rx="6" stroke-width="0.5"></rect>
+  <text class="th" fill="#3f3d44" font-weight="600" font-size="13.5" x="190" y="51" text-anchor="middle" dominant-baseline="central">Input tokens</text>
+</g>
+<line x1="190" y1="70" x2="190" y2="96" class="arr" marker-end="url(#arrow)" stroke="#8a877f"></line>
+
+<!-- Lower layers -->
+<g class="node c-purple">
+  <rect fill="#ece9f7" stroke="#8978d6" x="40" y="96" width="300" height="100" rx="8" stroke-width="0.5"></rect>
+  <text class="th" fill="#5a49bd" font-weight="600" font-size="13.5" x="190" y="120" text-anchor="middle" dominant-baseline="central">Lower layers (L1 … Lk)</text>
+  <text class="ts" fill="#54515a" font-size="11" x="190" y="140" text-anchor="middle" dominant-baseline="central">Standard attention + FFN passes</text>
+  <text class="ts" fill="#54515a" font-size="11" x="190" y="158" text-anchor="middle" dominant-baseline="central">Syntactic + semantic grounding</text>
+  <text class="ts" fill="#54515a" font-size="11" x="190" y="175" text-anchor="middle" dominant-baseline="central">Frozen Hermes weights</text>
+</g>
+<line x1="190" y1="196" x2="190" y2="226" class="arr" marker-end="url(#arrow)" stroke="#8a877f"></line>
+
+<!-- Injection layer — highlighted -->
+<rect x="34" y="226" width="312" height="108" rx="10" stroke="#BA7517" stroke-width="1.5" fill="none" stroke-dasharray="5 3"></rect>
+<text class="ts" fill="#54515a" font-size="11" x="48" y="222" style="fill:#BA7517">injection layer Lk</text>
+
+<g class="node c-amber">
+  <rect fill="#faf1dd" stroke="#c98f2e" x="46" y="232" width="288" height="96" rx="7" stroke-width="0.5"></rect>
+  <text class="th" fill="#8a6313" font-weight="600" font-size="13.5" x="190" y="256" text-anchor="middle" dominant-baseline="central">Attention (tokens + reservoir)</text>
+  <text class="ts" fill="#54515a" font-size="11" x="190" y="274" text-anchor="middle" dominant-baseline="central">Full Q/K/V over all token hidden states</text>
+  <text class="ts" fill="#54515a" font-size="11" x="190" y="292" text-anchor="middle" dominant-baseline="central">+ all reservoir nodes as extra keys/values</text>
+  <text class="ts" fill="#54515a" font-size="11" x="190" y="310" text-anchor="middle" dominant-baseline="central">Every neuron, nothing dropped</text>
+</g>
+
+<line x1="190" y1="328" x2="190" y2="358" class="arr" marker-end="url(#arrow)" stroke="#8a877f"></line>
+
+<!-- Upper layers -->
+<g class="node c-purple">
+  <rect fill="#ece9f7" stroke="#8978d6" x="40" y="358" width="300" height="80" rx="8" stroke-width="0.5"></rect>
+  <text class="th" fill="#5a49bd" font-weight="600" font-size="13.5" x="190" y="382" text-anchor="middle" dominant-baseline="central">Upper layers (Lk+1 … Ln)</text>
+  <text class="ts" fill="#54515a" font-size="11" x="190" y="400" text-anchor="middle" dominant-baseline="central">Reasoning + action generation</text>
+  <text class="ts" fill="#54515a" font-size="11" x="190" y="418" text-anchor="middle" dominant-baseline="central">Fine-tuned on reservoir-augmented data</text>
+</g>
+<line x1="190" y1="438" x2="190" y2="468" class="arr" marker-end="url(#arrow)" stroke="#8a877f"></line>
+
+<!-- Output -->
+<g class="node c-teal">
+  <rect fill="#e4f0ec" stroke="#3f9a86" x="40" y="468" width="300" height="44" rx="6" stroke-width="0.5"></rect>
+  <text class="th" fill="#0f6e56" font-weight="600" font-size="13.5" x="190" y="487" text-anchor="middle" dominant-baseline="central">Action / token output</text>
+  <text class="ts" fill="#54515a" font-size="11" x="190" y="503" text-anchor="middle" dominant-baseline="central">Tool call, reasoning step, self-interrupt</text>
+</g>
+
+<!-- ══ RESERVOIR COLUMN (right) ══ -->
+
+<text class="ts" fill="#54515a" font-size="11" x="530" y="20" text-anchor="middle" style="fill:#54515a">Reservoir state</text>
+
+<!-- State box t-1 -->
+<g class="node c-amber">
+  <rect fill="#faf1dd" stroke="#c98f2e" x="440" y="32" width="200" height="54" rx="8" stroke-width="0.5"></rect>
+  <text class="th" fill="#8a6313" font-weight="600" font-size="13.5" x="540" y="52" text-anchor="middle" dominant-baseline="central">State at tick t−1</text>
+  <text class="ts" fill="#54515a" font-size="11" x="540" y="70" text-anchor="middle" dominant-baseline="central">~N neurons, chaotic weights</text>
+</g>
+
+<!-- READ arrow: injection layer reads full attn matrix → reservoir -->
+<path d="M334,276 Q390,276 438,66" stroke="#BA7517" stroke-width="1.2" fill="none" marker-end="url(#arrow)" stroke-dasharray="5 3" mask="url(#imagine-text-gaps-wb8cgb)"></path>
+<text class="ts" fill="#54515a" font-size="11" x="412" y="210" text-anchor="middle" style="fill:#BA7517">full attn</text>
+<text class="ts" fill="#54515a" font-size="11" x="412" y="224" text-anchor="middle" style="fill:#BA7517">matrix in</text>
+
+<!-- Reservoir update block -->
+<g class="node c-amber">
+  <rect fill="#faf1dd" stroke="#c98f2e" x="440" y="130" width="200" height="80" rx="8" stroke-width="0.5"></rect>
+  <text class="th" fill="#8a6313" font-weight="600" font-size="13.5" x="540" y="154" text-anchor="middle" dominant-baseline="central">Reservoir update</text>
+  <text class="ts" fill="#54515a" font-size="11" x="540" y="172" text-anchor="middle" dominant-baseline="central">r(t) = f(W_r · r(t−1)</text>
+  <text class="ts" fill="#54515a" font-size="11" x="540" y="188" text-anchor="middle" dominant-baseline="central">+ W_in · attn_matrix)</text>
+</g>
+<line x1="540" y1="86" x2="540" y2="128" class="arr" marker-end="url(#arrow)" stroke="#BA7517"></line>
+
+<!-- State box t -->
+<g class="node c-amber">
+  <rect fill="#faf1dd" stroke="#c98f2e" x="440" y="250" width="200" height="44" rx="8" stroke-width="0.5"></rect>
+  <text class="th" fill="#8a6313" font-weight="600" font-size="13.5" x="540" y="272" text-anchor="middle" dominant-baseline="central">State at tick t</text>
+</g>
+<line x1="540" y1="210" x2="540" y2="248" class="arr" marker-end="url(#arrow)" stroke="#BA7517"></line>
+
+<!-- WRITE arrow: reservoir state → injection layer (next pass) -->
+<path d="M440,268 Q390,268 334,268" stroke="#0F6E56" stroke-width="1.4" fill="none" marker-end="url(#arrow)" mask="url(#imagine-text-gaps-wb8cgb)"></path>
+<text class="ts" fill="#54515a" font-size="11" x="392" y="258" text-anchor="middle" style="fill:#0F6E56">state out</text>
+<text class="ts" fill="#54515a" font-size="11" x="392" y="272" text-anchor="middle" style="fill:#0F6E56">→ next pass</text>
+
+<!-- Persistence / long-range accumulation annotation -->
+<rect x="440" y="330" width="200" height="120" rx="8" stroke="#c6c1b6" stroke-width="0.5" fill="#f7f6f3"></rect>
+<text class="ts" fill="#54515a" font-size="11" x="540" y="352" text-anchor="middle" style="fill:#54515a">Accumulates over passes:</text>
+<text class="ts" fill="#54515a" font-size="11" x="540" y="372" text-anchor="middle" style="fill:#54515a">tick 1 — first prompt token</text>
+<text class="ts" fill="#54515a" font-size="11" x="540" y="390" text-anchor="middle" style="fill:#54515a">tick 50 — mid-task state</text>
+<text class="ts" fill="#54515a" font-size="11" x="540" y="408" text-anchor="middle" style="fill:#54515a">tick 100+ — long-range</text>
+<text class="ts" fill="#54515a" font-size="11" x="540" y="426" text-anchor="middle" style="fill:#54515a">dependency active</text>
+<text class="ts" fill="#54515a" font-size="11" x="540" y="444" text-anchor="middle" style="fill:#54515a">"implicit elapsed time"</text>
+
+<!-- ══ BOTTOM: Ensemble training strategy ══ -->
+<line x1="190" y1="512" x2="190" y2="552" class="arr" marker-end="url(#arrow)" stroke="#8a877f" mask="url(#imagine-text-gaps-wb8cgb)"></line>
+
+<rect x="40" y="552" width="600" height="120" rx="10" stroke="#d8d4cb" stroke-width="0.5" fill="#f7f6f3"></rect>
+<text class="th" fill="#2d2a26" font-weight="600" font-size="13.5" x="340" y="576" text-anchor="middle" dominant-baseline="central">Ensemble training strategy</text>
+<text class="ts" fill="#54515a" font-size="11" x="340" y="598" text-anchor="middle" dominant-baseline="central">Reservoir weights are random and fixed — only the transformer's fine-tune changes</text>
+<text class="ts" fill="#54515a" font-size="11" x="340" y="618" text-anchor="middle" dominant-baseline="central">Run N independent seeds (different reservoir initialisations)</text>
+<text class="ts" fill="#54515a" font-size="11" x="340" y="638" text-anchor="middle" dominant-baseline="central">Evaluate each agent on agentic benchmark suite</text>
+<text class="ts" fill="#54515a" font-size="11" x="340" y="658" text-anchor="middle" dominant-baseline="central">Keep the seed whose dynamics happen to be useful — discard the rest</text>
+
+<!-- Legend -->
+<line x1="44" y1="800" x2="72" y2="800" stroke="#BA7517" stroke-width="1.5" stroke-dasharray="5 3"></line>
+<text class="ts" fill="#54515a" font-size="11" x="78" y="804" style="fill:#54515a">Read: attn matrix → reservoir</text>
+<line x1="260" y1="800" x2="288" y2="800" stroke="#0F6E56" stroke-width="1.5"></line>
+<text class="ts" fill="#54515a" font-size="11" x="294" y="804" style="fill:#54515a">Write: reservoir state → tokens</text>
+
+<text class="ts" fill="#54515a" font-size="11" x="340" y="828" text-anchor="middle" style="fill:#54515a">Both happen at the same layer on every forward pass</text>
+</svg>
