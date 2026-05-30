@@ -359,6 +359,23 @@
   </figcaption>
 </figure>
 <p>
+  <strong>The over-saturation is fixable by input scaling.</strong> Sweeping the input
+  scaling at ρ = 0.95, saturation is a clean sigmoid: near zero below ≈ 0.05, crossing
+  0.5 at ≈ 0.24, while separation and dimensionality stay high. There&rsquo;s a sweet spot
+  around <strong>0.08&ndash;0.24</strong> &mdash; the reservoir is responsive but not
+  pinned &mdash; so real attention activations should be fed at roughly ¼&ndash;⅒ of unit
+  scale, a concrete injection setting this study contributes.
+</p>
+<figure>
+  <img src="sweep_scaling.png" alt="Reservoir dynamics versus input scaling on real GPT-2 activations: saturation rises as a sigmoid crossing 0.5 near scaling 0.24; participation ratio stays around 0.4K; input separation rises monotonically.">
+  <figcaption>
+    <strong>Dynamics vs. input scaling</strong> (real GPT-2 activations, ρ=0.95, K=150).
+    The healthy band (saturation &lt; 0.5, shaded) is input scaling ≲ 0.24. Regenerate
+    with <code>python scripts/run.py sweep-scaling</code>.
+  </figcaption>
+</figure>
+
+<p>
   <strong>Proof-of-concept: the time axis is behavioural.</strong> Pushing past the
   feasibility scope: running the <em>same</em> prompt after different prior history, with
   the reservoir state carried across the otherwise-independent forward passes, shifts

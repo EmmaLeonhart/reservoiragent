@@ -98,6 +98,14 @@ Sweeping spectral radius ρ ∈ [0.1, 2.0] (figures: `docs/sweep_synthetic.png`,
   activations: the input scaling has to be tuned down for injection at transformer
   scale — the precise concern the plan anticipated ("feeding a large attention tensor
   may require different scaling").
+- **Tuning the input scaling fixes it (figure: `docs/sweep_scaling.png`).** Sweeping the
+  input scaling at ρ = 0.95, saturation is a clean sigmoid in the scaling: it crosses
+  0.5 at scaling ≈ 0.24 and is near zero below ≈ 0.05, while input separation and
+  effective dimensionality stay high. There is a sweet spot around **input scaling
+  0.08–0.24** where the reservoir is *not* over-saturated (saturation 0.08–0.49) yet
+  still strongly responsive (separation 1.03–1.26, PR ≈ 0.39·K). So real attention
+  activations should be fed at roughly **¼–⅒ of unit scale**, not 1.0 — a concrete
+  injection setting this study contributes.
 
 ## Ambitious reach (proof-of-concept)
 
@@ -157,8 +165,9 @@ the whole loop is now testable before spending compute on training.
 - The injection writes the reservoir state into the **residual stream**, not yet as
   appended **key/value** entries the upper layers attend to (the richer variant in the
   architecture); the readout `W_out` is not yet **trained** (H3 is future work).
-- Input scaling for real-activation injection is **untuned** (the reservoir is
-  over-saturated at unit scale); tuning it is the natural next dynamics experiment.
+- Input scaling for real-activation injection has now been **characterized** (sweet
+  spot ≈ 0.08–0.24 at ρ = 0.95); it has not yet been wired as the default in the
+  injection hook, and the optimum's dependence on layer/model/ρ is not yet mapped.
 - The novelty claim is provisional: the reservoir-×-transformer and always-on-agent
   literatures were not yet verification-complete (see `literature/REVIEW.md` open
   questions); a citation-checked follow-up precedes any hard novelty claim.

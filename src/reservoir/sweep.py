@@ -115,7 +115,7 @@ def measure_point_stream(rho: float, stream_a, stream_b, K: int, *, washout: int
     sep = trajectory_distinguishability(res.run(a_in[:T])[washout:],
                                         res.run(b_in[:T])[washout:])
     return {
-        "rho": float(rho), "K": int(K),
+        "rho": float(rho), "K": int(K), "input_scaling": float(input_scaling),
         "variance": state_variance(base),
         "saturation": saturation_fraction(base),
         "participation_ratio": participation_ratio(base),
@@ -129,6 +129,42 @@ def run_sweep_stream(rhos, stream_a, stream_b, K: int = 200, **kwargs) -> list[d
     """Spectral-radius sweep driven by supplied input streams."""
     return [measure_point_stream(float(rho), stream_a, stream_b, K, **kwargs)
             for rho in rhos]
+
+
+def run_scaling_sweep(scalings, stream_a, stream_b, K: int = 150, rho: float = 0.95,
+                      **kwargs) -> list[dict]:
+    """Sweep the input scaling at a fixed ρ — the knob for the over-saturation found
+    on real activations. (The autonomous ESP boundary is ρ-governed and independent of
+    input scaling, so it is held fixed here.)"""
+    return [measure_point_stream(rho, stream_a, stream_b, K, input_scaling=float(s),
+                                 **kwargs) for s in scalings]
+
+
+def plot_scaling(records: list[dict], path: str, *,
+                 title: str = "Reservoir dynamics vs input scaling") -> None:
+    """Render the input-scaling sweep curves (saturation / dimensionality / separation)."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    xs = [r["input_scaling"] for r in records]
+    fig, ax = plt.subplots(figsize=(8, 5))
+    for key, label, color in (
+        ("saturation", "saturation (|r|>0.99)", "#b8553a"),
+        ("participation_ratio_frac", "participation ratio / K", "#5b7a4a"),
+        ("input_separation", "input separation", "#3f6487"),
+    ):
+        ax.plot(xs, [r[key] for r in records], "-o", ms=4, color=color, label=label)
+    ax.axhspan(0.0, 0.5, color="#5b7a4a", alpha=0.06)
+    ax.set_xscale("log")
+    ax.set_xlabel("input scaling (W_in magnitude)")
+    ax.set_ylabel("metric")
+    ax.set_title(title)
+    ax.grid(alpha=0.25, which="both")
+    ax.legend(fontsize=8, loc="center left")
+    fig.tight_layout()
+    fig.savefig(path, dpi=130)
+    plt.close(fig)
 
 
 def healthy_regime(records: list[dict], *, sat_max: float = 0.5,
