@@ -35,14 +35,7 @@ recall** vs **chance (0.17)** for the stateless baseline. The Reservoir Agent's
 statefulness *does* the desired thing when the reservoir is **attended to, not added**.
 See `FINDINGS.md` "## C: cross-pass recall" + `docs/crosspass.png`._
 
-1. **(D) Trained silence policy (meaningful "sometimes no response").** Replace the
-   base-entropy gate with a **learned** gate (a head on r(t) and/or logit features) trained
-   with labelled correct-silence / correct-speech data — so silence is a real decision, not
-   entropy noise. Requires designing the silence training data (correct-silence labels) —
-   ties to C. Measure precision/recall of the speak/stay-silent decision. `results/` +
-   `FINDINGS.md`. Commit.
-
-2. **(E) Fork the real Hermes harness (tool-calling + agentic loop).** Build a fork of the
+1. **(E) Fork the real Hermes harness (tool-calling + agentic loop).** Build a fork of the
    actual Nous Hermes harness — Hermes tool-call/ChatML formatting and the agentic loop —
    wrapping the always-alive runtime (prompted + unprompted passes, the trained gate),
    preserving Hermes' tool-call behaviour (regression vs vanilla Hermes is an explicit

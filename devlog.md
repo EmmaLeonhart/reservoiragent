@@ -564,3 +564,25 @@ instruction model's strong priors), not a defect. Stopped the GPU grind after 3 
 diagnosis and concrete routes (curriculum / more steps / stronger coupling / unfreeze).
 **Net: the core claim holds decisively on GPT-2; on Hermes the mechanism is
 verified-wired but recall is not yet trained to converge.**
+
+## 2026-05-30 — Phase H · D: trained silence policy works (sees history)
+
+Implemented a **learned silence gate** (`src/reservoir/silence.py`) to replace the
+arbitrary base-entropy gate. It addresses an "unresolved thread" task (speak if a
+trigger occurred within the last N passes).
+
+- **Result:** Reservoir gate reaches **F1 = 0.48** (P=0.71, R=0.36) while the stateless
+  baseline stays at **F1 = 0.03** (P=1.00, R=0.02). The carried state allows the agent
+  to make a meaningful decision to keep speaking even after the trigger is gone from the
+  input — a structural impossibility for a stateless model. Added `scripts/run.py silence`.
+
+## 2026-05-30 — Feasibility phase complete; website and PDF report updated
+
+Updated `FINDINGS.md`, `README.md`, and `docs/index.html` to reflect the completion of
+the feasibility study.
+
+- Added results for **Cross-pass recall** (decisive win on GPT-2 with KV-append;
+  scale difficulty on Hermes 3B) and the **Trained silence policy** (H4).
+- Added figures to the website, including the Hermes 3B recall plateau.
+- Updated status to "Feasibility Study Complete". Pushing to trigger PDF generation.
+

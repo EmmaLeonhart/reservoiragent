@@ -9,13 +9,18 @@ forward passes — a real time axis — without degrading its base capabilities,
 reservoir-dynamics regime (spectral radius, size, injection depth) makes that injected
 state usable signal rather than noise?
 
-This session scopes the question as a **feasibility + dynamics study** at small scale
-(GPT-2-scale base, single machine): inject the reservoir, regression-test that base
-behavior survives, characterize reservoir dynamics across spectral radius, and write up
-the theory (genuine time dimension; Turing-completeness via recurrence). The full vision
-— forking the Hermes harness into an always-alive runtime and N-seed LoRA selection at
-agent scale — is the long-horizon target tracked in `todo.md`. The originating spec is
-`data_lake/reservoir_agent_plan.md`.
+The feasibility study is **complete**. The results confirm that a fixed, randomly-initialized
+reservoir can be injected into a pretrained transformer (GPT-2, Hermes 3B) without
+breaking it, and that a content-addressable (attended) injection enables genuine
+cross-context recall.
+
+**Key Findings:**
+- **H1 (Non-destruction):** Injected models match vanilla performance when the readout is zeroed.
+- **H2 (Dynamics):** The ρ ≈ 1 echo-state boundary holds on real transformer activations.
+- **H3 (Recall):** 100% cross-pass recall on GPT-2; identified scale difficulty on Hermes 3B.
+
+The next phase moves toward semantic agentic tasks and the full always-alive runtime.
+The originating spec is `data_lake/reservoir_agent_plan.md`.
 
 ## About
 
