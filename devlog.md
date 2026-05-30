@@ -100,3 +100,21 @@ this session) / mid-term (harness fork PoC, benchmark+training-data design, read
 the scoped theory section; the open questions carried from the review (citation-checked
 novelty follow-up; the finite-precision TC⁰ question; edge-of-chaos at attention scale);
 and the report shape.
+
+## 2026-05-29 — Bootstrap 6: live & public + report-site polish
+
+Repo is public at <https://github.com/EmmaLeonhart/reservoiragent>; Pages builds via
+GitHub Actions and the site is live (HTTP 200) at
+<https://emmaleonhart.github.io/reservoiragent/>. (The work-loop cron had already
+fixed an earlier failed Pages deploy by auto-enabling Pages in the workflow.)
+
+Report-site polish from user feedback ("repo link doesn't work", "needs a better
+preview", "use the diagrams I added"):
+- Fixed the GitHub repo link (was `href="#"`).
+- Added Open Graph + Twitter-card meta and a purpose-built 1200×630 social-preview
+  card (`docs/og-preview.png`) composed from the user's architecture diagram + title.
+- Embedded the user's two canonical diagrams as figures with captions:
+  `docs/diagram-architecture.png` (per-pass architecture + ensemble training) as the
+  hero, and `docs/diagram-runtime.png` in a new "always-alive runtime" section.
+  (Discarded an earlier hand-authored schematic in favour of the user's diagrams.)
+- Provenance for the user-supplied screenshots noted in `data_lake/README.md`.
