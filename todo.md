@@ -118,11 +118,11 @@ rather than noise?
 - The organism analogy as a single, clearly-bounded discussion paragraph.
 
 ## D. Open questions carried from the literature review
-- **Citation-checked novelty follow-up.** The reservoir-×-transformer and
-  always-on-agent literatures (§4–§5 of `literature/sources.md`) were not
-  verification-complete. Before publishing any hard novelty claim, run a dedicated,
-  citation-verified review of those areas (and re-check the fast-moving 2024–2026
-  recurrent-transformer landscape).
+- **Citation-checked novelty follow-up — DONE (2026-05-30).** Searched-prior-art
+  sweep recorded in `literature/novelty_recheck.md`; claim positioned against
+  Titans (test-time memory, arXiv 2501.00663) and the 2025 reservoir-transformer
+  line. Standing caveat: re-run the sweep before any hard novelty claim in a
+  *submitted paper*.
 - **Theoretical open question (above): does finite-precision cross-pass reservoir
   state provably lift TC⁰/FO(M)?** Pose precisely; do not assert.
 - **Does the edge-of-chaos prior survive the high-dimensional attention-input
