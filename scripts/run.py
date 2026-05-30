@@ -132,6 +132,63 @@ def cmd_sweep_real(args) -> int:
     return 0
 
 
+def cmd_alive(args) -> int:
+    import json as _json
+    from reservoir.harness import two_pass_dependence
+
+    print("Two-pass time-axis proof-of-concept (reservoir state carried across "
+          "independent forward passes)…")
+    out = two_pass_dependence(args.model, TEXT_A, "The capital of France is",
+                              seed=args.seed, readout_scale=args.readout_scale)
+    print(f"same prompt, different history -> next-token logit L2 diff = "
+          f"{out['logit_l2_diff']:.4f}; argmax changed = {out['argmax_changed']}")
+    p = ROOT / "results" / "alive_poc.json"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(_json.dumps({"model": args.model, **out}, indent=2))
+    print(f"wrote {p.relative_to(ROOT)}")
+    return 0
+
+
+def cmd_nseed(args) -> int:
+    import numpy as np
+    from reservoir.inject import extract_layer_stream
+    from reservoir.harness import select_seed_by_dynamics
+
+    print(f"N-seed dynamics pre-selection proxy over {args.n} seeds (no training)…")
+    a = extract_layer_stream(args.model, TEXT_A)
+    b = extract_layer_stream(args.model, TEXT_B)
+    ranked = select_seed_by_dynamics(a, b, seeds=list(range(args.n)),
+                                     rho=args.rho, K=args.K)
+    out = ROOT / "results" / "nseed.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps({"params": {"model": args.model, "n": args.n,
+                                          "rho": args.rho, "K": args.K},
+                               "ranked": ranked}, indent=2))
+    print(f"wrote {out.relative_to(ROOT)}")
+    best, worst = ranked[0], ranked[-1]
+    print(f"best seed = {best['seed']} (score={best['score']:.3f}), "
+          f"worst = {worst['seed']} (score={worst['score']:.3f}); "
+          f"spread = {best['score'] - worst['score']:.3f}")
+
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    ranked_by_seed = sorted(ranked, key=lambda r: r["seed"])
+    fig, ax = plt.subplots(figsize=(7, 4))
+    ax.bar([str(r["seed"]) for r in ranked_by_seed],
+           [r["score"] for r in ranked_by_seed], color="#5b7a4a")
+    ax.set_xlabel("reservoir seed")
+    ax.set_ylabel("dynamics-quality proxy score")
+    ax.set_title(f"N-seed dynamics pre-selection (ρ={args.rho}, K={args.K})")
+    ax.grid(axis="y", alpha=0.25)
+    fig.tight_layout()
+    figp = ROOT / "docs" / "nseed.png"
+    fig.savefig(figp, dpi=130)
+    plt.close(fig)
+    print(f"wrote {figp.relative_to(ROOT)}")
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="Reservoir Agent experiment runner")
     parser.add_argument("--version", action="store_true", help="print version and exit")
@@ -160,6 +217,19 @@ def main(argv=None) -> int:
     sr.add_argument("--out", default="results/sweep_real.json")
     sr.add_argument("--fig", default="docs/sweep_real.png")
     sr.set_defaults(func=cmd_sweep_real)
+
+    al = sub.add_parser("alive", help="two-pass time-axis proof-of-concept")
+    al.add_argument("--model", default="gpt2")
+    al.add_argument("--seed", type=int, default=0)
+    al.add_argument("--readout-scale", type=float, default=0.05)
+    al.set_defaults(func=cmd_alive)
+
+    ns = sub.add_parser("nseed", help="N-seed dynamics pre-selection proxy")
+    ns.add_argument("--model", default="gpt2")
+    ns.add_argument("--n", type=int, default=8)
+    ns.add_argument("--rho", type=float, default=0.95)
+    ns.add_argument("--K", type=int, default=150)
+    ns.set_defaults(func=cmd_nseed)
 
     args = parser.parse_args(argv)
     if args.version:

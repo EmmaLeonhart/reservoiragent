@@ -264,3 +264,26 @@ for large K but noisy in the ρ∈[1,1.6] band for small K (two inits can share 
 so the stream-sweep test pins the two ends (forgets at ρ=0.4, retains at ρ=2.0) rather
 than over-specifying the transition width — no test was weakened to pass. Full suite 23
 passed locally. Resolves queue item (real sweep + write-up).
+
+## 2026-05-29 — Implementation 7: ambitious reach (time-axis PoC + N-seed proxy)
+
+`src/reservoir/harness.py` — `two_pass_dependence` and `select_seed_by_dynamics`, plus
+`alive` and `nseed` subcommands. `tests/test_harness.py` (2; seed proxy in CI, two-pass
+demo torch-gated).
+
+**Measured:**
+- **Time axis is behavioural** — the same prompt after different history (reservoir
+  state carried across passes, small random readout) shifts GPT-2 next-token logits by
+  L2 ≈ 22 (`results/alive_poc.json`). A stateless transformer cannot do this.
+- **Seed-selection mechanism works; pre-training signal is weak** — ranking 8 fixed
+  reservoir seeds by an untrained dynamics proxy on real activations gives only a ~0.02
+  spread (`results/nseed.json`, `docs/nseed.png`), so the real selection signal likely
+  needs training. Mechanism in place; usefulness compute-gated.
+
+**Named as not done (compute-gated):** full N-seed LoRA fine-tuning + benchmark
+selection; productionized always-alive runtime (scheduler/idle-timer/output-gate);
+KV-append injection; agent-scale (Hermes). All written into FINDINGS.
+
+Full suite 25 passed locally. **This drains the implementation queue** — the
+feasibility + dynamics study is complete; H1 + H2 answered, report + PDF live, PoC
+honest. Resolves queue item (ambitious reach).

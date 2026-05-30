@@ -344,6 +344,27 @@
     <code>python scripts/run.py sweep-real</code>.
   </figcaption>
 </figure>
+<p>
+  <strong>Proof-of-concept: the time axis is behavioural.</strong> Pushing past the
+  feasibility scope: running the <em>same</em> prompt after different prior history, with
+  the reservoir state carried across the otherwise-independent forward passes, shifts
+  GPT-2&rsquo;s next-token logits by an L2 distance of ≈ 22 &mdash; the same input yields a
+  different output distribution depending on what came before, which a stateless
+  transformer cannot do. A seed-selection proxy (below) ranks fixed-random reservoir
+  seeds by their dynamics before any training; the <em>untrained</em> spread across seeds
+  is small (~0.02), so the selection signal the architecture relies on most likely
+  emerges only after fine-tuning &mdash; the mechanism is in place, the verdict is
+  compute-gated. The full N-seed LoRA selection, a productionized always-alive runtime,
+  and agent-scale models are named in the report as not done this session.
+</p>
+<figure>
+  <img src="nseed.png" alt="Bar chart of a dynamics-quality proxy score across eight reservoir seeds; the scores are similar, varying by about 0.02.">
+  <figcaption>
+    <strong>N-seed dynamics pre-selection</strong> (ρ=0.95, K=150, real GPT-2
+    activations). Untrained reservoir seeds differ only modestly on the dynamics proxy.
+    Regenerate with <code>python scripts/run.py nseed</code>.
+  </figcaption>
+</figure>
 
 <footer>
   <p>
