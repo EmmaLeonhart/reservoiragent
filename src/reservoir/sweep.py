@@ -77,6 +77,60 @@ def run_sweep(rhos, K: int = 200, **kwargs) -> list[dict]:
     return [measure_point(float(rho), K, **kwargs) for rho in rhos]
 
 
+def _zscore(stream: np.ndarray) -> np.ndarray:
+    """Per-dimension standardize an input stream (real activations have large, biased
+    magnitudes that would otherwise saturate the reservoir)."""
+    stream = np.asarray(stream, dtype=float)
+    mu = stream.mean(axis=0, keepdims=True)
+    sd = stream.std(axis=0, keepdims=True)
+    return (stream - mu) / (sd + 1e-8)
+
+
+def measure_point_stream(rho: float, stream_a, stream_b, K: int, *, washout: int = 100,
+                         seed: int = 0, input_scaling: float = 1.0,
+                         normalize: bool = True, **reservoir_kwargs) -> dict:
+    """Like :func:`measure_point` but driven by supplied input streams (e.g. real
+    transformer activations) instead of synthetic noise. ``stream_a`` drives the
+    dynamics; ``stream_b`` (a different input history) is used for input separation.
+    The init-forgetting probe is autonomous (zero input), so the ESP boundary it
+    measures is independent of the stream.
+    """
+    a_in = _zscore(stream_a) if normalize else np.asarray(stream_a, dtype=float)
+    b_in = _zscore(stream_b) if normalize else np.asarray(stream_b, dtype=float)
+    n_input = a_in.shape[1]
+    res = EchoStateReservoir(K, n_input, spectral_radius=rho, seed=seed,
+                             input_scaling=input_scaling, **reservoir_kwargs)
+
+    base = res.run(a_in)[washout:]
+
+    zero = np.zeros((a_in.shape[0], n_input))
+    rng = np.random.default_rng(seed + 9991)
+    res.reset(rng.standard_normal(K))
+    p = res.run(zero, reset=False)[washout:]
+    res.reset(rng.standard_normal(K))
+    q = res.run(zero, reset=False)[washout:]
+    init_forgetting = trajectory_distinguishability(p, q)
+
+    T = min(a_in.shape[0], b_in.shape[0])
+    sep = trajectory_distinguishability(res.run(a_in[:T])[washout:],
+                                        res.run(b_in[:T])[washout:])
+    return {
+        "rho": float(rho), "K": int(K),
+        "variance": state_variance(base),
+        "saturation": saturation_fraction(base),
+        "participation_ratio": participation_ratio(base),
+        "participation_ratio_frac": participation_ratio(base) / K,
+        "init_forgetting": init_forgetting,
+        "input_separation": sep,
+    }
+
+
+def run_sweep_stream(rhos, stream_a, stream_b, K: int = 200, **kwargs) -> list[dict]:
+    """Spectral-radius sweep driven by supplied input streams."""
+    return [measure_point_stream(float(rho), stream_a, stream_b, K, **kwargs)
+            for rho in rhos]
+
+
 def healthy_regime(records: list[dict], *, sat_max: float = 0.5,
                    forget_max: float = 0.2) -> list[dict]:
     """Records whose state forgets its init (ESP) and is not over-saturated."""

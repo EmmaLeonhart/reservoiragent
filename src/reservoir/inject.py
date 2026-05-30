@@ -109,6 +109,29 @@ class ReservoirInjectedLM:
         return self.reservoir.state.copy()
 
 
+def extract_layer_stream(model_name: str, text: str, *, layer: int | None = None,
+                         device: str | None = None) -> np.ndarray:
+    """Return the per-token hidden-state stream at a mid-depth block of a pretrained
+    transformer, shape ``(T, d_model)`` — the real activation stream the reservoir
+    sees at the injection layer. Used to drive the sweep on real (not synthetic) input.
+    """
+    import torch
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+
+    device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+    tok = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForCausalLM.from_pretrained(model_name).to(device).eval()
+    n_layers = len(model.transformer.h)
+    layer = n_layers // 2 if layer is None else int(layer)
+    ids = tok(text, return_tensors="pt").to(device)
+    with torch.no_grad():
+        out = model(**ids, output_hidden_states=True)
+    # hidden_states is (embeddings, block_0_out, ..., block_{n-1}_out); block `layer`
+    # output is index layer+1.
+    h = out.hidden_states[layer + 1][0]  # (T, d_model)
+    return h.detach().to("cpu", dtype=torch.float64).numpy()
+
+
 def base_logits(model_name: str, text: str, device: str | None = None):
     """Next-token logits from the unmodified base model (for regression checks)."""
     import torch
