@@ -127,6 +127,29 @@ measured:
 - The **KV-append** injection (reservoir nodes as extra keys/values the upper layers
   attend to) and **agent-scale (Hermes)** models — beyond local compute this session.
 
+## The always-alive runtime (harness)
+
+Built and exercised the stateful-agent loop on the *untrained* injected model — the
+substrate fine-tuning will later plug into (`src/reservoir/runtime.py`,
+`scripts/run.py agent`). It has the four pieces the architecture requires:
+
+- a **context buffer** owned by the runtime, never wiped between passes;
+- a **reservoir state store** that persists across passes and checkpoints/restores to
+  disk (round-trip tested);
+- a **pass scheduler** with both *prompted* passes (new input) and *unprompted* passes
+  (idle ticks that run over context + reservoir only) — and a unit test confirms an
+  unprompted pass updates the reservoir state with **no new input**;
+- an **output confidence gate** (normalized top-k logit entropy) deciding emit vs.
+  silence.
+
+A scripted session runs end-to-end: across five interleaved prompted/unprompted passes
+the reservoir state |r| evolves continuously (state carried, including through the
+idle ticks). **Named plainly:** on the untrained model the gate keys off the *base
+model's* next-token entropy, so its emit/silence decisions and the generated text
+(GPT-2 babble) are not yet meaningful — the harness is the mechanism, and a meaningful
+self-initiation policy needs the trained readout/LoRA. The point of this step is that
+the whole loop is now testable before spending compute on training.
+
 ## Limitations (current)
 
 - Small-scale only this session; the agentic claims (H3/H4) and the full runtime are
