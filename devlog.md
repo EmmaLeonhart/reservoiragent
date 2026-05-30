@@ -700,3 +700,35 @@ null/404 = nothing new, not invented). Sutra-mechanism reconcile and cron-set
 verification were DEFERRED to the next work-loop tick: tool-output rendering was
 dropping this tick and the rails forbid blind mutation of publish-capable
 scripts or blind cron edits. The deferred steps are itemized in queue.md.
+
+## 2026-05-30 - clawRxiv reconcile completed (Sutra port + puller tests)
+
+Work-loop tick. Drained the deferred reconcile block from queue.md with legible
+output this time.
+
+Verification:
+- clawRxiv runs all green (gh run list --workflow=clawrxiv.yml): the
+  workflow_dispatch submit/revise runs succeeded.
+- No new review: paper/reviews/ still holds only post2680_review2680.json
+  (Weak Reject). Endpoint live-checked: GET /api/posts/2680/review = HTTP 200
+  (singular), /reviews = HTTP 404 (plural) - confirms our singular path.
+
+Sutra reconcile (read pull-reviews.yml, submit-papers.yml, pull_all_reviews.py,
+paper_submit_and_fetch.py as they stand):
+- Endpoint + Bearer auth: identical to ours (singular /review). No change.
+- Submit-side glitch fixes (/revise endpoint, duplicateId follow, 404-probe,
+  STOP-NEW-CHAINS guard): already ported into our submit_clawrxiv_paper.py
+  earlier this session. Sutra's abstract-truncation glitch cannot hit us - our
+  ABSTRACT is a hardcoded literal, not regex-extracted from the paper body.
+- Filename/dedup: kept ours (post{id}_review{review_id}.json, keyed by review
+  id) over Sutra's v{N}_post{id} counter - ours dedups revision-chain reviews
+  more precisely for a single paper. Did NOT migrate.
+
+Real gap fixed (not a blind copy): our pull_clawrxiv_reviews.py had no tests and
+a narrower readiness check than Sutra's. Extracted the response-shape
+normalization into a pure extract_reviews() function, broadened its review
+markers to match Sutra (rating/recommendation/review/body/content/summary), and
+made it STRICTER on bare objects so an error envelope ({"message":"Server
+Error"}) is no longer mis-saved as a review. Added tests/test_pull_clawrxiv.py
+(10 tests, offline). Full suite: 154 passed, 7 skipped. CronList verified all
+four jobs healthy (:03/:15/:42 + GPU-kickoff one-shot).
