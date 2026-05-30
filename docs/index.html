@@ -245,9 +245,10 @@
   <div class="pillar">
     <h3>3 &middot; The finding</h3>
     <p>
-      <em>In progress.</em> This session builds the reservoir core, performs the
-      model surgery, and characterizes reservoir dynamics across spectral radius;
-      the headline result lands here once the experiments run.
+      <em>In progress.</em> First result: the reservoir's echo state property breaks
+      sharply at spectral radius ρ ≈ 1 (the edge-of-chaos boundary) in the autonomous
+      regime &mdash; see Findings. Next: model surgery (H1 non-destruction) and the
+      sweep on real GPT-2 attention streams.
     </p>
   </div>
 </div>
@@ -302,6 +303,27 @@
   results &mdash; the reservoir-dynamics characterization and the H1 non-destruction
   regression &mdash; as they land. No result is claimed here until it has been measured.
 </p>
+<p>
+  <strong>First result (synthetic-input dynamics sweep).</strong> Driving a 200-unit
+  reservoir across spectral radius ρ ∈ [0.1, 2.0], the echo state property &mdash; the
+  reservoir forgetting its initial condition &mdash; holds cleanly for ρ &lt; 1 and breaks
+  sharply at ρ ≈ 1 (gold curve), exactly the edge-of-chaos boundary the classical theory
+  predicts, now measured in this injection-oriented setup. Saturation and effective
+  dimensionality rise smoothly with ρ. A nuance worth flagging: under unit-scale input
+  drive the reservoir forgets its initial state across <em>all</em> ρ (strong input
+  enforces the ESP), so the ρ ≈ 1 boundary is the regime that matters for
+  <em>unprompted</em>, input-free passes &mdash; precisely where the agent runs on
+  reservoir state alone.
+</p>
+<figure>
+  <img src="sweep_synthetic.png" alt="Reservoir dynamics versus spectral radius: init-forgetting (echo state property) is near zero below rho=1 and jumps sharply above it; saturation and participation ratio rise smoothly with rho; input separation rises steadily.">
+  <figcaption>
+    <strong>Reservoir dynamics vs. spectral radius</strong> (synthetic input, K=200).
+    Autonomous init-forgetting transitions sharply at ρ ≈ 1 (the echo-state boundary);
+    saturation stays low and dimensionality rises with ρ. Regenerate with
+    <code>python scripts/run.py sweep</code>.
+  </figcaption>
+</figure>
 
 <footer>
   <p>

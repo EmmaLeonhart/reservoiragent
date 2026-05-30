@@ -201,3 +201,23 @@ saturation 0.75 on a constructed array; variance 0 for constant + matches numpy;
 PR≈1 for a rank-1 trajectory and PR≈K for K independent units; distinguishability
 1.0 for zeros-vs-ones and 0 for identical. Full suite 14 passed locally.
 Resolves queue item 1 (dynamics metrics).
+
+## 2026-05-29 — Implementation 4: spectral-radius dynamics sweep (first result)
+
+`src/reservoir/sweep.py` + a `sweep` subcommand in `scripts/run.py` drive a fixed
+reservoir across ρ ∈ [0.1, 2.0] on synthetic input, logging metrics to
+`results/sweep_synthetic.json` and a figure to `docs/sweep_synthetic.png`.
+`tests/test_sweep.py` (5) assert the qualitative physics.
+
+**First measured result (H2):** the echo state property breaks **sharply at ρ ≈ 1**.
+Using an *autonomous* (zero-input) init-forgetting probe, two random initial states
+converge identically (forgetting = 0.000) for ρ ≤ 0.9, then diverge abruptly
+(0.05 → 0.38 → 0.95) for ρ ≥ 1.0 — the classic edge-of-chaos boundary, now measured
+in this injection setup. Saturation and participation ratio rise smoothly with ρ.
+Important nuance (kept in the write-up, not papered over): under unit-scale *input*
+drive the reservoir forgets its init across all ρ (strong input enforces the ESP), so
+the ρ ≈ 1 boundary is the regime that governs **unprompted, input-free passes** — where
+the agent runs on reservoir state alone. The first probe (driven) masked this; switched
+to the autonomous probe to expose the boundary correctly. Figure + result reflected in
+the `docs/` Findings section and pillar 3. Full suite 19 passed locally.
+Resolves queue item (spectral-radius sweep).
