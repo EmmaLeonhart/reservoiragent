@@ -194,8 +194,16 @@
   <div class="pillar">
     <h3>2 &middot; Grounded in the literature</h3>
     <p>
-      TODO: one line on the prior work this builds on (the full survey lives in
-      <code>literature/REVIEW.md</code>) and the gap this project addresses.
+      It relocates the proven reservoir-computing recipe (fix the recurrent weights,
+      train only a readout &mdash; Jaeger&rsquo;s echo state networks, Maass&rsquo;s
+      liquid state machines) into a pretrained transformer, and targets a gap the
+      expressivity literature makes precise: a finite-precision transformer is bounded
+      to TC&#8304;/FO(M) <em>per forward pass</em>, while state carried <em>across</em>
+      passes is the documented lever past that ceiling. Every prior recurrence-augmented
+      transformer (Transformer-XL, RMT, Block-Recurrent, Mamba, Titans&hellip;) uses
+      <em>trained</em> recurrence carrying state <em>within</em> a sequence; none uses a
+      <em>fixed-random</em> reservoir with state across <em>independent</em> passes.
+      Full survey: <code>literature/REVIEW.md</code>.
     </p>
   </div>
   <div class="pillar">

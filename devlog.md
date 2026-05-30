@@ -62,3 +62,30 @@ theory (time dimension; Turing-completeness via recurrence). Full Hermes-fork +
 always-alive runtime + N-seed LoRA selection is the long-horizon `todo.md` target.
 Written into `README.md`, `CLAUDE.md` (Project Description + Research question), and
 `docs/index.html` (lede, question block, pillar 1).
+
+## 2026-05-29 — Bootstrap 4: literature review (agentic RAG)
+
+Ran a multi-agent deep-research pass (103 agents; 5 angles → 21 sources → 96 claims →
+25 adversarially verified, 24 confirmed / 1 refuted), then a targeted re-verification
+of the closest prior art. Wrote `literature/sources.md` (per-source notes, grouped by
+area, with verification status) and `literature/REVIEW.md` (synthesis).
+
+Key outcomes:
+- **Foundations solid:** the fixed-reservoir/trained-readout core is textbook ESN/LSM
+  (Jaeger, Maass, Lukoševičius & Jaeger); the spectral-radius/ESP regime is real but
+  the edge-of-chaos optimum is *disputed* — vindicating the planned empirical sweep.
+- **Sharp theoretical gap:** finite-precision transformer ⊆ TC⁰/FO(M) *per pass*
+  (Merrill & Sabharwal; Hahn); cross-pass state feedback is the documented escape —
+  but the known proofs need *arbitrary precision*, so whether finite-precision
+  reservoir state lifts the bound is **open** (paper must pose, not assert).
+- **Novelty axis:** every prior recurrence-augmented transformer (Transformer-XL,
+  Compressive, Universal, Block-Recurrent, Memorizing, RMT, RWKV, RetNet, S4/Mamba,
+  Titans) uses *trained* recurrence carrying state *within a sequence*. None uses a
+  *fixed-random* reservoir with state across *independent* passes — the Reservoir
+  Agent's empty cell. Block-Recurrent independently confirms the "model learns to
+  ignore the recurrent state" failure mode the plan worries about.
+- **Honest caveat logged:** the reservoir-×-transformer and always-on-agent areas
+  were not verification-complete (some returned arXiv IDs didn't resolve and were
+  discarded, not cited); a citation-checked follow-up is queued in `todo.md` before
+  any hard novelty claim is published. Reflected the one-line summary into
+  `docs/index.html` (pillar 2).
