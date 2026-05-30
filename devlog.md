@@ -479,3 +479,15 @@ to use them instead of the hardcoded GPT-2 paths. `tests/test_inject.py` gained
 (`hf-internal-testing/tiny-random-LlamaForCausalLM`) as well as tiny-gpt2 (zeroed readout
 → logits identical). The injection is now architecture-agnostic, so it can host Hermes
 (Llama-3.2). Full suite 44 passed locally. Resolves Phase H item A.
+
+## 2026-05-30 — Phase H · B: Hermes-3-Llama-3.2-3B loads + H1 holds on the GPU
+
+Added 4-bit (bitsandbytes nf4) support to `ReservoirInjectedLM` (`load_in_4bit`).
+`scripts/hermes_h1.py` loads **NousResearch/Hermes-3-Llama-3.2-3B** in 4-bit (28 layers,
+d_model=3072, injection at layer 14) and checks H1 memory-frugally (one copy: zeroed
+readout vs hook removed). **Result: H1 holds exactly — `max|diff| = 0.00e+00`, peak VRAM
+2.35 GB** (`results/hermes_h1.json`). So the architecture transplant is non-destructive
+on the real Hermes, with ample VRAM headroom on the RTX 4070 for LoRA + training.
+FINDINGS gained a "## Porting to the real target: Hermes (Phase H)" section. Resolves
+Phase H item B. (Also added — pending its GPU run — the C cross-pass pipeline:
+`src/reservoir/crosspass.py` + `crosspass` subcommand + smoke test.)

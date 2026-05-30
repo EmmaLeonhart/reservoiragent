@@ -296,6 +296,46 @@ def cmd_nseed_select(args) -> int:
     return 0
 
 
+def cmd_crosspass(args) -> int:
+    from reservoir.crosspass import run_cross_pass
+
+    print(f"Cross-pass recall: train {args.model} to recall a wiped secret word from "
+          f"reservoir state ({args.n_keys} keys, {args.steps} steps)…")
+    recs = {}
+    for stateful in (True, False):
+        tag = "stateful" if stateful else "baseline (reservoir wiped between passes)"
+        r = run_cross_pass(args.model, n_keys=args.n_keys, steps=args.steps,
+                           lr=args.lr, seed=args.seed, stateful=stateful)
+        recs["stateful" if stateful else "baseline"] = r
+        print(f"  {tag}: recall accuracy = {r['recall_accuracy']:.2f} "
+              f"(loss {r['loss_start']:.2f}->{r['loss_end']:.2f}, {r['device']})")
+    out = ROOT / "results" / "crosspass.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps({"params": {"model": args.model, "n_keys": args.n_keys,
+                                          "steps": args.steps}, "results": recs}, indent=2))
+    print(f"wrote {out.relative_to(ROOT)}")
+
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(figsize=(6, 4.5))
+    ax.bar(["reservoir\n(stateful)", "stateless\nbaseline"],
+           [recs["stateful"]["recall_accuracy"], recs["baseline"]["recall_accuracy"]],
+           color=["#5b7a4a", "#b8553a"])
+    ax.axhline(1.0 / args.n_keys, color="#999", ls="--", lw=1,
+               label=f"chance (1/{args.n_keys})")
+    ax.set_ylabel("cross-context recall accuracy")
+    ax.set_ylim(0, 1.05)
+    ax.set_title(f"Recall a wiped secret word ({args.model})")
+    ax.legend(fontsize=8)
+    fig.tight_layout()
+    figp = ROOT / "docs" / "crosspass.png"
+    fig.savefig(figp, dpi=130)
+    plt.close(fig)
+    print(f"wrote {figp.relative_to(ROOT)}")
+    return 0
+
+
 def cmd_finetune(args) -> int:
     from reservoir.torch_inject import train_finetune
 
@@ -412,6 +452,14 @@ def main(argv=None) -> int:
     ss.add_argument("--n", type=int, default=16)
     ss.add_argument("--washout", type=int, default=20)
     ss.set_defaults(func=cmd_sweep_scaling)
+
+    cp = sub.add_parser("crosspass", help="cross-pass recall: stateful vs stateless")
+    cp.add_argument("--model", default="gpt2")
+    cp.add_argument("--n-keys", type=int, default=6)
+    cp.add_argument("--steps", type=int, default=300)
+    cp.add_argument("--lr", type=float, default=1e-3)
+    cp.add_argument("--seed", type=int, default=0)
+    cp.set_defaults(func=cmd_crosspass)
 
     ft = sub.add_parser("finetune", help="real LoRA + W_out fine-tune (GPU)")
     ft.add_argument("--model", default="gpt2")
