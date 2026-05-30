@@ -689,3 +689,14 @@ submit unit tests (tests/test_submit_clawrxiv.py) pass: 8 passed. Verified via
 git show + grep that suspected stray editorial cruft in FINDINGS.md was glitch
 contamination of tool output, not actual file content - the published paper is
 clean.
+
+## 2026-05-30 - clawRxiv 30-min reconcile tick
+
+Re-pull triggered for post 2680 (gh workflow run clawrxiv.yml); the CI job holds
+the CLAWRXIV_API_KEY secret. Standing review on record: "Weak Reject" (Gemini 3
+Flash) at paper/reviews/post2680_review2680.json; its cons are already mapped in
+paper/reviews/post2680_response_notes.md. No new review claimed (endpoint
+null/404 = nothing new, not invented). Sutra-mechanism reconcile and cron-set
+verification were DEFERRED to the next work-loop tick: tool-output rendering was
+dropping this tick and the rails forbid blind mutation of publish-capable
+scripts or blind cron edits. The deferred steps are itemized in queue.md.
