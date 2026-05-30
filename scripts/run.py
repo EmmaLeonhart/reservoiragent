@@ -189,6 +189,49 @@ def cmd_nseed(args) -> int:
     return 0
 
 
+def cmd_agent(args) -> int:
+    from reservoir.runtime import AliveAgent, ConfidenceGate
+
+    print(f"Always-alive session on {args.model} (readout_scale={args.readout_scale}, "
+          f"gate threshold={args.threshold})…\n")
+    agent = AliveAgent(args.model, gate=ConfidenceGate(threshold=args.threshold),
+                       readout_scale=args.readout_scale, seed=args.seed)
+
+    # a scripted session: prompted turns interleaved with unprompted (idle) ticks
+    script = [
+        ("prompt", "I have two errands today: water the plants and call the bank."),
+        ("idle", None),
+        ("prompt", "By the way, what is the capital of France?"),
+        ("idle", None),
+        ("idle", None),
+    ]
+    transcript = []
+    for i, (kind, text) in enumerate(script):
+        rec = agent.prompt(text) if kind == "prompt" else agent.idle()
+        rec["pass"] = i
+        if kind == "prompt":
+            rec["input"] = text
+        transcript.append(rec)
+        tag = "PROMPTED" if rec["kind"] == "prompted" else "unprompted"
+        said = f' -> "{rec["said"]}"' if rec.get("emit") else "  (silent)"
+        if kind == "prompt":
+            print(f"[{i}] {tag}  in: {text}")
+        print(f"[{i}] {tag}  entropy={rec['entropy']:.3f}  state|r|={rec['state_norm']:.3f}"
+              f"  emit={rec['emit']}{said}\n")
+
+    out = ROOT / "results" / "agent_session.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    import json as _json
+    out.write_text(_json.dumps({"model": args.model, "threshold": args.threshold,
+                                "readout_scale": args.readout_scale,
+                                "transcript": transcript}, indent=2))
+    print(f"wrote {out.relative_to(ROOT)}")
+    norms = [r["state_norm"] for r in transcript]
+    print(f"reservoir |r| evolved across {len(transcript)} passes: "
+          f"{norms[0]:.3f} -> {norms[-1]:.3f} (state carried, incl. unprompted ticks)")
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="Reservoir Agent experiment runner")
     parser.add_argument("--version", action="store_true", help="print version and exit")
@@ -230,6 +273,13 @@ def main(argv=None) -> int:
     ns.add_argument("--rho", type=float, default=0.95)
     ns.add_argument("--K", type=int, default=150)
     ns.set_defaults(func=cmd_nseed)
+
+    ag = sub.add_parser("agent", help="run a scripted always-alive session")
+    ag.add_argument("--model", default="gpt2")
+    ag.add_argument("--threshold", type=float, default=0.85)
+    ag.add_argument("--readout-scale", type=float, default=0.05)
+    ag.add_argument("--seed", type=int, default=0)
+    ag.set_defaults(func=cmd_agent)
 
     args = parser.parse_args(argv)
     if args.version:

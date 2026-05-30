@@ -310,3 +310,23 @@ tracked uppercase kicker ("Reservoir computing × transformers · research repor
 above the title, and larger/tighter headline treatment. Kept the warm "paper" theme,
 dark-mode variant, and all content/figures/OG-meta/PDF+repo links (verified: 6 figures,
 8 OG tags, PDF + repo links intact, all tags balanced). Resolves queue item (site polish).
+
+## 2026-05-29 — Round 2.2: agent harness — the always-alive runtime
+
+Built the stateful-agent runtime on the *untrained* injected model (the substrate
+fine-tuning will plug into), per the user's "make the harness and test it before fine
+tuning" priority. `src/reservoir/runtime.py`: `ContextBuffer` (never wiped),
+`topk_entropy`/`ConfidenceGate` (emit-vs-silence), `checkpoint_state`/`restore_state`,
+and `AliveAgent` (prompted + unprompted passes, reservoir state persisting across both).
+`scripts/run.py agent` runs a scripted session → `results/agent_session.json`.
+`tests/test_runtime.py` (6): entropy bounds, gate, context buffer, state checkpoint
+round-trip (CI), and torch-gated AliveAgent tests — incl. **an unprompted pass updates
+the reservoir state with no new input** and agent checkpoint/restore.
+
+Demo: 5 interleaved prompted/unprompted passes, reservoir |r| evolves continuously
+through the idle ticks. Named plainly: on the untrained model the gate keys off the
+base model's entropy so emit/silence + the generated text (GPT-2 babble) aren't yet
+meaningful — the harness is the mechanism; a real self-initiation policy needs the
+trained readout/LoRA. FINDINGS gained a "## The always-alive runtime (harness)" section.
+Full suite 31 passed locally. Resolves queue item (agent harness). NOT compute-gated;
+fine-tuning is the next, compute-gated, step the user will start.

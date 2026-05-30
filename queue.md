@@ -27,29 +27,14 @@ verify CI green, not just local; name compute-blocked work plainly.
 running and are kept running through this re-fill (written atomically in one edit, so
 there is no half-written-queue window). The pinned `## Always last` keeps them alive.
 
-1. **Agent harness — the always-alive runtime (PRIORITY; before any fine-tuning).**
-   Per the user: build the harness and exercise the whole stateful-agent loop on the
-   *untrained* injected model before fine-tuning anything. Build `src/reservoir/runtime.py`
-   (or similar): a persistent **context buffer** (never wiped) + a **reservoir state
-   store** (persists across passes, checkpoint/restore to disk) + a **pass scheduler**
-   (prompted pass on new input; *unprompted* pass on an idle tick that runs over context +
-   reservoir only, no new input) + an **output confidence gate** (entropy-of-top-k-logits
-   proxy: emit vs stay silent). Add a CLI driver (`scripts/run.py agent`) that runs a
-   scripted session — feed prompts, fire idle ticks, log emit/silence decisions and the
-   reservoir-state evolution — so the behaviour is observable end-to-end. **TDD** the pure
-   logic (scheduler, entropy gate, buffer, state checkpoint round-trip, unprompted-pass
-   updates-state-without-input); torch-gate the model-integration tests. This is the
-   substrate the fine-tuning will later plug into; it is NOT compute-gated. Commit;
-   capture a short transcript artifact under `results/` and a note in `FINDINGS.md`.
-
-2. **Input-scaling tuning sweep (follow-up to the over-saturation finding).** The real
+1. **Input-scaling tuning sweep (follow-up to the over-saturation finding).** The real
    sweep showed real GPT-2 activations over-saturate a unit-input-scaled reservoir.
    Add an input-scaling sweep (2-D over input_scaling × ρ, or input_scaling at fixed ρ)
    on real activations; find the scaling where saturation drops into a healthy band
    while the ρ ≈ 1 boundary and input separation survive. New `results/` + `docs/`
    figure; update `FINDINGS.md`. TDD the new sweep path on a synthetic stand-in stream.
 
-3. **Theory section (`todo.md` §C), correctly scoped.** Write the formal claims into a
+2. **Theory section (`todo.md` §C), correctly scoped.** Write the formal claims into a
    new `docs/` theory section + `FINDINGS.md`: the genuine time-dimension argument; the
    expressivity framing (finite-precision transformer ⊆ TC⁰/FO(M) per pass; cross-pass
    state as the documented lever, stated *with* the arbitrary-precision caveat, posing
@@ -57,21 +42,21 @@ there is no half-written-queue window). The pinned `## Always last` keeps them a
    Siegelmann–Sontag class; the organism analogy as one bounded paragraph. Cite
    `literature/REVIEW.md`. No new empirical claims. Commit.
 
-4. **Train a readout for H3 (state is informative).** Build a small reservoir-requiring
+3. **Train a readout for H3 (state is informative).** Build a small reservoir-requiring
    task (e.g. estimate elapsed pass-count, or detect a flag seen N passes ago) and train
    the readout `W_out` (linear, ridge/regression — cheap, CPU) to extract it from the
    reservoir state; show a stateless baseline cannot. Real metric → `results/` + figure;
    `FINDINGS.md` H3 result. TDD the task generator + readout fit. Name plainly if the
    signal is weak.
 
-5. **KV-append injection variant + H1 regression.** Implement the richer injection:
+4. **KV-append injection variant + H1 regression.** Implement the richer injection:
    reservoir nodes appended to the injection layer's key/value sequence (upper layers
    attend to them), not just a residual-stream add. H1 regression: with the reservoir
    contribution gated to zero, base logits unchanged. Compare against the residual-stream
    variant. If the HF attention surgery proves too invasive for this session, stop and
    leave a precise documented blocker rather than a half-built hack.
 
-6. **Citation-checked novelty follow-up (`todo.md` §D).** Run a focused, verified review
+5. **Citation-checked novelty follow-up (`todo.md` §D).** Run a focused, verified review
    of the areas the first lit-review pass left unverified (reservoir × transformer /
    fixed-reservoir-in-pretrained-net; always-on / between-request agents). Confirm or
    qualify the novelty claim; fold verified sources into `literature/` and tighten
