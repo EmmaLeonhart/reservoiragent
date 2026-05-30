@@ -190,3 +190,14 @@ spectral-radius scaling accurate to 1e-6; echo-state contraction (ρ<1, zero inp
 forgets initial condition, decays to null state); state bounded/finite even at ρ=1.5;
 shapes/dtype; seed reproducibility; leak-rate=0 freezes state; sparsity controls
 density. Full suite 9 passed locally. Resolves queue item 1 (was item 2).
+
+## 2026-05-29 — Implementation 3: reservoir dynamics metrics (TDD)
+
+`src/reservoir/metrics.py` — `state_variance`, `saturation_fraction` (|r|>thr),
+`participation_ratio` (effective dimensionality = (Σλ)²/Σλ² of the unit covariance),
+and `trajectory_distinguishability` (mean per-step RMS distance between two
+trajectories). Tests first (`tests/test_metrics.py`, 5) each against a known answer:
+saturation 0.75 on a constructed array; variance 0 for constant + matches numpy;
+PR≈1 for a rank-1 trajectory and PR≈K for K independent units; distinguishability
+1.0 for zeros-vs-ones and 0 for identical. Full suite 14 passed locally.
+Resolves queue item 1 (dynamics metrics).

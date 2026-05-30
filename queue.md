@@ -29,29 +29,24 @@ one edit, so there is no half-written-queue window to protect against). The pinn
 (`0bacbec1`, ~2026-05-30 04:24 local) both draw from the top of this queue** — the 8h
 cron is a guaranteed escalation/kickoff point, not the only start.
 
-1. **Reservoir observability / dynamics metrics (TDD).** `src/reservoir/metrics.py`:
-   state variance, saturation fraction (|r|>0.99), effective rank (participation ratio),
-   and trajectory distinguishability between two input histories. Tests on synthetic
-   signals with known answers. Commit.
-
-2. **Spectral-radius dynamics sweep on synthetic input.** `scripts/run.py` drives the
+1. **Spectral-radius dynamics sweep on synthetic input.** `scripts/run.py` drives the
    reservoir across a grid of ρ (and reservoir size K) with synthetic input streams;
    logs metrics to `results/sweep_synthetic.json`; renders figures to `docs/`. Identify
    the healthy regime (H2) — non-saturating, non-exploding, distinguishable trajectories;
    check whether the optimum sits at the classical edge-of-chaos prior. Commit.
 
-3. **Model surgery: inject the reservoir into a small pretrained transformer (H1).**
+2. **Model surgery: inject the reservoir into a small pretrained transformer (H1).**
    Hook a mid-depth layer of GPT-2-small (HF `transformers`): read its hidden states into
    the reservoir via fixed `W_in`, write `r(t)` back into that layer's key/value sequence
    via readout `W_out`. **Regression test (H1):** with `W_out=0` the base model's logits
    are unchanged vs vanilla GPT-2 (graceful degradation). Commit.
 
-4. **Dynamics sweep on REAL attention streams + write up.** Drive the sweep (item 4) with
+3. **Dynamics sweep on REAL attention streams + write up.** Drive the sweep (item 4) with
    real GPT-2 mid-layer activations; capture `results/sweep_real.json` + figures. Write
    `FINDINGS.md` (question → method → results → limitations) and fill the `docs/` Findings
    section + pillar 3 with the headline dynamics result. Commit; verify Pages updates.
 
-5. **Ambitious reach (per `todo.md` §B note — "just to see if we can").** Attempt the
+4. **Ambitious reach (per `todo.md` §B note — "just to see if we can").** Attempt the
    harder build beyond local-compute comfort and **report honestly how far it gets**:
    the minimal harness fork (two forward passes without reinitialising the reservoir =
    the genuine-time-axis proof-of-concept), and, if it runs at all, a tiny N-seed (3–5)
