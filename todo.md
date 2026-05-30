@@ -63,7 +63,13 @@ rather than noise?
   long-context baseline. Training data must *require* the reservoir (Block-Recurrent
   shows models otherwise learn to ignore recurrent state).
 - **Readout + light LoRA training (H3).** Train W_out (+ upper-layer LoRA) on
-  reservoir-requiring data; show the state becomes informative.
+  reservoir-requiring data; show the state becomes informative. *(Mechanism shown:
+  the delay-memory readout result — `scripts/run.py h3`. Training W_out through the LM
+  on a semantic task remains.)*
+- **Wire KV-append into live GPT-2 (`GPT2_INTEGRATION_BLOCKER`).** The mechanism is
+  built + unit-tested (`src/reservoir/kv_inject.py`); the remaining step is an
+  eager-path `GPT2Attention.forward` override (transformers 5.4) that appends the
+  reservoir key/value rows and extends the attention mask. Bounded but version-sensitive.
 
 ### Long-term (aspirational — compute-gated, full vision)
 - **N-seed selection pipeline.** 10–20 reservoir seeds × LoRA fine-tunes, keep the

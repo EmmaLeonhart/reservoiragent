@@ -27,14 +27,7 @@ verify CI green, not just local; name compute-blocked work plainly.
 running and are kept running through this re-fill (written atomically in one edit, so
 there is no half-written-queue window). The pinned `## Always last` keeps them alive.
 
-1. **KV-append injection variant + H1 regression.** Implement the richer injection:
-   reservoir nodes appended to the injection layer's key/value sequence (upper layers
-   attend to them), not just a residual-stream add. H1 regression: with the reservoir
-   contribution gated to zero, base logits unchanged. Compare against the residual-stream
-   variant. If the HF attention surgery proves too invasive for this session, stop and
-   leave a precise documented blocker rather than a half-built hack.
-
-2. **Citation-checked novelty follow-up (`todo.md` §D).** Run a focused, verified review
+1. **Citation-checked novelty follow-up (`todo.md` §D).** Run a focused, verified review
    of the areas the first lit-review pass left unverified (reservoir × transformer /
    fixed-reservoir-in-pretrained-net; always-on / between-request agents). Confirm or
    qualify the novelty claim; fold verified sources into `literature/` and tighten

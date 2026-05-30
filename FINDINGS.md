@@ -219,9 +219,12 @@ the whole loop is now testable before spending compute on training.
 
 - Small-scale only this session; the agentic claims (H3/H4) and the full runtime are
   out of scope and compute-gated.
-- The injection writes the reservoir state into the **residual stream**, not yet as
-  appended **key/value** entries the upper layers attend to (the richer variant in the
-  architecture); the readout `W_out` is not yet **trained** (H3 is future work).
+- Two injection variants now exist: the **residual-stream** write (`inject.py`, wired
+  into live GPT-2, H1-verified) and the richer **KV-append** mechanism (`kv_inject.py`,
+  reservoir nodes as extra attention keys/values) — the latter is implemented and
+  unit-tested in isolation with a clean H1 *masking* property, but **wiring it into HF
+  GPT-2 (transformers 5.4) is a documented blocker** (`GPT2_INTEGRATION_BLOCKER`), left
+  for a focused future item rather than a fragile patch of attention internals.
 - Input scaling for real-activation injection has now been **characterized** (sweet
   spot ≈ 0.08–0.24 at ρ = 0.95); it has not yet been wired as the default in the
   injection hook, and the optimum's dependence on layer/model/ρ is not yet mapped.

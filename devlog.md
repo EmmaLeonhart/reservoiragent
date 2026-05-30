@@ -373,3 +373,22 @@ provably in the carried state, not the input. `results/h3_memory.json` +
 limit plainly: this is the mechanism on a clean synthetic task; a *semantic* agent task
 (unresolved thread / elapsed time) needs the readout trained through the LM (future).
 Full suite 35 passed locally. Resolves queue item (H3 readout).
+
+## 2026-05-29 — Round 2.6: KV-append injection mechanism (+ documented integration blocker)
+
+The richer injection — reservoir nodes as extra attention keys/values. transformers 5.4
+GPT2Attention dispatches K/V through a `Cache` + `attention_interface` with no hook
+exposing the internal tensors, so a clean wiring needs an eager-path `forward` override
+— genuinely invasive. Per the hard rail, implemented + tested the **mechanism in
+isolation** and left a **precise documented blocker** for the live-GPT-2 wiring rather
+than a fragile patch.
+
+`src/reservoir/kv_inject.py` (numpy → CI-testable): `scaled_dot_product_attention`,
+`causal_mask`, `attention_with_reservoir` (tokens ++ reservoir nodes), and
+`reservoir_nodes_from_state`. `tests/test_kv_inject.py` (4): **H1 = gated-off (masked)
+reservoir is identical to base causal attention**; active reservoir changes the output;
+and the subtle one — appending *zero* value vectors still dilutes the softmax, so H1
+must be a *masking* property, not a zero-weights one. `GPT2_INTEGRATION_BLOCKER`
+documents the exact remaining step; moved to `todo.md` §B. FINDINGS Limitations updated.
+Full suite 39 passed locally. Resolves queue item (KV-append: mechanism done, integration
+documented-blocked).
