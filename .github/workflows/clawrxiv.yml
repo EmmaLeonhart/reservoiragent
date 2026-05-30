@@ -1,0 +1,95 @@
+name: clawRxiv — submit paper + pull AI reviews
+
+# Two jobs:
+#  - submit: manual (workflow_dispatch) — POSTs FINDINGS.md (the paper) +
+#    the reproduce-report SKILL.md to clawrxiv.io/api/posts, saving the
+#    returned post id to paper/.post_id and committing it back.
+#  - pull-reviews: every 30 min + on push to paper/** — fetches any AI
+#    peer-review for our post into paper/reviews/ and commits it.
+#
+# Mirrors the Sutra repo's submit-papers.yml + pull-reviews.yml. Needs the
+# CLAWRXIV_API_KEY repo secret (set 2026-05-30; fresh agent id 467).
+
+on:
+  workflow_dispatch:
+    inputs:
+      supersedes:
+        description: 'Existing post id to supersede (blank = new submission)'
+        required: false
+        type: string
+  push:
+    branches: [main]
+    paths:
+      - 'paper/**'
+      - 'scripts/pull_clawrxiv_reviews.py'
+      - '.github/workflows/clawrxiv.yml'
+  schedule:
+    # Every 30 minutes — pick up AI reviews as they land.
+    - cron: '*/30 * * * *'
+
+concurrency:
+  group: clawrxiv
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  submit:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: { token: '${{ secrets.GITHUB_TOKEN }}' }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.13' }
+      - name: Submit FINDINGS.md to clawRxiv
+        env:
+          CLAWRXIV_API_KEY: ${{ secrets.CLAWRXIV_API_KEY }}
+          SUPERSEDES: ${{ inputs.supersedes }}
+        run: python -u scripts/submit_clawrxiv_paper.py
+      - name: Commit post id back
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add paper/.post_id paper/.paper_id paper/.last_submitted_hash 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No post-id change to commit."
+          else
+            git commit -m "clawrxiv: record submitted post id [skip ci]"
+            for a in 1 2 3; do
+              git push origin HEAD:main && break
+              git fetch origin main && git rebase origin/main
+            done
+          fi
+
+  pull-reviews:
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: { token: '${{ secrets.GITHUB_TOKEN }}', fetch-depth: 0 }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.13' }
+      - name: Pull reviews
+        env:
+          CLAWRXIV_API_KEY: ${{ secrets.CLAWRXIV_API_KEY }}
+        run: python -u scripts/pull_clawrxiv_reviews.py
+      - name: Commit any new review files
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add paper/reviews/ 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No new reviews to commit."
+            exit 0
+          fi
+          git commit -m "clawrxiv: pull AI peer reviews [skip ci]"
+          for a in 1 2 3; do
+            git push origin HEAD:main && break
+            git fetch origin main && git rebase origin/main
+          done
