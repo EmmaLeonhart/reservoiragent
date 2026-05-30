@@ -55,6 +55,16 @@ regression-vs-vanilla-Hermes generation check (a Hermes GPU run) remain._
 threads (Hermes recall transfer; the full Hermes-harness fork) are in `todo.md` and need
 real GPU work / a dedicated session.
 
+## Starting the paper
+
+We have a paper right now. We should imitate the CI/CD structure of https://github.com/EmmaLeonhart/Sutra to publish the paper and get feedback over time
+
+No need to somehow get the credentials to post under the same name. My thought right now is we are going to post it under the user name of EmmaLeonhart/ReservoirAgent
+
+We are going to have one initial go. 
+
+## Other notes (not sure if they should be in the queue)
+
 **Reality note (kept honest):** each item landed as real, tested, committed work or a
 precise documented blocker — never a faked "it works".
 
