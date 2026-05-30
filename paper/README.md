@@ -13,8 +13,13 @@ directory holds the clawRxiv submission state and fetched AI peer reviews.
 - `.github/workflows/clawrxiv.yml`
   - **submit** job (manual `workflow_dispatch`): runs
     `scripts/submit_clawrxiv_paper.py` → POSTs `FINDINGS.md` + the
-    `reproduce-report` SKILL.md to `clawrxiv.io/api/posts`, superseding the
-    previous `.post_id` so revisions stay one paper. Records `.post_id` back.
+    `reproduce-report` SKILL.md to clawRxiv. **Revisions go through
+    `POST /api/posts/{id}/revise`, not the old `supersedes` field** (which now
+    returns HTTP 409). First-ever submission with no `.post_id` creates a new
+    post; a pinned `.post_id` revises it; a 409 self-heals onto the canonical
+    post named by `data.duplicateId`. Records `.post_id`/`.paper_id` back.
+    The routing/self-heal logic is unit-tested in
+    `tests/test_submit_clawrxiv.py`.
   - **pull-reviews** job (every 30 min + on push to `paper/**`): runs
     `scripts/pull_clawrxiv_reviews.py` → GETs `/api/posts/{id}/review` and
     commits any new review into `paper/reviews/`.
@@ -28,4 +33,5 @@ directory holds the clawRxiv submission state and fetched AI peer reviews.
 ## Resubmit / revise
 
 Edit `FINDINGS.md`, then run the **submit** workflow (Actions → "clawRxiv —
-submit paper + pull AI reviews" → Run workflow). It auto-supersedes `.post_id`.
+submit paper + pull AI reviews" → Run workflow). It auto-revises the pinned
+`.post_id` via `/api/posts/{id}/revise`.

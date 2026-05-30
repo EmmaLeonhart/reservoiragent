@@ -98,6 +98,42 @@ line — **Titans** (arXiv 2501.00663, 2025) — whose memory is *trained at tes
 time* vs this project's *fixed random* reservoir with only a readout trained.
 Re-run the sweep before any hard novelty claim in a submitted paper.
 
+## 6. clawRxiv submission + peer-review loop (publish / revise)
+
+The paper is published to clawRxiv and accrues AI peer reviews. This is wired in
+`.github/workflows/clawrxiv.yml` + two scripts, mirroring the Sutra repo's
+mechanism. The submission state lives in `paper/` (`.post_id`, `.paper_id`,
+`.last_submitted_hash`, and `reviews/`). Current live post: **2680**
+(paper_id 2605.02680).
+
+- **Submit / revise** — `scripts/submit_clawrxiv_paper.py` (manual
+  `workflow_dispatch`). It POSTs `FINDINGS.md` + this SKILL.md to clawRxiv.
+  **Revisions use `POST /api/posts/{id}/revise`, NOT the old `supersedes`
+  field.** clawRxiv migrated revisions to `/revise`; the old
+  `POST /api/posts` + `{"supersedes": id}` body now returns **HTTP 409**
+  ("already been revised" / "duplicate detected"). The script:
+  - first-ever submission (no `paper/.post_id`) → `create_post` (POST /api/posts);
+  - a pinned `.post_id` → `revise_post` (POST /api/posts/{id}/revise);
+  - 409 on revise → follow `data.duplicateId` to the canonical post and revise it,
+    re-pinning `.post_id` (deterministic self-heal of a drifted id);
+  - 404 on revise (a clawRxiv server-side bug on some chains) → probe `create_post`
+    to elicit the 409 that names the canonical post;
+  - **STOP-NEW-CHAINS guard:** with a `.post_id` pinned, a *successful* create is an
+    orphan, not a revision — the script refuses to pin to it, keeps `.post_id` at the
+    chain tip, and exits 1 so CI goes red. This is the load-bearing resubmission
+    logic; it is unit-tested in `tests/test_submit_clawrxiv.py` (no network).
+- **Pull reviews** — `scripts/pull_clawrxiv_reviews.py` (every 30 min + on push to
+  `paper/**`). GETs `/api/posts/{id}/review` and commits any new review into
+  `paper/reviews/`. A 404 / `{"review": null}` means "not generated yet" (exit 0,
+  not an error). A real review (`paper/reviews/post2680_review2680.json`, a
+  "Weak Reject" from Gemini 3 Flash) confirms the pull side works end-to-end.
+
+To resubmit a revision: edit `FINDINGS.md` (and keep `TITLE`/`ABSTRACT` in
+`scripts/submit_clawrxiv_paper.py` in sync), commit, then **Actions → "clawRxiv —
+submit paper + pull AI reviews" → Run workflow** (or `gh workflow run
+clawrxiv.yml`). It auto-revises the pinned `.post_id`. The 30-min schedule then
+pulls the new review.
+
 ## Hard rails (same as the repo's)
 
 Never fake a result or a figure. Never weaken/skip a test to make a number look
