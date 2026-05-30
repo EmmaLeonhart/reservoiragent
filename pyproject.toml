@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reservoir-agent"
+version = "0.0.1"
+description = "A pretrained transformer with a fixed random reservoir injected into its mid-layer attention, giving it state across forward passes (a genuine time axis). Feasibility + reservoir-dynamics study."
+readme = "README.md"
+requires-python = ">=3.9"
+# Core deps are light (numpy/matplotlib) so CI stays fast. The model-surgery work
+# (GPT-2 injection) additionally needs the `models` extra (torch + transformers);
+# those tests skip gracefully when the extra is absent (see tests).
+dependencies = [
+    "numpy>=1.23",
+    "matplotlib>=3.6",
+]
+
+[project.optional-dependencies]
+models = ["torch>=2.0", "transformers>=4.30"]
+dev = ["pytest>=7.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
