@@ -41,6 +41,18 @@ def test_nonzero_readout_changes_output(injected):
     injected.set_readout(np.zeros((injected.d_model, injected.n_reservoir)))
 
 
+def test_h1_holds_on_llama_architecture():
+    # the generalized injection must also work on a Llama-family model (Hermes is
+    # Llama-based): decoder blocks at model.model.layers, width at config.hidden_size.
+    llm = ReservoirInjectedLM("hf-internal-testing/tiny-random-LlamaForCausalLM",
+                              n_reservoir=32, seed=0, device="cpu")
+    base = base_logits("hf-internal-testing/tiny-random-LlamaForCausalLM", PROMPT,
+                       device="cpu").detach().numpy()
+    llm.reset_reservoir()
+    got = llm.logits(PROMPT).detach().numpy()
+    assert np.allclose(base, got, atol=1e-5)      # H1 on Llama arch too
+
+
 def test_reservoir_state_persists_across_passes(injected):
     # The reservoir carries state between independent forward passes (a time axis):
     # two passes leave the state different from one pass.

@@ -55,8 +55,9 @@ class TorchReservoirInjectedLM:
             self.tokenizer.pad_token = self.tokenizer.eos_token
         base = AutoModelForCausalLM.from_pretrained(model_name)
 
-        d_model = base.config.n_embd
-        n_layers = base.config.n_layer
+        from ._arch import decoder_blocks, hidden_size
+        d_model = hidden_size(base.config)
+        n_layers = len(decoder_blocks(base))
         self.layer = n_layers // 2 if layer is None else int(layer)
         self.d_model, self.n_reservoir, self.leak = d_model, n_reservoir, float(leak)
 
@@ -83,7 +84,8 @@ class TorchReservoirInjectedLM:
 
     def _register(self):
         torch = self.torch
-        block = self.model.base_model.model.transformer.h[self.layer]
+        from ._arch import decoder_blocks
+        block = decoder_blocks(self.model)[self.layer]
 
         def hook(module, inputs, output):
             hidden = output[0] if isinstance(output, tuple) else output

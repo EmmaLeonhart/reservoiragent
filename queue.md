@@ -28,21 +28,13 @@ things plainly; the model-download/GPU steps are local-only (torch-gated tests s
 **Crons:** the three (work-loop :03, auto-flush :15, status-report :42) are running and
 kept running through this re-fill (atomic edit). The pinned `## Always last` keeps them alive.
 
-1. **(A) Generalize the injection to any decoder architecture (GPT-2 + Llama/Hermes).**
-   Both `inject.py` and `torch_inject.py` hardcode `model.transformer.h` (GPT-2). Add a
-   `_decoder_blocks(model)` helper that detects the block list across architectures
-   (`transformer.h` for GPT-2; `model.model.layers` for Llama). Make the injection +
-   hidden-state handling architecture-agnostic. **Verify H1** (zeroed readout → identical
-   logits) on BOTH `sshleifer/tiny-gpt2` AND a tiny Llama model (e.g.
-   `trl-internal-testing/tiny-random-LlamaForCausalLM` or similar). TDD; torch-gated. Commit.
-
-2. **(B) Load Hermes-3-Llama-3.2-3B on the 4070 + verify H1.** Load with a 4-bit base
+1. **(B) Load Hermes-3-Llama-3.2-3B on the 4070 + verify H1.** Load with a 4-bit base
    (bitsandbytes `BitsAndBytesConfig`) + the generalized injection; inject at a mid layer;
    **verify H1 holds on Hermes** (zeroed readout → logits identical to the un-injected
    Hermes, to numerical tolerance). Manage VRAM (4-bit base ≈ 2 GB + LoRA + activations).
    Capture a result note in `results/` + `FINDINGS.md`. Local-only. Commit.
 
-3. **(C) Multi-pass differentiable harness — the load-bearing condition.** Build a
+2. **(C) Multi-pass differentiable harness — the load-bearing condition.** Build a
    differentiable multi-pass loop (backprop **through passes**) on a **reservoir-requiring
    cross-context task**: show a fact on pass 1, truncate context, recall it on pass N from
    the reservoir alone; train W_out (+ LoRA) so the injected model beats a **stateless
@@ -50,14 +42,14 @@ kept running through this re-fill (atomic edit). The pinned `## Always last` kee
    model for iteration speed, then run on Hermes. Honest metric → `results/` + `FINDINGS.md`.
    Substantial; if a piece is genuinely blocked, document it precisely. Commit.
 
-4. **(D) Trained silence policy (meaningful "sometimes no response").** Replace the
+3. **(D) Trained silence policy (meaningful "sometimes no response").** Replace the
    base-entropy gate with a **learned** gate (a head on r(t) and/or logit features) trained
    with labelled correct-silence / correct-speech data — so silence is a real decision, not
    entropy noise. Requires designing the silence training data (correct-silence labels) —
    ties to C. Measure precision/recall of the speak/stay-silent decision. `results/` +
    `FINDINGS.md`. Commit.
 
-5. **(E) Fork the real Hermes harness (tool-calling + agentic loop).** Build a fork of the
+4. **(E) Fork the real Hermes harness (tool-calling + agentic loop).** Build a fork of the
    actual Nous Hermes harness — Hermes tool-call/ChatML formatting and the agentic loop —
    wrapping the always-alive runtime (prompted + unprompted passes, the trained gate),
    preserving Hermes' tool-call behaviour (regression vs vanilla Hermes is an explicit
