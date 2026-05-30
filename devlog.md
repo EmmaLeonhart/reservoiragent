@@ -89,3 +89,14 @@ Key outcomes:
   discarded, not cited); a citation-checked follow-up is queued in `todo.md` before
   any hard novelty claim is published. Reflected the one-line summary into
   `docs/index.html` (pillar 2).
+
+## 2026-05-29 — Bootstrap 5: long-horizon todo.md written
+
+Wrote `todo.md` from the literature gap: hypotheses H1–H4 (feasibility/non-destruction,
+healthy-dynamics regime, state-readability, cross-pass behaviour change); experiments
+tiered near-term (reservoir core, model surgery, spectral-radius dynamics sweep —
+this session) / mid-term (harness fork PoC, benchmark+training-data design, readout+LoRA)
+/ long-term aspirational (N-seed selection, always-alive runtime, Hermes scale-up);
+the scoped theory section; the open questions carried from the review (citation-checked
+novelty follow-up; the finite-precision TC⁰ question; edge-of-chaos at attention scale);
+and the report shape.
