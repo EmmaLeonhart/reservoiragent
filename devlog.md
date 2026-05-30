@@ -221,3 +221,22 @@ the agent runs on reservoir state alone. The first probe (driven) masked this; s
 to the autonomous probe to expose the boundary correctly. Figure + result reflected in
 the `docs/` Findings section and pillar 3. Full suite 19 passed locally.
 Resolves queue item (spectral-radius sweep).
+
+## 2026-05-29 — Implementation 5: model surgery / reservoir injection (H1 ✓)
+
+`src/reservoir/inject.py` — `ReservoirInjectedLM`: loads a pretrained GPT-2, hooks a
+mid-depth block so its hidden states drive the fixed reservoir (read via `W_in`) and
+the reservoir state is written back into the residual stream via readout `W_out`
+(`h' = h + W_out·r(t)`). Feasibility-scoped injection (residual-stream write; the
+KV-append variant is the ambitious reach). `tests/test_inject.py` (3, torch+transformers
+`importorskip` so the light CI job skips them, run locally on `sshleifer/tiny-gpt2`):
+
+- **H1 non-destruction ✓** — with `W_out=0` the injected model's next-token logits are
+  identical to vanilla GPT-2 (`allclose`, atol 1e-5): the architecture degrades
+  gracefully to the base model.
+- The injection is live — a nonzero `W_out` changes the logits.
+- Reservoir state **persists across independent forward passes** (a genuine time axis):
+  state after two passes ≠ after one.
+
+Full suite 22 passed locally (3 inject tests skip in CI). Resolves queue item
+(model surgery, H1).
