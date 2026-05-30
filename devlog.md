@@ -611,3 +611,25 @@ time, so the agent **reverts to baseline responding** as activity subsides; and 
 pretrained model this new behavioural axis is aggressive **brain surgery** — genuinely
 hard (the same difficulty that kept Hermes recall from bootstrapping). Mirrored a condensed
 version into the docs Findings. Resolves Phase H item D.
+
+## 2026-05-30 — Phase H · E core: Hermes-format agentic harness
+
+`src/reservoir/hermes_harness.py` — the Hermes-format layer for the real target:
+`render_chatml`, `tools_system_prompt` (function-calling system message),
+`parse_tool_calls` / `format_tool_response` (`<tool_call>`/`<tool_response>` XML), and a
+`HermesHarness` that drives the reservoir-injected model through the agentic tool loop
+(parse → execute registered tool → feed `<tool_response>` back → repeat to a budget).
+`tests/test_hermes_harness.py` (5): ChatML round-trip, tools system prompt, tool-call
+parse (incl. malformed-skip), tool-response format, and a torch-gated wiring smoke
+(`HermesHarness.chat` runs end-to-end on tiny-gpt2). Full suite 54 passed.
+
+**Named plainly as NOT a full Nous fork** (`HERMES_HARNESS_REMAINING` + todo.md): streaming
++ exact Nous scaffolding; fusing the unprompted/idle pass + trained silence gate into the
+loop; the regression-vs-vanilla-Hermes generation check (a Hermes GPU run); multi-tool
+routing. This is the Hermes-format core + tool loop the production fork plugs into.
+Resolves the bounded part of Phase H item E; the full fork is queued in todo.md.
+
+**Phase H wrap:** A (Llama port) ✓, B (Hermes 3B H1) ✓, C (cross-pass recall: 100% on
+GPT-2, Hermes transfer open + diagnosed) ✓, D (trained silence policy + the conceptual
+"brain surgery is hard" point) ✓, E (Hermes-format harness core) ✓. The two open threads
+(Hermes recall transfer; full Hermes harness fork) are documented in todo.md.
