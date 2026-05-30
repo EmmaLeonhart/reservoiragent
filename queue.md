@@ -29,12 +29,12 @@ one edit, so there is no half-written-queue window to protect against). The pinn
 (`0bacbec1`, ~2026-05-30 04:24 local) both draw from the top of this queue** — the 8h
 cron is a guaranteed escalation/kickoff point, not the only start.
 
-1. **Ambitious reach (per `todo.md` §B note — "just to see if we can").** Attempt the
-   harder build beyond local-compute comfort and **report honestly how far it gets**:
-   the minimal harness fork (two forward passes without reinitialising the reservoir =
-   the genuine-time-axis proof-of-concept), and, if it runs at all, a tiny N-seed (3–5)
-   reservoir comparison. Anything compute-blocked → a precise documented blocker / strict
-   `xfail`, never a faked or weakened result.
+_All implementation items are complete (see `devlog.md`). The feasibility + dynamics
+study delivered H1 (non-destruction) and H2 (the ρ ≈ 1 echo-state regime on synthetic
+and real activations), a published report + PDF, and an honest proof-of-concept of the
+time axis and seed-selection mechanism with compute-gated parts named plainly. Refill
+from `todo.md` (e.g. the citation-checked novelty follow-up, input-scaling tuning, the
+KV-append injection, or training a readout for H3) when the next session begins._
 
 **Stop condition (then hand back):** the research question has a defensible answer or a
 clearly-reported partial result; `FINDINGS.md` and the published `docs/` report reflect

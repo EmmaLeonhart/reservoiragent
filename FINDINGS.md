@@ -99,6 +99,34 @@ Sweeping spectral radius ρ ∈ [0.1, 2.0] (figures: `docs/sweep_synthetic.png`,
   scale — the precise concern the plan anticipated ("feeding a large attention tensor
   may require different scaling").
 
+## Ambitious reach (proof-of-concept)
+
+Pushed past the feasibility scope to see how far local compute reaches, reported as
+measured:
+
+- **The time axis is real and behavioural.** Running the *same* prompt after different
+  prior history, with the reservoir state carried across the (otherwise independent)
+  forward passes and a small random readout, shifts the next-token logits by an L2
+  distance of ≈ 22 (`scripts/run.py alive`, GPT-2). The same input produces a different
+  output distribution depending on what the model processed before — something a
+  stateless transformer structurally cannot do.
+- **The seed-selection mechanism works; the pre-training signal is weak.** A dynamics
+  pre-selection proxy ranks N fixed-random reservoir seeds by responsiveness,
+  dimensionality, and (penalised) saturation on real GPT-2 activations, before any
+  training (`scripts/run.py nseed`). Across 8 seeds at ρ = 0.95 the spread is small
+  (~0.02), i.e. *untrained* dynamics vary only modestly between seeds — so the real
+  selection signal the plan relies on most likely emerges only after fine-tuning. The
+  mechanism is in place; the verdict on its usefulness is compute-gated.
+
+**Named plainly as not done (compute-gated), not papered over:**
+
+- The full **N-seed LoRA fine-tuning + benchmark selection** — there is no training
+  pipeline or benchmark suite here; only the *dynamics* proxy was run.
+- A productionized **always-alive runtime** (pass scheduler, idle timer, output
+  confidence gate) — only the two-pass state-carry was demonstrated.
+- The **KV-append** injection (reservoir nodes as extra keys/values the upper layers
+  attend to) and **agent-scale (Hermes)** models — beyond local compute this session.
+
 ## Limitations (current)
 
 - Small-scale only this session; the agentic claims (H3/H4) and the full runtime are
