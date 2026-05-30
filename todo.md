@@ -54,6 +54,11 @@ rather than noise?
   healthy regime (H2). Metrics → `results/`, figures → `docs/`.
 
 ### Mid-term (the real architecture)
+- **Transfer the cross-pass recall win to Hermes 3B (open).** Content-addressable
+  KV-prefix recall is 100% on GPT-2 but did **not** transfer to Hermes-3-Llama-3.2-3B in
+  4-bit (2 attempts; loss didn't converge, recall at chance). Try: more steps / higher
+  LR / full-precision (non-4-bit) LoRA / a stronger injection; diagnose why the 4-bit
+  Hermes optimization stalls.
 - **Make the reservoir actually USED across passes (redirect from the C negative).**
   The cross-pass *content-recall* experiment showed the model ignores the reservoir
   (stateful ≈ stateless ≈ chance). Two directions the result points to: (1) **wire

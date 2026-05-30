@@ -528,3 +528,23 @@ cross-pass reservoir state perfectly. **The negative→positive arc is the core 
 the injection design is the decisive factor — the reservoir must be *attended to*, not
 *added*.** FINDINGS "## C" rewritten as the resolved arc; docs Findings + figure updated.
 Full suite 46 passed locally. Resolves the KV-append item.
+
+## 2026-05-30 — Phase H: Hermes recall transfer — NEGATIVE (honest), + report-accuracy fixes
+
+**Hermes validation (task #28): negative, reported plainly.** The content-addressable
+cross-pass recall (100% on GPT-2) did **not** transfer to Hermes-3-Llama-3.2-3B in 4-bit
+across two principled attempts (input scaling 0.5→0.1 per the H2 result; 300→600 steps):
+both stateful and baseline at **chance (0.17)**, and — unlike GPT-2 (loss → 0.02) — the
+**loss did not converge** (plateaued ~2.9). So it is not just the over-saturation knob;
+the LoRA-on-4-bit-Hermes + prefix setup is not optimizing recall in this budget. Likely
+needs more steps / higher LR / full-precision / a stronger injection — logged as an open
+transfer step in `todo.md` §B, FINDINGS "## C" updated. Per my commitment to the user, I
+stopped after two principled attempts rather than hacking. Added model-tagged outputs so
+the Hermes figure (`docs/crosspass_hermes-3-llama-3-2-3b.png`) does not clobber the GPT-2
+win figure.
+
+**Report-accuracy fixes (user feedback):** regenerated `docs/og-preview.png` without the
+"grounded in a literature review" / "feasibility study" lines (the weird thumbnail text);
+updated `docs/index.html` lede + always-alive-runtime section + meta/OG/Twitter
+descriptions to drop the stale "feasibility / long-term / aspirational" framing — the
+mechanism is demonstrated and the Hermes port + harness fork are in progress.
