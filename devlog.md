@@ -297,3 +297,16 @@ polish via the newly-installed `frontend-design` plugin (fix the janky title); (
 input-scaling tuning sweep (follow-up to the real-activation over-saturation finding);
 (3) scoped theory section; (4) train a readout for H3; (5) KV-append injection variant;
 (6) citation-checked novelty follow-up. Crons kept running through the atomic re-fill.
+Mid-round, per a follow-up from the user, inserted the **agent harness (always-alive
+runtime)** as priority item 2 — to be built and exercised on the untrained injected
+model before any (compute-gated) fine-tuning.
+
+## 2026-05-29 — Round 2.1: report-site polish (frontend-design)
+
+Fixed the janky tab title (`<title>` was "reservoiragent" → "Reservoir Agent — a
+transformer with a genuine time axis") and gave the report an editorial masthead:
+a distinctive display serif (**Fraunces**, via Google Fonts) for the headings, a
+tracked uppercase kicker ("Reservoir computing × transformers · research report")
+above the title, and larger/tighter headline treatment. Kept the warm "paper" theme,
+dark-mode variant, and all content/figures/OG-meta/PDF+repo links (verified: 6 figures,
+8 OG tags, PDF + repo links intact, all tags balanced). Resolves queue item (site polish).

@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>reservoiragent</title>
+<title>Reservoir Agent — a transformer with a genuine time axis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,900&display=swap" rel="stylesheet">
 <meta name="description" content="Reservoir Agent: can a fixed random reservoir injected into a pretrained transformer's mid-layer attention give it genuine state between forward passes — a real time axis — without breaking the base model? A feasibility + reservoir-dynamics study.">
 
 <!-- Social / link previews -->
@@ -32,6 +35,7 @@
     --yellow: #a07a2b;
     --blue: #3f6487;
     --border: #d9d1c1;
+    --display: 'Fraunces', Georgia, 'Times New Roman', serif;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -41,15 +45,24 @@
     font-size: 16.5px;
   }
   h1 {
-    color: var(--text); font-size: 2.2rem; margin-bottom: 0.4rem;
-    font-weight: 700; letter-spacing: -0.01em;
+    font-family: var(--display); font-optical-sizing: auto;
+    color: var(--text); font-size: 3rem; line-height: 1.04;
+    margin-bottom: 0.5rem; font-weight: 900; letter-spacing: -0.02em;
   }
   h2 {
-    color: var(--blue); font-size: 1.35rem; margin: 2.75rem 0 1rem;
+    font-family: var(--display); font-optical-sizing: auto;
+    color: var(--blue); font-size: 1.55rem; margin: 2.9rem 0 1rem;
     padding-bottom: 0.4rem; border-bottom: 1px solid var(--border);
-    font-weight: 600;
+    font-weight: 600; letter-spacing: -0.01em;
   }
-  h3 { font-size: 1.1rem; font-weight: 600; margin: 1.5rem 0 0.5rem; }
+  h3 {
+    font-family: var(--display); font-size: 1.18rem; font-weight: 600;
+    margin: 1.5rem 0 0.5rem;
+  }
+  .masthead-kicker {
+    text-transform: uppercase; letter-spacing: 0.2em; font-size: 0.72rem;
+    font-weight: 700; color: var(--accent); margin-bottom: 0.7rem;
+  }
   p { margin-bottom: 1rem; }
   a { color: var(--blue); text-decoration: none; border-bottom: 1px solid transparent; }
   a:hover { border-bottom-color: var(--blue); }
@@ -159,6 +172,7 @@
      CONTENT as the project progresses; keep the theme/chrome. The build step in
      .github/workflows/pages.yml also drops a transportable report.pdf alongside. -->
 
+<p class="masthead-kicker">Reservoir computing &times; transformers &middot; research report</p>
 <h1>Reservoir Agent</h1>
 <p class="lede">
   A transformer with a genuine <strong>time axis</strong>. Standard transformers are
