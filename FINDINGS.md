@@ -247,6 +247,22 @@ differentiable harness — backprop through passes on a reservoir-requiring (cro
 task — which is the next compute step, now unblocked by everything above (working
 injection, the always-alive harness, the trained readout, and this fine-tune pipeline).
 
+## Porting to the real target: Hermes (Phase H)
+
+The GPT-2 work validated the mechanisms; this phase moves to the smallest Hermes —
+**NousResearch/Hermes-3-Llama-3.2-3B** (Llama-3.2, the architecture the project actually
+wants, already agent-fine-tuned).
+
+- **(A) Injection generalized to the Llama architecture.** The injection was GPT-2-only
+  (`transformer.h`); `src/reservoir/_arch.py` now locates decoder blocks across families
+  (`model.model.layers` for Llama), and H1 is verified on a tiny Llama as well as GPT-2.
+- **(B) Hermes 3B loads and H1 holds, on the laptop GPU.** Loaded in 4-bit (bitsandbytes
+  nf4) with the reservoir injected at layer 14 of 28 (d_model 3072): with the readout
+  zeroed, the injected model's logits are **byte-identical** to the un-injected Hermes
+  (`max|diff| = 0.00`), at a peak of **2.35 GB VRAM** — leaving ample room for LoRA +
+  training on the RTX 4070. So the architecture transplant is non-destructive on the real
+  model. (`scripts/hermes_h1.py`; `results/hermes_h1.json`.)
+
 ## Limitations (current)
 
 - Small-scale only this session; the agentic claims (H3/H4) and the full runtime are

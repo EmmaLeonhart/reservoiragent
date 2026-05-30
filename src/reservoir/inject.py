@@ -41,14 +41,25 @@ class ReservoirInjectedLM:
 
     def __init__(self, model_name: str = "gpt2", *, layer: int | None = None,
                  n_reservoir: int = 256, seed: int = 0, device: str | None = None,
-                 **reservoir_kwargs):
+                 load_in_4bit: bool = False, **reservoir_kwargs):
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
         self.torch = torch
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModelForCausalLM.from_pretrained(model_name).to(self.device).eval()
+        if load_in_4bit:
+            # 4-bit base (bitsandbytes) so a multi-billion-parameter model (Hermes 3B)
+            # fits the GPU. The injection still adds a full-precision readout on top.
+            from transformers import BitsAndBytesConfig
+            bnb = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4",
+                                     bnb_4bit_use_double_quant=True,
+                                     bnb_4bit_compute_dtype=torch.float16)
+            self.model = AutoModelForCausalLM.from_pretrained(
+                model_name, quantization_config=bnb, device_map={"": 0}).eval()
+            self.device = "cuda"
+        else:
+            self.model = AutoModelForCausalLM.from_pretrained(model_name).to(self.device).eval()
 
         from ._arch import decoder_blocks, hidden_size
         self.blocks = decoder_blocks(self.model)
