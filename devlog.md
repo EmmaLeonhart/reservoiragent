@@ -167,3 +167,15 @@ predicting "Paris") **with the reservoir added**: a fixed-random amber reservoir
 column that joins the attention layer as extra keys/values (read W_in, write W_out),
 with a recurrence loop and state persisting across passes. Embedded on the report
 page under a new "How the reservoir enters attention" section. Resolves queue item 8.
+
+## 2026-05-29 — Implementation 1: package + tests + CI scaffold
+
+First implementation step. Created the package skeleton: `pyproject.toml`
+(`reservoir-agent`, src layout; core deps numpy+matplotlib kept light so CI is fast,
+with torch+transformers behind a `models` extra for the later model-surgery work),
+`src/reservoir/__init__.py`, `scripts/run.py` (entry point with `--version`),
+`tests/test_smoke.py`, and `.github/workflows/ci.yml` (setup-python →
+`pip install -e ".[dev]"` → `pytest` → smoke-run the entry point). Verified locally:
+`pytest` 2 passed; `python scripts/run.py --version` → 0.0.1. (Used pyproject with a
+`models` extra rather than a single requirements.txt with torch/transformers, so CI
+stays fast and green; the heavy deps install only where needed.) Resolves queue item 1.
