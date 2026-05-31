@@ -732,3 +732,20 @@ made it STRICTER on bare objects so an error envelope ({"message":"Server
 Error"}) is no longer mis-saved as a review. Added tests/test_pull_clawrxiv.py
 (10 tests, offline). Full suite: 154 passed, 7 skipped. CronList verified all
 four jobs healthy (:03/:15/:42 + GPU-kickoff one-shot).
+
+## 2026-05-30 - cleanvibe update check (v1.14.0; no revisions)
+
+Ran the weekly cleanvibe-update-check skill (CLAUDE.md `## Skills` showed last
+check = `never`). Fetched https://cleanvibe.emmaleonhart.com/updates.md:
+current cleanvibe is v1.14.0 (2026-05-30), which lists exactly six skills
+(emergency-stop, cron-is-local, autonomous-loop, queue-driven-workflow,
+writing-style, cleanvibe-update-check) — all already vendored in `.claude/skills/`.
+Nothing newer than v1.14.0, so no SKILL.md content was revised. Updated the
+last-check date in CLAUDE.md from `never` to `2026-05-30`. No code change.
+
+Also this session (scheduling/heartbeat only, no commits before this): started
+the three session crons (work-loop :03 `c0bf227a`, auto-flush :15 `c920f0d6`,
+status-report :42 `115b16bb`) — none were running on session start — and
+scheduled a one-shot midnight kickoff (`dd9ba085`, 00:00 2026-05-31) for the
+Hermes 3B cross-pass recall transfer (user-chosen), which plans itself into
+queue.md before launching the fine-tune in the background.
