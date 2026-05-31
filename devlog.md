@@ -789,3 +789,21 @@ and a "Model / weights" section in README.md pointing at
 EmmaLeonhart/reservoir-agent-gpt2-crosspass + the --save / publish_hf.py workflow.
 Verified the page HTML stays balanced (html.parser, no unclosed tags) and both HF links
 render. Docs-only; CI/pages rebuild on push.
+
+## 2026-05-30 - Installer model registry + reprioritize to N-seed training first
+
+Started the installer, built the model registry, then the user reprioritized: get the
+N-seed batch TRAINING running first, installer after. Captured here; queue reordered.
+
+Registry (`src/reservoir/installer/registry.py`, 11 tests in tests/test_registry.py):
+lists the project's reservoir-agent models with a live HF query (filtered to the
+`reservoir-agent-*` naming convention / `reservoir-agent` tag — the author hosts unrelated
+repos) and a bundled offline fallback; pure sort/default/merge logic is CI-tested. Per the
+user's design, the registry PRIVILEGES the recommended best but never drops models — the
+"bad" seeds in a batch are kept as signal. Verified live discovery finds the published
+model. Added the `reservoir-agent` tag (the canonical model-type name) to the HF model
+card and re-uploaded. Full suite: 86 passed.
+
+Deferred (registry done): installer console + bootstrap + .exe build. Next: vision/planning
+docs (new model type; preserve-all-models-as-signal) + the N-seed batch training pipeline
+that saves ALL N models with their scores + reservoir properties.
