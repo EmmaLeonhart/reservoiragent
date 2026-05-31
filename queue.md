@@ -65,16 +65,16 @@ The bad models are signal. Barrel through; limited time.
 
 1. **Run batches of increasing size** — consecutive runs, publishing each population to HF
    as `reservoir-agent-<model>-batch` (publisher done: `publish_hf.py --batch-dir`).
-   Done so far: 4-seed GPT-2 batch (all reached 1.0; signal in loss/dynamics spread) →
-   `EmmaLeonhart/reservoir-agent-gpt2-batch`. Next: larger N, then larger base models (the
-   midnight Hermes path). Log what ran; never fake a result; the seed-discrimination signal
-   sharpens at harder settings.
+   Done: 4-seed GPT-2 batch → `EmmaLeonhart/reservoir-agent-gpt2-batch`. IN PROGRESS:
+   GPT-2-medium N=10 (first attempt HUNG at 4/10 due to GPU contention from a concurrent
+   torch-test run — killed the wedged process, freed the GPU, restarted clean; **do NOT run
+   GPU/torch work while a batch trains**). Publish when done. Next: larger base models (the
+   midnight Hermes path). Log what ran; never fake a result.
 
-Installer DONE — registry + console + menu + bootstrap (21 tests) + `installer/build_exe.py`
-+ `.github/workflows/build-installer.yml` (Windows runner builds the exe -> artifact, and
-release asset on tags) + docs "Run a reservoir agent locally" section. Verify the
-build-installer workflow goes green (the exe must actually build); cut a tag when ready so
-the exe attaches to a Release the docs link can point at directly.
+Installer COMPLETE + verified — registry + console + menu + bootstrap (21 tests) +
+`installer/build_exe.py` + `build-installer` workflow (GREEN @ 2b3b976: the exe actually
+builds) + docs "Run a reservoir agent locally" section. Optional follow-up: cut a `v*` tag
+so the exe attaches to a Release the docs link can point at directly.
 
 ## Other notes (not sure if they should be in the queue)
 

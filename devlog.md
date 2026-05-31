@@ -889,3 +889,17 @@ PyInstaller is not installed locally, so the exe build is verified via the CI wo
 (triggers on this push), not a local claim. NOTE: avoid running the torch test suite while a
 GPU batch trains — it contends for the GPU (slowed the medium batch + caused a transient
 test flake earlier).
+
+## 2026-05-30 - Installer exe build VERIFIED green; GPT-2-medium batch hang fixed
+
+Installer fully complete and verified: the `build-installer` workflow ran GREEN on a
+Windows runner @ 2b3b976 — the `reservoir-agent-installer.exe` actually builds (PyInstaller
+isn't local, so this CI run was the real check, not a claim). ci + pages also green there.
+
+GPT-2-medium N=10 batch hang: the first attempt stalled at 4/10 seeds (seed_3 saved 20:50,
+no progress 35 min). Diagnosis: I had run the full torch test suite against the GPU WHILE
+the batch trained, contending for the device and wedging a python process (PID 30432, held
+~2 GB GPU). Fix: TaskStop the batch job, kill the wedged process, confirmed GPU back to
+0 MiB / 0 python procs, restarted the batch clean (job bvz21t3t6). Operational rule recorded
+in queue.md: do NOT run GPU/torch work while a batch trains. Publish the medium population
+when the clean run completes. No code defect — a resource-contention hang of my own making.
