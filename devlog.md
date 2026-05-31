@@ -966,3 +966,18 @@ the report didn't yet show: a TRAINED downstream selection spread (recall 1.00 f
   concrete justification for batch-and-keep-all. Links the published population.
 - docs/index.html: matching paragraph + figure.
 HTML validated balanced. CI/pages verify on push. GPU left untouched (clear for midnight).
+
+## 2026-05-31 00:00 - Midnight kickoff: Hermes 3B cross-pass transfer (many-more-steps)
+
+Scheduled one-shot fired. SYNC clean, GPU free (0/8188). Planned into queue.md + task #19,
+then launched the headline transfer attempt in the BACKGROUND:
+`crosspass --model NousResearch/Hermes-3-Llama-3.2-3B --mode kv --4bit --steps 2000
+--save artifacts/hermes-crosspass` (log: results/hermes_crosspass_run.log, job bnbpqv4f1).
+
+Chose crosspass (NOT finetune as the cron example said): crosspass --mode kv IS the
+cross-pass RECALL experiment that produces the ~2.8 plateau the thread references; finetune
+is a generic LM fine-tune that doesn't measure recall. Clean test of the documented route:
+same baseline settings (4-bit, default input_scaling), only steps 300 -> 2000. On
+completion I will MEASURE: recall>chance -> publish the saved model + FINDINGS update;
+still chance/plateau -> record the precise blocker (more steps insufficient -> curriculum/
+coupling). No faking either way.

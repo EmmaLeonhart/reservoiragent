@@ -82,6 +82,25 @@ Installer COMPLETE + verified — registry + console + menu + bootstrap (21 test
 builds) + docs "Run a reservoir agent locally" section. Optional follow-up: cut a `v*` tag
 so the exe attaches to a Release the docs link can point at directly.
 
+## Active — Hermes 3B cross-pass recall transfer (midnight kickoff, user-scheduled)
+
+The headline open `todo.md` thread. Prior attempts plateaued at loss ~2.8 (NOT a bug —
+gradients flow; the prefix signal is diluted through 28 layers vs GPT-2's shallow stack).
+GPT-2-medium (355M) also failed at chance, so the wall starts well below 3B. Documented
+route to try: **MANY MORE STEPS** (then curriculum / stronger prefix coupling if it
+plateaus). This run is the clean "does more steps break the plateau" test: same settings as
+the prior baseline (4-bit, default input_scaling), only steps increased 300 → 2000.
+
+1. **LAUNCH (background)** — `crosspass --model NousResearch/Hermes-3-Llama-3.2-3B --mode kv
+   --4bit --steps 2000 --save artifacts/hermes-crosspass`, log to `results/`. (crosspass, NOT
+   finetune — it is the experiment that measures cross-pass RECALL + produces the ~2.8 plateau.)
+2. **ON COMPLETION** — measure, don't assume:
+   - If recall > chance: it WORKED — the saved stateful model → publish
+     `reservoir-agent-hermes-3b-crosspass`; update FINDINGS (transfer achieved at N steps).
+   - If still chance / loss plateau: record the precise result in FINDINGS/devlog — more
+     steps alone insufficient → the real fix is curriculum / stronger coupling (substantial).
+     Do NOT fake or soften.
+
 ## Other notes (not sure if they should be in the queue)
 
 **Reality note (kept honest):** each item landed as real, tested, committed work or a
