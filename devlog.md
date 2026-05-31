@@ -998,3 +998,21 @@ FINDINGS (Hermes paragraph: 4th attempt, more-steps ruled out) and todo.md (rout
 The chance-level saved artifact (artifacts/hermes-crosspass: W_res + LoRA + config) is kept
 LOCAL, NOT published — a single non-working 3B model would mislead installer users, and it
 is not a selection batch. The negative result is the deliverable, recorded in FINDINGS.
+
+## 2026-05-31 - GPT-2-small N=20 selection batch + memory fix verified at scale
+
+Grew the reservoir-selection dataset: N=20 @250 steps → published
+EmmaLeonhart/reservoir-agent-gpt2-batch-n20. Full spread: 4 seeds at recall 1.00
+(4, 9, 0, 3), through 0.83/0.67/0.50/0.33, down to 5 at chance 0.17 (15, 12, 16, 6, 8).
+Best = seed 4. Combined with N=12, that's a 32-seed selection dataset.
+
+The train_batch per-seed memory fix is VERIFIED at N=20: the run completed clean and the
+GPU released to 0 MiB (no accumulation/drag like the unfixed N=12).
+
+SIGNAL worth recording: across all 20 seeds the participation-ratio proxy pr_frac is
+essentially constant (~0.111-0.114) and does NOT track recall; final training loss also
+doesn't cleanly predict recall (e.g. seed 19 loss 0.037 -> recall 0.67; seed 14 loss 2.768
+-> recall 0.83). So neither the cheap dynamics proxy nor loss predicts which reservoir wins
+— consistent with the earlier proxy-fails result, now on real downstream recall. This
+motivates the next direction: enrich per-seed reservoir metrics to find an actual predictor
+(the point of keeping the whole population).
