@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reservoir Agent — a transformer with a genuine time axis</title>
+<title>Reservoir Attention Network (RAN) — a transformer with a genuine time axis</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,900&display=swap" rel="stylesheet">
-<meta name="description" content="Reservoir Agent: a fixed random reservoir injected into a pretrained transformer's mid-layer attention gives it genuine state between forward passes — a real time axis. The mechanism is demonstrated and is being carried onto Hermes (Llama-3.2-3B).">
+<meta name="description" content="Reservoir Attention Network (RAN): a fixed random reservoir injected into a pretrained transformer's mid-layer attention gives it genuine state between forward passes — a real time axis. The mechanism is demonstrated and is being carried onto Hermes (Llama-3.2-3B) as a Reservoir Agent.">
 
 <!-- Social / link previews -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Reservoir Agent">
-<meta property="og:title" content="Reservoir Agent — a transformer with a genuine time axis">
+<meta property="og:title" content="Reservoir Attention Network (RAN) — a transformer with a genuine time axis">
 <meta property="og:description" content="A fixed random reservoir injected into a pretrained transformer's mid-layer attention, so its state persists across forward passes — not just within a context window. Demonstrated, and being carried onto Hermes.">
 <meta property="og:url" content="https://reservoir.emmaleonhart.com/">
 <meta property="og:image" content="https://reservoir.emmaleonhart.com/og-preview.png">
@@ -175,18 +175,18 @@
      .github/workflows/pages.yml also drops a transportable report.pdf alongside. -->
 
 <p class="masthead-kicker">Reservoir computing &times; transformers &middot; research report</p>
-<h1>Reservoir Agent</h1>
+<h1>Reservoir Attention Network (RAN)</h1>
 <p class="lede">
-  A transformer with a genuine <strong>time axis</strong>. Standard transformers are
-  stateless between forward passes — they re-derive everything from the context window
-  each call. This project injects a <strong>fixed, randomly-initialized reservoir</strong>
-  into a pretrained transformer's mid-layer attention so its state evolves
-  <em>across</em> passes, accumulating a history of the model's own attention dynamics.
-  The mechanism is demonstrated &mdash; the injection is non-destructive, the reservoir
-  dynamics are characterized, and (with a content-addressable injection) a model
-  <strong>recalls information that exists only in the carried state</strong> across an
-  otherwise-wiped context. The work is now being carried onto the real target: the
-  smallest <strong>Hermes</strong> (Llama-3.2-3B), where the agent harness is being built.
+  The <strong>Reservoir Attention Network (RAN)</strong> is an architectural
+  modification to standard transformers that provides a genuine <strong>time axis</strong>.
+  While standard transformers are stateless between forward passes, a RAN injects a
+  <strong>fixed, randomly-initialized reservoir</strong> into the mid-layer attention
+  so its state evolves <em>across</em> passes. We refer to a specific instantiation of
+  this architecture as a <strong>Reservoir Agent</strong>. The mechanism is
+  demonstrated &mdash; the injection is non-destructive, the reservoir dynamics are
+  characterized, and a Reservoir Agent (GPT-2) <strong>recalls information that exists
+  only in the carried state</strong> across an otherwise-wiped context. The work is
+  now being carried onto <strong>Hermes</strong> (Llama-3.2-3B).
 </p>
 
 <div class="question">

@@ -1,26 +1,28 @@
-# Literature Review — Reservoir Agent
+# Literature Review — Reservoir Attention Network (RAN)
 
-**Question.** Can a *fixed, randomly-initialized* reservoir injected into a
-*pretrained* transformer's mid-layer attention give the model genuine state
-*between* forward passes — a real time axis — without degrading base capabilities,
-and what reservoir-dynamics regime (spectral radius, size, injection depth) makes
-that injected state usable signal rather than noise?
+**Question.** Can the **Reservoir Attention Network (RAN)** architecture — 
+which injects a *fixed, randomly-initialized* reservoir into a *pretrained* 
+transformer's mid-layer attention — give the model genuine state *between* 
+forward passes (a real time axis) without degrading base capabilities?
 
 This review grounds the project in three bodies of work: (1) reservoir computing,
 (2) the expressivity gap between stateless transformers and stateful recurrent
 systems, and (3) the family of recurrence-augmented transformers that is the
 closest prior art. Per-source notes and citations are in [`sources.md`](./sources.md).
-How it was built — and its limits — is in *Method & confidence* at the end.
+We refer to a specific instantiation of this architecture as a 
+**Reservoir Agent**. How it was built — and its limits — is in 
+*Method & confidence* at the end.
 
 ---
 
 ## 1. What is already known
 
 **Reservoir computing is a mature, faithful home for the core mechanism.** The
-Reservoir Agent's defining move — fix the recurrent weights (W_r, W_in) at random
-and train *only* a readout (W_out) — is exactly the echo-state-network (Jaeger
-2001) / liquid-state-machine (Maass 2002) paradigm, surveyed and codified by
-Lukoševičius & Jaeger (2009). This paradigm is well-established and has historically
+Reservoir Attention Network's defining move — fix the recurrent weights (W_r, W_in)
+at random and train *only* a readout (W_out) — is exactly the echo-state-network
+(Jaeger 2001) / liquid-state-machine (Maass 2002) paradigm, surveyed and codified
+by Lukoševičius & Jaeger (2009).
+ This paradigm is well-established and has historically
 *outperformed* fully-trained RNNs on many temporal tasks. So the project is not
 inventing a learning rule; it is *relocating* a proven one into a new substrate.
 
@@ -87,14 +89,15 @@ Classified on the two axes that matter here:
 | RWKV / RetNet | trained | within sequence (RNN-form state) |
 | S4 / Mamba | trained (learned SSM) | within sequence |
 | Titans | trained (test-time weight updates) | within a stream |
-| **Reservoir Agent** | **fixed-random** | **across genuinely independent forward passes** |
+| **RAN (Reservoir Agent)** | **fixed-random** | **across genuinely independent forward passes** |
 
 **The gap, stated sharply.** Every prior system uses **trained** recurrence and
 carries state **within a (possibly very long) sequence or segment chain**. The
-Reservoir Agent occupies the empty cell: a **fixed-random** reservoir whose state
-persists **across independent forward passes**, including *unprompted* ticks with no
-new input — and it is injected into a **pretrained, frozen** backbone, trained only
-through a readout + light LoRA. Two corroborating specifics from the prior art:
+**Reservoir Attention Network (RAN)** occupies the empty cell: a **fixed-random** 
+reservoir whose state persists **across independent forward passes**, including 
+*unprompted* ticks with no new input — and it is injected into a **pretrained, 
+frozen** backbone, trained only through a readout + light LoRA.
+ Two corroborating specifics from the prior art:
 - Block-Recurrent Transformer documents that recurrent transformers have a real
   failure mode where "the model learns to completely ignore the recurrent state."
   This independently confirms the plan's central training-data concern: tasks must

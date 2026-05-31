@@ -1,26 +1,33 @@
-# Reservoir Agents — a new model type (foundational doc)
+# Reservoir Attention Network (RAN) — a new architecture (foundational doc)
 
-This document records *what a reservoir agent is* and *how we must build and preserve
-them*. It is foundational: the rest of the project (training, publishing, the installer)
+This document records *what a Reservoir Attention Network (RAN) is* and *how we 
+must build and preserve its implementations (Reservoir Agents)*. It is 
+foundational: the rest of the project (training, publishing, the installer) 
 serves it. Grounding: `data_lake/transcripts/so-because-reservoir-computer-claude.md`
 (esp. lines 529–549) and `reservoir-state-injection-in-transformer-architecture-claude.md`.
 
-## A reservoir agent is not a transformer
+## A Reservoir Attention Network (RAN) is not a transformer
 
-We did not modify a transformer. We made a **new kind of AI model**. Starting from a
-pretrained transformer LLM, a fixed randomly-initialized **reservoir** is brain-surgeried
-in — injected as content-addressable, attended state (`kv_live.py`: reservoir-derived
-prefix tokens the model attends to at every layer) whose state is **carried across forward
-passes**. The result is **fundamentally different in nature**: it behaves more like an
-**RNN than a transformer**, it has a genuine **time axis** (state causally downstream of
-every past pass), and the reservoir is now a *fundamental part of the model*, not a
-detachable add-on. It inherits the transformer's pretrained world knowledge + cheap
-fine-tuning AND reservoir computing's rich nonlinear temporal dynamics, while shedding the
-worst of each (transformers' statelessness; reservoirs' train-from-scratch cost).
+We did not merely modify a transformer. We created a **new architectural 
+paradigm**: the **Reservoir Attention Network (RAN)**. Starting from a 
+pretrained transformer LLM, a fixed randomly-initialized **reservoir** is 
+brain-surgeried in — injected as content-addressable, attended state 
+(`kv_live.py`: reservoir-derived prefix tokens the model attends to at every 
+layer) whose state is **carried across forward passes**.
 
-The published GPT-2 cross-pass models are, to our knowledge, **the first reservoir agents
-to exist.** "Reservoir agent" is the **canonical name of the model type** — every model we
-ship is tagged `reservoir-agent` on the Hub.
+The result is **fundamentally different in nature**: it behaves more like an 
+**RNN than a transformer**, it has a genuine **time axis** (state causally 
+downstream of every past pass), and the reservoir is now a *fundamental part of 
+the model*, not a detachable add-on. We refer to a specific instantiation of 
+this architecture as a **Reservoir Agent**. A Reservoir Agent inherits the 
+transformer's pretrained world knowledge + cheap fine-tuning AND reservoir 
+computing's rich nonlinear temporal dynamics, while shedding the worst of each 
+(transformers' statelessness; reservoirs' train-from-scratch cost).
+
+The published GPT-2 cross-pass models are, to our knowledge, **the first 
+Reservoir Agents to exist.** "Reservoir Attention Network (RAN)" is the 
+**canonical name of the architecture** — every specific model we ship is a 
+**Reservoir Agent**, tagged `reservoir-agent` on the Hub.
 
 ## Why we build in batches — and why we keep the bad ones
 

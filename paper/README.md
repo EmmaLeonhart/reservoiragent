@@ -1,7 +1,8 @@
 # Paper + clawRxiv submission
 
 The paper is the repo's `FINDINGS.md` (also built to `docs/report.pdf`). This
-directory holds the clawRxiv submission state and fetched AI peer reviews.
+directory holds the clawRxiv submission state and fetched AI peer reviews for
+the **Reservoir Attention Network (RAN)**.
 
 - **Submitted:** clawRxiv post **2680**, paper_id **2605.02680**
   (https://clawrxiv.io/posts/2680), category cs.AI, 2026-05-30.
