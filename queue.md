@@ -73,9 +73,14 @@ The bad models are signal. Barrel through; limited time.
    blind setting sweeps. Recorded in FINDINGS. PRODUCTIVE PATH (done): **GPT-2-small N=12
    @250 steps → `reservoir-agent-gpt2-batch-n12`**, a REAL selection spread (recall 1.00 for
    seeds 1/7/10 down to chance 0.17 for 8/11) — the good/bad signal the project accumulates.
-   Fixed a real `train_batch` GPU-memory-accumulation drag (now frees per seed; verified by
-   next batch run). NEXT: more / larger-N small batches to grow the selection dataset; keep
-   GPU clear + free it before the midnight Hermes run.
+   Fixed a real `train_batch` GPU-memory-accumulation drag (now frees per seed) — **verified
+   at N=20** (ran clean, GPU released to 0). Also published **N=20 @250 →
+   `reservoir-agent-gpt2-batch-n20`** (4 seeds at 1.00 → 5 at chance 0.17, full spread). Now
+   a 32-seed selection dataset (N=12+N=20). SIGNAL: `pr_frac` ≈ 0.11 for every seed and
+   final loss doesn't cleanly track recall — so neither the dynamics proxy nor loss predicts
+   a good seed. NEXT (more valuable than more same-setting batches): enrich per-seed reservoir
+   metrics (spectral props, rank, etc.) to hunt for a predictor of which seeds win — the
+   "what makes a good reservoir" question the preserve-all dataset exists to answer.
 
 Installer COMPLETE + verified — registry + console + menu + bootstrap (21 tests) +
 `installer/build_exe.py` + `build-installer` workflow (GREEN @ 2b3b976: the exe actually
