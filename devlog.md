@@ -936,3 +936,20 @@ Decision: pivot the "increasing size" barrel-through to larger-N GPT-2-SMALL bat
 harder setting (fewer steps) where training actually works and seeds genuinely differ —
 that produces the real good/bad reservoir-selection signal the project is built to
 accumulate. Larger base models remain gated on the transfer routes.
+
+## 2026-05-30 - GPT-2-small N=12 selection batch: REAL good/bad spread + train_batch mem fix
+
+The productive pivot paid off. GPT-2-small N=12 @ 250 steps produced a genuine
+reservoir-selection spread (the signal the project is built to accumulate): recall 1.00
+(seeds 1, 7, 10), 0.83 (6), 0.67 (5, 4, 2), 0.50 (3), 0.33 (9, 0), 0.17/chance (8, 11).
+Same architecture + training; seeds range from perfect recall to complete failure —
+confirming "some reservoirs are good, some bad" and that selection matters. Published the
+whole population (best=seed 1) → EmmaLeonhart/reservoir-agent-gpt2-batch-n12.
+
+Correction to the prior status report: the batch was not hard-stuck at 10/12 — it completed
+(exit 0), just dragged. Root cause was a REAL defect: train_batch constructed a fresh
+injected model per seed without releasing the previous one's CUDA memory, so the caching
+allocator accumulated across the loop (~7.9 GB by seed 10 on GPT-2-small — absurd for that
+size). Fixed: gc.collect() + torch.cuda.empty_cache() per seed. Pure-logic tests (36) pass;
+the memory effect is GPU-runtime, verified by the next batch run, not a unit test (named
+plainly). GPU confirmed freed (189 MiB) after the run — clear for the midnight Hermes job.
