@@ -63,16 +63,12 @@ after.** We literally made a new kind of AI model — the first reservoir agents
 suboptimal reservoir-structure patterns are only findable if the suboptimal ones are kept.
 The bad models are signal. Barrel through; limited time.
 
-1. **Publish batch populations to HF** — the batch pipeline saves ALL N locally
-   (`artifacts/batch/<model>/seed_*` + `batch_manifest.json`), but local artifacts are
-   gitignored/ephemeral — the preservation mandate needs them ON HF. Decide topology
-   (one repo per seed `reservoir-agent-<model>-s<seed>`, or one batch repo with the
-   population + manifest), tag everything `reservoir-agent`, mark the recommended best, and
-   push. Extend `publish_hf.py` / add a batch publisher.
-2. **Run batches of increasing size** — consecutive runs (GPT-2 done: 4-seed batch all
-   reached 1.0; signal is in loss/dynamics spread — see devlog). Next: larger N, then
-   larger base models (the midnight Hermes path), publishing each population. Log what ran;
-   never fake a result. The seed-discrimination signal sharpens at harder settings.
+1. **Run batches of increasing size** — consecutive runs, publishing each population to HF
+   as `reservoir-agent-<model>-batch` (publisher done: `publish_hf.py --batch-dir`).
+   Done so far: 4-seed GPT-2 batch (all reached 1.0; signal in loss/dynamics spread) →
+   `EmmaLeonhart/reservoir-agent-gpt2-batch`. Next: larger N, then larger base models (the
+   midnight Hermes path). Log what ran; never fake a result; the seed-discrimination signal
+   sharpens at harder settings.
 
 Deferred until training is running (registry DONE: `reservoir.installer.registry`,
 11 tests):

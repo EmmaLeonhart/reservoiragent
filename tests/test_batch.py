@@ -5,7 +5,9 @@ logic: rank the population, privilege the best, and KEEP every model (bad seeds 
 """
 import pytest
 
-from reservoir.batch import rank_population, select_best, build_batch_manifest
+from reservoir.batch import (
+    rank_population, select_best, build_batch_manifest, build_batch_card,
+)
 
 
 def _rec(seed, recall, loss_end):
@@ -54,3 +56,28 @@ def test_manifest_population_is_ranked_with_ranks_assigned():
 def test_manifest_empty_raises():
     with pytest.raises(ValueError):
         build_batch_manifest([], model_name="gpt2")
+
+
+def _manifest():
+    recs = [{"seed": 0, "recall_accuracy": 0.17, "loss_end": 0.40, "pr_frac": 0.11},
+            {"seed": 1, "recall_accuracy": 1.0, "loss_end": 0.01, "pr_frac": 0.12}]
+    return build_batch_manifest(recs, model_name="gpt2")
+
+
+def test_card_has_reservoir_agent_tag():
+    card = build_batch_card(_manifest(), repo_id="EmmaLeonhart/reservoir-agent-gpt2-batch")
+    assert "reservoir-agent" in card
+    assert card.lstrip().startswith("---")          # YAML front matter
+
+
+def test_card_lists_every_seed_in_the_population():
+    card = build_batch_card(_manifest(), repo_id="x/y")
+    assert "seed_0" in card and "seed_1" in card     # bad seed preserved + shown
+
+
+def test_card_marks_the_recommended_best():
+    card = build_batch_card(_manifest(), repo_id="x/y")
+    # the best seed (1) is identified as recommended somewhere in the card
+    assert "seed_1" in card
+    lower = card.lower()
+    assert "recommended" in lower or "best" in lower

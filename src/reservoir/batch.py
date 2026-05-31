@@ -49,6 +49,66 @@ def build_batch_manifest(records: list[dict], *, model_name: str,
             "best": {"seed": best["seed"], "save_dir": best.get("save_dir")}}
 
 
+def build_batch_card(manifest: dict, *, repo_id: str) -> str:
+    """Generate the Hugging Face model card (README.md) for a published batch.
+
+    The card documents the WHOLE population — every seed, with its score and dynamics
+    signal, the bad ones included — because preserving them is the point (learning what
+    makes a reservoir good). The recommended best is flagged and is what to load by default.
+    """
+    model = manifest["model_name"]
+    best = manifest["best"]["seed"]
+    rows = ["| rank | seed | recall | loss_end | pr_frac | recommended |",
+            "|---|---|---|---|---|---|"]
+    for p in manifest["population"]:
+        rows.append(
+            f"| {p['rank']} | `seed_{p['seed']}` | {float(p.get('recall_accuracy', 0)):.2f} "
+            f"| {float(p.get('loss_end', float('nan'))):.3f} "
+            f"| {float(p.get('pr_frac', float('nan'))):.3f} "
+            f"| {'**yes**' if p.get('recommended') else ''} |")
+    table = "\n".join(rows)
+    return f"""---
+license: mit
+base_model: {model}
+tags:
+  - reservoir-agent
+  - reservoir-computing
+  - echo-state-network
+  - stateful-transformer
+library_name: reservoir-agent
+---
+
+# Reservoir Agent batch — {model}
+
+A **batch** of {manifest['n']} reservoir agents (different fixed-random reservoir seeds)
+trained on the cross-pass recall task. A reservoir agent is a new model type: a pretrained
+transformer with a fixed reservoir brain-surgeried in (attended, cross-pass-stateful,
+RNN-like) — see the [project](https://github.com/EmmaLeonhart/reservoiragent) and
+`RESERVOIR_AGENTS.md`.
+
+**The whole population is published, not just the winner.** Reservoir performance is
+stochastic in the seed; the suboptimal models are kept as **signal** for learning which
+reservoir properties survive selection. The **recommended** model is `seed_{best}`.
+
+## Population
+
+{table}
+
+## Use
+
+Each `seed_<n>/` is a complete loadable reservoir agent. Load the recommended one:
+
+```python
+from huggingface_hub import snapshot_download
+from reservoir.persist import load_reservoir_model
+path = snapshot_download("{repo_id}")
+lm = load_reservoir_model(f"{{path}}/seed_{best}")
+```
+
+`batch_manifest.json` records the ranking + each seed's score and reservoir-dynamics signal.
+"""
+
+
 def _reservoir_dynamics_proxy(seed: int, *, n_reservoir: int = 512,
                               spectral_radius: float = 0.9,
                               input_scaling: float = 0.5) -> dict:
