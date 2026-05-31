@@ -233,6 +233,13 @@
       Code, data, and the literature review. <span class="arrow">&nearr;</span>
     </div>
   </a>
+  <a class="action" href="https://huggingface.co/EmmaLeonhart/reservoir-agent-gpt2-crosspass">
+    <div class="kicker">Weights</div>
+    <div class="title">Model on Hugging Face</div>
+    <div class="desc">
+      The trained GPT-2 cross-pass reservoir. <span class="arrow">&nearr;</span>
+    </div>
+  </a>
 </div>
 
 <h2>What this project does</h2>
@@ -461,7 +468,9 @@
   <figcaption>
     <strong>Cross-pass recall</strong> (GPT-2, content-addressable KV-prefix injection). The
     stateful model recalls the wiped word perfectly; the stateless baseline is at chance.
-    Regenerate with <code>python scripts/run.py crosspass --mode kv</code>.
+    Regenerate with <code>python scripts/run.py crosspass --mode kv</code>, or download the
+    trained weights from
+    <a href="https://huggingface.co/EmmaLeonhart/reservoir-agent-gpt2-crosspass">Hugging Face</a>.
   </figcaption>
 </figure>
 
