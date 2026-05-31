@@ -93,6 +93,14 @@ class TorchReservoirPrefixInjectedLM:
         self.W_in = self.W_in.to(self.device)
         self._state = self._state.to(self.device)
         self.embed = self.model.get_input_embeddings()
+        # everything needed to reconstruct this model on load (device is chosen at load
+        # time, not saved). The reservoir (W_r, W_in) regenerates from seed, so only the
+        # trained W_res + LoRA adapter need to be persisted alongside this config.
+        self._init_config = dict(
+            model_name=model_name, n_reservoir=n_reservoir, n_prefix=n_prefix,
+            layer=self.layer, spectral_radius=spectral_radius, input_scaling=input_scaling,
+            sparsity=sparsity, leak=leak, seed=seed, lora_r=lora_r, lora_alpha=lora_alpha,
+            summary=summary)
         self._register_read_hook()
 
     def _register_read_hook(self):

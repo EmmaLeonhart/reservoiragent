@@ -305,10 +305,13 @@ def cmd_crosspass(args) -> int:
     for stateful in (True, False):
         tag = "stateful" if stateful else "baseline (reservoir wiped between passes)"
         if args.mode == "kv":
+            # only persist the stateful model — the baseline (reservoir wiped) is the
+            # control, not a shippable artifact
             r = run_cross_pass_kv(args.model, n_keys=args.n_keys, steps=args.steps,
                                   lr=args.lr, seed=args.seed, stateful=stateful,
                                   load_in_4bit=args.bits4,
-                                  input_scaling=args.input_scaling, dtype=args.dtype)
+                                  input_scaling=args.input_scaling, dtype=args.dtype,
+                                  save_dir=(args.save if stateful else None))
         else:
             r = run_cross_pass(args.model, n_keys=args.n_keys, steps=args.steps,
                                lr=args.lr, seed=args.seed, stateful=stateful,
@@ -516,7 +519,7 @@ def main(argv=None) -> int:
     cp = sub.add_parser("crosspass", help="cross-pass recall: stateful vs stateless")
     cp.add_argument("--model", default="gpt2")
     cp.add_argument("--n-keys", type=int, default=6)
-    cp.add_argument("--steps", type=int, default=300)
+    cp.add_argument("--steps", type=int, default=600)  # 300 undertrains kv recall (~0.67); 600 reproduces 1.0
     cp.add_argument("--lr", type=float, default=1e-3)
     cp.add_argument("--seed", type=int, default=0)
     cp.add_argument("--layer", type=int, default=None)
@@ -527,7 +530,10 @@ def main(argv=None) -> int:
                     help="reservoir input scaling (lower for large-activation models)")
     cp.add_argument("--dtype", choices=["float16", "bfloat16"], default=None,
                     help="non-4-bit base dtype (bf16 fits a 3B model and trains more stably)")
-    cp.set_defaults(func=cmd_crosspass, bits4=False)
+    cp.add_argument("--save", default=None,
+                    help="directory to persist the trained stateful model (kv mode) as a "
+                         "loadable artifact (config + W_res readout + LoRA adapter)")
+    cp.set_defaults(func=cmd_crosspass, bits4=False, save=None)
 
     ft = sub.add_parser("finetune", help="real LoRA + W_out fine-tune (GPU)")
     ft.add_argument("--model", default="gpt2")

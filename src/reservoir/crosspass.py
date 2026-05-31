@@ -101,7 +101,7 @@ def run_cross_pass_kv(model_name: str = "gpt2", *, n_keys: int = 6, steps: int =
                       lr: float = 1e-3, seed: int = 0, device: str | None = None,
                       stateful: bool = True, n_prefix: int = 8,
                       load_in_4bit: bool = False, input_scaling: float = 0.5,
-                      dtype: str | None = None) -> dict:
+                      dtype: str | None = None, save_dir: str | None = None) -> dict:
     """Same cross-pass recall task, but with the **content-addressable** injection:
     the model attends to reservoir-derived prefix tokens (see ``kv_live``). This is the
     fix for the additive-injection negative result."""
@@ -144,6 +144,13 @@ def run_cross_pass_kv(model_name: str = "gpt2", *, n_keys: int = 6, steps: int =
         for word, tok_id in keys:
             if int(forward_pair(word, reset_between=not stateful).argmax().item()) == tok_id:
                 correct += 1
-    return {"model": model_name, "stateful": stateful, "n_keys": n_keys, "steps": steps,
-            "loss_start": losses[0], "loss_end": losses[-1],
-            "recall_accuracy": correct / n_keys, "device": lm.device, "mode": "kv-prefix"}
+    result = {"model": model_name, "stateful": stateful, "n_keys": n_keys, "steps": steps,
+              "loss_start": losses[0], "loss_end": losses[-1],
+              "recall_accuracy": correct / n_keys, "device": lm.device, "mode": "kv-prefix"}
+    if save_dir is not None:
+        # persist the trained model so it is a loadable, shippable artifact (the fix for
+        # the experiments that previously measured-then-discarded their weights)
+        from .persist import save_reservoir_model
+        save_reservoir_model(save_dir, lm, extra_meta=result)
+        result["saved_to"] = save_dir
+    return result
