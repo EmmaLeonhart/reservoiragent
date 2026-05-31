@@ -449,21 +449,30 @@
   </figcaption>
 </figure>
 <p>
-  And the spread is not academic &mdash; it decides the task. Training <strong>12 fixed
-  reservoir seeds end-to-end on the cross-pass recall task</strong> (GPT-2, a deliberately
-  hard 250-step budget so seeds separate) gives downstream recall ranging from
-  <strong>1.00</strong> (seeds 1, 7, 10) down to <strong>chance, 0.17</strong> (seeds 8,
-  11). Same architecture, same data &mdash; only the fixed random reservoir differs, and it
-  is the difference between solving the task and not. This is why reservoir agents are built
-  in <strong>batches with the whole population kept</strong>: the good seeds are the model;
-  the bad seeds are signal for eventually predicting good reservoirs.
+  Training <strong>fixed reservoir seeds end-to-end on the cross-pass task</strong> (GPT-2,
+  a hard 250-step budget) gives recall spread all the way from <strong>1.00</strong> to
+  <strong>chance, 0.17</strong> across seeds. The tempting reading &mdash; that this measures
+  reservoir <em>quality</em> &mdash; does <strong>not</strong> survive a check: the two
+  published runs share seed indices, and the <strong>same seed (identical reservoir, same
+  setting) lands at very different recall</strong> across them (seed 0: 0.33 vs 1.00; mean
+  |&Delta;|&nbsp;&asymp;&nbsp;0.47 over 12 shared seeds). So at this budget the outcome is
+  <strong>dominated by training noise</strong> (CUDA non-determinism + under-training), not
+  reservoir quality &mdash; and no untrained metric (&rho;, eigenvalue spread, non-normality,
+  participation ratio, memory capacity) predicts recall (|Spearman|&nbsp;&lt;&nbsp;0.36).
+  What it <em>does</em> support: you cannot cheaply pre-filter reservoirs, so you keep the
+  whole population and train. Showing some reservoirs are <em>durably</em> better needs a
+  controlled rerun (seed the trainable init, deterministic CUDA, average several runs per
+  seed) &mdash; open work, stated plainly.
 </p>
 <figure>
-  <img src="nseed_trained_spread.png" alt="Bar chart of cross-pass recall across 12 GPT-2 reservoir seeds, ranked best to worst: three seeds reach 1.0, descending through 0.83, 0.67, 0.5, 0.33 down to two seeds at chance (0.17).">
+  <img src="nseed_trained_spread.png" alt="Bar chart of cross-pass recall across 12 GPT-2 reservoir seeds from a single run, ranked best to worst: three seeds reach 1.0, descending through 0.83, 0.67, 0.5, 0.33 down to two seeds at chance (0.17).">
   <figcaption>
-    <strong>Trained reservoir selection</strong> (GPT-2, N=12, 250 steps). Downstream
-    cross-pass recall per seed, ranked. The whole population is published at
-    <a href="https://huggingface.co/EmmaLeonhart/reservoir-agent-gpt2-batch-n12">reservoir-agent-gpt2-batch-n12</a>.
+    <strong>Per-seed recall, one run</strong> (GPT-2, N=12, 250 steps). A wide spread &mdash;
+    but the same seeds rerun (the N=20 population) land very differently, so at this budget
+    the spread is training-noise-dominated, not a clean reservoir-quality ranking (see text).
+    Populations published at
+    <a href="https://huggingface.co/EmmaLeonhart/reservoir-agent-gpt2-batch-n12">…-batch-n12</a>
+    / <a href="https://huggingface.co/EmmaLeonhart/reservoir-agent-gpt2-batch-n20">-n20</a>.
     Regenerate with <code>python scripts/run.py batch --model gpt2 --n 12 --steps 250</code>.
   </figcaption>
 </figure>

@@ -179,18 +179,31 @@ currently requires training each seed's readout — i.e. genuine trial-and-error
 cheap pre-filter. Finding an untrained proxy that *does* correlate is open work; until
 then the selection cost scales with the number of seeds tried.
 
-**Selection matters on the real task, decisively.** Training a population of **12 fixed
-reservoir seeds end-to-end on the cross-pass recall task itself** (GPT-2, 250 steps each —
-a deliberately hard budget so seeds separate) gives a wide spread of *downstream* recall,
-not just the synthetic memory-capacity proxy: **recall ranges from 1.00 (seeds 1, 7, 10)
-down to chance 0.17 (seeds 8, 11)** under identical architecture and training. Same model,
-same data — only the fixed random reservoir differs, and it is the difference between a
-model that solves the task and one that cannot. This is the concrete justification for
-building reservoir agents in **batches and keeping the whole population**: the good seeds
-are the model, and the bad seeds are the signal for eventually predicting which reservoirs
-will be good. (Figure: `docs/nseed_trained_spread.png`; `scripts/run.py batch --model gpt2
---n 12 --steps 250`. The full population is published at
-`EmmaLeonhart/reservoir-agent-gpt2-batch-n12`.)
+**Per-seed recall spreads widely — but at this budget it is dominated by training noise,
+not cleanly by reservoir quality (a correction).** Training a population of fixed reservoir
+seeds end-to-end on the cross-pass task (GPT-2, 250 steps each) gives recall from **1.00 to
+chance (0.17)** across seeds (populations of 12 and 20 are published at
+`EmmaLeonhart/reservoir-agent-gpt2-batch-n12` and `-n20`). It is tempting to read that
+spread as reservoir *quality* — but the two runs share seed indices, which gives a natural
+replication, and it does **not** hold up: the **same seed (identical fixed reservoir, same
+setting) lands at very different recall across the two runs** — e.g. seed 0 at 0.33 vs 1.00,
+seed 1 at 1.00 vs 0.33 — with **mean |Δrecall| ≈ 0.47** over the 12 shared seeds, nearly as
+large as the full spread. So at 250 steps the outcome is **run-to-run noise-dominated**
+(CUDA non-determinism + an under-trained regime + the trainable readout/LoRA init not being
+seeded by the reservoir seed), and a single run per seed cannot separate reservoir quality
+from training noise. Consistently, **no untrained reservoir metric predicts recall**:
+realized ρ, mean/std |eigenvalue|, Henrici non-normality, participation ratio, and
+delay-memory capacity all give |Spearman ρ| < 0.36 (p > 0.14, n=20) against the recall
+labels (`scripts/run.py`/`reservoir.seed_metrics.correlate_seed_metrics`) — but with
+noise-dominated labels this cannot distinguish "no cheap predictor" from "labels too noisy
+to correlate". **What this does and does not support:** it supports *keeping the whole
+population* (cheap metrics don't let you pre-filter, so you train and measure) and the H2
+fact that reservoirs scaled to a fixed ρ have near-identical bulk dynamics; it does **not**
+yet demonstrate that some fixed reservoirs are durably better than others on this task.
+Establishing that needs a **controlled** experiment: seed the trainable init too, enable
+deterministic CUDA, and **average several runs per seed** (or train far longer so outcomes
+stop being noisy). Open work, named plainly. (Figure: `docs/nseed_trained_spread.png` shows
+one run's spread.)
 
 ### H2 — the reservoir-dynamics regime
 

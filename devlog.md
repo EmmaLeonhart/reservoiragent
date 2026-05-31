@@ -1016,3 +1016,26 @@ doesn't cleanly predict recall (e.g. seed 19 loss 0.037 -> recall 0.67; seed 14 
 — consistent with the earlier proxy-fails result, now on real downstream recall. This
 motivates the next direction: enrich per-seed reservoir metrics to find an actual predictor
 (the point of keeping the whole population).
+
+## 2026-05-31 - Per-seed metrics + a confound correction (reservoir "selection" is noise-dominated at 250 steps)
+
+Built reservoir.seed_metrics (untrained per-seed structural metrics: realized rho,
+mean/std |eigenvalue|, Henrici non-normality, participation ratio, delay-memory capacity)
++ correlate_seed_metrics, 6 CI tests. Correlated against the N=20 recall labels: NO metric
+predicts recall (all |Spearman| < 0.36, p > 0.14).
+
+But checking the data turned up a confound I had to correct: the N=12 and N=20 batches share
+seed indices (a natural replication), and the SAME seed (identical fixed reservoir, same
+250-step setting) lands at very different recall across the two runs — seed 0: 0.33 vs 1.00,
+seed 1: 1.00 vs 0.33, mean |Δrecall| ≈ 0.47 over 12 shared seeds, nearly the full spread.
+So the per-seed recall spread is DOMINATED BY TRAINING NOISE (CUDA non-determinism +
+under-trained 250-step regime + the trainable readout/LoRA init not seeded by the reservoir
+seed), NOT clean reservoir quality. A single run per seed cannot separate the two.
+
+Corrected the overclaim in FINDINGS ("Selection matters... decisively" -> a measured caveat)
+and docs/index.html (figure recaptioned "per-seed recall, one run", with the replication
+caveat). What still holds: cheap metrics can't pre-filter, so keep the whole population +
+train; reservoirs at fixed rho have near-identical bulk dynamics (H2). What does NOT yet
+hold: that some fixed reservoirs are durably better on this task. The proper test (queued):
+seed the trainable init + deterministic CUDA + average several runs per seed (or train far
+longer). The published populations stay up (real data); only the interpretation is corrected.
