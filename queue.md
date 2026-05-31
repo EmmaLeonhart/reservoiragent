@@ -65,11 +65,12 @@ The bad models are signal. Barrel through; limited time.
 
 1. **Run batches of increasing size** — consecutive runs, publishing each population to HF
    as `reservoir-agent-<model>-batch` (publisher done: `publish_hf.py --batch-dir`).
-   Done: 4-seed GPT-2 batch → `EmmaLeonhart/reservoir-agent-gpt2-batch`. IN PROGRESS:
-   GPT-2-medium N=10 (first attempt HUNG at 4/10 due to GPU contention from a concurrent
-   torch-test run — killed the wedged process, freed the GPU, restarted clean; **do NOT run
-   GPU/torch work while a batch trains**). Publish when done. Next: larger base models (the
-   midnight Hermes path). Log what ran; never fake a result.
+   Done: 4-seed GPT-2 batch → `reservoir-agent-gpt2-batch`. GPT-2-medium N=10 → published
+   `reservoir-agent-gpt2-medium-batch`, but **all 10 seeds at chance (0.17)** — medium does
+   NOT converge at `input_scaling=0.5`/600 steps (loss plateaus 1.3–2.5; same over-drive
+   signature as Hermes). Preserved as signal. NEXT: probe a corrected setting on medium
+   (lower `--input-scaling` ~0.1, more steps) on ONE seed before a full batch; if it learns,
+   run + publish the corrected batch. Keep the GPU clear while training.
 
 Installer COMPLETE + verified — registry + console + menu + bootstrap (21 tests) +
 `installer/build_exe.py` + `build-installer` workflow (GREEN @ 2b3b976: the exe actually
