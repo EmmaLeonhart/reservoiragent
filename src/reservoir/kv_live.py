@@ -36,7 +36,7 @@ class TorchReservoirPrefixInjectedLM:
                  input_scaling: float = 0.5, sparsity: float = 0.1, leak: float = 1.0,
                  seed: int = 0, device: str | None = None, lora_r: int = 8,
                  lora_alpha: int = 16, summary: str = "last", load_in_4bit: bool = False,
-                 dtype: str | None = None):
+                 dtype: str | None = None, train_seed: int | None = None):
         import torch
         import torch.nn as nn
         from transformers import AutoModelForCausalLM, AutoTokenizer
