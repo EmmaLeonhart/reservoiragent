@@ -55,13 +55,15 @@ rather than noise?
 
 ### Mid-term (the real architecture)
 - **Transfer the cross-pass recall win to Hermes 3B (open; well-diagnosed).** 100% on
-  GPT-2 but chance on Hermes across 3 attempts (4-bit ×2 + bf16+higher-LR); loss plateaus
-  ~2.8 regardless of quantization. A gradient diagnostic confirms it is **NOT a bug**
-  (state updates; ∇ flows to W_res + LoRA) — it is a bootstrapping/scale difficulty (the
-  prefix signal is diluted through 28 layers vs GPT-2's shallow stack). Routes to try:
-  a **curriculum** (key in-context first, anneal out), many more steps, a stronger prefix
-  coupling (e.g. inject the prefix at multiple layers, or larger n_prefix), or unfreezing
-  more of the model. Substantial; needs real compute.
+  GPT-2 but chance on Hermes across **4** attempts (4-bit ×2 + bf16+higher-LR + a dedicated
+  **2000-step** 4-bit run); loss plateaus ~2.5–2.8 regardless of quantization. A gradient
+  diagnostic confirms it is **NOT a bug** (state updates; ∇ flows to W_res + LoRA) — it is a
+  bootstrapping/scale difficulty (the prefix signal is diluted through 28 layers vs GPT-2's
+  shallow stack); GPT-2-medium (355M) fails the same way, so the wall starts well below 3B.
+  **"Many more steps" is now RULED OUT** (2000 steps ≈6.7× still chance/2.49). Remaining
+  routes are structural: a **curriculum** (key in-context first, anneal out), a stronger
+  prefix coupling (inject the prefix at multiple layers, or larger n_prefix), or unfreezing
+  more of the model. Substantial; needs real compute + a dedicated effort.
 - **Make the reservoir actually USED across passes (redirect from the C negative).**
   The cross-pass *content-recall* experiment showed the model ignores the reservoir
   (stateful ≈ stateless ≈ chance). Two directions the result points to: (1) **wire

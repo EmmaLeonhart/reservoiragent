@@ -981,3 +981,20 @@ same baseline settings (4-bit, default input_scaling), only steps 300 -> 2000. O
 completion I will MEASURE: recall>chance -> publish the saved model + FINDINGS update;
 still chance/plateau -> record the precise blocker (more steps insufficient -> curriculum/
 coupling). No faking either way.
+
+## 2026-05-31 - Hermes 3B many-more-steps run: still chance (route ruled out)
+
+The midnight transfer attempt completed (job bnbpqv4f1, exit 0). Result, measured:
+- Hermes-3-Llama-3.2-3B, kv-prefix, 4-bit, **2000 steps** (≈6.7× the prior 300):
+  stateful recall **0.17 (chance)**, loss 10.07 -> **2.49**; baseline 0.17, loss -> 2.75.
+- So MANY MORE STEPS did NOT break the plateau (2.49 ≈ the prior ~2.8; no better than 300).
+
+Conclusion (no faking): the Hermes transfer wall is **neither quantization nor
+under-training** — it's structural (prefix bootstrapping diluted through 28 layers; GPT-2
+-medium fails the same way). The remaining routes are a curriculum / stronger multi-layer
+coupling / unfreezing more — substantial, dedicated work, not a hyperparameter. Updated
+FINDINGS (Hermes paragraph: 4th attempt, more-steps ruled out) and todo.md (route closed).
+
+The chance-level saved artifact (artifacts/hermes-crosspass: W_res + LoRA + config) is kept
+LOCAL, NOT published — a single non-working 3B model would mislead installer users, and it
+is not a selection batch. The negative result is the deliverable, recorded in FINDINGS.
