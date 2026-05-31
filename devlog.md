@@ -749,3 +749,33 @@ status-report :42 `115b16bb`) — none were running on session start — and
 scheduled a one-shot midnight kickoff (`dd9ba085`, 00:00 2026-05-31) for the
 Hermes 3B cross-pass recall transfer (user-chosen), which plans itself into
 queue.md before launching the fine-tune in the background.
+
+## 2026-05-30 - Weight persistence + first HuggingFace upload (GPT-2 cross-pass)
+
+User flagged that no trained weights were ever saved. Root cause: the experiments were
+written as measurement functions that return a metrics dict and discard the trained model
+(`run_cross_pass_kv` dropped the trained `lm` on return); `results/` held only metrics
+JSON, zero weight files. Low cost to recover: the reservoir (W_r, W_in) is fixed-random
+from `seed=0` (regenerates byte-identically); only the small readout W_res + LoRA are
+learned, and they retrain in minutes at GPT-2 scale.
+
+Built the missing save/load layer:
+- `src/reservoir/persist.py` — `save_model_config`/`load_model_config` (plain JSON) and
+  `save_array_dict`/`load_array_dict` (npz) are pure and unit-tested in CI
+  (`tests/test_persist.py`, 5 tests). `save_reservoir_model`/`load_reservoir_model` are the
+  torch-gated glue (config + W_res npz + peft LoRA adapter). `kv_live.py` now stashes
+  `_init_config` for reconstruction.
+- Wired `--save DIR` into `scripts/run.py crosspass` (persists only the stateful model).
+- `scripts/publish_hf.py` — create_repo + upload_folder, with a `--dry-run`.
+
+Found and fixed a reproducibility footgun: the CLI `--steps` default was 300, which
+UNDERTRAINS the kv cross-pass recall to ~0.67; FINDINGS claims 1.0. Re-running at 600
+steps reproduces **1.00 recall (loss -> 0.01)** vs **0.17 chance** baseline, matching the
+paper. Bumped the CLI default to 600. (The published `docs/crosspass.png` was already the
+1.0 figure and did not change; only the gitignored `results/crosspass.json` was stale.)
+
+Trained the GPT-2 artifact, verified it **reloads from disk and reproduces 6/6 = 1.00**,
+and uploaded it PUBLIC to **https://huggingface.co/EmmaLeonhart/reservoir-agent-gpt2-crosspass**
+(user-approved visibility) with a model card stating the real numbers + scope caveats
+(GPT-2-only; Hermes still chance). Full suite: 75 passed. Artifact weights live on HF, not
+git (`artifacts/` is gitignored).

@@ -46,3 +46,4 @@ data_lake/diagrams/*.png
 Thumbs.db
 .env
 .env.local
+artifacts/
