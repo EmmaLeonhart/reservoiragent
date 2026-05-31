@@ -179,6 +179,19 @@ currently requires training each seed's readout — i.e. genuine trial-and-error
 cheap pre-filter. Finding an untrained proxy that *does* correlate is open work; until
 then the selection cost scales with the number of seeds tried.
 
+**Selection matters on the real task, decisively.** Training a population of **12 fixed
+reservoir seeds end-to-end on the cross-pass recall task itself** (GPT-2, 250 steps each —
+a deliberately hard budget so seeds separate) gives a wide spread of *downstream* recall,
+not just the synthetic memory-capacity proxy: **recall ranges from 1.00 (seeds 1, 7, 10)
+down to chance 0.17 (seeds 8, 11)** under identical architecture and training. Same model,
+same data — only the fixed random reservoir differs, and it is the difference between a
+model that solves the task and one that cannot. This is the concrete justification for
+building reservoir agents in **batches and keeping the whole population**: the good seeds
+are the model, and the bad seeds are the signal for eventually predicting which reservoirs
+will be good. (Figure: `docs/nseed_trained_spread.png`; `scripts/run.py batch --model gpt2
+--n 12 --steps 250`. The full population is published at
+`EmmaLeonhart/reservoir-agent-gpt2-batch-n12`.)
+
 ### H2 — the reservoir-dynamics regime
 
 Sweeping spectral radius ρ ∈ [0.1, 2.0] (figures: `docs/sweep_synthetic.png`,

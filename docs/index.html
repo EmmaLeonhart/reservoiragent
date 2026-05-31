@@ -448,6 +448,25 @@
     <code>python scripts/run.py nseed-select</code>.
   </figcaption>
 </figure>
+<p>
+  And the spread is not academic &mdash; it decides the task. Training <strong>12 fixed
+  reservoir seeds end-to-end on the cross-pass recall task</strong> (GPT-2, a deliberately
+  hard 250-step budget so seeds separate) gives downstream recall ranging from
+  <strong>1.00</strong> (seeds 1, 7, 10) down to <strong>chance, 0.17</strong> (seeds 8,
+  11). Same architecture, same data &mdash; only the fixed random reservoir differs, and it
+  is the difference between solving the task and not. This is why reservoir agents are built
+  in <strong>batches with the whole population kept</strong>: the good seeds are the model;
+  the bad seeds are signal for eventually predicting good reservoirs.
+</p>
+<figure>
+  <img src="nseed_trained_spread.png" alt="Bar chart of cross-pass recall across 12 GPT-2 reservoir seeds, ranked best to worst: three seeds reach 1.0, descending through 0.83, 0.67, 0.5, 0.33 down to two seeds at chance (0.17).">
+  <figcaption>
+    <strong>Trained reservoir selection</strong> (GPT-2, N=12, 250 steps). Downstream
+    cross-pass recall per seed, ranked. The whole population is published at
+    <a href="https://huggingface.co/EmmaLeonhart/reservoir-agent-gpt2-batch-n12">reservoir-agent-gpt2-batch-n12</a>.
+    Regenerate with <code>python scripts/run.py batch --model gpt2 --n 12 --steps 250</code>.
+  </figcaption>
+</figure>
 
 <p>
   <strong>Cross-pass recall &mdash; the core claim, demonstrated (the injection design
