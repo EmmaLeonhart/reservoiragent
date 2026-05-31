@@ -63,19 +63,16 @@ after.** We literally made a new kind of AI model — the first reservoir agents
 suboptimal reservoir-structure patterns are only findable if the suboptimal ones are kept.
 The bad models are signal. Barrel through; limited time.
 
-1. **Vision/planning documentation** — write the "new kind of AI model" framing + the
-   preserve-all-models-as-signal mandate + the versioning scheme (best privileged, all
-   kept) into the docs/planning (FINDINGS or a dedicated doc + todo.md). Grounding:
-   `data_lake/transcripts/so-because-reservoir-computer-claude.md` lines 529-549
-   (reservoir selection via fine-tuning; build empirical knowledge of good reservoirs).
-2. **N-seed batch training pipeline** — train N seeds on the cross-pass task, **SAVE ALL N**
-   (not just the best) via `persist.save_reservoir_model`, record each one's benchmark
-   score + reservoir properties (ρ, participation ratio, memory capacity) as the analysis
-   signal, mark the best `recommended`. A batch manifest links the population + the
-   privileged best. TDD the pure manifest/selection logic; the training is torch-gated.
-3. **Run batches of increasing size** — consecutive training runs (GPT-2 first, then
-   larger), publishing each batch's population to HF (named `reservoir-agent-*` so the
-   registry auto-discovers them). Log what was run; never fake a result.
+1. **Publish batch populations to HF** — the batch pipeline saves ALL N locally
+   (`artifacts/batch/<model>/seed_*` + `batch_manifest.json`), but local artifacts are
+   gitignored/ephemeral — the preservation mandate needs them ON HF. Decide topology
+   (one repo per seed `reservoir-agent-<model>-s<seed>`, or one batch repo with the
+   population + manifest), tag everything `reservoir-agent`, mark the recommended best, and
+   push. Extend `publish_hf.py` / add a batch publisher.
+2. **Run batches of increasing size** — consecutive runs (GPT-2 done: 4-seed batch all
+   reached 1.0; signal is in loss/dynamics spread — see devlog). Next: larger N, then
+   larger base models (the midnight Hermes path), publishing each population. Log what ran;
+   never fake a result. The seed-discrimination signal sharpens at harder settings.
 
 Deferred until training is running (registry DONE: `reservoir.installer.registry`,
 11 tests):
