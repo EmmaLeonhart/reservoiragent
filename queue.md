@@ -70,13 +70,11 @@ The bad models are signal. Barrel through; limited time.
    midnight Hermes path). Log what ran; never fake a result; the seed-discrimination signal
    sharpens at harder settings.
 
-Installer (training is now running, so this is unblocked; registry + console + menu +
-bootstrap DONE — `reservoir.installer.{registry,console,menu}` + `installer/install.py`,
-21 tests):
-2. **PyInstaller build + docs download link** — `installer/build_exe.py` to produce
-   `reservoir-agent-installer.exe` from `installer/install.py`; wire the download link into
-   docs/index.html. Building the binary needs a Windows runner — name plainly; no claim of
-   a hosted .exe until it actually builds + is linked.
+Installer DONE — registry + console + menu + bootstrap (21 tests) + `installer/build_exe.py`
++ `.github/workflows/build-installer.yml` (Windows runner builds the exe -> artifact, and
+release asset on tags) + docs "Run a reservoir agent locally" section. Verify the
+build-installer workflow goes green (the exe must actually build); cut a tag when ready so
+the exe attaches to a Release the docs link can point at directly.
 
 ## Other notes (not sure if they should be in the queue)
 

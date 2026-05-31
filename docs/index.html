@@ -568,6 +568,32 @@
   </figcaption>
 </figure>
 
+<h2>Run a reservoir agent locally</h2>
+<p>
+  Every model the project ships is a <strong>reservoir agent</strong> &mdash; a new model
+  type, not a vanilla transformer (the fixed reservoir is brain-surgeried in, attended, and
+  carries state across passes). They are published, tagged <code>reservoir-agent</code>, on
+  the <a href="https://huggingface.co/EmmaLeonhart/reservoir-agent-gpt2-crosspass">Hugging
+  Face Hub</a>, and built in batches where the <em>whole population is kept</em> &mdash; the
+  weaker seeds are retained as signal for learning what makes a good reservoir.
+</p>
+<p>
+  The installer lists every published reservoir agent (default = the recommended best),
+  downloads the one you pick, and drops you into a console where the reservoir state
+  persists across turns. It works today via Python:
+</p>
+<pre><code>pip install "reservoir-agent[models] @ git+https://github.com/EmmaLeonhart/reservoiragent.git"
+python -m reservoir.installer            # menu -&gt; download -&gt; stateful console</code></pre>
+<p>
+  A one-file <strong>Windows installer</strong> (<code>reservoir-agent-installer.exe</code>)
+  is built by the
+  <a href="https://github.com/EmmaLeonhart/reservoiragent/actions/workflows/build-installer.yml">build-installer
+  workflow</a> and attached to <a href="https://github.com/EmmaLeonhart/reservoiragent/releases">Releases</a>;
+  it is a thin bootstrap that sets up the environment and runs the same menu (a reservoir
+  agent needs PyTorch and a multi-GB base model fetched at run time, so the binary itself
+  stays small).
+</p>
+
 <footer>
   <p>
     Scaffolded with <a href="https://github.com/Immanuelle/cleanvibe">cleanvibe</a>

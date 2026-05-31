@@ -873,3 +873,19 @@ installer pieces — their logic needs no GPU:
 the torch-gated suite WHILE a GPU batch trains can flake on CUDA contention (saw one
 transient failure that passed on re-run); CI is unaffected (torch tests skip there).
 Remaining installer step: PyInstaller .exe build + docs download link.
+
+## 2026-05-30 - Installer .exe build script + CI workflow + docs section
+
+Finished the installer packaging (non-GPU, built while the GPT-2-medium batch trained):
+- `installer/build_exe.py` — PyInstaller one-file build of the stdlib-only bootstrap
+  (`install.py`); the binary is small because torch + the model are fetched at run time.
+- `.github/workflows/build-installer.yml` — Windows runner builds the exe, uploads it as a
+  workflow artifact, and attaches it to the GitHub Release on tag pushes.
+- docs/index.html — "Run a reservoir agent locally" section: the works-now path
+  (`pip install … ; python -m reservoir.installer`) + the Windows exe via the build workflow
+  / Releases. No broken/false exe link — points at the workflow + releases pages.
+
+PyInstaller is not installed locally, so the exe build is verified via the CI workflow
+(triggers on this push), not a local claim. NOTE: avoid running the torch test suite while a
+GPU batch trains — it contends for the GPU (slowed the medium batch + caused a transient
+test flake earlier).
