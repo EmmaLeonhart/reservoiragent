@@ -854,3 +854,22 @@ BOTH reservoir-agent repos. Full suite: 96 passed.
 Topology chosen (decided, not asked): one repo per batch holding the full population +
 manifest — preserves the seeds together for the pattern analysis that is the whole reason
 to keep the bad ones. Remaining: larger N, larger base models.
+
+## 2026-05-30 - Installer console + menu + bootstrap launcher (built in parallel)
+
+With training running (a GPT-2-medium batch in the background), built the deferred
+installer pieces — their logic needs no GPU:
+- `reservoir.installer.console` — `resolve_load_dir` (pure: single-model repo -> itself;
+  batch repo -> recommended seed subdir; 4 tests) + `ReservoirConsole` REPL that carries
+  reservoir state ACROSS turns (no reset between turns — the cross-pass statefulness is the
+  point) + `download_and_resolve`/`run` (torch+net gated).
+- `reservoir.installer.menu` — `choose_repo` (pure: empty -> recommended default; number ->
+  that row; 6 tests) + the interactive menu + `python -m reservoir.installer` entry.
+- `installer/install.py` — standalone bootstrap (stdlib only; pip-installs the package then
+  hands off to the menu). This is what the .exe wraps; a bootstrap (not a frozen binary)
+  because a reservoir agent needs torch+CUDA + a multi-GB base model at run time.
+
+21 installer tests total (registry 11 + console 4 + menu 6); full suite green. NOTE: running
+the torch-gated suite WHILE a GPU batch trains can flake on CUDA contention (saw one
+transient failure that passed on re-run); CI is unaffected (torch tests skip there).
+Remaining installer step: PyInstaller .exe build + docs download link.

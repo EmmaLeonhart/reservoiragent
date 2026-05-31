@@ -70,13 +70,13 @@ The bad models are signal. Barrel through; limited time.
    midnight Hermes path). Log what ran; never fake a result; the seed-discrimination signal
    sharpens at harder settings.
 
-Deferred until training is running (registry DONE: `reservoir.installer.registry`,
-11 tests):
-4. **installer/console.py** — stateful reservoir-agent REPL (download + `load_reservoir_model`
-   + state-carrying chat loop). torch-gated.
-5. **installer/install.py** — bootstrap launcher (deps + registry menu + download + console).
-6. **PyInstaller build + docs download link** — produce `reservoir-agent-installer.exe`
-   (needs a Windows runner — name plainly; no claim of a hosted .exe until it builds).
+Installer (training is now running, so this is unblocked; registry + console + menu +
+bootstrap DONE — `reservoir.installer.{registry,console,menu}` + `installer/install.py`,
+21 tests):
+2. **PyInstaller build + docs download link** — `installer/build_exe.py` to produce
+   `reservoir-agent-installer.exe` from `installer/install.py`; wire the download link into
+   docs/index.html. Building the binary needs a Windows runner — name plainly; no claim of
+   a hosted .exe until it actually builds + is linked.
 
 ## Other notes (not sure if they should be in the queue)
 
