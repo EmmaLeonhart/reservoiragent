@@ -779,3 +779,13 @@ and uploaded it PUBLIC to **https://huggingface.co/EmmaLeonhart/reservoir-agent-
 (user-approved visibility) with a model card stating the real numbers + scope caveats
 (GPT-2-only; Hermes still chance). Full suite: 75 passed. Artifact weights live on HF, not
 git (`artifacts/` is gitignored).
+
+## 2026-05-30 - Link the published HF model in the report site + README
+
+Surfaced the newly-published GPT-2 cross-pass model in the deliverables (it was on HF but
+linked nowhere). Added a "Model on Hugging Face" action card to the docs/index.html
+Download section, a "download the trained weights" link in the cross-pass figure caption,
+and a "Model / weights" section in README.md pointing at
+EmmaLeonhart/reservoir-agent-gpt2-crosspass + the --save / publish_hf.py workflow.
+Verified the page HTML stays balanced (html.parser, no unclosed tags) and both HF links
+render. Docs-only; CI/pages rebuild on push.

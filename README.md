@@ -40,6 +40,14 @@ building — see `literature/`.
 - `docs/` — the published GitHub Pages report site (themed) + built PDF.
 - `queue.md` / `todo.md` / `devlog.md` — the cleanvibe work loop.
 
+## Model / weights
+
+The trained GPT-2 cross-pass reservoir is published on Hugging Face:
+**[EmmaLeonhart/reservoir-agent-gpt2-crosspass](https://huggingface.co/EmmaLeonhart/reservoir-agent-gpt2-crosspass)**
+(verified 100% cross-context recall vs 17% chance baseline). Reproduce and save your own
+with `python scripts/run.py crosspass --mode kv --save <dir>`, then publish with
+`python scripts/publish_hf.py --artifact-dir <dir> --repo-id <user>/<name>`.
+
 ## Getting started
 
 ```
