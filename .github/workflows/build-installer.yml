@@ -1,0 +1,39 @@
+name: build-installer
+
+# Builds the downloadable Windows installer (reservoir-agent-installer.exe) from the
+# stdlib-only bootstrap. The exe is small (torch + the model are fetched at run time).
+# Uploads it as a workflow artifact; on a tag push it is also attached to the GitHub Release
+# so the docs site can link to it.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "installer/**"
+      - ".github/workflows/build-installer.yml"
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install PyInstaller
+        run: python -m pip install pyinstaller
+      - name: Build the installer exe
+        run: python installer/build_exe.py
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: reservoir-agent-installer
+          path: dist/reservoir-agent-installer.exe
+      - name: Attach to release (tags only)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/reservoir-agent-installer.exe
