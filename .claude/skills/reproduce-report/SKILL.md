@@ -1,9 +1,9 @@
 ---
 name: reproduce-report
-description: Reproduce the Reservoir Agent results, figures, report site (docs/) and report.pdf from the code in this repo. Use when someone asks to replicate/reproduce the findings, regenerate a figure, rebuild the GitHub Pages site or PDF, or verify a result before it goes in the paper.
+description: Reproduce the Reservoir Attention Network (RAN) results, figures, report site (docs/) and report.pdf from the code in this repo. Use when someone asks to replicate/reproduce the findings, regenerate a figure, rebuild the GitHub Pages site or PDF, or verify a result before it goes in the paper.
 ---
 
-# Reproduce the Reservoir Agent report (replication skill)
+# Reproduce the Reservoir Attention Network (RAN) report (replication skill)
 
 This skill is the reproduction recipe that backs the published site and the
 paper. Every headline claim in `FINDINGS.md` / the `docs/` site must be

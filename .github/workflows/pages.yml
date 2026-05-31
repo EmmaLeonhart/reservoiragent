@@ -42,7 +42,7 @@ jobs:
           mkdir -p docs
           if [ -f FINDINGS.md ]; then
             pandoc FINDINGS.md -f gfm --standalone \
-              --metadata title="Reservoir Agent — Findings" \
+              --metadata title="Reservoir Attention Network (RAN) — Findings" \
               --include-in-header report-print.html \
               -o docs/report.pdf --pdf-engine=/tmp/wp/bin/weasyprint \
               || { echo "::error::report.pdf build failed"; exit 1; }

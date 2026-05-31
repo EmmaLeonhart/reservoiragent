@@ -1,5 +1,7 @@
-# Reservoir Agent — Findings
+# Reservoir Attention Network (RAN) — Findings
 
+**Architecture:** Reservoir Attention Network (RAN)  
+**Implementation:** Reservoir Agent (GPT-2, Hermes 3B)  
 **Status: feasibility phase complete.** This document is the project's write-up.
 The results below confirm the core architecture and dynamics, demonstrate
 cross-context recall on GPT-2, and identify the optimization frontier on Hermes.
@@ -14,6 +16,10 @@ mid-layer attention give the model genuine state **between** forward passes — 
 time axis — without degrading its base capabilities, and what reservoir-dynamics
 regime (spectral radius, reservoir size, injection depth) makes that injected state
 usable signal rather than noise?
+
+The Reservoir Attention Network (RAN) architecture introduces a fixed-random
+recurrent substrate into the transformer's attention mechanism. We refer to a
+specific instantiation of this architecture as a **Reservoir Agent**.
 
 This session scopes the question as a **feasibility + dynamics study** at small scale
 (GPT-2-scale base, single machine). The full vision — forking an agent harness into an

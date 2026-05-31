@@ -1,9 +1,11 @@
-# Sources — Reservoir Agent literature review
+# Sources — Reservoir Attention Network (RAN) literature review
 
 One entry per source: citation · key claim relevant to us · method (one line) ·
-how it relates to / differs from the Reservoir Agent (fixed-random reservoir
-injected into a *pretrained* transformer's mid-layer attention, with state
-persisting across *independent* forward passes via a learned KV readout).
+how it relates to / differs from the **Reservoir Attention Network (RAN)** 
+(fixed-random reservoir injected into a *pretrained* transformer's mid-layer 
+attention, with state persisting across *independent* forward passes via a 
+learned KV readout). We refer to a specific instantiation of this architecture 
+as a **Reservoir Agent**.
 
 **Verification status.** Entries in §1 (reservoir foundations) and §2
 (expressivity) were produced and adversarially fact-checked by a multi-agent
@@ -28,9 +30,10 @@ GMD Report 148, German National Research Center for Information Technology.
   *sufficient* for the echo state property (ESP); |λ_max| > 1 (spectral radius > 1)
   → "asymptotically unstable null state… no echo states" for input sets containing 0.
 - **Method:** Random fixed recurrent net + linear readout trained by regression.
-- **Relation:** This *is* the paradigm the Reservoir Agent instantiates (W_r, W_in
-  fixed; W_out learned). The spectral-radius regime is exactly what this project
-  proposes to characterize — but at transformer-attention scale, not scalar inputs.
+- **Relation:** This *is* the paradigm the **Reservoir Attention Network (RAN)** 
+  instantiates (W_r, W_in fixed; W_out learned). The spectral-radius regime is 
+  exactly what this project proposes to characterize — but at 
+  transformer-attention scale, not scalar inputs.
 
 ### Maass, Natschläger & Markram 2002 — "Real-time computing without stable states: a new framework for neural computation based on perturbations" (Liquid State Machines)
 *Neural Computation* 14(11):2531–2560. <https://pubmed.ncbi.nlm.nih.gov/12433288/>
@@ -138,7 +141,8 @@ ICML 2021. <https://arxiv.org/abs/2106.06981>
 ## §3 — Recurrence / state / memory added to transformers  *(closest prior art — the gap)*
 
 For each: **recurrence trained or fixed-random?** and **state within-sequence or
-across independent passes?** — the two axes on which the Reservoir Agent differs.
+across independent passes?** — the two axes on which the **Reservoir Attention 
+Network (RAN)** differs.
 
 ### Dai et al. 2019 — Transformer-XL  *(re-verified)*
 ACL 2019. <https://arxiv.org/abs/1901.02860>

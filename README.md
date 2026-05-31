@@ -1,18 +1,17 @@
-# reservoiragent
+# Reservoir Attention Network (RAN)
 
 > A **research project** scaffolded with
 > [cleanvibe](https://github.com/Immanuelle/cleanvibe) `research`.
 
-**Research question:** Can a fixed, randomly-initialized reservoir injected into a
-pretrained transformer's mid-layer attention give the model genuine state between
-forward passes — a real time axis — without degrading its base capabilities, and what
-reservoir-dynamics regime (spectral radius, size, injection depth) makes that injected
-state usable signal rather than noise?
+**Research question:** Can the **Reservoir Attention Network (RAN)** architecture — 
+which injects a fixed, randomly-initialized reservoir into a pretrained 
+transformer's mid-layer attention — give the model genuine state between forward 
+passes (a real time axis) without degrading its base capabilities?
 
-The feasibility study is **complete**. The results confirm that a fixed, randomly-initialized
-reservoir can be injected into a pretrained transformer (GPT-2, Hermes 3B) without
-breaking it, and that a content-addressable (attended) injection enables genuine
-cross-context recall.
+The feasibility study is **complete**. The results confirm that a RAN can be 
+successfully implemented (as a **Reservoir Agent**) using pretrained transformers 
+(GPT-2, Hermes 3B) without breaking them, and that a content-addressable 
+(attended) injection enables genuine cross-context recall.
 
 **Key Findings:**
 - **H1 (Non-destruction):** Injected models match vanilla performance when the readout is zeroed.

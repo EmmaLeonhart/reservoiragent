@@ -1,4 +1,4 @@
-# reservoiragent — research project
+# Reservoir Attention Network (RAN) — research project
 
 ## Skills
 
@@ -18,22 +18,24 @@ This is a **research project** scaffolded by `cleanvibe research`. Unlike a
 investigation: you pose a question, survey the prior literature, run experiments
 or build something to answer it, and publish the findings.
 
-The project investigates the **Reservoir Agent**: a pretrained transformer with a
-fixed, randomly-initialized reservoir injected into its mid-layer attention so the
-model carries state *between* forward passes (a genuine time axis), rather than being
-stateless. The originating spec is `data_lake/reservoir_agent_plan.md`; the originating
-conversations + architecture diagrams are preserved under `data_lake/transcripts/` and
-`data_lake/diagrams/`. **This session's scope is a feasibility + dynamics study at small
-scale** (GPT-2-scale base, single CUDA machine): inject the reservoir, regression-test
-that base behavior survives, characterize reservoir dynamics across spectral radius, and
-write up the theory. The full vision — forking the Hermes harness into an always-alive
-runtime and N-seed LoRA selection at agent scale — is the long-horizon target in `todo.md`.
+The project investigates the **Reservoir Attention Network (RAN)**: a pretrained 
+transformer with a fixed, randomly-initialized reservoir injected into its 
+mid-layer attention so the model carries state *between* forward passes (a 
+genuine time axis), rather than being stateless. We refer to a specific 
+instantiation of this architecture as a **Reservoir Agent**. The originating 
+spec is `data_lake/reservoir_agent_plan.md`; the originating conversations + 
+architecture diagrams are preserved under `data_lake/transcripts/` and 
+`data_lake/diagrams/`. **This session's scope is a feasibility + dynamics study 
+at small scale** (GPT-2-scale base, single CUDA machine): inject the reservoir, 
+regression-test that base behavior survives, characterize reservoir dynamics 
+across spectral radius, and write up the theory. The full vision — forking the 
+Hermes harness into an always-alive runtime and N-seed LoRA selection at agent 
+scale — is the long-horizon target in `todo.md`.
 
-> **Research question:** Can a fixed, randomly-initialized reservoir injected into a
-> pretrained transformer's mid-layer attention give the model genuine state between
-> forward passes — a real time axis — without degrading its base capabilities, and what
-> reservoir-dynamics regime (spectral radius, size, injection depth) makes that injected
-> state usable signal rather than noise?
+> **Research question:** Can the **Reservoir Attention Network (RAN)** architecture — 
+> which injects a fixed, randomly-initialized reservoir into a pretrained 
+> transformer's mid-layer attention — give the model genuine state between forward 
+> passes (a real time axis) without degrading its base capabilities?
 
 Like a cleanvibe replication it produces a published, legible report — a themed
 **GitHub Pages site** (`docs/`) plus a transportable PDF — but the content is
