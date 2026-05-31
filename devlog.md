@@ -921,3 +921,18 @@ Per the preserve-all mandate, published the whole failed population as signal �
 by loss; seed 9 "best" at loss 1.27). The registry still defaults to the working
 gpt2-crosspass model, so nothing misleads installer users. Next: probe gpt2-medium with
 lower input_scaling (~0.1) + more steps on one seed before committing a full batch.
+
+## 2026-05-30 - GPT-2-medium corrected probe also fails: scale wall starts at 355M
+
+Probed gpt2-medium cross-pass with lower input_scaling=0.1 + 1000 steps (the over-drive
+hypothesis). Result: still chance (0.17), loss plateau 12.32->2.16 — lowering the reservoir
+drive did NOT fix it. So the cross-pass transfer wall starts at 355M, same failure mode as
+Hermes-3B (learns the marginal, ignores the prefix), not a parameter tweak. Documented in
+FINDINGS C-section ("transfer wall starts well below 3B"). The real fix is the documented
+curriculum / stronger-prefix-coupling routes (substantial; todo.md Hermes thread) — not
+blind setting sweeps, so I am not burning GPU guessing.
+
+Decision: pivot the "increasing size" barrel-through to larger-N GPT-2-SMALL batches at a
+harder setting (fewer steps) where training actually works and seeds genuinely differ —
+that produces the real good/bad reservoir-selection signal the project is built to
+accumulate. Larger base models remain gated on the transfer routes.

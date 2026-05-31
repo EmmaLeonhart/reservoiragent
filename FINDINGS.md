@@ -353,6 +353,15 @@ on GPT-2; on Hermes the mechanism is verified-wired but the recall has not yet b
 trained to converge.** (`results/crosspass_hermes-3-llama-3-2-3b.json`,
 `docs/crosspass_hermes-3-llama-3-2-3b.png`.)
 
+**The transfer wall starts well below 3B.** A 10-seed **GPT-2-medium (355M)** batch and a
+follow-up single-seed probe at lower input scaling (0.1, 1000 steps) both stayed at
+**chance (0.17)** with loss plateauing ~2.1 — the same "learns the marginal, ignores the
+prefix" failure as Hermes, just at 355M. So the decisive cross-pass result is specific to
+**GPT-2-small**; the bootstrapping difficulty appears as soon as the base model grows, which
+sharpens (not contradicts) the open challenge: scaling the win needs the curriculum /
+stronger-coupling routes above, not a parameter tweak. The failed medium population is
+preserved as signal at `EmmaLeonhart/reservoir-agent-gpt2-medium-batch`.
+
 ### H4 (D) — a trained silence policy (meaningful "sometimes no response")
 
 The harness gate currently keys off the *base model's* next-token entropy, which is
