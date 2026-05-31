@@ -903,3 +903,21 @@ the batch trained, contending for the device and wedging a python process (PID 3
 0 MiB / 0 python procs, restarted the batch clean (job bvz21t3t6). Operational rule recorded
 in queue.md: do NOT run GPU/torch work while a batch trains. Publish the medium population
 when the clean run completes. No code defect — a resource-contention hang of my own making.
+
+## 2026-05-30 - GPT-2-medium batch: all chance (negative result) + misdiagnosis correction
+
+Correction to the prior status report: the restarted GPT-2-medium batch was NOT stuck/OOM —
+it completed (exit 0), just slow (medium seeds are far heavier than gpt2-small; the two-pass
+backprop graph pushes ~8 GB on the 4070). My "wedged near-OOM" read was wrong; it was
+grinding.
+
+Real result: **all 10 GPT-2-medium seeds reached chance recall (0.17)** — none learned the
+cross-pass task. Loss plateaued high (1.27–2.52) vs ~0 for gpt2-small. This is the same
+over-drive signature as the Hermes failure: larger activations saturate the reservoir at
+`input_scaling=0.5`. A genuine negative result, not a bug.
+
+Per the preserve-all mandate, published the whole failed population as signal →
+`EmmaLeonhart/reservoir-agent-gpt2-medium-batch` (honest card: every seed at chance, ranked
+by loss; seed 9 "best" at loss 1.27). The registry still defaults to the working
+gpt2-crosspass model, so nothing misleads installer users. Next: probe gpt2-medium with
+lower input_scaling (~0.1) + more steps on one seed before committing a full batch.
