@@ -70,10 +70,12 @@ The bad models are signal. Barrel through; limited time.
    lower `input_scaling=0.1`/1000 steps ALSO chance (loss plateau ~2.1) — so it's a real
    **scale wall starting at 355M** (same as Hermes), not a tweak; the fix is the documented
    curriculum/stronger-coupling routes (substantial — `todo.md` Hermes-transfer thread), not
-   blind setting sweeps. Recorded in FINDINGS. PRODUCTIVE UNBLOCKED PATH instead: larger-N
-   **GPT-2-small** batches at a *harder* setting (fewer steps) so seeds actually differ →
-   real good/bad reservoir-selection signal where training works. Keep GPU clear while
-   training; free it before the midnight Hermes run.
+   blind setting sweeps. Recorded in FINDINGS. PRODUCTIVE PATH (done): **GPT-2-small N=12
+   @250 steps → `reservoir-agent-gpt2-batch-n12`**, a REAL selection spread (recall 1.00 for
+   seeds 1/7/10 down to chance 0.17 for 8/11) — the good/bad signal the project accumulates.
+   Fixed a real `train_batch` GPU-memory-accumulation drag (now frees per seed; verified by
+   next batch run). NEXT: more / larger-N small batches to grow the selection dataset; keep
+   GPU clear + free it before the midnight Hermes run.
 
 Installer COMPLETE + verified — registry + console + menu + bootstrap (21 tests) +
 `installer/build_exe.py` + `build-installer` workflow (GREEN @ 2b3b976: the exe actually

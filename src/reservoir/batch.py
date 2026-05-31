@@ -167,6 +167,19 @@ def train_batch(model_name: str = "gpt2", *, seeds=range(4), steps: int = 600,
         r["seed"] = seed
         r["save_dir"] = save_dir
         records.append(r)
+        # release this seed's model + cached CUDA memory before the next seed. Without
+        # this, each seed's injected model + two-pass autograd graph accumulates in the
+        # caching allocator across the loop — harmless at small N, but it drags toward
+        # near-OOM by ~seed 10 (observed on the N=12 GPT-2 batch). Verified by the next
+        # batch run, not a unit test (it is a GPU-runtime resource effect).
+        try:
+            import gc
+            import torch
+            gc.collect()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+        except Exception:
+            pass
 
     manifest = build_batch_manifest(records, model_name=model_name)
     with open(os.path.join(batch_dir, "batch_manifest.json"), "w", encoding="utf-8") as f:
