@@ -833,3 +833,24 @@ preserve-all mandate exists to capture. Best = seed 1. Full suite: 93 passed.
 
 Remaining (queue): publish batch populations to HF (local artifacts are gitignored), run
 larger N + larger base models. Installer console/bootstrap/exe deferred until training runs.
+
+## 2026-05-30 - Batch → HF publisher; first batch population published
+
+Honored the preservation mandate: the batch pipeline saved all N locally but they were
+gitignored/ephemeral, so they needed to be ON HF. Built the batch publisher and pushed the
+first population.
+
+- `build_batch_card(manifest, repo_id)` in batch.py — generates a HF model card documenting
+  the WHOLE population (every seed, its score + dynamics signal, recommended best flagged),
+  tagged `reservoir-agent`. 3 tests (tag/front-matter, lists every seed, marks best).
+- `scripts/publish_hf.py --batch-dir` — validates the batch dir (every seed_*/ is a complete
+  artifact), writes the generated card, uploads the whole population as one repo. Kept the
+  single-model `--artifact-dir` path; the two are mutually exclusive.
+
+Published `EmmaLeonhart/reservoir-agent-gpt2-batch` (4 seeds + batch_manifest.json + card).
+Verified all 4 seed dirs + manifest + card present on HF, and the registry auto-discovers
+BOTH reservoir-agent repos. Full suite: 96 passed.
+
+Topology chosen (decided, not asked): one repo per batch holding the full population +
+manifest — preserves the seeds together for the pattern analysis that is the whole reason
+to keep the bad ones. Remaining: larger N, larger base models.
