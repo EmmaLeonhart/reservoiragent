@@ -953,3 +953,16 @@ allocator accumulated across the loop (~7.9 GB by seed 10 on GPT-2-small — abs
 size). Fixed: gc.collect() + torch.cuda.empty_cache() per seed. Pure-logic tests (36) pass;
 the memory effect is GPU-runtime, verified by the next batch run, not a unit test (named
 plainly). GPU confirmed freed (189 MiB) after the run — clear for the midnight Hermes job.
+
+## 2026-05-30 - Document the trained reservoir-selection spread in the report
+
+Non-GPU work (held off launching batches ~34 min before the midnight Hermes run, and an
+unidentified python process was already on the GPU). The N=12 run produced a strong result
+the report didn't yet show: a TRAINED downstream selection spread (recall 1.00 for seeds
+1/7/10 → chance 0.17 for 8/11), much more decisive than the untrained dynamics proxy.
+- Generated `docs/nseed_trained_spread.png` (matplotlib, from the local batch manifest).
+- FINDINGS N-seed section: added "Selection matters on the real task, decisively" — same
+  architecture/data, only the fixed reservoir differs, and it decides task success; the
+  concrete justification for batch-and-keep-all. Links the published population.
+- docs/index.html: matching paragraph + figure.
+HTML validated balanced. CI/pages verify on push. GPU left untouched (clear for midnight).
