@@ -347,11 +347,16 @@ architecture-agnostic and runs on Hermes via the generalized injection.)
 
 **Transfer to Hermes 3B — not yet, and well diagnosed (honest).** The same
 content-addressable experiment was run on the real target, Hermes-3-Llama-3.2-3B, across
-**three** attempts: 4-bit at input scaling 0.5 (300 steps), 4-bit at 0.1 (600 steps), and
-**bf16 (non-4-bit) at 0.1 with a higher LR 3e-3** (600 steps). **All three came back at
-chance (0.17), stateful ≈ baseline,** with the training loss consistently failing to
-converge (plateau ≈ 2.8–2.9, vs GPT-2's 0.02). The consistent plateau **across both 4-bit
-and bf16** shows quantization is *not* the cause.
+**four** attempts: 4-bit at input scaling 0.5 (300 steps), 4-bit at 0.1 (600 steps),
+**bf16 (non-4-bit) at 0.1 with a higher LR 3e-3** (600 steps), and a dedicated
+**many-more-steps run: 4-bit, 2000 steps** (≈6.7× the first attempt). **All four came back
+at chance (0.17), stateful ≈ baseline,** with the training loss consistently failing to
+converge (plateau ≈ 2.5–2.9, vs GPT-2's 0.02; the 2000-step run reached 2.49, no better
+than 300 steps). The consistent plateau **across both 4-bit and bf16, and now across a
+6.7× step increase,** shows the wall is **neither quantization nor under-training** — more
+steps alone does not break it, so the remaining routes are structural (a curriculum that
+starts with the key in-context and anneals it out, a stronger multi-layer prefix coupling,
+or unfreezing more of the model), which is substantial work, not a hyperparameter.
 
 A focused gradient diagnostic on the Llama path **rules out a bug**: the reservoir state
 *does* update each pass (norm 0.14 after pass 1, from 0) and gradients *do* flow to both
@@ -359,11 +364,13 @@ the readout `W_res` (‖∇‖ ≈ 0.016) and the LoRA adapters (Σ|∇| ≈ 3.0
 correctly wired on Hermes — this is a genuine **optimization / scale difficulty**, not a
 defect: the prefix's signal, diluted through 28 layers and competing with a 3B
 instruction-tuned model's strong priors, does not *bootstrap* into use within the
-attempted budget, whereas shallow GPT-2 bootstrapped easily. Plausible routes (left open,
-not faked): far more steps / a curriculum (start with the key in-context, anneal it out) /
-a stronger prefix coupling / unfreezing more of the model. **The result holds decisively
-on GPT-2; on Hermes the mechanism is verified-wired but the recall has not yet been
-trained to converge.** (`results/crosspass_hermes-3-llama-3-2-3b.json`,
+attempted budget, whereas shallow GPT-2 bootstrapped easily. The **"far more steps" route
+has now been tested and ruled out** (a 2000-step 4-bit run, ≈6.7×, still chance / loss 2.49);
+the remaining plausible routes (left open, not faked) are structural: a curriculum (start
+with the key in-context, anneal it out) / a stronger multi-layer prefix coupling / unfreezing
+more of the model. **The result holds decisively on GPT-2; on Hermes the mechanism is
+verified-wired but the recall has not yet been trained to converge, and it is not a
+step-count problem.** (`results/crosspass_hermes-3-llama-3-2-3b.json`,
 `docs/crosspass_hermes-3-llama-3-2-3b.png`.)
 
 **The transfer wall starts well below 3B.** A 10-seed **GPT-2-medium (355M)** batch and a
