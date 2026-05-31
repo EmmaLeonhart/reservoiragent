@@ -807,3 +807,29 @@ card and re-uploaded. Full suite: 86 passed.
 Deferred (registry done): installer console + bootstrap + .exe build. Next: vision/planning
 docs (new model type; preserve-all-models-as-signal) + the N-seed batch training pipeline
 that saves ALL N models with their scores + reservoir properties.
+
+## 2026-05-30 - N-seed batch training pipeline + reservoir-agent model-type doc
+
+Built the project's core method (reservoir selection via fine-tuning) and documented the
+model type. Per the user: reservoir agents are a NEW model type (the first to exist), and
+we PRESERVE every model in a batch — the bad seeds are signal for learning what makes a
+reservoir good.
+
+- `RESERVOIR_AGENTS.md` — foundational doc: reservoir agent = transformer + brain-surgeried
+  fixed reservoir (attended, cross-pass-stateful, RNN-like), not a transformer; build in
+  batches of N seeds, fine-tune all, KEEP ALL (bad ones = signal), privilege the best,
+  tag everything `reservoir-agent`. Grounded in the data_lake transcripts (selection via
+  fine-tuning, building empirical knowledge of good reservoirs).
+- `src/reservoir/batch.py` — `rank_population`/`select_best`/`build_batch_manifest` (pure,
+  7 tests in tests/test_batch.py: rank by recall then loss, preserve ALL, mark exactly one
+  recommended best) + torch-gated `train_batch` (trains each seed via run_cross_pass_kv with
+  --save, records per-seed dynamics proxy as signal, writes batch_manifest.json).
+- `scripts/run.py batch` subcommand (--model/--n/--steps/...).
+
+Ran a real 4-seed GPT-2 batch (600 steps): all 4 saved with full artifacts + manifest; all
+reached recall 1.00, so the discriminating signal is convergence loss (seed 3 plateaued at
+0.20 vs ~0) + participation ratio (~0.112-0.114) — exactly the per-seed signal the
+preserve-all mandate exists to capture. Best = seed 1. Full suite: 93 passed.
+
+Remaining (queue): publish batch populations to HF (local artifacts are gitignored), run
+larger N + larger base models. Installer console/bootstrap/exe deferred until training runs.

@@ -352,6 +352,23 @@ def cmd_crosspass(args) -> int:
     return 0
 
 
+def cmd_batch(args) -> int:
+    from reservoir.batch import train_batch
+
+    print(f"N-seed batch: train {args.n} reservoir agents (seeds 0..{args.n - 1}) on "
+          f"{args.model} cross-pass, SAVE ALL, rank + manifest (bad seeds kept as signal)…")
+    m = train_batch(args.model, seeds=range(args.n), steps=args.steps, out_root=args.out,
+                    n_keys=args.n_keys, lr=args.lr, input_scaling=args.input_scaling,
+                    load_in_4bit=args.bits4, dtype=args.dtype)
+    print(f"batch of {m['n']}; best (recommended) seed = {m['best']['seed']}")
+    for p in m["population"]:
+        print(f"  rank {p['rank']} seed {p['seed']}: recall={p['recall_accuracy']:.2f} "
+              f"loss_end={p['loss_end']:.3f} pr_frac={p.get('pr_frac', float('nan')):.3f} "
+              f"recommended={p['recommended']}")
+    print(f"saved population + batch_manifest.json under {args.out}/")
+    return 0
+
+
 def cmd_finetune(args) -> int:
     from reservoir.torch_inject import train_finetune
 
@@ -534,6 +551,19 @@ def main(argv=None) -> int:
                     help="directory to persist the trained stateful model (kv mode) as a "
                          "loadable artifact (config + W_res readout + LoRA adapter)")
     cp.set_defaults(func=cmd_crosspass, bits4=False, save=None)
+
+    bt = sub.add_parser("batch", help="N-seed batch: train a population, save ALL, rank + manifest")
+    bt.add_argument("--model", default="gpt2")
+    bt.add_argument("--n", type=int, default=4, help="population size (seeds 0..n-1)")
+    bt.add_argument("--steps", type=int, default=600)
+    bt.add_argument("--lr", type=float, default=1e-3)
+    bt.add_argument("--n-keys", type=int, default=6)
+    bt.add_argument("--out", default="artifacts/batch")
+    bt.add_argument("--input-scaling", type=float, default=0.5)
+    bt.add_argument("--4bit", dest="bits4", action="store_true",
+                    help="load the base in 4-bit (for large models)")
+    bt.add_argument("--dtype", choices=["float16", "bfloat16"], default=None)
+    bt.set_defaults(func=cmd_batch, bits4=False)
 
     ft = sub.add_parser("finetune", help="real LoRA + W_out fine-tune (GPU)")
     ft.add_argument("--model", default="gpt2")
