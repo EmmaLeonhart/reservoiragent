@@ -1168,3 +1168,16 @@ is whether QLoRA *training* fits in 8.6 GB with offloaded experts — only a rea
 Did NOT run the ~9 GB 4-bit download + load blind in this session: heavy download + uncertain
 training fit, left as a resource-gated local step (tightened queue item + recorded in todo.md).
 Not a faked completion — the load was not run, and that is stated.
+
+## 2026-06-01 - Importance-based (H2O) eviction added to the reservoir-protected policy (Phase G)
+
+Work-loop tick: the only remaining Phase G item (the V2-Lite injection attempt) is
+resource-gated, so promoted the next bounded, CPU-verifiable item — the H2O heavy-hitter
+eviction the chat raised and sources.md §6 had flagged as planned. Extended
+ReservoirEvictionPolicy.retained_indices/evicted_indices with an optional per-position
+`scores` argument: when given, the budget headroom is filled with the highest-scoring
+evictable normal tokens (heavy hitters) instead of the newest, ties broken toward recency,
+while sink + reservoir + recent window stay pinned exactly as before. scores=None keeps the
+StreamingLLM recency behaviour (regression test added). 5 new tests (suite 145 passed),
+docstring + a one-line FINDINGS note. Position-based and importance-based eviction now sit
+under one interface with the reservoir pinned either way.

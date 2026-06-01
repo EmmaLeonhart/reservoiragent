@@ -576,7 +576,10 @@ evicted. *"A really long time of no activity is signal,"* and that signal must s
 `reservoir.kv_evict.ReservoirEvictionPolicy` implements this as a pure, torch-free policy
 over per-position tags `{sink, reservoir, normal}`; with no reservoir tags it degrades to
 vanilla StreamingLLM. Because the reservoir is re-prepended each pass (a *fixed* number of
-pseudo-tokens, not accumulated), pinning it costs only a constant.
+pseudo-tokens, not accumulated), pinning it costs only a constant. The policy also accepts
+per-position importance scores, switching the ordinary-token choice from recency to H2O-style
+heavy-hitter retention while still pinning the reservoir — position-based and importance-based
+eviction under one interface.
 
 Simulating 512 blank ticks (`scripts/run.py blankcycle`; `docs/blank_cycle_kv.png`): the
 **vanilla** cache grows linearly to **524 positions**, while the **reservoir-protected**
