@@ -1060,3 +1060,18 @@ KV eviction → blank-cycle context-growth demo → interruptibility experiment 
 linear probe → Safety-by-Design section → DeepSeek decision into todo/REVIEW → V2-Lite spike),
 mirrored to the task tool, and started the three session-local crons (work-loop :03, auto-flush
 :15, status-report :42) for a fresh session.
+
+## 2026-06-01 - Reservoir-protected KV eviction policy (Phase G, from the Grok chat)
+
+Built src/reservoir/kv_evict.py + tests/test_kv_evict.py (11 tests, TDD, all green; full
+suite 123 passed). This is the first concrete application of the imported Grok conversation:
+the chat flagged that a Reservoir Agent's blank ticks keep appending to the KV cache, burning
+context faster than a turn-based model, and pointed at StreamingLLM (attention-sink + recent
+window) eviction with the reservoir's K/V *pinned*. ReservoirEvictionPolicy implements exactly
+that as a pure, torch-free policy over per-position tags {sink, reservoir, normal}: always
+retain sinks + all reservoir entries + the recent window; evict oldest normal tokens first up
+to a budget; protected entries are a hard floor (over_budget() reports when they alone exceed
+the cap); with no reservoir tags it degrades to vanilla StreamingLLM. Keeping it pure means it
+runs in CI on CPU with no GPU gate. Next (queue item 1): drive blank ticks through the live KV
+path to show vanilla cache grows linearly while this policy stays bounded and the reservoir
+signal survives.
