@@ -1075,3 +1075,17 @@ the cap); with no reservoir tags it degrades to vanilla StreamingLLM. Keeping it
 runs in CI on CPU with no GPU gate. Next (queue item 1): drive blank ticks through the live KV
 path to show vanilla cache grows linearly while this policy stays bounded and the reservoir
 signal survives.
+
+## 2026-06-01 - Blank-cycle context-growth demonstration (Phase G)
+
+Built src/reservoir/blank_cycle.py (simulate_blank_cycle + plot_blank_cycle) + a `blankcycle`
+subcommand in scripts/run.py + tests/test_blank_cycle.py (6 tests; full suite 129 passed).
+Makes the Grok chat's "context explodes on a reservoir agent" concern measurable with no GPU:
+streaming 512 blank ticks, the no-eviction cache grows linearly to 524 positions while the
+reservoir-protected policy (kv_evict) stays bounded at the budget (128) from ~tick 116 on, and
+all 8 reservoir entries are retained on EVERY tick — the time-axis is exactly what the policy
+refuses to drop. Wrote results/blank_cycle.json (gitignored), docs/blank_cycle_kv.png (the
+line chart), a FINDINGS "## KV: blank-cycle context growth" section, and a docs/index.html
+figure block. The bound is the point, not the specific numbers (they scale with budget/window).
+The expensive native-KV-efficiency half (DeepSeek MLA / V4 CSA+HCA) stays a documented todo —
+not runnable on this hardware.

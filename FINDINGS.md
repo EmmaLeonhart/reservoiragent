@@ -462,6 +462,38 @@ of the real agent is subtler and worth stating plainly:
   show the mechanism *can* carry and use state; making a large pretrained agent
   *behave* differently is the real, hard frontier this project is pushing on.
 
+## KV: blank-cycle context growth (an always-on agent burns context, unless the reservoir is pinned)
+
+An always-alive Reservoir Agent runs **blank ticks** — autonomous passes with no user
+input. Each silent tick still appends to the KV cache, so a continuously-running agent
+burns its context window *faster* than a turn-based model that only runs when prompted.
+Left unmanaged the cache grows linearly with the number of ticks and the agent eventually
+hits its context limit on idle activity alone. This is the operational pain point raised in
+the imported Grok conversation (`data_lake/transcripts/attention-reservoir-architecture-grok.md`):
+*"context explodes on a reservoir agent because a reservoir agent gets an input of blank."*
+
+The standard remedy is StreamingLLM-style eviction — keep a few **attention-sink** tokens
+plus a **recent window**, drop the middle — with one project-specific twist: the
+reservoir's K/V entries are **pinned** so the persistent time-axis is never the thing
+evicted. *"A really long time of no activity is signal,"* and that signal must survive.
+`reservoir.kv_evict.ReservoirEvictionPolicy` implements this as a pure, torch-free policy
+over per-position tags `{sink, reservoir, normal}`; with no reservoir tags it degrades to
+vanilla StreamingLLM. Because the reservoir is re-prepended each pass (a *fixed* number of
+pseudo-tokens, not accumulated), pinning it costs only a constant.
+
+Simulating 512 blank ticks (`scripts/run.py blankcycle`; `docs/blank_cycle_kv.png`): the
+**vanilla** cache grows linearly to **524 positions**, while the **reservoir-protected**
+policy stays bounded at the **budget (128)** from tick ~116 onward — and **all 8 reservoir
+entries are retained on every single tick**, even under heavy eviction. So the cache-burn
+from autonomous idling is bounded by a constant the operator chooses, and the time-axis the
+whole architecture depends on is exactly the part the policy refuses to drop. (The bound is
+the point, not the specific numbers — they scale with the budget/window settings.)
+
+This is the cheap, base-agnostic half of the cache story. The expensive half — a base model
+whose attention is *natively* KV-efficient so the headroom is far larger (DeepSeek's MLA /
+the V4 CSA+HCA compression discussed in the chat) — is recorded as project direction in
+`todo.md`; it is not runnable on this session's hardware (see Limitations).
+
 ## Limitations (current)
 
 - Small-scale only this session; the agentic claims (H3/H4) and the full runtime are
