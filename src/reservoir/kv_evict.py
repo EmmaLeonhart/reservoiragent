@@ -25,7 +25,9 @@ Tags per position are one of:
                    newest-kept-first, only as far as the budget allows.
 
 With no ``RESERVOIR`` tags present the policy degrades exactly to vanilla StreamingLLM
-(sink + recent window).
+(sink + recent window). Passing per-position importance ``scores`` switches the normal-token
+choice from recency to H2O-style heavy-hitter retention (keep the highest-scoring), with the
+reservoir still pinned either way.
 """
 from __future__ import annotations
 
@@ -85,19 +87,31 @@ class ReservoirEvictionPolicy:
         evictable = [i for i in normal_idx if i not in recent_set]
         return protected, evictable
 
-    def retained_indices(self, tags: Sequence[str]) -> List[int]:
+    def retained_indices(self, tags: Sequence[str],
+                         scores: Sequence[float] | None = None) -> List[int]:
         """Positions to keep, ascending. Length is ``<= budget`` unless protected entries
-        alone exceed the budget (see :meth:`over_budget`)."""
+        alone exceed the budget (see :meth:`over_budget`).
+
+        ``scores`` (optional) gives a per-position importance (e.g. accumulated attention mass,
+        H2O-style). When provided, the budget headroom is filled with the *highest-scoring*
+        evictable normal tokens (heavy hitters) instead of the newest, ties broken by recency.
+        When ``None`` (the default) headroom is filled by recency, i.e. plain StreamingLLM."""
         protected, evictable = self._partition(tags)
         kept = set(protected)
         headroom = self.budget - len(protected)
         if headroom > 0 and evictable:
-            kept |= set(evictable[-headroom:])  # newest evictable tokens first
+            if scores is None:
+                kept |= set(evictable[-headroom:])              # recency: newest tokens
+            else:
+                # heavy hitters: highest score first, ties broken toward more recent (larger idx)
+                ranked = sorted(evictable, key=lambda i: (scores[i], i), reverse=True)
+                kept |= set(ranked[:headroom])
         return sorted(kept)
 
-    def evicted_indices(self, tags: Sequence[str]) -> List[int]:
+    def evicted_indices(self, tags: Sequence[str],
+                        scores: Sequence[float] | None = None) -> List[int]:
         """Positions to drop, ascending — the complement of :meth:`retained_indices`."""
-        retained = set(self.retained_indices(tags))
+        retained = set(self.retained_indices(tags, scores))
         return [i for i in range(len(tags)) if i not in retained]
 
     def over_budget(self, tags: Sequence[str]) -> bool:

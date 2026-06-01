@@ -118,3 +118,53 @@ def test_invalid_tag_raises():
     pol = ReservoirEvictionPolicy(budget=4)
     with pytest.raises(ValueError):
         pol.retained_indices(["bogus"])
+
+
+# --- importance-based (H2O heavy-hitter) eviction, with the reservoir still pinned ---
+
+def test_importance_keeps_heavy_hitters_not_newest():
+    # 1 sink (0) + normals 1..6; recent=1 protects idx 6; budget headroom = 2 middle normals.
+    tags = _tags("S " + "N " * 6)
+    # make an OLD normal a heavy hitter; recency alone would drop it.
+    scores = [0.0, 0.9, 0.1, 0.2, 0.8, 0.3, 0.0]  # idx1 and idx4 are the heavy hitters
+    pol = ReservoirEvictionPolicy(budget=4, recent=1)
+    kept = pol.retained_indices(tags, scores=scores)
+    # sink(0) + recent(6) pinned; the 2 highest-scoring evictable middles are idx1 (0.9) and idx4 (0.8)
+    assert kept == [0, 1, 4, 6]
+    assert pol.evicted_indices(tags, scores=scores) == [2, 3, 5]
+
+
+def test_importance_never_evicts_reservoir_or_sink():
+    tags = _tags("S R N N R N N N")
+    scores = [0.0, 0.0, 0.1, 0.2, 0.0, 0.3, 0.4, 0.5]  # reservoir/sink scores are irrelevant
+    pol = ReservoirEvictionPolicy(budget=5, recent=1)
+    kept = set(pol.retained_indices(tags, scores=scores))
+    assert {0, 1, 4} <= kept                       # sink + both reservoir entries always kept
+    assert {i for i, t in enumerate(tags) if t == RESERVOIR} <= kept
+
+
+def test_importance_ties_break_by_recency():
+    tags = _tags("S " + "N " * 5)                  # sink 0, normals 1..5
+    scores = [0.0, 0.5, 0.5, 0.5, 0.5, 0.5]        # all evictable normals tie
+    pol = ReservoirEvictionPolicy(budget=3, recent=1)
+    # recent=1 pins idx5; headroom 1 -> among tied {1,2,3,4} keep the newest (idx4).
+    kept = pol.retained_indices(tags, scores=scores)
+    assert kept == [0, 4, 5]
+
+
+def test_scores_none_preserves_recency_behaviour():
+    tags = _tags("S " + "N " * 8)
+    pol = ReservoirEvictionPolicy(budget=5, recent=2)
+    assert pol.retained_indices(tags, scores=None) == pol.retained_indices(tags)
+    assert pol.retained_indices(tags) == [0, 5, 6, 7, 8]
+
+
+def test_importance_respects_budget_and_partitions():
+    tags = _tags("S R N N N N N N")
+    scores = [0.0, 0.0, 0.7, 0.1, 0.9, 0.2, 0.4, 0.6]
+    pol = ReservoirEvictionPolicy(budget=5, recent=1)
+    kept = set(pol.retained_indices(tags, scores=scores))
+    dropped = set(pol.evicted_indices(tags, scores=scores))
+    assert len(kept) <= 5
+    assert kept.isdisjoint(dropped)
+    assert kept | dropped == set(range(len(tags)))
