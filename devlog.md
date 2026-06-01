@@ -1089,3 +1089,19 @@ line chart), a FINDINGS "## KV: blank-cycle context growth" section, and a docs/
 figure block. The bound is the point, not the specific numbers (they scale with budget/window).
 The expensive native-KV-efficiency half (DeepSeek MLA / V4 CSA+HCA) stays a documented todo —
 not runnable on this hardware.
+
+## 2026-06-01 - Interruptibility experiment: faster + more durable STOP response (Phase G, safety)
+
+Built src/reservoir/interrupt.py + an `interrupt` subcommand + tests/test_interrupt.py (6
+tests; full suite 135 passed). Quantifies the chat's controllability claim on CPU, two ways.
+(1) Polling latency: a turn-based agent reading every `period` passes has mean latency
+(period-1)/2 — at period 8, mean 3.57 passes (max 7); a per-tick agent is 0. (2) Signal
+persistence: a one-shot urgent STOP burst, driven through an EchoStateReservoir (leak 0.2 =
+long fading memory), stays above a matched-filter detection threshold for 3 passes AFTER
+arrival, while a stateless monitor (current input only) catches it on the arrival pass and 0
+after. Consequence: a turn-based + stateless agent whose poll period (8) outruns the
+persistence window misses a non-repeated off-boundary burst entirely; the per-tick reservoir
+agent catches it on arrival and has a window besides. Wrote results/interrupt.json, the
+docs/interrupt.png trace figure, a FINDINGS "## Safety: interruptibility" section, and a
+docs/index.html figure block. Framed as a measured illustration, not a guarantee (window
+length is set by the leak/threshold settings; a real harness adds its own latencies).

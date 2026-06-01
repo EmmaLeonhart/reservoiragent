@@ -515,6 +515,38 @@ def cmd_blankcycle(args) -> int:
     return 0
 
 
+def cmd_interrupt(args) -> int:
+    """Interruptibility: latency + reservoir persistence of a one-shot urgent STOP."""
+    from reservoir.interrupt import run_interrupt_experiment, plot_interrupt
+
+    print(f"Interruptibility: turn period={args.period}, urgent burst at pass {args.t_star} "
+          f"of {args.horizon} (reservoir K={args.n_reservoir})…")
+    record = run_interrupt_experiment(
+        period=args.period, n_reservoir=args.n_reservoir, n_input=args.n_input,
+        t_star=args.t_star, horizon=args.horizon, urgent_scale=args.urgent_scale,
+        seed=args.seed)
+
+    out = ROOT / args.out
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(record, indent=2))
+    print(f"wrote {out.relative_to(ROOT)}")
+
+    fig = ROOT / args.fig
+    fig.parent.mkdir(parents=True, exist_ok=True)
+    plot_interrupt(record, str(fig))
+    print(f"wrote {fig.relative_to(ROOT)}")
+
+    s = record["summary"]
+    print(f"per-tick reservoir agent: latency {s['per_tick_latency']} pass; "
+          f"STOP stays detectable in state for {s['reservoir_window']} passes after arrival")
+    print(f"turn-based agent (period {s['period']}): mean latency "
+          f"{s['turn_based_mean_latency']:.2f} passes, max {s['turn_based_max_latency']}; "
+          f"stateless monitor catches the one-shot burst for {s['stateless_window']} passes after")
+    print(f"non-repeated burst missed entirely by turn-based+stateless agent: "
+          f"{s['burst_missed_by_turn_based']}")
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="Reservoir Agent experiment runner")
     parser.add_argument("--version", action="store_true", help="print version and exit")
@@ -646,6 +678,19 @@ def main(argv=None) -> int:
     bc.add_argument("--out", default="results/blank_cycle.json")
     bc.add_argument("--fig", default="docs/blank_cycle_kv.png")
     bc.set_defaults(func=cmd_blankcycle)
+
+    it = sub.add_parser("interrupt",
+                        help="interruptibility: STOP latency + reservoir signal persistence")
+    it.add_argument("--period", type=int, default=8)
+    it.add_argument("--n-reservoir", type=int, default=200)
+    it.add_argument("--n-input", type=int, default=16)
+    it.add_argument("--t-star", type=int, default=20)
+    it.add_argument("--horizon", type=int, default=60)
+    it.add_argument("--urgent-scale", type=float, default=6.0)
+    it.add_argument("--seed", type=int, default=0)
+    it.add_argument("--out", default="results/interrupt.json")
+    it.add_argument("--fig", default="docs/interrupt.png")
+    it.set_defaults(func=cmd_interrupt)
 
     args = parser.parse_args(argv)
     if args.version:

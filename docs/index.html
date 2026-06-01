@@ -597,6 +597,28 @@
 </figure>
 
 <p>
+  <strong>Interruptibility &mdash; a faster, more durable response to &ldquo;STOP&rdquo;
+  (a safety property).</strong> A turn-based harness agent only reads input at turn
+  boundaries, so an urgent override waits: at a poll period of 8 passes its mean latency is
+  3.57 passes, while a per-tick Reservoir Agent&rsquo;s is <strong>0</strong>. The sharper
+  point is a <em>one-shot</em> burst (the user yells STOP once, then goes quiet): a
+  matched-filter monitor on the reservoir state stays detectable for <strong>3 passes
+  after</strong> arrival via fading memory, while a stateless monitor catches it on the
+  arrival pass and <strong>0 passes after</strong>. A turn-based + stateless agent can miss
+  a non-repeated off-boundary burst entirely; the reservoir agent both polls every tick and
+  <em>remembers</em> the urgency. The same statefulness built for capability buys
+  lower-latency human override.
+</p>
+<figure>
+  <img src="interrupt.png" alt="Detection score over forward passes: a one-shot urgent STOP at pass 20 produces a sharp single-pass spike for the stateless monitor that drops immediately to zero, while the reservoir-state monitor spikes and then decays gradually, staying above the detection threshold for three passes after the burst.">
+  <figcaption>
+    <strong>Interruptibility</strong>. A one-shot urgent STOP persists in reservoir state for
+    several passes (blue) but vanishes immediately from the raw input (red). Regenerate with
+    <code>python scripts/run.py interrupt</code>.
+  </figcaption>
+</figure>
+
+<p>
   <strong>Blank-tick context burn &mdash; bounded by pinning the reservoir.</strong> An
   always-alive agent runs <em>blank ticks</em>: autonomous passes with no user input. Each
   silent tick still appends to the KV cache, so a continuously-running agent burns its

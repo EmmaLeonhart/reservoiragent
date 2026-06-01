@@ -462,6 +462,35 @@ of the real agent is subtler and worth stating plainly:
   show the mechanism *can* carry and use state; making a large pretrained agent
   *behave* differently is the real, hard frontier this project is pushing on.
 
+## Safety: interruptibility — a Reservoir Agent registers an urgent STOP faster, and remembers it
+
+A recurring controllability complaint in the imported chat: a turn-based harness agent "is
+doing something destructive, I yell at it to stop … and it takes like ten minutes for it to
+respond," because it only reads input at turn boundaries. The claim is that a Reservoir Agent —
+running every tick, with the reservoir continuously integrating input — "will be able to see
+frantic messages from a human as indicating stop immediately." We measured both halves on CPU
+(`scripts/run.py interrupt`; `docs/interrupt.png`).
+
+**Polling latency (structural).** A poller that only reads input every `period` passes
+registers an arrival at the next boundary: latency is uniform on `0..period-1` (mean
+`(period-1)/2`). At period 8 the turn-based agent's mean latency is **3.57 passes** (max 7);
+a **per-tick agent's latency is 0** — it reads on the pass the input arrives.
+
+**Signal persistence (dynamics).** The sharper point is what happens to a *one-shot* burst —
+the user yells STOP once, then goes quiet because the agent isn't answering. A matched-filter
+monitor on the **reservoir state** stays above its detection threshold for **3 passes after
+arrival** (fading memory carries the STOP signature forward), while a **stateless** monitor —
+which sees only the current input — is above threshold on the arrival pass and **0 passes
+after**. So a turn-based + stateless agent whose poll period (8) outruns the persistence window
+**misses a non-repeated off-boundary burst entirely**; the per-tick reservoir agent catches it
+on arrival and has a window besides. The reservoir is not just polled more often — it *retains*
+the urgency, which is the architecture-level interruptibility advantage the chat argued for.
+
+This is a safety property that falls out of the same statefulness the project builds for
+capability: lower-latency, more durable response to human override. It is a measured
+illustration, not a guarantee — the reservoir/leak settings set the window length, and a real
+harness adds its own latencies; see the Safety-by-Design section and Limitations.
+
 ## KV: blank-cycle context growth (an always-on agent burns context, unless the reservoir is pinned)
 
 An always-alive Reservoir Agent runs **blank ticks** — autonomous passes with no user
