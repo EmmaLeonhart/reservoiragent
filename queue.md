@@ -33,13 +33,17 @@ resilient to fine-tune drift; faster interruptibility / lower "STOP" latency tha
 harnesses; learned thought-representation via a *linear probe*, no SAE needed); rule:
 "never do capabilities work without meaningfully taking safety into account".
 
-1. **DeepSeek-V2-Lite injection attempt** (follow-on; resource-gated, local-only, CI-skipped).
-   _Analysis done 2026-06-01 (see `todo.md` base-model subsection + devlog): env GO (native
-   `deepseek_v2` in transformers 5.4), injection point = layer 13/27, VRAM marginal → needs
-   `device_map="auto"` + CPU offload, port steps identified._ **Remaining:** the actual ~9 GB
-   4-bit download + load + a QLoRA-fit test (does training fit in 8.6 GB with offloaded
-   experts?) + the `_arch.py` `deepseek_v2` branch and MLA LoRA targets. Heavy download +
-   uncertain training fit — left for a dedicated local run / user go-ahead, not run blind here.
+_**DeepSeek-V2-Lite — DROPPED (user, 2026-06-01).** V2-Lite has MLA (fixed low-rank KV
+compression, ~9× vs MHA) but **not** the *learned, fine-tunable* compression (DeepSeek Sparse
+Attention / V4 CSA+HCA). The user's point: the fundamental lever is being able to **fine-tune
+the cache management** so it learns to lean on the reservoir for idle signal — fixed MLA alone
+isn't worth the port. Landscape (verified): learned/trainable compression starts at **V3.2
+(671B, DSA)** and **V4-Flash (284B, CSA+HCA)** — there is **no runnable-size open model with
+it**; it's frontier-scale-only. So the base-model question is now a fork the user must call:
+**(a) cloud/rented-GPU fine-tune of V4-Flash/V3.2** (the only way to get learned-compression ×
+reservoir), or **(b) drop the learned-compression angle locally** and keep the reservoir-pinned
+eviction (`kv_evict.py`) as the local cache story, staying on GPT-2/Hermes. Parked pending that
+decision; recorded in `todo.md`._
 
 ---
 

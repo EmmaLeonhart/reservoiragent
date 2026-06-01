@@ -111,7 +111,18 @@ MLA, the V4 CSA/HCA hybrid).
   fine-tuning, and 284B params won't load on the 8.6 GB RTX 4070 even at 4-bit (~140 GB), and
   a hosted API can't expose mid-layer attention for injection. So this is a **cloud / big-GPU**
   destination, tracked as direction, not a near-term step.
-- **DeepSeek-V2-Lite — the realistic local MLA base (NEXT to attempt).** 16B total / 2.4B
+- **DeepSeek-V2-Lite — DROPPED (user, 2026-06-01).** Reason: V2-Lite has MLA (fixed low-rank
+  KV compression) but **not the *learned, fine-tunable* compression** the user actually wants —
+  the ability to fine-tune the cache manager so it learns to defer to the reservoir for
+  long-idle signal. That learned compression is **DeepSeek Sparse Attention (DSA, V3.2)** /
+  **CSA+HCA (V4)**, which only exists at frontier scale: V3.2 = 671B, V4-Flash = 284B — **no
+  runnable-size open model has it**. So the base decision is a fork: **(a) cloud/rented-GPU
+  fine-tune of V4-Flash or V3.2** to actually test learned-compression × reservoir, or **(b)
+  drop the learned-compression angle for local work** and keep the reservoir-pinned eviction
+  (`src/reservoir/kv_evict.py`) as the local cache story on GPT-2/Hermes. Awaiting user call.
+  _(Config-only analysis retained below for if a small MLA base is ever wanted for the *fixed*
+  compression alone.)_
+- **DeepSeek-V2-Lite — config-only analysis (retained, not the plan).** 16B total / 2.4B
   active, MLA, MIT. **Feasibility analysis done 2026-06-01 (config-only, no weight download):**
   transformers 5.4.0 supports `deepseek_v2` **natively** (no `trust_remote_code`); config
   confirms 27 layers, hidden 2048, 16 heads, MLA `kv_lora_rank=512` / `qk_rope_head_dim=64` /
