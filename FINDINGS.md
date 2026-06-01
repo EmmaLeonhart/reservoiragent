@@ -491,6 +491,38 @@ capability: lower-latency, more durable response to human override. It is a meas
 illustration, not a guarantee — the reservoir/leak settings set the window length, and a real
 harness adds its own latencies; see the Safety-by-Design section and Limitations.
 
+## Safety: a reservoir-state probe reads an internal clock — linearly, no SAE, and drift-tolerant
+
+The chat made an interpretability argument for the reservoir as a *monitoring surface*: "I
+don't think you'd need a sparse autoencoder for the reservoir state … it's much more simple to
+have a learned representation of what is happening," and, because the reservoir weights never
+change, the mapping from state to behaviour is stable — "relatively resilient to fine-tuning."
+We tested the falsifiable parts (`scripts/run.py probe`; `docs/probe.png`).
+
+**Linearly decodable, no SAE.** We defined a temporal *process property* a stateless pass
+cannot see — *elapsed passes since the last trigger*, an internal clock — and fit a plain
+ridge-regression readout. From the **reservoir state** it reaches **R² = 0.995**; the same
+linear probe on the **instantaneous input** reaches **R² = 0.16** (elapsed time simply is not
+in the current input). A *linear* probe suffices precisely because the fixed reservoir already
+holds the history in a low-complexity, stable form — no sparse autoencoder needed, which is
+the chat's claim borne out.
+
+**Resilience to a fine-tuning-like drift (measured, stated honestly).** Fine-tuning the
+readout/LoRA does not touch the reservoir weights, but it does shift the *activations that
+drive* the reservoir. We model that as a fixed drift α added to the driving input and re-apply
+the **pre-drift** probe. R² stays **0.99 → 0.98 → 0.94** through α = 0.1, 0.2, 0.4 and is still
+**0.82** at α = 0.8 — graceful degradation, and at every drift level far above the stateless
+baseline (0.16). So the probe is *usable* across moderate drift, not *invariant*: the reservoir
+map is fixed, but its inputs still move, so a very large fine-tune would still erode it. That
+is the honest version of "resilient monitoring surface" — a stable, cheap, linear read on an
+internal state that degrades slowly rather than a guarantee.
+
+Together with interruptibility, this is the concrete content behind the project's safety
+framing: the same fixed reservoir that gives the agent a usable time-axis also gives an
+operator a cheap, stable place to watch what the agent is doing. (Reading an *elapsed clock*
+is the decodability demonstration; reading genuine *misalignment* signatures is a much harder,
+unproven extension — flagged as future work in the Safety-by-Design section and Limitations.)
+
 ## KV: blank-cycle context growth (an always-on agent burns context, unless the reservoir is pinned)
 
 An always-alive Reservoir Agent runs **blank ticks** — autonomous passes with no user

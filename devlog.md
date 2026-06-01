@@ -1105,3 +1105,20 @@ agent catches it on arrival and has a window besides. Wrote results/interrupt.js
 docs/interrupt.png trace figure, a FINDINGS "## Safety: interruptibility" section, and a
 docs/index.html figure block. Framed as a measured illustration, not a guarantee (window
 length is set by the leak/threshold settings; a real harness adds its own latencies).
+
+## 2026-06-01 - Reservoir-state linear probe: internal clock, no SAE, drift-tolerant (Phase G, safety)
+
+Built src/reservoir/probe.py + a `probe` subcommand + tests/test_probe.py (5 tests; full
+suite 140 passed). Tests the chat's falsifiable interpretability claims on CPU. (1) A plain
+ridge probe reads a temporal process property — elapsed passes since the last trigger, an
+internal clock — from reservoir state at R²=0.995, vs R²=0.16 from the instantaneous input
+(elapsed time isn't in the current input). A LINEAR probe suffices — no SAE needed, the chat's
+"you don't need a sparse autoencoder for the reservoir state" borne out. (2) Resilience,
+measured not assumed: modelling a fine-tuning-like drift α on the driving activations and
+re-applying the pre-drift probe, R² degrades gracefully 0.99→0.94 (α=0.4) →0.82 (α=0.8),
+staying far above the 0.16 stateless baseline throughout. Framed honestly: usable across
+moderate drift, NOT invariant — the reservoir weights are fixed but their driving inputs still
+move, so a very large fine-tune would still erode it. Reading an elapsed clock is the
+decodability demo; reading genuine misalignment signatures is a much harder unproven extension
+(flagged future work). Wrote results/probe.json, docs/probe.png (two-panel), FINDINGS
+"## Safety: a reservoir-state probe…", docs/index.html figure block.
