@@ -596,6 +596,22 @@
   </figcaption>
 </figure>
 
+<h2>Safety by design</h2>
+<p>
+  The project follows a rule: <strong>never introduce a new capability to an AI without
+  meaningfully taking its safety into account</strong>. The Reservoir Attention Network adds
+  capability (cross-pass state, autonomous ticks), so it owes safety value back &mdash; and the
+  value comes from the <em>same</em> feature as the capability, the <strong>fixed</strong>
+  reservoir, not a bolt-on. Three properties, each backed by a measured result below rather
+  than asserted: lower-latency, durable human override (interruptibility); a cheap, stable
+  monitoring surface (a linear reservoir-state probe); and bounded context under autonomous
+  idling (reservoir-protected eviction). What this does not yet show: the probe decodes a
+  benign internal clock, not genuine misalignment signatures; the numbers are small-scale on a
+  fixed reservoir, not a live agent at the real base-model scale. It is the design intent and a
+  first measured down-payment, not a finished safety case &mdash; which is why the models,
+  training code, and reservoir monitors are released open rather than bolted on later.
+</p>
+
 <p>
   <strong>A reservoir-state probe reads an internal clock &mdash; linearly, no SAE
   (interpretability for safety).</strong> The chat argued the reservoir is a good monitoring

@@ -1122,3 +1122,16 @@ move, so a very large fine-tune would still erode it. Reading an elapsed clock i
 decodability demo; reading genuine misalignment signatures is a much harder unproven extension
 (flagged future work). Wrote results/probe.json, docs/probe.png (two-panel), FINDINGS
 "## Safety: a reservoir-state probe…", docs/index.html figure block.
+
+## 2026-06-01 - Safety-by-Design section (Phase G)
+
+Added a "## Safety by design" framing section to FINDINGS.md and a matching block to
+docs/index.html, stating the project's rule (never introduce a capability without meaningfully
+taking safety into account) and the three safety properties that come from the SAME fixed
+reservoir as the capability — lower-latency durable override (interruptibility), a cheap stable
+linear monitoring surface (the probe), and bounded idle context (blank-cycle eviction) — each
+tied to a measured number from this session, not asserted. Names what is NOT shown: the probe
+decodes a benign elapsed clock, not misalignment signatures; resilience is graceful not
+invariant; everything is small-scale on a fixed reservoir, not the real base. Also removed two
+self-congratulatory "stated honestly"/"honest version" phrasings from the probe section per
+the writing-style skill (name the limit flatly instead).

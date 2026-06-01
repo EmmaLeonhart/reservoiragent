@@ -33,16 +33,12 @@ resilient to fine-tune drift; faster interruptibility / lower "STOP" latency tha
 harnesses; learned thought-representation via a *linear probe*, no SAE needed); rule:
 "never do capabilities work without meaningfully taking safety into account".
 
-1. **"Safety by Design" section** in `FINDINGS.md` + `docs/` — fixed reservoir as monitoring
-   surface, interruptibility, resilient misalignment signatures, learned thought reps, the
-   rule. Grounded in the interruptibility + probe items above (cite measured numbers, no bare assertions). Keep docs/PDF current.
-
-2. **DeepSeek base decision → `todo.md` + `literature/REVIEW.md`** — record: V4-Flash as the
+1. **DeepSeek base decision → `todo.md` + `literature/REVIEW.md`** — record: V4-Flash as the
    aspirational target (needs cloud / a big GPU; infeasible locally), V2-Lite as the realistic
    local MLA base; add the KV-cache literature (StreamingLLM attention-sink, H2O, MLA, V4
    CSA/HCA) to REVIEW with citations.
 
-3. **DeepSeek-V2-Lite feasibility spike** (follow-on, after 1–2). Document the MLA arch +
+2. **DeepSeek-V2-Lite feasibility spike** (follow-on, after item 1). Document the MLA arch +
    mid-layer injection point; attempt `deepseek-ai/DeepSeek-V2-Lite` 4-bit load on the 4070,
    measure VRAM, determine go/no-go for QLoRA on the reservoir-interface layers (with CPU
    offload). Honest writeup either way → `devlog.md` + `todo.md` (local-only; CI-skipped).

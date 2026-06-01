@@ -462,6 +462,42 @@ of the real agent is subtler and worth stating plainly:
   show the mechanism *can* carry and use state; making a large pretrained agent
   *behave* differently is the real, hard frontier this project is pushing on.
 
+## Safety by design (the rule, and what backs it)
+
+This project follows a rule the user states plainly: **never introduce a new capability to an
+AI without meaningfully taking its safety into account** — capability work is acceptable only
+when paired with concrete improvements in controllability, monitorability, or risk reduction.
+The Reservoir Attention Network adds capability (genuine cross-pass state, autonomous ticks,
+runtime-like behaviour), so under the rule it owes safety value back. The distinctive point is
+that the safety value comes from the *same* architectural feature as the capability — the
+**fixed** reservoir — not from a bolt-on. Three properties, each backed by a measured result
+in this report rather than by assertion:
+
+1. **Lower-latency, durable human override** (interruptibility, below). Because the agent runs
+   every tick and the reservoir integrates input continuously, an urgent "STOP" registers at
+   latency 0 vs a turn-based agent's mean 3.57 passes, and a one-shot burst persists in
+   reservoir state for several passes — so it is not missed if the human does not repeat it.
+2. **A cheap, stable monitoring surface** (reservoir-state probe, below). A *linear* readout
+   recovers an internal process variable from the reservoir at R² = 0.995 with no sparse
+   autoencoder, and the pre-drift probe degrades only gradually under a fine-tuning-like
+   activation drift. The reservoir weights never move, so the mapping from state to read-out
+   is a fixed, low-complexity surface an operator can watch in real time.
+3. **Bounded context under autonomous idling** (blank-cycle, below). The reservoir-protected
+   eviction policy keeps the cache from growing without limit during blank ticks while pinning
+   the time-axis, so an always-on agent does not silently exhaust its own context.
+
+**What this does *not* yet show, stated plainly.** The probe decodes an *elapsed clock*, which
+is a benign process variable; reading genuine *misalignment* signatures (deception, goal drift)
+off the reservoir is a much harder, unproven extension — the resilience result says only that a
+fixed-reservoir read degrades slowly, not that misalignment is legible there. The
+interruptibility numbers are from a synthetic stream on the echo-state reservoir, not a live
+agent under a real harness with its own latencies. And all of it is at small scale on a fixed
+reservoir; the claims for the real target (a DeepSeek/Hermes-scale base) are not yet run. These
+properties are the *design intent* and a first measured down-payment on it, not a finished
+safety case. The project's release plan — open weights, the training/harness code, and the
+reservoir monitors included rather than bolted on — is the mechanism for others to test and
+extend them.
+
 ## Safety: interruptibility — a Reservoir Agent registers an urgent STOP faster, and remembers it
 
 A recurring controllability complaint in the imported chat: a turn-based harness agent "is
@@ -507,14 +543,14 @@ in the current input). A *linear* probe suffices precisely because the fixed res
 holds the history in a low-complexity, stable form — no sparse autoencoder needed, which is
 the chat's claim borne out.
 
-**Resilience to a fine-tuning-like drift (measured, stated honestly).** Fine-tuning the
+**Resilience to a fine-tuning-like drift (measured).** Fine-tuning the
 readout/LoRA does not touch the reservoir weights, but it does shift the *activations that
 drive* the reservoir. We model that as a fixed drift α added to the driving input and re-apply
 the **pre-drift** probe. R² stays **0.99 → 0.98 → 0.94** through α = 0.1, 0.2, 0.4 and is still
 **0.82** at α = 0.8 — graceful degradation, and at every drift level far above the stateless
 baseline (0.16). So the probe is *usable* across moderate drift, not *invariant*: the reservoir
 map is fixed, but its inputs still move, so a very large fine-tune would still erode it. That
-is the honest version of "resilient monitoring surface" — a stable, cheap, linear read on an
+is the precise version of "resilient monitoring surface" — a stable, cheap, linear read on an
 internal state that degrades slowly rather than a guarantee.
 
 Together with interruptibility, this is the concrete content behind the project's safety
