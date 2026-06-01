@@ -283,3 +283,55 @@ cross-pass / always-on setting is the project's least-pre-empted axis. (Open que
 carried forward in `REVIEW.md`: whether recurrent-memory-transformer / SSM-agent /
 test-time-training literatures, which these reservoir-focused searches would not surface,
 contain a cross-pass-state system.)
+
+---
+
+## §6 — KV-cache management & compressed attention  *(motivates the base-model direction)*
+
+Added 2026-06-01 from the imported Grok conversation
+(`data_lake/transcripts/attention-reservoir-architecture-grok.md`). Relevance: a Reservoir
+Agent injects persistent K/V every pass and runs blank ticks, so it burns context faster than
+a turn-based model. Two families bear on this — *eviction* policies (what to keep in a fixed
+cache) and *architecturally* compressed attention (a smaller cache to begin with). The first
+we implemented over (`src/reservoir/kv_evict.py`, pinning the reservoir); the second motivates
+moving the base off Hermes.
+
+### Xiao et al. 2023 — "Efficient Streaming Language Models with Attention Sinks" (StreamingLLM)
+arXiv:2309.17453. <https://arxiv.org/abs/2309.17453>
+- **Key claim:** keeping a few initial "attention-sink" tokens plus a rolling recent window
+  lets a pretrained LLM stream over effectively unbounded input without fine-tuning or a
+  catastrophic perplexity blow-up; the sink tokens absorb otherwise-misplaced attention mass.
+- **Relation to RAN:** this is the exact template `kv_evict.py` follows — sink + recent window
+  — with the project-specific addition that the reservoir's K/V entries are *pinned* so the
+  time-axis is never evicted. With no reservoir tags our policy *is* StreamingLLM.
+
+### Zhang et al. 2023 — "H2O: Heavy-Hitter Oracle for Efficient Generative Inference of LLMs"
+arXiv:2306.14048. <https://arxiv.org/abs/2306.14048>
+- **Key claim:** a small set of "heavy-hitter" tokens (high accumulated attention) dominates
+  quality; scoring tokens by attention and evicting the rest keeps a small KV cache with little
+  loss. An importance-based alternative to position-based (sink/recent) eviction.
+- **Relation to RAN:** an importance signal the reservoir-protected policy could later use to
+  rank *normal* tokens for eviction; orthogonal to (and combinable with) pinning the reservoir.
+
+### DeepSeek-AI 2024 — "DeepSeek-V2: A Strong, Economical, and Efficient MoE Language Model" (MLA)
+arXiv:2405.04434. <https://arxiv.org/abs/2405.04434>
+- **Key claim:** Multi-head Latent Attention (MLA) compresses keys/values into a low-rank
+  latent vector, shrinking the KV cache by ~an order of magnitude vs MHA while preserving
+  quality; DeepSeek-V2-Lite (16B total / 2.4B active, 27 layers) is the small open MLA model.
+- **Relation to RAN:** the *architectural* cache-efficiency the chat argues gives the
+  persistent reservoir headroom. DeepSeek-V2-Lite is the realistic local base to attempt
+  reservoir injection on (feasibility spike queued); MLA is the mechanism we want under us.
+
+### DeepSeek-AI — DeepSeek-V4-Flash model release (hybrid compressed attention)
+Hugging Face model card <https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash> (MIT, released
+2026-04-24); 284B-total / 13B-active MoE, 1M context.
+- **Key claim (as reported by the release / the imported chat, not independently verified
+  here):** a hybrid attention stack interleaving Compressed Sparse Attention (CSA, moderate
+  compression with learned top-k selection) and Heavily Compressed Attention (HCA, aggressive
+  grouping of long history) to support 1M-token context at a fraction of prior KV-cache cost.
+- **Relation to RAN:** the aspirational base — its learned compression is what the chat
+  hypothesises could be fine-tuned to route long-idle "nothing happened" signal through the
+  reservoir. **Not runnable locally** (284B won't fit on 8.6 GB even at 4-bit; injection needs
+  fine-tuning, so a hosted API can't substitute). Tracked as a cloud/big-GPU destination. The
+  specific CSA/HCA mechanism and compression ratios are from the release/chat and were not
+  fact-checked against a peer-reviewed source.

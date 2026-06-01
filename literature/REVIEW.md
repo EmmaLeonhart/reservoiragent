@@ -71,6 +71,25 @@ escaping statelessness — recurrent state across passes — is exactly what the
 reservoir adds, while a *proof* that a finite-precision continuous reservoir state
 lifts the bound does **not** exist and must not be asserted.
 
+**KV-cache management is a known problem with two relevant families — and it sharpens
+the base-model choice.** An always-on Reservoir Agent injects persistent K/V every pass and
+runs blank (no-input) ticks, so it burns context faster than a turn-based model — the
+operational concern raised in the imported Grok conversation. The prior work splits in two.
+*Eviction* policies keep a fixed cache useful: StreamingLLM keeps a few "attention-sink"
+tokens plus a rolling recent window and streams over unbounded input without fine-tuning
+(Xiao et al. 2023, arXiv:2309.17453); H2O instead evicts by accumulated-attention importance
+(Zhang et al. 2023, arXiv:2306.14048). *Architectural* compression makes the cache smaller to
+begin with: DeepSeek's Multi-head Latent Attention compresses K/V into a low-rank latent,
+cutting cache by roughly an order of magnitude (DeepSeek-V2, arXiv:2405.04434), and the
+recent DeepSeek-V4-Flash release reports a hybrid compressed-attention stack for 1M-token
+context (model card; mechanism as reported, not independently verified). **Implication for
+us:** the eviction family is directly usable — `src/reservoir/kv_evict.py` is StreamingLLM
+with the reservoir's K/V *pinned* so the time-axis is never evicted — and the compression
+family motivates moving the base off Hermes toward a natively KV-efficient model. The full
+target (DeepSeek-V4-Flash) is not runnable on this project's hardware; the small open MLA
+model **DeepSeek-V2-Lite** (16B/2.4B-active) is the realistic local base to attempt injection
+on. (Full entries in `sources.md` §6; base-model plan in `todo.md`.)
+
 ## 2. The closest prior art, and the gap
 
 A decade of work adds recurrence/state/memory to transformers (Transformer-XL,

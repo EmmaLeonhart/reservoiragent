@@ -99,6 +99,33 @@ rather than noise?
   eager-path `GPT2Attention.forward` override (transformers 5.4) that appends the
   reservoir key/value rows and extends the attention mask. Bounded but version-sensitive.
 
+### Base model — moving off Hermes to a KV-efficient base (the Grok-chat direction)
+Grounding: `data_lake/transcripts/attention-reservoir-architecture-grok.md`. The chat's case
+is that an always-on Reservoir Agent burns context on blank ticks, so the base should be one
+whose attention is *natively* KV-efficient (compressed cache) to give the persistent reservoir
+headroom, and whose learned compression can be fine-tuned to lean on the reservoir for
+long-idle signal. The KV literature is now in `literature/REVIEW.md` §1 (StreamingLLM, H2O,
+MLA, the V4 CSA/HCA hybrid).
+- **DeepSeek-V4-Flash — aspirational target, not local.** Real (284B-total / 13B-active MoE,
+  1M context, hybrid CSA+HCA attention, MIT, released 2026-04-24). Reservoir injection needs
+  fine-tuning, and 284B params won't load on the 8.6 GB RTX 4070 even at 4-bit (~140 GB), and
+  a hosted API can't expose mid-layer attention for injection. So this is a **cloud / big-GPU**
+  destination, tracked as direction, not a near-term step.
+- **DeepSeek-V2-Lite — the realistic local MLA base (NEXT to attempt).** 16B total / 2.4B
+  active, MLA (the compressed-KV mechanism), 27 layers, hidden 2048, MIT. Carries the
+  cache-efficiency property the chat cares about at a size that *might* be probeable on the
+  4070 with 4-bit QLoRA + CPU offload (tight — feasibility spike is queued). Decompose: load
+  4-bit + measure VRAM → identify the mid-layer injection point in the MLA stack → port the
+  `kv_live.py` reservoir-prefix injection → small cross-pass-recall probe. Go/no-go honestly.
+- **Reservoir-friendly compression interaction (research question).** If the base has learned
+  KV compression (CSA/HCA), does fine-tuning teach it to route long-idle "nothing happened"
+  signal through the reservoir and compress raw blank tokens harder? The chat's hypothesis;
+  only testable once a compressed-attention base actually runs. Pair with the reservoir-pinned
+  eviction policy already built (`src/reservoir/kv_evict.py`).
+- **Study, don't fork, the Hermes/Nous agent training.** Adapt their trajectory/data-generation
+  ideas to the simpler local harness rather than forking the full stack (the user's call); the
+  reward/scaffolding don't transfer cleanly to a reservoir agent.
+
 ### Long-term (aspirational — compute-gated, full vision)
 - **N-seed selection pipeline.** 10–20 reservoir seeds × LoRA fine-tunes, keep the
   best by benchmark. Investigate a dynamics-based seed pre-selection proxy.
