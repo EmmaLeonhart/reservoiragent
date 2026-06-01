@@ -1135,3 +1135,17 @@ decodes a benign elapsed clock, not misalignment signatures; resilience is grace
 invariant; everything is small-scale on a fixed reservoir, not the real base. Also removed two
 self-congratulatory "stated honestly"/"honest version" phrasings from the probe section per
 the writing-style skill (name the limit flatly instead).
+
+## 2026-06-01 - DeepSeek base-model decision recorded (Phase G)
+
+Recorded the base-model direction from the Grok chat into the project's planning + literature.
+todo.md gets a new "Base model — moving off Hermes to a KV-efficient base" subsection:
+DeepSeek-V4-Flash as the aspirational target (real, 284B/13B-active MoE, 1M ctx, MIT,
+2026-04-24 — but not loadable/fine-tunable on the 8.6 GB 4070, so cloud/big-GPU only) and
+DeepSeek-V2-Lite as the realistic local MLA base to attempt injection on next (16B/2.4B-active,
+MLA, 27 layers), with a decomposed spike and the reservoir×compression research question.
+literature/REVIEW.md §1 gets a KV-cache paragraph and sources.md a new §6 with the verifiable
+citations (StreamingLLM arXiv:2309.17453, H2O arXiv:2306.14048, MLA/DeepSeek-V2 arXiv:2405.04434)
+plus the V4-Flash release entry flagged as reported-not-independently-verified for its CSA/HCA
+detail. Closes the writing half of the user's DeepSeek ask; the GPU spike is the one remaining
+Phase G item.
