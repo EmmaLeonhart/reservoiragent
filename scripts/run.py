@@ -547,6 +547,35 @@ def cmd_interrupt(args) -> int:
     return 0
 
 
+def cmd_probe(args) -> int:
+    """Reservoir-state probe: linearly decode an internal clock + measure drift resilience."""
+    from reservoir.probe import run_probe_experiment, plot_probe
+
+    print(f"Training linear probes on reservoir state (K={args.n_reservoir}, "
+          f"{args.n_sessions} sessions, elapsed clock to {args.max_elapsed})…")
+    record = run_probe_experiment(
+        n_reservoir=args.n_reservoir, n_input=args.n_input, n_sessions=args.n_sessions,
+        horizon=args.horizon, max_elapsed=args.max_elapsed, leak_rate=args.leak_rate,
+        seed=args.seed)
+
+    out = ROOT / args.out
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(record, indent=2))
+    print(f"wrote {out.relative_to(ROOT)}")
+
+    fig = ROOT / args.fig
+    fig.parent.mkdir(parents=True, exist_ok=True)
+    plot_probe(record, str(fig))
+    print(f"wrote {fig.relative_to(ROOT)}")
+
+    print(f"reservoir-state probe R² = {record['r2_state']:.3f}  "
+          f"(stateless input probe R² = {record['r2_input']:.3f})")
+    c = record["resilience_curve"]
+    print("resilience to fine-tuning-like drift: " +
+          ", ".join(f"α={x['drift']:.2f}→R²={x['r2_state']:.2f}" for x in c))
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="Reservoir Agent experiment runner")
     parser.add_argument("--version", action="store_true", help="print version and exit")
@@ -691,6 +720,19 @@ def main(argv=None) -> int:
     it.add_argument("--out", default="results/interrupt.json")
     it.add_argument("--fig", default="docs/interrupt.png")
     it.set_defaults(func=cmd_interrupt)
+
+    pb = sub.add_parser("probe",
+                        help="reservoir-state linear probe: decode an internal clock + resilience")
+    pb.add_argument("--n-reservoir", type=int, default=200)
+    pb.add_argument("--n-input", type=int, default=16)
+    pb.add_argument("--n-sessions", type=int, default=200)
+    pb.add_argument("--horizon", type=int, default=40)
+    pb.add_argument("--max-elapsed", type=int, default=15)
+    pb.add_argument("--leak-rate", type=float, default=0.3)
+    pb.add_argument("--seed", type=int, default=0)
+    pb.add_argument("--out", default="results/probe.json")
+    pb.add_argument("--fig", default="docs/probe.png")
+    pb.set_defaults(func=cmd_probe)
 
     args = parser.parse_args(argv)
     if args.version:

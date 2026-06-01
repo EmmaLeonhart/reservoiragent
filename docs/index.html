@@ -597,6 +597,27 @@
 </figure>
 
 <p>
+  <strong>A reservoir-state probe reads an internal clock &mdash; linearly, no SAE
+  (interpretability for safety).</strong> The chat argued the reservoir is a good monitoring
+  surface that needs only a simple learned readout, not a sparse autoencoder. We defined a
+  process property a stateless pass can&rsquo;t see &mdash; elapsed passes since the last
+  trigger &mdash; and fit a plain ridge probe: from the reservoir state it reaches
+  <strong>R² = 0.99</strong>, vs <strong>0.16</strong> from the instantaneous input. Modelling
+  a fine-tuning-like drift on the driving activations, the pre-drift probe degrades
+  <em>gracefully</em> (0.99 &rarr; 0.94 at drift 0.4, 0.82 at 0.8) &mdash; usable across
+  moderate drift, not invariant, since the reservoir <em>weights</em> are fixed but their
+  inputs still move. A cheap, stable place to watch the agent&rsquo;s internal state.
+</p>
+<figure>
+  <img src="probe.png" alt="Two panels. Left: bar chart of probe R-squared for decoding elapsed-since-trigger, reservoir state at 0.99 versus stateless input at 0.16. Right: a line of R-squared versus fine-tuning-like input drift, starting near 0.99 and curving gently down to about 0.82 at drift 0.8.">
+  <figcaption>
+    <strong>Reservoir-state probe</strong>. An internal clock is linearly decodable from the
+    fixed reservoir (no SAE) and the pre-drift probe degrades gracefully under a
+    fine-tuning-like drift. Regenerate with <code>python scripts/run.py probe</code>.
+  </figcaption>
+</figure>
+
+<p>
   <strong>Interruptibility &mdash; a faster, more durable response to &ldquo;STOP&rdquo;
   (a safety property).</strong> A turn-based harness agent only reads input at turn
   boundaries, so an urgent override waits: at a poll period of 8 passes its mean latency is
