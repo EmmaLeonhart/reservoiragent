@@ -12,6 +12,65 @@ See `CLAUDE.md` § "Workflow Rules" and § "Research workflow" for how this file
 
 ---
 
+## Active — Phase G: apply the Grok-chat insights (base-agnostic first, then DeepSeek-V2-Lite spike)
+
+User imported a strategic Grok conversation (`data_lake/transcripts/attention-reservoir-architecture-grok.md`)
+and asked to apply its insights, wanting **DeepSeek-V4-Flash** as the base. **Feasibility
+resolved this session:** V4-Flash is real (284B-total/13B-active MoE, 1M ctx, MIT, released
+2026-04-24) but **not fine-tunable or loadable on this RTX 4070 (8.6 GB)** — reservoir
+injection requires fine-tuning, so a hosted API can't help either. The cache-efficiency
+architecture the chat hinges on (MLA / compressed KV) exists in a smaller form,
+**DeepSeek-V2-Lite (16B/2.4B-active, MLA, 27 layers)** — still hard on 8.6 GB but probeable.
+**User chose (AskUserQuestion): do the base-agnostic insight work first, then attempt a
+V2-Lite feasibility spike.** Work top to bottom; TDD where there is logic; **delete each
+item in the same commit that completes it + append a dated `devlog.md` entry**; push; CI green.
+
+The chat's actionable insights (all base-agnostic, buildable on the existing small-model harness):
+KV burnout from blank-cycle ticks → a *reservoir-protected* eviction policy (StreamingLLM-style
+sink + recent window, but reservoir K/V is pinned); "a long time of no activity is signal";
+safety framing the user wants in the paper (fixed reservoir = stable monitoring surface
+resilient to fine-tune drift; faster interruptibility / lower "STOP" latency than turn-based
+harnesses; learned thought-representation via a *linear probe*, no SAE needed); rule:
+"never do capabilities work without meaningfully taking safety into account".
+
+1. **Reservoir-protected KV eviction policy** (`src/reservoir/kv_evict.py`, TDD). Pure module:
+   given a KV sequence tagged {sink | reservoir | normal}, evict oldest *normal* tokens once
+   over a budget while ALWAYS retaining sink (first-k) + all reservoir entries + a recent
+   window. Tests: reservoir entries never evicted; budget respected; oldest-normal-first;
+   degrades to vanilla sliding-window when no reservoir tags. This is the chat's "protect the
+   reservoir during eviction" idea made concrete.
+
+2. **Blank-cycle context-growth demonstration** — drive M blank ticks through the live KV
+   path; show vanilla cache grows ~linearly while the protected policy stays bounded AND the
+   reservoir signal survives. Metrics → `results/`, figure → `docs/blank_cycle_kv.png`,
+   write-up → `FINDINGS.md` "## KV: blank-cycle context growth". (torch-gated parts skip in CI.)
+
+3. **Interruptibility experiment (safety)** — quantify the chat's "STOP latency" claim:
+   passes-to-register an urgent injected input for the reservoir path vs a turn-based baseline.
+   Metrics → `results/`, figure → `docs/`, FINDINGS "## Safety: interruptibility".
+
+4. **Reservoir-state linear probe (safety / interpretability)** (`src/reservoir/probe.py`, TDD).
+   Train a linear/small-MLP probe on reservoir state to decode a process property (e.g. idle
+   duration / pass-count / unresolved-thread flag). Demonstrate (a) it's decodable without an
+   SAE and (b) the "fixed-reservoir = resilient monitor" claim: a probe trained pre-finetune
+   still reads after finetune. Metrics → `results/`, FINDINGS "## Safety: reservoir probe".
+
+5. **"Safety by Design" section** in `FINDINGS.md` + `docs/` — fixed reservoir as monitoring
+   surface, interruptibility, resilient misalignment signatures, learned thought reps, the
+   rule. Grounded in items 3–4 (cite measured numbers, no bare assertions). Keep docs/PDF current.
+
+6. **DeepSeek base decision → `todo.md` + `literature/REVIEW.md`** — record: V4-Flash as the
+   aspirational target (needs cloud / a big GPU; infeasible locally), V2-Lite as the realistic
+   local MLA base; add the KV-cache literature (StreamingLLM attention-sink, H2O, MLA, V4
+   CSA/HCA) to REVIEW with citations.
+
+7. **DeepSeek-V2-Lite feasibility spike** (follow-on, after 1–6). Document the MLA arch +
+   mid-layer injection point; attempt `deepseek-ai/DeepSeek-V2-Lite` 4-bit load on the 4070,
+   measure VRAM, determine go/no-go for QLoRA on the reservoir-interface layers (with CPU
+   offload). Honest writeup either way → `devlog.md` + `todo.md` (local-only; CI-skipped).
+
+---
+
 ## Active — Phase H: port to Hermes + make the behaviour real (A–E)
 
 Rounds 1–3 validated the *mechanisms on GPT-2*. This phase moves to the real target —
