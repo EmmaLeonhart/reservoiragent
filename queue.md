@@ -33,10 +33,13 @@ resilient to fine-tune drift; faster interruptibility / lower "STOP" latency tha
 harnesses; learned thought-representation via a *linear probe*, no SAE needed); rule:
 "never do capabilities work without meaningfully taking safety into account".
 
-1. **DeepSeek-V2-Lite feasibility spike** (follow-on). Document the MLA arch +
-   mid-layer injection point; attempt `deepseek-ai/DeepSeek-V2-Lite` 4-bit load on the 4070,
-   measure VRAM, determine go/no-go for QLoRA on the reservoir-interface layers (with CPU
-   offload). Honest writeup either way → `devlog.md` + `todo.md` (local-only; CI-skipped).
+1. **DeepSeek-V2-Lite injection attempt** (follow-on; resource-gated, local-only, CI-skipped).
+   _Analysis done 2026-06-01 (see `todo.md` base-model subsection + devlog): env GO (native
+   `deepseek_v2` in transformers 5.4), injection point = layer 13/27, VRAM marginal → needs
+   `device_map="auto"` + CPU offload, port steps identified._ **Remaining:** the actual ~9 GB
+   4-bit download + load + a QLoRA-fit test (does training fit in 8.6 GB with offloaded
+   experts?) + the `_arch.py` `deepseek_v2` branch and MLA LoRA targets. Heavy download +
+   uncertain training fit — left for a dedicated local run / user go-ahead, not run blind here.
 
 ---
 

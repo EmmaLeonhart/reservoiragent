@@ -112,11 +112,22 @@ MLA, the V4 CSA/HCA hybrid).
   a hosted API can't expose mid-layer attention for injection. So this is a **cloud / big-GPU**
   destination, tracked as direction, not a near-term step.
 - **DeepSeek-V2-Lite — the realistic local MLA base (NEXT to attempt).** 16B total / 2.4B
-  active, MLA (the compressed-KV mechanism), 27 layers, hidden 2048, MIT. Carries the
-  cache-efficiency property the chat cares about at a size that *might* be probeable on the
-  4070 with 4-bit QLoRA + CPU offload (tight — feasibility spike is queued). Decompose: load
-  4-bit + measure VRAM → identify the mid-layer injection point in the MLA stack → port the
-  `kv_live.py` reservoir-prefix injection → small cross-pass-recall probe. Go/no-go honestly.
+  active, MLA, MIT. **Feasibility analysis done 2026-06-01 (config-only, no weight download):**
+  transformers 5.4.0 supports `deepseek_v2` **natively** (no `trust_remote_code`); config
+  confirms 27 layers, hidden 2048, 16 heads, MLA `kv_lora_rank=512` / `qk_rope_head_dim=64` /
+  `qk_nope_head_dim=128` / `v_head_dim=128` (queries uncompressed in Lite: `q_lora_rank=None`),
+  MoE = 64 routed experts (6 active) + 2 shared, `first_k_dense_replace=1` (layer 0 dense, 1–26
+  MoE). **Mid-layer injection point = layer 13 of 27.** VRAM: 16B at 4-bit ≈ 8 GB of weights
+  vs the 4070's 8.6 GB → a pure-GPU load is at/over the edge; **`device_map="auto"` + CPU
+  offload is required** (763 GB disk, ample RAM). The `kv_live.py` prefix-injection mechanism
+  is architecture-agnostic (works through `inputs_embeds` + the causal path, no MLA surgery),
+  so the port is bounded: (a) a `_arch.py` `deepseek_v2` branch (`decoder_blocks =
+  model.model.layers`, `hidden_size` from config); (b) LoRA `target_modules` set to the MLA
+  projection names (`q_proj` / `kv_a_proj_with_mqa` / `kv_b_proj` / `o_proj`) instead of GPT-2
+  `c_attn`; (c) `layer=13` for the reservoir read hook. **Remaining (resource-gated):** the
+  actual ~9 GB 4-bit download + load + a QLoRA-fit test — the one thing the analysis can't
+  settle is whether QLoRA training fits in 8.6 GB with offloaded experts (likely tight; only
+  a real attempt resolves it). Queued as the next local step.
 - **Reservoir-friendly compression interaction (research question).** If the base has learned
   KV compression (CSA/HCA), does fine-tuning teach it to route long-idle "nothing happened"
   signal through the reservoir and compress raw blank tokens harder? The chat's hypothesis;

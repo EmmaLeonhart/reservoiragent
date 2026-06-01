@@ -1149,3 +1149,22 @@ citations (StreamingLLM arXiv:2309.17453, H2O arXiv:2306.14048, MLA/DeepSeek-V2 
 plus the V4-Flash release entry flagged as reported-not-independently-verified for its CSA/HCA
 detail. Closes the writing half of the user's DeepSeek ask; the GPU spike is the one remaining
 Phase G item.
+
+## 2026-06-01 - DeepSeek-V2-Lite feasibility analysis (Phase G; config-only, no weight download)
+
+Resolved most of the V2-Lite spike's uncertainty cheaply, without the 31 GB weight download.
+Environment: torch 2.10+cu128, transformers 5.4.0 (which supports `deepseek_v2` NATIVELY — no
+trust_remote_code), bitsandbytes 0.49.2, peft, accelerate all present; RTX 4070 8.6 GB, 763 GB
+free. Pulled the config (a few KB): 27 layers, hidden 2048, 16 heads, MLA kv_lora_rank=512
+(qk_rope 64 / qk_nope 128 / v_head 128; queries uncompressed in Lite), MoE 64 routed experts
+(6 active) + 2 shared, first_k_dense_replace=1. Mid-layer injection point = layer 13/27.
+
+Go/no-go: arch support GO; the kv_live.py prefix-injection mechanism is architecture-agnostic
+(inputs_embeds + causal path), so the port is bounded — a _arch.py deepseek_v2 branch, LoRA
+targets set to the MLA projection names (q_proj/kv_a_proj_with_mqa/kv_b_proj/o_proj), layer=13.
+VRAM is the constraint: 16B at 4-bit ≈ 8 GB of weights vs 8.6 GB, so a pure-GPU load is at the
+edge and device_map="auto" + CPU offload is required. The one thing the analysis can't settle
+is whether QLoRA *training* fits in 8.6 GB with offloaded experts — only a real attempt does.
+Did NOT run the ~9 GB 4-bit download + load blind in this session: heavy download + uncertain
+training fit, left as a resource-gated local step (tightened queue item + recorded in todo.md).
+Not a faked completion — the load was not run, and that is stated.
