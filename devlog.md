@@ -1191,3 +1191,19 @@ session) — added a "Safety & runtime (Phase G)" findings group (interruptibili
 context via reservoir-pinned eviction), an "## Experiments" section listing the runnable
 run.py subcommands (verified all present via `run.py -h`), and the DeepSeek-V2-Lite base
 direction + a pointer to the imported Grok transcript. No code change; suite unchanged at 145.
+
+## 2026-06-01 - DeepSeek-V2-Lite dropped; learned cache-compression is frontier-scale-only
+
+User decision: drop the V2-Lite base switch. Reason: V2-Lite has MLA (fixed low-rank KV
+compression, ~8.9× smaller cache than MHA — verified from its config: 576 vs ~5120 dims/token)
+but NOT the *learned, fine-tunable* compression that is the actual point — being able to
+fine-tune the cache manager to lean on the reservoir for long-idle signal. Verified the
+landscape: learned/trainable compression is DeepSeek Sparse Attention (DSA, first in V3.2,
+671B) and the V4 CSA+HCA hybrid (V4-Flash, 284B); there is no runnable-size open model with it
+— it's frontier-scale-only. So "the next biggest model that has it" is V4-Flash/V3.2, neither
+locally runnable. The base-model question is now a fork for the user: (a) cloud/rented-GPU
+fine-tune of V4-Flash/V3.2 (the only way to test learned-compression × reservoir), or (b) drop
+the learned-compression angle locally and keep the reservoir-pinned eviction (kv_evict.py) as
+the local cache story on GPT-2/Hermes. Removed the V2-Lite queue item + task; recorded in
+todo.md (config-only analysis retained there in case a fixed-MLA base is ever wanted). Phase G
+(the buildable Grok insights) is complete; the base switch is parked on the user's call.
