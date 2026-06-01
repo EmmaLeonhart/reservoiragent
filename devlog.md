@@ -1181,3 +1181,13 @@ while sink + reservoir + recent window stay pinned exactly as before. scores=Non
 StreamingLLM recency behaviour (regression test added). 5 new tests (suite 145 passed),
 docstring + a one-line FINDINGS note. Position-based and importance-based eviction now sit
 under one interface with the reservoir pinned either way.
+
+## 2026-06-01 - README brought current with Phase G (work-loop housekeeping)
+
+Work-loop tick: the only remaining Phase G queue item is the resource-gated V2-Lite attempt,
+so did the standing README-currency obligation instead. README.md was stale (predated the
+session) — added a "Safety & runtime (Phase G)" findings group (interruptibility latency 0 vs
+3.57 + 3-pass persistence; linear probe R²≈0.99 vs 0.16, no SAE, graceful drift; bounded idle
+context via reservoir-pinned eviction), an "## Experiments" section listing the runnable
+run.py subcommands (verified all present via `run.py -h`), and the DeepSeek-V2-Lite base
+direction + a pointer to the imported Grok transcript. No code change; suite unchanged at 145.
