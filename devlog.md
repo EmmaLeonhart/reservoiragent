@@ -1207,3 +1207,13 @@ the learned-compression angle locally and keep the reservoir-pinned eviction (kv
 the local cache story on GPT-2/Hermes. Removed the V2-Lite queue item + task; recorded in
 todo.md (config-only analysis retained there in case a fixed-MLA base is ever wanted). Phase G
 (the buildable Grok insights) is complete; the base switch is parked on the user's call.
+
+## 2026-06-01 - Base-model question resolved: drop the learned-compression angle locally
+
+User chose: drop the angle, stay local. Local hardware can't have learned/fine-tunable cache
+compression (frontier-scale-only), so the local cache story is settled as the reservoir-pinned
+eviction (kv_evict.py) — it bounds blank-tick context burn without needing a learned compressor.
+Local work continues on GPT-2/Hermes. The learned-compression × reservoir hypothesis (does
+fine-tuning a DSA/CSA-HCA compressor teach it to defer to the reservoir for idle signal?) is now
+an explicit cloud/future experiment, deferred until there's a compute budget. Updated todo.md +
+queue.md to mark Phase G (the buildable Grok insights) complete and the base switch resolved.

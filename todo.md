@@ -116,12 +116,15 @@ MLA, the V4 CSA/HCA hybrid).
   the ability to fine-tune the cache manager so it learns to defer to the reservoir for
   long-idle signal. That learned compression is **DeepSeek Sparse Attention (DSA, V3.2)** /
   **CSA+HCA (V4)**, which only exists at frontier scale: V3.2 = 671B, V4-Flash = 284B — **no
-  runnable-size open model has it**. So the base decision is a fork: **(a) cloud/rented-GPU
-  fine-tune of V4-Flash or V3.2** to actually test learned-compression × reservoir, or **(b)
-  drop the learned-compression angle for local work** and keep the reservoir-pinned eviction
-  (`src/reservoir/kv_evict.py`) as the local cache story on GPT-2/Hermes. Awaiting user call.
-  _(Config-only analysis retained below for if a small MLA base is ever wanted for the *fixed*
-  compression alone.)_
+  runnable-size open model has it**. **RESOLVED (user, 2026-06-01): drop the learned-compression
+  angle for local work.** Local hardware can't have learned compression, so the local cache
+  story is the **reservoir-pinned eviction** (`src/reservoir/kv_evict.py`, StreamingLLM + H2O
+  with the reservoir pinned) — it bounds blank-tick context burn without needing a learned
+  compressor. Stay on GPT-2/Hermes locally. The **learned-compression × reservoir** hypothesis
+  (does fine-tuning a DSA/CSA-HCA compressor teach it to defer to the reservoir for long-idle
+  signal?) becomes an explicit **cloud/future experiment** — only runnable by renting GPUs for
+  V4-Flash/V3.2, deferred until there's a compute budget and a reason to commit.
+  _(Config-only V2-Lite analysis retained below for if a small fixed-MLA base is ever wanted.)_
 - **DeepSeek-V2-Lite — config-only analysis (retained, not the plan).** 16B total / 2.4B
   active, MLA, MIT. **Feasibility analysis done 2026-06-01 (config-only, no weight download):**
   transformers 5.4.0 supports `deepseek_v2` **natively** (no `trust_remote_code`); config

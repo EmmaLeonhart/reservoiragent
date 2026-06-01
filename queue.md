@@ -39,11 +39,10 @@ Attention / V4 CSA+HCA). The user's point: the fundamental lever is being able t
 the cache management** so it learns to lean on the reservoir for idle signal — fixed MLA alone
 isn't worth the port. Landscape (verified): learned/trainable compression starts at **V3.2
 (671B, DSA)** and **V4-Flash (284B, CSA+HCA)** — there is **no runnable-size open model with
-it**; it's frontier-scale-only. So the base-model question is now a fork the user must call:
-**(a) cloud/rented-GPU fine-tune of V4-Flash/V3.2** (the only way to get learned-compression ×
-reservoir), or **(b) drop the learned-compression angle locally** and keep the reservoir-pinned
-eviction (`kv_evict.py`) as the local cache story, staying on GPT-2/Hermes. Parked pending that
-decision; recorded in `todo.md`._
+it**; it's frontier-scale-only. **RESOLVED (user, 2026-06-01): drop the learned-compression
+angle locally.** The local cache story is the reservoir-pinned eviction (`kv_evict.py`); the
+learned-compression × reservoir hypothesis is deferred to a cloud/future experiment (rent GPUs
+for V4-Flash/V3.2). Phase G (the buildable Grok insights) is **complete**; recorded in `todo.md`._
 
 ---
 
