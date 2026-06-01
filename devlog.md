@@ -1039,3 +1039,24 @@ train; reservoirs at fixed rho have near-identical bulk dynamics (H2). What does
 hold: that some fixed reservoirs are durably better on this task. The proper test (queued):
 seed the trainable init + deterministic CUDA + average several runs per seed (or train far
 longer). The published populations stay up (real data); only the interpretation is corrected.
+
+## 2026-06-01 - Imported the "Attention Reservoir Architecture" Grok chat + opened Phase G
+
+User added a saved Grok conversation to the data lake and asked to apply its insights, with
+a stated want to move the base model to DeepSeek-V4-Flash. Extracted the 1.1 MB HTML export
+(BeautifulSoup; stripped Grok UI chrome, cookie banners, "N sources" lines) and reconstructed
+the 15 Emma/Grok exchanges into data_lake/transcripts/attention-reservoir-architecture-grok.md.
+Raw HTML + _files JS dump moved under data_lake/ where the existing .gitignore rules keep it
+local (convention: distilled transcripts committed, raw exports not).
+
+Feasibility check on the headline ask: DeepSeek-V4-Flash IS real (284B-total/13B-active MoE,
+1M context, MIT, released 2026-04-24) but is not loadable, let alone fine-tunable, on this
+RTX 4070 (8.6 GB) — and reservoir injection requires fine-tuning, so a hosted API can't
+substitute. The cache-efficiency architecture the whole chat hinges on (MLA / compressed KV)
+does exist in a small enough form: DeepSeek-V2-Lite (16B/2.4B-active, MLA, 27 layers). Asked
+the user how to proceed; they chose: do the base-agnostic insight work first, then attempt a
+V2-Lite feasibility spike. Opened queue Phase G with that plan (7 items: reservoir-protected
+KV eviction → blank-cycle context-growth demo → interruptibility experiment → reservoir-state
+linear probe → Safety-by-Design section → DeepSeek decision into todo/REVIEW → V2-Lite spike),
+mirrored to the task tool, and started the three session-local crons (work-loop :03, auto-flush
+:15, status-report :42) for a fresh session.
