@@ -596,6 +596,30 @@
   </figcaption>
 </figure>
 
+<p>
+  <strong>Blank-tick context burn &mdash; bounded by pinning the reservoir.</strong> An
+  always-alive agent runs <em>blank ticks</em>: autonomous passes with no user input. Each
+  silent tick still appends to the KV cache, so a continuously-running agent burns its
+  context window <em>faster</em> than a turn-based one &mdash; the operational pain point
+  raised in the imported Grok chat (<em>&ldquo;context explodes&hellip; a reservoir agent
+  gets an input of blank&rdquo;</em>). The fix is StreamingLLM-style eviction (a few
+  attention-sink tokens + a recent window, drop the middle) with the reservoir&rsquo;s K/V
+  entries <strong>pinned</strong>, so the persistent time-axis is never what gets dropped
+  &mdash; <em>&ldquo;a really long time of no activity is signal.&rdquo;</em> Over 512 blank
+  ticks the vanilla cache grows linearly to 524 positions while the protected policy stays
+  bounded at the budget (128), with <strong>all 8 reservoir entries retained on every
+  tick</strong>. The policy (<code>reservoir.kv_evict</code>) is pure and CPU-tested;
+  with no reservoir tags it degrades to ordinary StreamingLLM.
+</p>
+<figure>
+  <img src="blank_cycle_kv.png" alt="Line chart of KV-cache positions over 512 blank ticks: the no-eviction vanilla cache grows linearly to about 524 positions, while the reservoir-protected policy rises then flattens at a budget of 128 positions.">
+  <figcaption>
+    <strong>Blank-cycle KV-cache growth</strong>. Vanilla (linear burn) vs. the
+    reservoir-protected eviction policy (bounded at the budget); every reservoir entry
+    survives each tick. Regenerate with <code>python scripts/run.py blankcycle</code>.
+  </figcaption>
+</figure>
+
 <h2>Run a reservoir agent locally</h2>
 <p>
   Every model the project ships is a <strong>reservoir agent</strong> &mdash; a new model

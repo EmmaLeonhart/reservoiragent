@@ -33,31 +33,26 @@ resilient to fine-tune drift; faster interruptibility / lower "STOP" latency tha
 harnesses; learned thought-representation via a *linear probe*, no SAE needed); rule:
 "never do capabilities work without meaningfully taking safety into account".
 
-1. **Blank-cycle context-growth demonstration** — drive M blank ticks through the live KV
-   path; show vanilla cache grows ~linearly while the protected policy stays bounded AND the
-   reservoir signal survives. Metrics → `results/`, figure → `docs/blank_cycle_kv.png`,
-   write-up → `FINDINGS.md` "## KV: blank-cycle context growth". (torch-gated parts skip in CI.)
-
-2. **Interruptibility experiment (safety)** — quantify the chat's "STOP latency" claim:
+1. **Interruptibility experiment (safety)** — quantify the chat's "STOP latency" claim:
    passes-to-register an urgent injected input for the reservoir path vs a turn-based baseline.
    Metrics → `results/`, figure → `docs/`, FINDINGS "## Safety: interruptibility".
 
-3. **Reservoir-state linear probe (safety / interpretability)** (`src/reservoir/probe.py`, TDD).
+2. **Reservoir-state linear probe (safety / interpretability)** (`src/reservoir/probe.py`, TDD).
    Train a linear/small-MLP probe on reservoir state to decode a process property (e.g. idle
    duration / pass-count / unresolved-thread flag). Demonstrate (a) it's decodable without an
    SAE and (b) the "fixed-reservoir = resilient monitor" claim: a probe trained pre-finetune
    still reads after finetune. Metrics → `results/`, FINDINGS "## Safety: reservoir probe".
 
-4. **"Safety by Design" section** in `FINDINGS.md` + `docs/` — fixed reservoir as monitoring
+3. **"Safety by Design" section** in `FINDINGS.md` + `docs/` — fixed reservoir as monitoring
    surface, interruptibility, resilient misalignment signatures, learned thought reps, the
-   rule. Grounded in items 2–3 (cite measured numbers, no bare assertions). Keep docs/PDF current.
+   rule. Grounded in items 1–2 (cite measured numbers, no bare assertions). Keep docs/PDF current.
 
-5. **DeepSeek base decision → `todo.md` + `literature/REVIEW.md`** — record: V4-Flash as the
+4. **DeepSeek base decision → `todo.md` + `literature/REVIEW.md`** — record: V4-Flash as the
    aspirational target (needs cloud / a big GPU; infeasible locally), V2-Lite as the realistic
    local MLA base; add the KV-cache literature (StreamingLLM attention-sink, H2O, MLA, V4
    CSA/HCA) to REVIEW with citations.
 
-6. **DeepSeek-V2-Lite feasibility spike** (follow-on, after 1–5). Document the MLA arch +
+5. **DeepSeek-V2-Lite feasibility spike** (follow-on, after 1–4). Document the MLA arch +
    mid-layer injection point; attempt `deepseek-ai/DeepSeek-V2-Lite` 4-bit load on the 4070,
    measure VRAM, determine go/no-go for QLoRA on the reservoir-interface layers (with CPU
    offload). Honest writeup either way → `devlog.md` + `todo.md` (local-only; CI-skipped).

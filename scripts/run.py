@@ -481,6 +481,40 @@ def cmd_silence(args) -> int:
     return 0
 
 
+def cmd_blankcycle(args) -> int:
+    """Blank-cycle KV-cache growth: vanilla (linear) vs reservoir-protected (bounded)."""
+    from reservoir.blank_cycle import simulate_blank_cycle, plot_blank_cycle
+
+    print(f"Simulating {args.ticks} blank ticks "
+          f"(tokens/tick={args.tokens_per_tick}, budget={args.budget}, "
+          f"reservoir={args.n_reservoir}, recent={args.recent})…")
+    records = simulate_blank_cycle(
+        args.ticks, tokens_per_tick=args.tokens_per_tick, n_sink=args.n_sink,
+        n_reservoir=args.n_reservoir, budget=args.budget, recent=args.recent)
+
+    out = ROOT / args.out
+    out.parent.mkdir(parents=True, exist_ok=True)
+    payload = {"params": {"ticks": args.ticks, "tokens_per_tick": args.tokens_per_tick,
+                          "n_sink": args.n_sink, "n_reservoir": args.n_reservoir,
+                          "budget": args.budget, "recent": args.recent},
+               "records": records}
+    out.write_text(json.dumps(payload, indent=2))
+    print(f"wrote {out.relative_to(ROOT)}")
+
+    fig = ROOT / args.fig
+    fig.parent.mkdir(parents=True, exist_ok=True)
+    plot_blank_cycle(records, str(fig))
+    print(f"wrote {fig.relative_to(ROOT)}")
+
+    last = records[-1]
+    reservoir_ok = all(r["reservoir_retained"] == r["reservoir_expected"] for r in records)
+    print(f"after {last['tick']} ticks: vanilla cache = {last['vanilla_size']} positions, "
+          f"protected = {last['protected_size']} (bounded at budget={args.budget})")
+    print(f"reservoir entries retained on every tick: {reservoir_ok} "
+          f"({args.n_reservoir}/{args.n_reservoir} each tick)")
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="Reservoir Agent experiment runner")
     parser.add_argument("--version", action="store_true", help="print version and exit")
@@ -600,6 +634,18 @@ def main(argv=None) -> int:
     ag.add_argument("--readout-scale", type=float, default=0.05)
     ag.add_argument("--seed", type=int, default=0)
     ag.set_defaults(func=cmd_agent)
+
+    bc = sub.add_parser("blankcycle",
+                        help="blank-tick KV-cache growth: vanilla vs reservoir-protected")
+    bc.add_argument("--ticks", type=int, default=512)
+    bc.add_argument("--tokens-per-tick", type=int, default=1)
+    bc.add_argument("--n-sink", type=int, default=4)
+    bc.add_argument("--n-reservoir", type=int, default=8)
+    bc.add_argument("--budget", type=int, default=128)
+    bc.add_argument("--recent", type=int, default=64)
+    bc.add_argument("--out", default="results/blank_cycle.json")
+    bc.add_argument("--fig", default="docs/blank_cycle_kv.png")
+    bc.set_defaults(func=cmd_blankcycle)
 
     args = parser.parse_args(argv)
     if args.version:
