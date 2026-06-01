@@ -18,8 +18,22 @@ successfully implemented (as a **Reservoir Agent**) using pretrained transformer
 - **H2 (Dynamics):** The ρ ≈ 1 echo-state boundary holds on real transformer activations.
 - **H3 (Recall):** 100% cross-pass recall on GPT-2; identified scale difficulty on Hermes 3B.
 
-The next phase moves toward semantic agentic tasks and the full always-alive runtime.
-The originating spec is `data_lake/reservoir_agent_plan.md`.
+**Safety & runtime (Phase G — from the imported Grok conversation):** the *same* fixed
+reservoir that gives the agent a time-axis also pays safety value back, each backed by a
+measured result rather than asserted:
+- **Interruptibility.** A per-tick Reservoir Agent registers an urgent "STOP" at latency 0
+  (vs a turn-based agent's mean 3.57 passes), and a one-shot burst persists in reservoir
+  state for ~3 passes (fading memory) where a stateless monitor sees it for 0.
+- **A cheap, stable monitoring surface.** A *linear* probe (no SAE) reads an internal clock
+  off the reservoir at R² ≈ 0.99 (vs 0.16 stateless), degrading gracefully under a
+  fine-tuning-like drift — usable across moderate drift, not invariant.
+- **Bounded idle context.** A reservoir-protected KV-eviction policy (StreamingLLM /
+  H2O-style, with the reservoir pinned) keeps an always-on agent's cache from growing without
+  limit on blank ticks while never dropping the time-axis.
+
+The next phase moves toward a KV-efficient base (DeepSeek-V2-Lite, the small open MLA model)
+and the full always-alive runtime. The originating spec is `data_lake/reservoir_agent_plan.md`;
+the strategic conversation behind Phase G is `data_lake/transcripts/attention-reservoir-architecture-grok.md`.
 
 ## About
 
@@ -46,6 +60,21 @@ The trained GPT-2 cross-pass reservoir is published on Hugging Face:
 (verified 100% cross-context recall vs 17% chance baseline). Reproduce and save your own
 with `python scripts/run.py crosspass --mode kv --save <dir>`, then publish with
 `python scripts/publish_hf.py --artifact-dir <dir> --repo-id <user>/<name>`.
+
+## Experiments
+
+All run via `python scripts/run.py <cmd>` (metrics → `results/`, figures → `docs/`):
+
+- `sweep` / `sweep-real` / `sweep-scaling` — reservoir dynamics vs spectral radius / input scaling.
+- `crosspass` — cross-pass recall: stateful vs stateless (the headline GPT-2 result).
+- `silence` — a trained reservoir-state silence gate vs a stateless gate.
+- `blankcycle` — blank-tick KV-cache growth: vanilla (linear) vs reservoir-protected (bounded).
+- `interrupt` — interruptibility: STOP latency + reservoir signal persistence.
+- `probe` — reservoir-state linear probe: decode an internal clock + drift resilience.
+- `batch` / `nseed` / `nseed-select` — N-seed reservoir populations and selection.
+
+The pure-logic modules (e.g. `reservoir.kv_evict`, `reservoir.blank_cycle`, `reservoir.probe`)
+are unit-tested on CPU in CI; the model/GPU steps are local-only.
 
 ## Getting started
 
