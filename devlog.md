@@ -1217,3 +1217,20 @@ Local work continues on GPT-2/Hermes. The learned-compression × reservoir hypot
 fine-tuning a DSA/CSA-HCA compressor teach it to defer to the reservoir for idle signal?) is now
 an explicit cloud/future experiment, deferred until there's a compute budget. Updated todo.md +
 queue.md to mark Phase G (the buildable Grok insights) complete and the base switch resolved.
+
+## 2026-06-02 - Phase I opened: fix the dead train_seed confound (controlled selection experiment)
+
+User resumed local GPU work, choosing the N-seed controlled experiment (over the Hermes recall
+transfer). Goal: settle whether reservoir "selection" is real or training-noise, after the
+2026-05-31 finding that the per-seed recall spread at 250 steps was noise-dominated (same
+reservoir seed → 0.33 vs 1.00 across runs). Root cause identified: kv_live.py declared a
+`train_seed` parameter but never used it — the trainable W_res + LoRA init was unseeded, so two
+runs of the SAME fixed reservoir started from different inits.
+
+Fixed it: kv_live now seeds the torch RNG with train_seed before constructing W_res + the LoRA
+adapter, making the trainable init a controlled variable (train_seed=None keeps the old unseeded
+behaviour). tests/test_train_seed.py (4 torch-gated tests, local-green; skip in CI): same
+train_seed → identical W_res weight/bias and identical LoRA init; different train_seed → differs;
+train_seed recorded on the instance. Full suite 149 passed locally, no regression. Restarted the
+three crons for the resumed work. Next: a deterministic-CUDA helper + thread train_seed through
+run_cross_pass_kv, then the controlled runner + variance analysis, then the local run.
