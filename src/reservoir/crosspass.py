@@ -101,19 +101,31 @@ def run_cross_pass_kv(model_name: str = "gpt2", *, n_keys: int = 6, steps: int =
                       lr: float = 1e-3, seed: int = 0, device: str | None = None,
                       stateful: bool = True, n_prefix: int = 8,
                       load_in_4bit: bool = False, input_scaling: float = 0.5,
-                      dtype: str | None = None, save_dir: str | None = None) -> dict:
+                      dtype: str | None = None, save_dir: str | None = None,
+                      train_seed: int | None = None, deterministic: bool = False) -> dict:
     """Same cross-pass recall task, but with the **content-addressable** injection:
     the model attends to reservoir-derived prefix tokens (see ``kv_live``). This is the
-    fix for the additive-injection negative result."""
+    fix for the additive-injection negative result.
+
+    ``seed`` fixes the reservoir (W_r, W_in). ``train_seed`` (the Phase-I confound control)
+    fixes the *trainable* init (W_res + LoRA) and the data order independently of the reservoir,
+    so several runs of one reservoir vary only by ``train_seed``; ``deterministic=True`` also
+    pins the backend kernels. ``train_seed=None`` reproduces the previous behaviour (data order
+    seeded by ``seed``, unseeded init)."""
     import torch
     from .kv_live import TorchReservoirPrefixInjectedLM
 
+    if deterministic:
+        from .determinism import set_deterministic
+        set_deterministic(seed if train_seed is None else train_seed)
+
     lm = TorchReservoirPrefixInjectedLM(model_name, seed=seed, device=device,
                                         n_prefix=n_prefix, load_in_4bit=load_in_4bit,
-                                        input_scaling=input_scaling, dtype=dtype)
+                                        input_scaling=input_scaling, dtype=dtype,
+                                        train_seed=train_seed)
     tok = lm.tokenizer
     keys = _single_token_keys(tok, n_keys)
-    rng = np.random.default_rng(seed)
+    rng = np.random.default_rng(seed if train_seed is None else train_seed)
 
     def forward_pair(key_word, *, reset_between):
         p1 = tok(f"The secret word is {key_word}.", return_tensors="pt").to(lm.device)

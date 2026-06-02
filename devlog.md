@@ -1234,3 +1234,19 @@ train_seed → identical W_res weight/bias and identical LoRA init; different tr
 train_seed recorded on the instance. Full suite 149 passed locally, no regression. Restarted the
 three crons for the resumed work. Next: a deterministic-CUDA helper + thread train_seed through
 run_cross_pass_kv, then the controlled runner + variance analysis, then the local run.
+
+## 2026-06-02 - Deterministic-CUDA helper + train_seed plumbing (Phase I); run is now bit-reproducible
+
+Closed the other half of the confound. Added src/reservoir/determinism.py `set_deterministic(seed)`
+— seeds Python/NumPy/torch RNGs, sets CUBLAS_WORKSPACE_CONFIG, cudnn.deterministic=True /
+benchmark=False, and torch.use_deterministic_algorithms(True, warn_only=True). Threaded a
+`train_seed` (and `deterministic`) param through run_cross_pass_kv: `seed` fixes the reservoir
+(W_r/W_in), `train_seed` fixes the trainable init (via the kv_live fix) AND the data order,
+independently — so several runs of one reservoir vary only by train_seed. train_seed=None
+reproduces prior behaviour. tests/test_determinism.py (3 torch-gated, local-green, CI-skip): the
+key one trains tiny-gpt2 twice with the same (seed, train_seed) and asserts loss_start, loss_end
+and recall_accuracy are BIT-identical; a different train_seed changes the trajectory; and
+set_deterministic sets the cudnn flags. Full suite 152 passed. With init + data + kernels all
+controlled, any recall spread that survives across DIFFERENT reservoir seeds is reservoir
+quality, not run-to-run noise — which is exactly what the next item (controlled_selection +
+variance analysis) measures.
