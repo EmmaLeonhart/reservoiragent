@@ -33,6 +33,15 @@ def set_deterministic(seed: int) -> None:
         torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
+    # The flash / memory-efficient scaled-dot-product-attention *backward* kernels are
+    # non-deterministic on CUDA; force the math kernel so a run is reproducible. Sequences
+    # here are tiny (cross-pass prompts), so the speed cost is negligible.
+    try:
+        torch.backends.cuda.enable_flash_sdp(False)
+        torch.backends.cuda.enable_mem_efficient_sdp(False)
+        torch.backends.cuda.enable_math_sdp(True)
+    except Exception:
+        pass
     try:
         torch.use_deterministic_algorithms(True, warn_only=True)
     except Exception:

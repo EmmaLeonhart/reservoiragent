@@ -478,6 +478,29 @@
 </figure>
 
 <p>
+  <strong>Controlled test &mdash; at this budget, &ldquo;selection&rdquo; is noise, not
+  signal.</strong> We then controlled the noise: <code>kv_live</code> had a <code>train_seed</code>
+  that was never wired, so the trainable init was uncontrolled &mdash; now it seeds the init, and
+  a determinism helper makes two runs of the same reservoir with the same <code>train_seed</code>
+  bit-identical. Training <strong>6 reservoir seeds &times; 4 runs</strong> (runs vary only by
+  init) and running a one-way ANOVA over recall by reservoir seed: the within-seed spread is as
+  wide as the between-seed spread (seed 0 alone spans 0.33&ndash;1.00), giving
+  <strong>F = 1.30 (df 5,18), p = 0.31</strong> &mdash; reservoir identity does <em>not</em>
+  explain recall above run-to-run init noise. At 250 steps, which fixed reservoir you drew
+  matters less than which init you got; select over <em>runs</em>, not seeds. (A far-longer-budget
+  run, where init noise should shrink, is the natural follow-up.)
+</p>
+<figure>
+  <img src="controlled.png" alt="Scatter of cross-pass recall for 6 reservoir seeds, four runs each, with a red mean bar per seed. The four runs within each seed scatter widely (e.g. seed 0 from 0.33 to 1.0), and the per-seed means all sit between about 0.33 and 0.75, overlapping heavily across seeds.">
+  <figcaption>
+    <strong>Controlled N-seed selection</strong> (GPT-2, 6 seeds &times; 4 runs, 250 steps,
+    seeded init + deterministic kernels). Within-seed run-to-run spread matches the between-seed
+    spread &mdash; ANOVA F=1.30, p=0.31, selection not significant. Regenerate with
+    <code>python scripts/run.py controlled --n-seeds 6 --runs 4 --steps 250</code>.
+  </figcaption>
+</figure>
+
+<p>
   <strong>Cross-pass recall &mdash; the core claim, demonstrated (the injection design
   decides everything).</strong> The load-bearing test: show a secret word, <em>wipe the
   context</em>, recall it on the next pass from carried reservoir state alone &mdash; a task

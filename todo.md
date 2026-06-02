@@ -154,6 +154,13 @@ MLA, the V4 CSA/HCA hybrid).
 ### Long-term (aspirational — compute-gated, full vision)
 - **N-seed selection pipeline.** 10–20 reservoir seeds × LoRA fine-tunes, keep the
   best by benchmark. Investigate a dynamics-based seed pre-selection proxy.
+  - **Controlled result (2026-06-02): at 250 steps, selection is NOT significant** (ANOVA
+    F=1.30, df 5,18, p=0.31, over 6 seeds × 4 controlled runs; within-seed init spread ≈
+    between-seed). The trainable init matters more than the reservoir at this budget. See
+    `FINDINGS.md` + `docs/controlled.png`; runner `scripts/run.py controlled`.
+  - **Open follow-up:** does selection become real at a far larger training budget (e.g.
+    `controlled --steps 1500`, 6×4 ≈ 1 hr local) where init noise shrinks? Either finds a real
+    reservoir signal at higher budget or strengthens the negative. Bounded; awaiting interest.
 - **Always-alive runtime.** Fork the Hermes harness into a stateful process: pass
   scheduler (prompted + unprompted passes), persistent context buffer, reservoir
   state store (GPU-pinned, checkpointed), output confidence gate. Regression vs
