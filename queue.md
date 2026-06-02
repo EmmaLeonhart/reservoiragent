@@ -12,7 +12,41 @@ See `CLAUDE.md` § "Workflow Rules" and § "Research workflow" for how this file
 
 ---
 
-## Active — Phase G: apply the Grok-chat insights (base-agnostic first, then DeepSeek-V2-Lite spike)
+## Active — Phase I: N-seed controlled selection experiment (resolve noise vs. signal)
+
+User chose (2026-06-02) to resume **local** GPU work with the controlled experiment. The open
+question: is reservoir "selection" real, or training-noise? At 250 steps the per-seed recall
+spread was noise-dominated — the SAME reservoir seed landed at 0.33 vs 1.00 across two runs
+(mean |Δrecall| ≈ 0.47, devlog 2026-05-31). Root cause found: `kv_live.py` accepts a
+`train_seed` param but **never uses it** (the trainable `W_res` + LoRA init is unseeded), and
+there's no deterministic-CUDA toggle — so runs differ by uncontrolled init + CUDA nondeterminism,
+not just reservoir quality. The fix is to control those, then average several runs per reservoir
+seed and test whether between-seed variance exceeds within-seed (run-to-run) variance.
+
+Crons: the three (work-loop :03, auto-flush :15, status-report :42) were stopped during the idle
+gap; restarted at this phase's bootstrap (item 1). Pinned `## Always last` keeps them alive.
+Hard rails: TDD where there's logic; the trainable-init determinism + the variance analysis are
+CPU-testable; the training runs are torch/GPU local-only (CI-skipped) and must be actually RUN
+before any result is claimed; name the outcome plainly either way (selection real, or noise).
+
+1. **Deterministic-CUDA helper + thread `train_seed` through `run_cross_pass_kv` (torch, local).**
+   A `set_deterministic(seed)` util (`use_deterministic_algorithms`, cudnn deterministic/benchmark,
+   `CUBLAS_WORKSPACE_CONFIG`). Add a `train_seed` param to `run_cross_pass_kv` separating the
+   reservoir seed (W_r/W_in) from the trainable-init + data-order seed. Torch-gated.
+
+2. **Controlled experiment + variance analysis (analysis TDD, CPU).** `controlled_selection(...)`:
+   for each of N reservoir seeds, run R training runs (varying `train_seed`), record recall per
+   (seed, run). Pure `selection_signal(records)`: per-seed mean/std recall + between-seed vs
+   within-seed variance ratio (an F-like statistic) — does fixed reservoir quality exceed
+   run-to-run noise? Unit-test the analysis on synthetic data with known structure.
+
+3. **Run it locally + write up.** Run (e.g. 6 reservoir seeds × 4 runs) at higher steps for less
+   noise; metrics → `results/`, figure → `docs/`, update `FINDINGS.md` to resolve/refine the
+   "selection is noise-dominated at 250 steps" finding. Honest outcome either way; keep docs/PDF current.
+
+---
+
+## Done — Phase G: apply the Grok-chat insights (complete 2026-06-01)
 
 User imported a strategic Grok conversation (`data_lake/transcripts/attention-reservoir-architecture-grok.md`)
 and asked to apply its insights, wanting **DeepSeek-V4-Flash** as the base. **Feasibility

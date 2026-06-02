@@ -79,6 +79,14 @@ class TorchReservoirPrefixInjectedLM:
         self.W_r = torch.tensor(W_r)
         self.W_in = torch.tensor(W_in)
         self._state = torch.zeros(n_reservoir)
+        # Seed the trainable init (W_res + the LoRA adapter built just below) so it is a
+        # *controlled* variable in the N-seed selection experiment rather than uncontrolled
+        # noise. Without this, two runs of the SAME fixed reservoir start from different inits,
+        # which dominated the per-seed recall spread (devlog 2026-05-31). train_seed=None keeps
+        # the previous (unseeded) behaviour.
+        self.train_seed = train_seed
+        if train_seed is not None:
+            torch.manual_seed(int(train_seed))
         # reservoir -> n_prefix prefix-token embeddings
         self.W_res = nn.Linear(n_reservoir, n_prefix * d_model)
 
