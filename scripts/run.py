@@ -576,6 +576,46 @@ def cmd_probe(args) -> int:
     return 0
 
 
+def cmd_controlled(args) -> int:
+    """Controlled N-seed selection: train R runs per reservoir seed, ANOVA-test signal vs noise."""
+    from reservoir.controlled import controlled_selection, selection_signal, plot_controlled
+
+    seeds = ([int(x) for x in args.seeds.split(",")] if args.seeds else list(range(args.n_seeds)))
+    print(f"Controlled selection: {len(seeds)} reservoir seeds x {args.runs} runs "
+          f"@ {args.steps} steps ({args.model})…")
+
+    def prog(s, run, r):
+        print(f"  seed {s} run {run}: recall={r['recall_accuracy']:.2f} "
+              f"loss_end={r['loss_end']:.3f}")
+
+    records = controlled_selection(seeds, args.runs, model_name=args.model, steps=args.steps,
+                                   n_keys=args.n_keys, lr=args.lr, input_scaling=args.input_scaling,
+                                   device=args.device, deterministic=True, progress=prog)
+    signal = selection_signal(records)
+
+    out = ROOT / args.out
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps({"params": {"seeds": seeds, "runs": args.runs, "steps": args.steps,
+                                          "model": args.model, "n_keys": args.n_keys,
+                                          "lr": args.lr, "input_scaling": args.input_scaling},
+                               "records": records, "signal": signal}, indent=2))
+    print(f"wrote {out.relative_to(ROOT)}")
+
+    fig = ROOT / args.fig
+    fig.parent.mkdir(parents=True, exist_ok=True)
+    plot_controlled(records, signal, str(fig))
+    print(f"wrote {fig.relative_to(ROOT)}")
+
+    p = signal["p_value"]
+    ptxt = "n/a" if p is None else f"{p:.3g}"
+    print(f"per-seed mean recall: " +
+          ", ".join(f"{k}={v:.2f}" for k, v in signal['per_seed_mean'].items()))
+    print(f"F={signal['f_ratio']:.2f} (df {signal['df_between']},{signal['df_within']}), "
+          f"p={ptxt} -> selection_is_real={signal['selection_is_real']} "
+          f"(best seed {signal['best_seed']}, worst {signal['worst_seed']})")
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="Reservoir Agent experiment runner")
     parser.add_argument("--version", action="store_true", help="print version and exit")
@@ -733,6 +773,21 @@ def main(argv=None) -> int:
     pb.add_argument("--out", default="results/probe.json")
     pb.add_argument("--fig", default="docs/probe.png")
     pb.set_defaults(func=cmd_probe)
+
+    ct = sub.add_parser("controlled",
+                        help="controlled N-seed selection: signal (reservoir) vs noise (runs)")
+    ct.add_argument("--n-seeds", type=int, default=6)
+    ct.add_argument("--seeds", default=None, help="explicit comma-separated reservoir seeds")
+    ct.add_argument("--runs", type=int, default=4, help="training runs per reservoir seed")
+    ct.add_argument("--steps", type=int, default=600)
+    ct.add_argument("--model", default="gpt2")
+    ct.add_argument("--n-keys", type=int, default=6)
+    ct.add_argument("--lr", type=float, default=1e-3)
+    ct.add_argument("--input-scaling", type=float, default=0.5)
+    ct.add_argument("--device", default=None)
+    ct.add_argument("--out", default="results/controlled.json")
+    ct.add_argument("--fig", default="docs/controlled.png")
+    ct.set_defaults(func=cmd_controlled)
 
     args = parser.parse_args(argv)
     if args.version:

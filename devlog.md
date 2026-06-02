@@ -1250,3 +1250,16 @@ set_deterministic sets the cudnn flags. Full suite 152 passed. With init + data 
 controlled, any recall spread that survives across DIFFERENT reservoir seeds is reservoir
 quality, not run-to-run noise — which is exactly what the next item (controlled_selection +
 variance analysis) measures.
+
+## 2026-06-02 - Controlled-selection runner + ANOVA analysis (Phase I)
+
+Built src/reservoir/controlled.py: controlled_selection (torch-gated; trains R runs per reservoir
+seed, same train_seeds across seeds) + selection_signal (pure; one-way ANOVA over recall grouped
+by reservoir seed → per-seed means, between- vs within-seed mean squares, F, p-value via
+scipy.stats.f, and a verdict selection_is_real = p<0.05) + plot_controlled. Added a `controlled`
+run.py subcommand. tests/test_controlled.py: 6 pure analysis tests (CI-run) — F matches a
+hand-computed 24.0 on a known example, a strong between-seed signal reads real (p<0.05), pure
+within-seed noise reads F=0 / not real, zero within-variance → F=inf → real, per-seed means
+reported, <2 seeds raises — plus 1 torch-gated runner smoke (2 seeds × 2 runs returns the right
+shape). Full suite 159 passed. This is the analysis that will judge the actual run; next item is
+the local GPU run (N seeds × R runs at higher steps) + the write-up.
