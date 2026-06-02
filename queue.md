@@ -12,26 +12,27 @@ See `CLAUDE.md` § "Workflow Rules" and § "Research workflow" for how this file
 
 ---
 
-## Active — Phase I: N-seed controlled selection experiment (resolve noise vs. signal)
+## Done — Phase I: N-seed controlled selection experiment (complete 2026-06-02)
 
-User chose (2026-06-02) to resume **local** GPU work with the controlled experiment. The open
-question: is reservoir "selection" real, or training-noise? At 250 steps the per-seed recall
-spread was noise-dominated — the SAME reservoir seed landed at 0.33 vs 1.00 across two runs
-(mean |Δrecall| ≈ 0.47, devlog 2026-05-31). Root cause found: `kv_live.py` accepts a
-`train_seed` param but **never uses it** (the trainable `W_res` + LoRA init is unseeded), and
-there's no deterministic-CUDA toggle — so runs differ by uncontrolled init + CUDA nondeterminism,
-not just reservoir quality. The fix is to control those, then average several runs per reservoir
-seed and test whether between-seed variance exceeds within-seed (run-to-run) variance.
+_Resolved the open question "is reservoir selection real, or training-noise?". Root cause of the
+noise was a dead `train_seed` param in `kv_live` (trainable init unseeded) + no deterministic
+CUDA; both fixed (runs now bit-identical for fixed seed+train_seed, CPU and CUDA). Controlled
+run (6 reservoir seeds × 4 runs × 250 steps) + one-way ANOVA: **F = 1.30 (df 5,18), p = 0.31 →
+selection NOT significant** — within-seed (init) spread is as wide as between-seed (seed 0 spans
+0.33→1.00). At 250 steps, selection is noise, not signal — select over runs, not reservoir seeds.
+A far-longer-budget run (where init noise should shrink) is the natural follow-up, noted in
+`todo.md`. FINDINGS + `docs/controlled.png` updated. New: `controlled.py`, `determinism.py`,
+`run.py controlled`; tests test_train_seed/test_determinism/test_controlled._
 
-Crons: the three (work-loop :03, auto-flush :15, status-report :42) were stopped during the idle
-gap; restarted at this phase's bootstrap (item 1). Pinned `## Always last` keeps them alive.
-Hard rails: TDD where there's logic; the trainable-init determinism + the variance analysis are
-CPU-testable; the training runs are torch/GPU local-only (CI-skipped) and must be actually RUN
-before any result is claimed; name the outcome plainly either way (selection real, or noise).
+---
 
-1. **Run it locally + write up.** Run (e.g. 6 reservoir seeds × 4 runs) at higher steps for less
-   noise; metrics → `results/`, figure → `docs/`, update `FINDINGS.md` to resolve/refine the
-   "selection is noise-dominated at 250 steps" finding. Honest outcome either way; keep docs/PDF current.
+## Possible follow-up (not yet queued): longer-budget controlled run
+
+The 250-step verdict is "noise-dominated". The open sub-question: does selection become real with
+far more training (e.g. 1000–2000 steps), where run-to-run init noise should shrink? A
+`controlled --steps 1500` run (6×4) would answer it. Left unqueued pending user interest; it's a
+bounded local GPU job (~1 hr) that either finds a real reservoir signal at higher budget or
+strengthens the negative. (Also in `todo.md`.)
 
 ---
 

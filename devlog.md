@@ -1263,3 +1263,21 @@ within-seed noise reads F=0 / not real, zero within-variance → F=inf → real,
 reported, <2 seeds raises — plus 1 torch-gated runner smoke (2 seeds × 2 runs returns the right
 shape). Full suite 159 passed. This is the analysis that will judge the actual run; next item is
 the local GPU run (N seeds × R runs at higher steps) + the write-up.
+
+## 2026-06-02 - Controlled N-seed run: selection is noise, not signal, at 250 steps (Phase I complete)
+
+Ran the controlled experiment (scripts/run.py controlled, 6 reservoir seeds × 4 runs × 250
+steps, GPT-2, on the 4070). With the confounds removed — train_seed now seeds the trainable
+init, and set_deterministic forces the math SDP kernel so runs are bit-identical for a fixed
+(seed, train_seed) on CUDA (verified) — the per-seed mean recall ranges 0.33–0.75, but the
+within-seed spread is as wide as the between-seed spread (seed 0 spans 0.33→1.00 across inits).
+One-way ANOVA over recall by reservoir seed: F=1.30 (df 5,18), p=0.31 → selection_is_real=False.
+
+So the verdict, now controlled rather than suspected: at 250 steps, reservoir "selection" is not
+a real signal — which trainable init you get matters more than which fixed reservoir you drew.
+This converts the 2026-05-31 suspected-artifact into a controlled negative result. It does not
+rule out selection mattering at a far larger training budget (where init noise should shrink) —
+that longer run is the named follow-up (queue + todo). Also strengthened determinism.py to force
+the deterministic SDP kernel after the mem-efficient attention backward was found nondeterministic
+on CUDA. Updated FINDINGS (the per-seed-spread section now reports the controlled result) and
+docs/index.html (+docs/controlled.png). Full suite 159 passed. Phase I complete.

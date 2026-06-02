@@ -207,9 +207,26 @@ population* (cheap metrics don't let you pre-filter, so you train and measure) a
 fact that reservoirs scaled to a fixed ρ have near-identical bulk dynamics; it does **not**
 yet demonstrate that some fixed reservoirs are durably better than others on this task.
 Establishing that needs a **controlled** experiment: seed the trainable init too, enable
-deterministic CUDA, and **average several runs per seed** (or train far longer so outcomes
-stop being noisy). Open work, named plainly. (Figure: `docs/nseed_trained_spread.png` shows
-one run's spread.)
+deterministic CUDA, and **average several runs per seed**. (Figure:
+`docs/nseed_trained_spread.png` shows one run's spread.)
+
+**The controlled experiment — run, and it confirms: at 250 steps selection is noise, not
+signal.** We then ran exactly that experiment (`scripts/run.py controlled`;
+`docs/controlled.png`). Root cause of the noise was first removed: `kv_live` had a `train_seed`
+parameter that was never used, so the trainable `W_res` + LoRA init was uncontrolled; it now
+seeds the init, and a `set_deterministic` helper (RNGs + `CUBLAS_WORKSPACE_CONFIG` + cudnn
+flags + the deterministic math SDP kernel) makes two runs of the same reservoir with the same
+`train_seed` **bit-identical** (verified on CPU and CUDA). With that, we trained **6 reservoir
+seeds × 4 runs** (the four runs vary only by `train_seed`) and ran a one-way **ANOVA** over
+recall grouped by reservoir seed. Per-seed mean recall ranged 0.33–0.75, but the **within-seed
+spread is as wide as the between-seed spread** (e.g. seed 0 spans 0.33→1.00 across inits): **F =
+1.30 (df 5, 18), p = 0.31** — the between-seed (reservoir) variation does **not** exceed the
+within-seed (trainable-init) noise. So at 250 steps, **reservoir "selection" is not a real
+signal** — which fixed reservoir you drew matters less than which trainable init you happened to
+get. This turns the earlier *suspected* artifact into a *controlled* negative result. It does
+not rule out selection mattering with far more training (where init noise should shrink) — that
+larger-budget run is the natural follow-up — but at this budget the honest verdict is: train and
+select over *runs*, not over reservoir seeds.
 
 ### H2 — the reservoir-dynamics regime
 
