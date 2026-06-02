@@ -29,13 +29,7 @@ Hard rails: TDD where there's logic; the trainable-init determinism + the varian
 CPU-testable; the training runs are torch/GPU local-only (CI-skipped) and must be actually RUN
 before any result is claimed; name the outcome plainly either way (selection real, or noise).
 
-1. **Controlled experiment + variance analysis (analysis TDD, CPU).** `controlled_selection(...)`:
-   for each of N reservoir seeds, run R training runs (varying `train_seed`), record recall per
-   (seed, run). Pure `selection_signal(records)`: per-seed mean/std recall + between-seed vs
-   within-seed variance ratio (an F-like statistic) — does fixed reservoir quality exceed
-   run-to-run noise? Unit-test the analysis on synthetic data with known structure.
-
-2. **Run it locally + write up.** Run (e.g. 6 reservoir seeds × 4 runs) at higher steps for less
+1. **Run it locally + write up.** Run (e.g. 6 reservoir seeds × 4 runs) at higher steps for less
    noise; metrics → `results/`, figure → `docs/`, update `FINDINGS.md` to resolve/refine the
    "selection is noise-dominated at 250 steps" finding. Honest outcome either way; keep docs/PDF current.
 
