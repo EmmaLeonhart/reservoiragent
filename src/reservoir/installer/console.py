@@ -124,9 +124,18 @@ class ReservoirConsole:
             print_fn("agent> " + self.step(line))
 
 
-def run(repo_id: str, *, max_new_tokens: int = 40):
-    """Download + load + REPL. Network + torch gated."""
-    from reservoir.persist import load_reservoir_model
+def run(repo_id, *, demo=True, repl=True, max_new_tokens=40):
+    """Download + load the model, optionally run the recall demo, then optionally the
+    stateful REPL. Network + torch gated."""
+    from reservoir.persist import load_reservoir_model, load_model_config
+    from reservoir.crosspass import _single_token_keys
+
     load_dir = download_and_resolve(repo_id)
     lm = load_reservoir_model(load_dir)
-    ReservoirConsole(lm, max_new_tokens=max_new_tokens).repl()
+    if demo:
+        meta = load_model_config(load_dir).get("meta") or {}
+        n_keys = int(meta.get("n_keys", 6))
+        keys = _single_token_keys(lm.tokenizer, n_keys)
+        recall_demo_session(lm, keys)
+    if repl:
+        ReservoirConsole(lm, max_new_tokens=max_new_tokens).repl()
