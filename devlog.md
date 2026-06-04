@@ -1281,3 +1281,26 @@ that longer run is the named follow-up (queue + todo). Also strengthened determi
 the deterministic SDP kernel after the mem-efficient attention backward was found nondeterministic
 on CUDA. Updated FINDINGS (the per-seed-spread section now reports the controlled result) and
 docs/index.html (+docs/controlled.png). Full suite 159 passed. Phase I complete.
+
+## 2026-06-04 — `run_agent.bat`: local recall-demo + stateful REPL launcher
+
+Added a repo-local "does it actually work?" launcher (NOT the distributable — that's the
+`reservoir-agent-installer.exe`). `run_agent.bat` resolves the local Python, then runs
+`python -m reservoir.installer`, which auto-picks the most-recent recommended HF model
+(`registry.default_model`), downloads it, prints a guided cross-pass recall demo, and drops
+into the stateful REPL. New flags: `--menu` (chooser), `--demo-only`, `--no-demo`.
+
+Pieces: factored `eval_recall`/`recall_accuracy` out of `run_cross_pass_kv` (crosspass.py,
+DRY); `recall_demo_session` printer (console.py); fixed a real REPL bug — `step()` used
+`model.generate`, which fires the read hook but never applies the trained reservoir→prefix
+*write* path (only `forward_logits` does), so the old REPL accumulated state but never fed it
+back. New `generate_stateful` greedy-decodes over `forward_logits`, making the REPL genuinely
+stateful. `menu.main` defaults to auto-pick + demo + REPL; `console.run` grew `demo`/`repl`
+switches and reads `n_keys` from the saved model meta.
+
+Verified on the **downloaded** weights (`--no-hf --demo-only`): stateful recall **100%**,
+baseline (state wiped between passes) **0%**, chance 17% — the headline cross-pass result
+reproduces from the published artifact, not just from a fresh training run. REPL path
+exercised end-to-end (pipes a turn, generates, exits clean). Full suite 169 passed. New
+tests: eval_recall/recall_accuracy, recall_demo_session, generate_stateful (torch-gated),
+and six menu flag-routing tests. Spec + plan under `docs/superpowers/`.
