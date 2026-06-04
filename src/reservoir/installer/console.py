@@ -43,6 +43,38 @@ def download_and_resolve(repo_id: str) -> str:
     return resolve_load_dir(snapshot_download(repo_id))
 
 
+def recall_demo_session(lm, keys, *, print_fn=print):
+    """Print the guided cross-pass recall demonstration for a loaded reservoir agent.
+
+    Runs the (training-free) recall eval and prints, per key, the stateful prediction
+    (reservoir carried across passes) vs the baseline (state wiped) with a hit/miss mark,
+    then a recall-accuracy summary. Returns the eval records."""
+    from reservoir.crosspass import eval_recall, recall_accuracy
+
+    records = eval_recall(lm, keys)
+    id2word = {tok_id: word for word, tok_id in keys}
+    print_fn("")
+    print_fn("Cross-pass recall demo — does the reservoir carry a wiped secret word "
+             "across forward passes?")
+    print_fn("  pass 1: 'The secret word is X.'  ->  context wiped  ->  "
+             "pass 2: 'The secret word was ___'")
+    print_fn("")
+    for r in records:
+        sp = id2word.get(r["stateful_pred"], f"<{r['stateful_pred']}>")
+        bp = id2word.get(r["baseline_pred"], f"<{r['baseline_pred']}>")
+        sm = "✓" if r["stateful_ok"] else "✗"
+        bm = "✓" if r["baseline_ok"] else "✗"
+        print_fn(f"  secret word -> {r['word']:<8}  reservoir (stateful): {sp:<8} {sm}"
+                 f"   stateless baseline: {bp:<8} {bm}")
+    n = len(records)
+    print_fn("")
+    print_fn(f"  recall accuracy   stateful: {recall_accuracy(records, 'stateful'):.0%}"
+             f"   baseline: {recall_accuracy(records, 'baseline'):.0%}"
+             f"   chance: {1.0 / max(n, 1):.0%}")
+    print_fn("")
+    return records
+
+
 class ReservoirConsole:
     """A stateful REPL over a loaded reservoir agent. State persists across turns."""
 
