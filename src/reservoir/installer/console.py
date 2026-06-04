@@ -75,6 +75,25 @@ def recall_demo_session(lm, keys, *, print_fn=print):
     return records
 
 
+def generate_stateful(lm, input_ids, attention_mask, max_new_tokens):
+    """Greedy-decode from a kv-prefix reservoir model using ``forward_logits`` (which
+    applies the trained reservoir->prefix write-path and ticks the state every pass).
+    Returns the list of generated token ids; stops early at eos."""
+    torch = lm.torch
+    ids, mask = input_ids, attention_mask
+    out = []
+    for _ in range(max_new_tokens):
+        logits = lm.forward_logits(ids, mask)
+        next_id = int(logits[0, -1].argmax().item())
+        out.append(next_id)
+        if next_id == lm.tokenizer.eos_token_id:
+            break
+        ids = torch.cat([ids, torch.tensor([[next_id]], device=lm.device)], dim=1)
+        mask = torch.cat(
+            [mask, torch.ones((1, 1), dtype=mask.dtype, device=lm.device)], dim=1)
+    return out
+
+
 class ReservoirConsole:
     """A stateful REPL over a loaded reservoir agent. State persists across turns."""
 
@@ -84,18 +103,13 @@ class ReservoirConsole:
         self.lm.reset_state()                 # fresh state at session start only
 
     def step(self, text: str) -> str:
-        """One pass: feed text (reservoir ticks), return the model's greedy continuation.
-        State is NOT reset — it carries into the next call."""
-        torch = self.lm.torch
+        """One turn: greedy-decode the model's continuation via the reservoir write-path.
+        Reservoir state is NOT reset — it carries into the next call."""
         tok = self.lm.tokenizer
-        ids = tok(text, return_tensors="pt").to(self.lm.device)
-        # a forward pass through the reservoir-injected model ticks the reservoir state
-        with torch.no_grad():
-            out = self.lm.model.generate(
-                **ids, max_new_tokens=self.max_new_tokens, do_sample=False,
-                pad_token_id=tok.eos_token_id)
-        new = out[0][ids["input_ids"].shape[1]:]
-        return tok.decode(new, skip_special_tokens=True).strip()
+        enc = tok(text, return_tensors="pt").to(self.lm.device)
+        ids = generate_stateful(self.lm, enc["input_ids"], enc["attention_mask"],
+                                self.max_new_tokens)
+        return tok.decode(ids, skip_special_tokens=True).strip()
 
     def repl(self, input_fn=input, print_fn=print):
         print_fn("reservoir-agent console — reservoir state persists across turns. "
