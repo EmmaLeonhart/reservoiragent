@@ -37,6 +37,45 @@ def _single_token_keys(tokenizer, n: int):
     return keys
 
 
+def _kv_forward_pair(lm, key_word, *, reset_between):
+    """One cross-pass recall trial on a kv-prefix reservoir model: encode the key in
+    pass 1, optionally wipe the reservoir state, then read the recall logits in pass 2.
+
+    Returns the next-token logits at the recall point (``logits[0, -1]``)."""
+    tok = lm.tokenizer
+    p1 = tok(f"The secret word is {key_word}.", return_tensors="pt").to(lm.device)
+    p2 = tok("The secret word was", return_tensors="pt").to(lm.device)
+    lm.reset_state()
+    lm.forward_logits(p1["input_ids"], p1["attention_mask"])     # pass 1: read the key
+    if reset_between:
+        lm.reset_state()                                         # baseline: wipe carried state
+    logits = lm.forward_logits(p2["input_ids"], p2["attention_mask"])
+    return logits[0, -1]
+
+
+def eval_recall(lm, keys):
+    """Evaluate cross-pass recall on an already-loaded kv-prefix model (no training).
+
+    For each ``(word, tok_id)`` in ``keys``, run the recall task twice: ``stateful`` (the
+    reservoir state carries across the two passes) and ``baseline`` (state wiped between
+    them). Returns one record per key with both predictions and whether each recalled."""
+    records = []
+    for word, tok_id in keys:
+        s = int(_kv_forward_pair(lm, word, reset_between=False).argmax().item())
+        b = int(_kv_forward_pair(lm, word, reset_between=True).argmax().item())
+        records.append({"word": word, "tok_id": tok_id,
+                        "stateful_pred": s, "stateful_ok": s == tok_id,
+                        "baseline_pred": b, "baseline_ok": b == tok_id})
+    return records
+
+
+def recall_accuracy(records, which):
+    """Fraction of ``records`` where ``which`` ('stateful' or 'baseline') recalled the key."""
+    if not records:
+        return 0.0
+    return sum(r[f"{which}_ok"] for r in records) / len(records)
+
+
 def run_cross_pass(model_name: str = "gpt2", *, n_keys: int = 6, steps: int = 200,
                    lr: float = 1e-3, seed: int = 0, device: str | None = None,
                    stateful: bool = True, layer: int | None = None,
@@ -127,22 +166,12 @@ def run_cross_pass_kv(model_name: str = "gpt2", *, n_keys: int = 6, steps: int =
     keys = _single_token_keys(tok, n_keys)
     rng = np.random.default_rng(seed if train_seed is None else train_seed)
 
-    def forward_pair(key_word, *, reset_between):
-        p1 = tok(f"The secret word is {key_word}.", return_tensors="pt").to(lm.device)
-        p2 = tok("The secret word was", return_tensors="pt").to(lm.device)
-        lm.reset_state()
-        lm.forward_logits(p1["input_ids"], p1["attention_mask"])   # pass 1: read key
-        if reset_between:
-            lm.reset_state()
-        logits = lm.forward_logits(p2["input_ids"], p2["attention_mask"])
-        return logits[0, -1]
-
     opt = torch.optim.AdamW(lm.trainable_parameters(), lr=lr)
     lm.model.train()
     losses = []
     for _ in range(steps):
         word, tok_id = keys[int(rng.integers(n_keys))]
-        logits = forward_pair(word, reset_between=not stateful)
+        logits = _kv_forward_pair(lm, word, reset_between=not stateful)
         loss = torch.nn.functional.cross_entropy(
             logits.unsqueeze(0), torch.tensor([tok_id], device=lm.device))
         opt.zero_grad()
@@ -154,7 +183,7 @@ def run_cross_pass_kv(model_name: str = "gpt2", *, n_keys: int = 6, steps: int =
     correct = 0
     with torch.no_grad():
         for word, tok_id in keys:
-            if int(forward_pair(word, reset_between=not stateful).argmax().item()) == tok_id:
+            if int(_kv_forward_pair(lm, word, reset_between=not stateful).argmax().item()) == tok_id:
                 correct += 1
     result = {"model": model_name, "stateful": stateful, "n_keys": n_keys, "steps": steps,
               "loss_start": losses[0], "loss_end": losses[-1],

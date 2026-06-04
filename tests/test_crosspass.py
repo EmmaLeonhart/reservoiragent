@@ -31,3 +31,59 @@ def test_cross_pass_kv_pipeline_runs():
                           device="cpu", stateful=True, n_prefix=4)
     assert r["mode"] == "kv-prefix"
     assert 0.0 <= r["recall_accuracy"] <= 1.0
+
+
+import numpy as np
+from reservoir.crosspass import eval_recall, recall_accuracy
+
+
+class _FakeEnc(dict):
+    def to(self, device):
+        return self
+
+
+class _FakeTok:
+    eos_token_id = 999
+
+    def __call__(self, text, return_tensors=None):
+        return _FakeEnc(input_ids=text, attention_mask=None)
+
+
+class _FakeReservoirLM:
+    """Simulates a stateful kv reservoir: remembers the word from pass 1 and predicts it
+    in pass 2 — unless the state was wiped between the passes (the baseline)."""
+
+    def __init__(self, vocab):
+        self.tokenizer = _FakeTok()
+        self.device = "cpu"
+        self.vocab = vocab            # stripped word -> tok_id
+        self._mem = None
+
+    def reset_state(self):
+        self._mem = None
+
+    def forward_logits(self, input_ids, attention_mask):
+        text = input_ids
+        prefix = "The secret word is "
+        if text.startswith(prefix):
+            self._mem = text[len(prefix):].rstrip(".")
+        V = max(self.vocab.values()) + 2
+        logits = np.full((1, 1, V), -1.0)
+        idx = self.vocab.get(self._mem, V - 1)   # no memory -> sentinel id (a miss)
+        logits[0, -1, idx] = 1.0
+        return logits
+
+
+def test_eval_recall_stateful_hits_baseline_misses():
+    vocab = {"red": 1, "blue": 2, "green": 3}
+    keys = [("red", 1), ("blue", 2), ("green", 3)]
+    recs = eval_recall(_FakeReservoirLM(vocab), keys)
+    assert all(r["stateful_ok"] for r in recs)
+    assert not any(r["baseline_ok"] for r in recs)
+    assert [r["word"] for r in recs] == ["red", "blue", "green"]
+    assert recall_accuracy(recs, "stateful") == 1.0
+    assert recall_accuracy(recs, "baseline") == 0.0
+
+
+def test_recall_accuracy_empty_is_zero():
+    assert recall_accuracy([], "stateful") == 0.0
