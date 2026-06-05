@@ -1335,3 +1335,23 @@ of dedicated steps (recall alone needed 400 -> composite needs thousands), and (
 competes with content in one distribution — the gate ("when to speak") should be a SEPARATE HEAD
 from emission. Next: a separate gate head + a long (thousands-of-steps) run, then load the trained
 model into the live app. New tests: test_alive, test_battery. Full suite green.
+
+## 2026-06-05 (cont.) — Qwen battery runs: the content-vs-temporal split
+
+Moved training to Qwen2.5-1.5B (GPT-2's 124M lacks capacity — confirmed). Through-passes
+backprop fits easily (peak 3.3GB/8GB). Two runs:
+- lr=1e-3 flat, 1500 steps: peaked at step 600 (recall 0.50, silence 1.0, timed 0.71,
+  selfinit 0.67) then DEGRADED to 1500 (overshoot) — and saved the final/worst weights.
+- Fixed the trainer (cosine LR to 0 + keep BEST-eval checkpoint, not last), re-ran lr=5e-4:
+  best at step 1200 (mean 0.34) — silence 1.0, timed 0.71, selfinit 0.67, interrupt 0.25,
+  deferred 0.12, but recall/accumulate/sequence = 0.
+
+Consistent finding across all GPT-2 + Qwen runs: the reservoir+small-readout reliably learns
+the TIMING/GATING family (when to be silent, count passes -> silence~1.0, timed~0.7,
+selfinit~0.67) but NOT the CONTENT-MEMORY family (recall/accumulate/sequence ~0, deferred
+~0.12), even on Qwen. Lowering lr didn't rescue content (recall actually peaked higher at
+lr=1e-3). This is a capacity/architecture result, not "needs more steps". Next moves:
+(1) separate gate head so silence-as-eos stops competing with content; (2) more content
+capacity (bigger reservoir / more prefix tokens / larger readout); (3) bigger eval set to cut
+the per-eval variance. The best Qwen checkpoint (good timing, weak content) is saved at
+artifacts/qwen-battery.
