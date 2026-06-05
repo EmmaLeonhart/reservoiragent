@@ -51,9 +51,15 @@ def main() -> int:
     repo = _env("RESERVOIR_HF_REPO", "EmmaLeonhart/reservoir-agent-qwen-battery-large")
     hours = _env("RESERVOIR_HOURS", "8", float)
     ckpt_min = _env("RESERVOIR_CKPT_MIN", "30", float)
+    # Epoch-count mode (preferred): run exactly RESERVOIR_EPOCHS epochs of RESERVOIR_SPER
+    # steps each, checkpoint+upload after each, then stop — NOT a wall-clock cap. Set
+    # RESERVOIR_EPOCHS=0 to fall back to the time budget above.
+    epochs_target = _env("RESERVOIR_EPOCHS", "0", int)
+    steps_per_epoch = _env("RESERVOIR_SPER", "3000", int)
     vocab = _env("RESERVOIR_VOCAB", "1200", int)
     n_res = _env("RESERVOIR_NRES", "1024", int)
     n_prefix = _env("RESERVOIR_NPREFIX", "16", int)
+    inscale = _env("RESERVOIR_INSCALE", "0.5", float)   # detune (lower) to avoid saturation
     lr = _env("RESERVOIR_LR", "5e-4", float)
     eval_n = _env("RESERVOIR_EVALN", "16", int)
     out_root = os.path.join(ROOT, "artifacts", "qwen-large")
@@ -63,11 +69,13 @@ def main() -> int:
     weights = {"recall": 3, "deferred": 3, "accumulate": 2, "sequence": 2,
                "interrupt": 2, "timed": 1, "selfinit": 1, "silence": 0.5}
 
-    print(f"[train_large] {model} | {hours}h | ckpt every {ckpt_min}m | vocab {vocab} "
-          f"| reservoir {n_res}/{n_prefix} | -> hf.co/{repo}", flush=True)
+    mode = (f"{epochs_target} epochs x {steps_per_epoch} steps" if epochs_target > 0
+            else f"{hours}h budget, ckpt every {ckpt_min}m")
+    print(f"[train_large] {model} | {mode} | vocab {vocab} | reservoir {n_res}/{n_prefix} "
+          f"| input_scaling {inscale} | -> hf.co/{repo}", flush=True)
 
     lm = TorchReservoirPrefixInjectedLM(model, n_reservoir=n_res, n_prefix=n_prefix,
-                                        dtype="bfloat16", seed=0)
+                                        input_scaling=inscale, dtype="bfloat16", seed=0)
     pool = B.large_word_pool(lm.tokenizer, vocab)
     B.set_word_pool(pool)
     print(f"[train_large] word pool: {len(pool)} single-token words "
@@ -118,7 +126,8 @@ def main() -> int:
         epoch += 1
         next_ckpt = time.time() + ckpt_min * 60
 
-    while time.time() < deadline:
+    def train_step():
+        nonlocal step, running
         ep = sample_episode(rng, weights)
         loss = episode_loss(lm, ep)
         opt.zero_grad()
@@ -126,12 +135,23 @@ def main() -> int:
         opt.step()
         step += 1
         running += float(loss.item())
-        if time.time() >= next_ckpt:
+
+    if epochs_target > 0:                              # epoch-count mode (preferred)
+        for _ in range(epochs_target):
+            for _ in range(steps_per_epoch):
+                train_step()
             print(f"[train_large] ~loss {running / max(step, 1):.3f} over {step} steps",
                   flush=True)
             checkpoint()
+    else:                                              # wall-clock budget mode
+        while time.time() < deadline:
+            train_step()
+            if time.time() >= next_ckpt:
+                print(f"[train_large] ~loss {running / max(step, 1):.3f} over {step} steps",
+                      flush=True)
+                checkpoint()
+        checkpoint()   # final
 
-    checkpoint()   # final
     print(f"[train_large] DONE: {epoch} epochs, {step} steps, "
           f"{(time.time() - start) / 3600:.2f}h", flush=True)
     return 0
