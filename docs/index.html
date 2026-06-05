@@ -409,13 +409,13 @@
 </p>
 <p>
   <strong>The expansion test, in progress.</strong> An 8192-node reservoir (5.3× the input,
-  detuned) is now training — the largest that fits an 8 GB GPU. Through its first four epochs
-  the temporal/gating scores hold and the best score plateaus at 0.349 (past the smaller
-  run's 0.332), while the content-memory tasks stay at zero apart from one noise-level
-  flicker — the modest expansion that fits this hardware lifts temporal behaviour without
-  recovering symbolic content. Whether it recovers over the full run, or needs a reservoir
-  far larger than fits here, is what this run is measuring; every epoch is checkpointed to
-  the Hub.
+  detuned) was run — the largest that fits an 8 GB GPU — and stopped after 5 epochs once the
+  trajectory was clear. It peaked at epoch 1 (mean 0.349, past the smaller run's 0.332), then
+  degraded each epoch and collapsed to near-zero by epoch 4: more training only hurt, and the
+  useful signal arrives within about one epoch. The content-memory tasks never recovered —
+  the modest expansion that fits this hardware lifts temporal behaviour without recovering
+  symbolic content. A reservoir genuinely larger than its input, beyond what this hardware
+  fits, remains the open test.
 </p>
 <p>
   <strong>First result (synthetic-input dynamics sweep).</strong> Driving a 200-unit

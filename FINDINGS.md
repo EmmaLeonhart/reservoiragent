@@ -687,13 +687,15 @@ parameters (tens of thousands of nodes, tens-of-× the 1536-dim input). The fixe
 readout is what scales badly, so it is kept tractable by a fixed random down-projection of the
 large state before a small trained readout. Combine with detuned dynamics (lower ρ and input
 scaling, higher leak) to stop the saturation and collapse. A first step within an 8 GB GPU —
-an 8192-node reservoir (5.3× the input) with detuned dynamics — is now running (17 epochs,
-each checkpointed to the Hub). Through its first four epochs the best score plateaus at
-epoch 1 (mean 0.349, past the 1024-node run's best of 0.332) and the content-memory tasks
-stay at zero — apart from a single noise-level flicker (accumulate 0.12 at one epoch, gone
-the next) — while temporal/gating behaviour holds (timed 0.64, silence 1.00, self-init
-0.64): the 5.3× expansion that fits an 8 GB budget lifts the temporal scores but is not
-recovering symbolic content. Whether it recovers over the full run, or whether recovery needs
+an 8192-node reservoir (5.3× the input) with detuned dynamics — was run and stopped after
+5 epochs once the trajectory was clear: it **peaked at epoch 1** (mean 0.349, past the
+1024-node run's best of 0.332), then degraded each epoch and collapsed to ~0 by epoch 4 —
+more training only hurt. The content-memory tasks never recovered (recall stayed 0;
+accumulate flickered to ≤0.12 then vanished), while temporal/gating held until the collapse.
+So the 5.3× expansion that fits an 8 GB budget lifts the temporal scores but does not recover
+symbolic content, and the useful signal arrives within ~1 epoch. A reservoir genuinely larger
+than its input — beyond what this hardware fits — remains the open test; the full scale needs
+sparse `W_r` and larger hardware. Whether it recovers over the full run, or whether recovery needs
 a reservoir far larger than fits here, is the open result this experiment is measuring; the
 full scale needs sparse `W_r` and larger hardware. (Enabling change this session:
 `_build_reservoir_weights` estimates the spectral radius by power iteration, since the exact
