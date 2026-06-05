@@ -107,6 +107,28 @@ runnable checkpoint:
 In-app Hugging Face download + model selection (the `registry.py`/installer code folds in),
 in-app training controls, and packaging. Not local-debug-now work.
 
+## Addendum (2026-06-05, after the first runs) — gate head + N-seed population
+
+The first GPT-2 + Qwen runs showed a consistent split: the **timing/gating** family learned
+(silence~1.0, timed/selfinit~0.7) but the **content-memory** family did not (recall/
+accumulate/sequence~0). Two root causes, both now addressed in code:
+
+1. **Silence-as-eos cannibalised content.** Training "stay silent" as "predict end-of-text"
+   on the LM output pushed eos up everywhere and suppressed content tokens. Fix: a
+   **separate gate head** (`gate_head` on `TorchReservoirPrefixInjectedLM`) — a tiny readout
+   from the reservoir state deciding *speak vs silent* (BCE), so the LM output learns only
+   *what* to say. Silence/timed/selfinit now supervise the gate; emit steps supervise gate
+   (open) + content. Validated on GPT-2: recall coexists with silence (0.44 vs ~0 before).
+2. **Limited content capacity.** Recall worked at 6 words but fell off at 12 even alone — the
+   reservoir holds little symbolic content. Levers exposed: larger `n_reservoir` / `n_prefix`
+   / readout, and a bigger eval set (`eval_n` default 16) to cut variance.
+
+**Multiple reservoirs (the N-seed design, RESERVOIR_AGENTS.md / reservoir_agent_plan.md).**
+Training is now a **population**: `train_battery_population` trains N reservoir seeds (each a
+different fixed-random reservoir, LoRA-fine-tuned on the battery), keeps the **whole
+population**, and writes a `batch_manifest.json` recommending the best by mean per-task
+accuracy (bad seeds preserved as signal; the installer/app loads the recommended seed).
+
 ## Honest limits
 
 - Through-passes backprop over long episodes is memory-heavy; long-horizon (#4) and timed
