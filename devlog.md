@@ -1355,3 +1355,22 @@ lr=1e-3). This is a capacity/architecture result, not "needs more steps". Next m
 capacity (bigger reservoir / more prefix tokens / larger readout); (3) bigger eval set to cut
 the per-eval variance. The best Qwen checkpoint (good timing, weak content) is saved at
 artifacts/qwen-battery.
+
+## 2026-06-05 (cont.) — gate head + N-seed population: content unlocks (partially)
+
+Implemented all four next-step levers: (1) separate gate head (speak/silent BCE from
+reservoir state, so silence stops training as predict-eos and cannibalising content);
+(2) content capacity (n_reservoir 512->1024, n_prefix 8->16); (3) bigger eval (eval_n 16);
+(4) multiple reservoirs — train_battery_population trains N seeds, keeps ALL + a
+batch_manifest recommending the best (the N-seed design, RESERVOIR_AGENTS.md). Gate head
+saved/loaded by persist (backward-compatible). All existing tests still green.
+
+N-seed Qwen run (3 seeds x 1200 steps, gate head, 1024-node reservoir, content-upweighted):
+best seed 0 mean 0.41 (was 0.34 single-seed/no-gate). Content tasks moved OFF zero for the
+first time: accumulate 0.38 (seed 0), recall 0.31 (seed 1), deferred 0.19 (seed 2). Gating
+solid: silence 1.0, interrupt 0.56 (up from ~0.06), selfinit 0.62, timed 0.56. sequence
+still 0 (hardest). Notable: seeds SPECIALISE — seed 0 best at accumulate, seed 1 best at
+recall; no seed dominates -> the population design earns its keep. Still not a strong agent:
+content weak/noisy. Saved population at artifacts/qwen-battery-pop (best=seed_0). Next: wire
+the trained best seed into the live app (app/server -> load_reservoir_model) so the agent
+shown is finally trained; push content further (more steps / bigger reservoir / per-task).
