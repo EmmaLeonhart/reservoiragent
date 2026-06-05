@@ -1304,3 +1304,34 @@ reproduces from the published artifact, not just from a fresh training run. REPL
 exercised end-to-end (pipes a turn, generates, exits clean). Full suite 169 passed. New
 tests: eval_recall/recall_accuracy, recall_demo_session, generate_stateful (torch-gated),
 and six menu flag-routing tests. Spec + plan under `docs/superpowers/`.
+
+## 2026-06-05 — Real-time agent app + the stateful-task loss battery (first training)
+
+Reframed the project around the user's actual goal: a **real-time, always-alive, independent
+agent**, not a chatbot or the narrow colour-recall trick. Behaviour must be a *training
+discovery*, never a system prompt.
+
+Built the harness (UI-out): `src/reservoir/alive.py` (`AliveEngine` — continuous prompted/idle
+tick loop, live `readout_scale` gain, no_grad fix so the live loop doesn't accumulate the
+through-pass autograd graph and OOM); `app/server` (websockets, owns the engine on a bg thread);
+`app/electron` (two-pane live UI: agent stream | you, telemetry strip with tick/entropy/state·cos,
+reservoir-gain slider). `run_agent.bat` now launches the app; recall demo preserved as
+`run_recall_demo.bat`. Runs Qwen2.5-1.5B + reservoir on the 4070, GPU bounded ~6.4GB, coherent
+live text. Honest: this is the UNTRAINED substrate — proves the harness, not trained behaviour.
+
+Designed + built the loss battery (the real objective): `episode.py` (Episode/Step + SILENCE,
+`episode_loss` backprop-through-passes, `episode_eval`), `battery.py` (8 generators: recall,
+accumulate, sequence, deferred, timed, interrupt, selfinit, silence), `train_battery.py`. Spec:
+`docs/superpowers/specs/2026-06-05-stateful-loss-battery-design.md`.
+
+First GPT-2 training runs (findings, not yet a win):
+- 400 steps, flat 8-way mix, 24-word vocab: loss 11.6->1.6; silence=1.0, selfinit/timed~0.7
+  (the silent portions), all content tasks (recall/accumulate/sequence/deferred)=0.0.
+- 800 steps, content-upweighted, 12-word vocab: loss 10.8->3.6; recall flickered to 0.38 then
+  collapsed; content tasks ~0; silence stuck at 1.0.
+- Diagnostic, content-only (no silence), 500 steps: recall reaches only 0.38; others ~0.
+Conclusion: the framework is correct and tasks *begin* to learn, but (a) each task needs hundreds
+of dedicated steps (recall alone needed 400 -> composite needs thousands), and (b) silence-as-eos
+competes with content in one distribution — the gate ("when to speak") should be a SEPARATE HEAD
+from emission. Next: a separate gate head + a long (thousands-of-steps) run, then load the trained
+model into the live app. New tests: test_alive, test_battery. Full suite green.
