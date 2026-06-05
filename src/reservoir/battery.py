@@ -15,11 +15,11 @@ import numpy as np
 
 from .episode import Episode, Step, SILENCE
 
-# Short, common, mostly single-token-friendly words (targets get a leading space so they
-# tokenise as a clean continuation).
-WORDS = ["red", "blue", "green", "gold", "silver", "black", "white", "brown",
-         "orange", "purple", "cat", "dog", "ship", "star", "moon", "key",
-         "book", "fire", "rain", "tree", "north", "south", "river", "stone"]
+# Short single-token words (verified single-token for GPT-2 with a leading space, so emit
+# targets are one token). Kept small: a large vocab makes the content-memory tasks need far
+# more samples to learn the mapping (the first 24-word run left recall at 0).
+WORDS = ["red", "blue", "green", "gold", "black", "white",
+         "cat", "dog", "star", "moon", "key", "fire"]
 
 
 def _w(rng):
