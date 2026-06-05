@@ -22,6 +22,32 @@ WORDS = ["red", "blue", "green", "gold", "black", "white",
          "cat", "dog", "star", "moon", "key", "fire"]
 
 
+def large_word_pool(tokenizer, n: int = 1200, min_len: int = 3) -> list:
+    """Build a large pool of lowercase alphabetic words that are **single-token** (with a
+    leading space) for this tokenizer — so emit targets stay one token while the vocabulary
+    is large. Scaling the word pool is how the content tasks stop being a 6-way toy."""
+    words, seen = [], set()
+    vocab = getattr(tokenizer, "vocab_size", 50000)
+    for tid in range(vocab):
+        try:
+            w = tokenizer.decode([tid]).strip()
+        except Exception:
+            continue
+        if (w and w.isalpha() and w.lower() == w and len(w) >= min_len and w not in seen
+                and len(tokenizer(" " + w, add_special_tokens=False)["input_ids"]) == 1):
+            seen.add(w)
+            words.append(w)
+        if len(words) >= n:
+            break
+    return words
+
+
+def set_word_pool(words: list) -> None:
+    """Replace the module word pool used by the generators (for large-scale training)."""
+    global WORDS
+    WORDS = list(words)
+
+
 def _w(rng):
     return str(rng.choice(WORDS))
 
