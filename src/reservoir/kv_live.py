@@ -94,6 +94,12 @@ class TorchReservoirPrefixInjectedLM:
             torch.manual_seed(int(train_seed))
         # reservoir -> n_prefix prefix-token embeddings
         self.W_res = nn.Linear(n_reservoir, n_prefix * d_model)
+        # Separate GATE HEAD: a tiny readout from the reservoir state that decides
+        # speak-vs-silent, independent of *what* to say. Without it, "stay silent" had to
+        # be trained as "predict end-of-text" on the LM output, which competed with content
+        # tokens and suppressed them. The gate head owns the act/don't-act decision so the
+        # LM output is free to learn content only. >0 logit => speak.
+        self.gate_head = nn.Linear(n_reservoir, 1)
 
         target = ["c_attn"] if hasattr(base.config, "n_embd") else ["q_proj", "v_proj"]
         lcfg = LoraConfig(r=lora_r, lora_alpha=lora_alpha, target_modules=target,
@@ -102,6 +108,7 @@ class TorchReservoirPrefixInjectedLM:
         if not load_in_4bit:
             self.model.to(self.device)
         self.W_res.to(self.device)
+        self.gate_head.to(self.device)
         self.W_r = self.W_r.to(self.device)
         self.W_in = self.W_in.to(self.device)
         self._state = self._state.to(self.device)
@@ -151,7 +158,13 @@ class TorchReservoirPrefixInjectedLM:
         out = self.model(inputs_embeds=inputs_embeds, attention_mask=ext_mask)
         return out.logits[:, self.n_prefix:, :]                     # strip the prefix
 
+    def gate_logit(self):
+        """Speak-vs-silent decision read from the *current* reservoir state (call after a
+        ``forward_logits`` pass has ticked the state). A scalar logit; >0 => speak."""
+        return self.gate_head(self._state.to(self.gate_head.weight.dtype)).squeeze(-1)
+
     def trainable_parameters(self):
         params = [p for p in self.model.parameters() if p.requires_grad]
         params += list(self.W_res.parameters())
+        params += list(self.gate_head.parameters())
         return params
