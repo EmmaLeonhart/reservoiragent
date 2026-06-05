@@ -22,19 +22,46 @@ WORDS = ["red", "blue", "green", "gold", "black", "white",
          "cat", "dog", "star", "moon", "key", "fire"]
 
 
+# Common function/pronoun words to exclude — they appear everywhere in prompts, so they
+# make terrible "secret words" (non-distinctive recall targets).
+_STOPWORDS = set("""the and for you are was with that this have from they will would there
+their what when your who which been were them then than some more will into over also been
+just like only your our out who has had his her its can may one two who why how all any new
+get got our use now off per via yet etc""".split())
+
+
 def large_word_pool(tokenizer, n: int = 1200, min_len: int = 3) -> list:
-    """Build a large pool of lowercase alphabetic words that are **single-token** (with a
-    leading space) for this tokenizer — so emit targets stay one token while the vocabulary
-    is large. Scaling the word pool is how the content tasks stop being a 6-way toy."""
+    """Build a large pool of real, lowercase, **single-token** content words (one token with
+    a leading space) — so emit targets stay one token while the vocabulary is large. Scaling
+    the word pool past a handful of words is how the content tasks stop being a toy.
+
+    Prefers a real frequency-ranked English list (``wordfreq``) over scraping BPE fragments
+    like "ing"/"ion"; falls back to a vocab scan if ``wordfreq`` is unavailable."""
     words, seen = [], set()
-    vocab = getattr(tokenizer, "vocab_size", 50000)
+
+    def ok(w):
+        return (w.isalpha() and w.lower() == w and len(w) >= min_len
+                and w not in _STOPWORDS and w not in seen
+                and len(tokenizer(" " + w, add_special_tokens=False)["input_ids"]) == 1)
+
+    try:
+        from wordfreq import top_n_list
+        for w in top_n_list("en", 30000):
+            if ok(w):
+                seen.add(w)
+                words.append(w)
+            if len(words) >= n:
+                return words
+    except Exception:
+        pass
+
+    vocab = getattr(tokenizer, "vocab_size", 50000)   # fallback: scan the tokenizer vocab
     for tid in range(vocab):
         try:
             w = tokenizer.decode([tid]).strip()
         except Exception:
             continue
-        if (w and w.isalpha() and w.lower() == w and len(w) >= min_len and w not in seen
-                and len(tokenizer(" " + w, add_special_tokens=False)["input_ids"]) == 1):
+        if ok(w):
             seen.add(w)
             words.append(w)
         if len(words) >= n:
