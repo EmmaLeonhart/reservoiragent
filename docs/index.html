@@ -277,7 +277,11 @@
       is usable (H3). The tasks here are deliberately <em>minimal mechanism-isolating
       probes</em>, not agentic demonstrations — each isolates one variable a stateless
       model structurally cannot handle; complex agentic behaviour at scale is named as
-      future work, not claimed.
+      future work, not claimed. A later session adds the agentic layer at scale: a
+      real-time always-alive harness and an 8-task stateful loss battery on Qwen-1.5B.
+      The result is a split — temporal/agency behaviour learns, symbolic content does
+      not — traced to a measurable cause: the reservoir was sized to <em>compress</em>
+      its input when its job is to <em>expand</em> it.
     </p>
   </div>
 </div>
@@ -370,6 +374,38 @@
   and is built into a typeset <a href="report.pdf">PDF</a> on every push. It confirms the
   core architecture, demonstrates the time axis on GPT-2, and identifies the scaling
   requirements for larger models.
+</p>
+<h3>The agentic layer at scale — and why it splits</h3>
+<p>
+  <strong>An 8-task stateful loss battery.</strong> A later session generalizes cross-pass
+  recall into a battery of eight tasks, each an <em>episode</em> — a scripted sequence of
+  forward passes with the context wiped at chosen points, so the only bridge between passes
+  is the reservoir state. Four are <em>content memory</em> (recall, accumulate, sequence,
+  deferred); four are <em>temporal/agency</em> (timed, interrupt, self-initiation, silence).
+  A separate gate head decides <em>when</em> to speak independently of <em>what</em> to say.
+  A real-time always-alive Electron app drives Qwen-1.5B + reservoir through this loop live —
+  running the untrained substrate, labelled as such.
+</p>
+<p>
+  <strong>Temporal behaviour learns; symbolic content does not.</strong> Across GPT-2 and
+  Qwen runs, the timed / self-initiation / silence tasks reach 0.4–1.0, while recall,
+  accumulate, sequence and deferred sit near zero at scale. Recall hit 100% only at six
+  single-token words and collapsed by twelve — it was fitting the one regime small enough to
+  fit, not learning recall. Keeping a population of reservoir seeds shows them specialize
+  (one best at accumulation, another at recall), which is the case for preserving the whole
+  population rather than only the winner.
+</p>
+<p>
+  <strong>The cause is geometric: the reservoir compresses where it should expand.</strong>
+  Qwen-1.5B is 28 layers of 1536 neurons; the reservoir reads a 1536-dimensional layer, yet
+  the runs used 512–1024 nodes — <strong>0.3–0.7× the input</strong>. A reservoir is meant to
+  project its input into a far higher-dimensional space. Measured effective dimensionality
+  <strong>plateaus at ~150–186 regardless of node count</strong> (16× more nodes barely moves
+  it), with 74% of cells saturated. Low-dimensional temporal state (a clock, a gate) fits
+  inside ~180 usable dimensions and learns; high-dimensional symbolic content exceeds it and
+  fails. That working dynamics and small-vocabulary recall emerged anyway makes the ceiling a
+  fixable engineering failure — size the reservoir well above its input and detune the
+  dynamics so it genuinely expands — rather than a limit of the architecture.
 </p>
 <p>
   <strong>First result (synthetic-input dynamics sweep).</strong> Driving a 200-unit

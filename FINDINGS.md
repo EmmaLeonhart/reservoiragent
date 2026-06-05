@@ -611,8 +611,97 @@ whose attention is *natively* KV-efficient so the headroom is far larger (DeepSe
 the V4 CSA+HCA compression discussed in the chat) — is recorded as project direction in
 `todo.md`; it is not runnable on this session's hardware (see Limitations).
 
+## The stateful-task battery, the gate head, and the reservoir-expansion finding
+
+This session built the agentic layer the earlier scope deferred and ran it at scale. The
+outcome is a clear split — temporal/agency behaviour learns, symbolic content does not — and
+a measured root cause: the reservoir is sized and tuned to *compress* its input when its job
+is to *expand* it. The result to carry forward is that working temporal dynamics and
+low-level symbolic recall emerged from a reservoir misconfigured in a specific, fixable way.
+
+### The real-time always-alive harness
+
+`run_agent.bat` launches an Electron two-pane app over a Python WebSocket server
+(`app/server`) driving `src/reservoir/alive.py` (`AliveEngine`): the reservoir ticks
+continuously (prompted passes on user input, idle ticks otherwise), streams tokens when an
+output gate opens, and the user injects into the live context without pausing it. It runs
+Qwen2.5-1.5B + reservoir. It runs the **untrained substrate** — coherence comes from the base
+model, the reservoir's readout is untrained, and a runtime gain (`readout_scale`) fades the
+reservoir's influence in and out. It demonstrates the real-time stateful loop; it does not
+demonstrate trained behaviour, and is labelled as such in the UI.
+
+### The 8-task stateful loss battery
+
+The training objective generalizes cross-pass recall into a battery of eight tasks, each an
+*episode* — a scripted sequence of passes with the context wiped at chosen points, so the
+only information bridge is the reservoir state. Tasks: **recall, accumulate, sequence,
+deferred** (content memory) and **timed, interrupt, self-initiation, silence**
+(temporal/agency). Loss is cross-entropy on emit targets plus a gate term, backpropagated
+through the carried state. A **separate gate head** (a small readout deciding speak-vs-silent)
+was added after training silence as "predict end-of-text" suppressed content in the shared
+output; the gate head separates *when to act* from *what to say*, and recall then coexists
+with silence instead of being driven to zero by it. (`episode.py`, `battery.py`,
+`train_battery.py`.)
+
+### Result 1 — content-vs-temporal split
+
+Across GPT-2 and Qwen runs the pattern repeats. Temporal/gating tasks learn (timed,
+self-initiation, silence reach 0.4–1.0); symbolic content tasks do not (recall, accumulate,
+sequence, deferred sit near 0 at scale). Recall reached 100% only at 6 single-token words and
+fell to ~0 by 12 — it was fitting the one regime small enough to fit, not learning recall.
+
+The N-seed reservoir **population** (keep all seeds, recommend the best — `RESERVOIR_AGENTS.md`)
+adds one positive note: reservoir seeds specialize. On Qwen-1.5B + a 1024-node reservoir, best
+seed mean 0.41, with seed 0 reaching accumulate 0.38 and seed 1 reaching recall 0.31 — no
+single seed strong everywhere, which is the case for preserving the whole population. A
+large-vocabulary (1200-word) run drove content to a flat 0.00 across all 16 epochs while
+temporal held (best epoch 3: silence 1.00, timed 0.62, self-init 0.60), then overtrained.
+
+### Result 2 — the reservoir collapses its input instead of expanding it
+
+The cause is geometric. Qwen2.5-1.5B is **28 layers × 1536 neurons**; the reservoir reads the
+layer-14 hidden state, so its input is **1536-dimensional** — yet the runs used **512–1024
+nodes, 0.3–0.7× the input**. A reservoir is meant to project its input into a much
+higher-dimensional space; this one compresses it.
+
+Measured effective dimensionality (participation ratio of the driven state, at a realistic
+input dimension): it **plateaus at ~150–186 regardless of nominal size** — scaling the node
+count 16× barely moves it — and **74% of cells saturate** (pinned at ±1) under the input
+scaling used. Detuning the drive drops saturation to ~13% but effective dimensionality still
+plateaus, because the recurrent dynamics collapse onto a low-dimensional attractor. (An
+earlier ~72 figure was measured with a too-small synthetic input and is superseded by
+~150–186.)
+
+This accounts for the split mechanically. Temporal/scalar state — a clock, a gate, an elapsed
+count — is low-dimensional and fits within the ~180 usable dimensions, so it learns. Symbolic
+content — which of N words — is high-dimensional, exceeds that budget at scale, and fails. The
+reservoir is crippled in exactly the way that spares temporal behaviour and breaks content.
+That temporal dynamics and small-vocabulary recall still emerged is what makes the ceiling an
+engineering failure in sizing and dynamics rather than a limit of the architecture.
+
+### Future work — a reservoir that actually expands
+
+The corrective is a reservoir sized well above its input — toward a quarter of the model's
+parameters (tens of thousands of nodes, tens-of-× the 1536-dim input). The fixed matrices
+`W_r`/`W_in` cost only memory and a sparse matmul, so they can be large cheaply; the trained
+readout is what scales badly, so it is kept tractable by a fixed random down-projection of the
+large state before a small trained readout. Combine with detuned dynamics (lower ρ and input
+scaling, higher leak) to stop the saturation and collapse. A first step within an 8 GB GPU —
+an 8192-node reservoir (5.3× the input) with detuned dynamics — is set up; the full scale
+needs sparse `W_r` and larger hardware. (Enabling change this session: `_build_reservoir_weights`
+estimates the spectral radius by power iteration, since the exact eigendecomposition is O(K³)
+and stalls past ~12k nodes.)
+
 ## Limitations (current)
 
+- The reservoir was **undersized relative to its input** (0.3–0.7× the 1536-dim layer it
+  reads) and saturated (74% of cells pinned); effective dimensionality plateaus at ~150–186,
+  which caps symbolic content. Symbolic-recall results therefore hold only at tiny
+  vocabularies (≈6 words); at 12+ words recall collapses. A correctly-sized, detuned reservoir
+  is future work, not a result here.
+- Content-memory tasks (recall, accumulate, sequence, deferred) do not learn at scale; only
+  temporal/agency tasks (timed, self-initiation, silence) do. The always-alive app runs the
+  untrained substrate, so it shows the harness and the live dynamics, not a trained policy.
 - Small-scale only this session; the agentic claims (H3/H4) and the full runtime are
   out of scope and compute-gated.
 - Two injection variants now exist: the **residual-stream** write (`inject.py`, wired
