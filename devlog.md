@@ -1374,3 +1374,29 @@ recall; no seed dominates -> the population design earns its keep. Still not a s
 content weak/noisy. Saved population at artifacts/qwen-battery-pop (best=seed_0). Next: wire
 the trained best seed into the live app (app/server -> load_reservoir_model) so the agent
 shown is finally trained; push content further (more steps / bigger reservoir / per-task).
+
+## 2026-06-05 (cont.) — large run results, the expansion finding, and the massive-run setup
+
+8-hour large run (Qwen+1024 reservoir, 1200-word vocab) finished: 16 epochs, best at epoch 3
+(mean 0.332, ~2h), then overtrained/destabilised (epoch 11 collapsed to 0.031). recall=0.00
+EVERY epoch — content dead at 1200 words / 1024 nodes. Only temporal/gating learned (timed
+~0.62, silence ~1.0, selfinit ~0.64), peaking early. All epochs streamed to
+hf.co/EmmaLeonhart/reservoir-agent-qwen-battery-large.
+
+KEY FINDING (user-driven): the reservoir is undersized AND collapsing. Qwen feeds it a
+1536-dim layer (28 layers x 1536); we ran 512-1024 nodes = 0.3-0.7x the input — a reservoir
+is supposed to EXPAND, not compress. Measured effective dimensionality (corrected; an earlier
+~72 used a wrong toy input dim): plateaus ~150-186 regardless of nominal size (16x more nodes
+barely moves it), 74% of cells saturated under input_scaling=0.5 (detune -> 13%). Low-dim
+temporal state fits the ~180 usable dims (works); high-dim symbolic content doesn't (fails).
+Positive framing: real temporal + low-level symbolic signal from a badly misconfigured
+reservoir => fixable engineering, not a dead end.
+
+Set up for the next run (the user's massive-reservoir vision): fixed _build_reservoir_weights
+to use power iteration for the spectral radius (full eigvals is O(K^3) and stalled at 12k
+nodes); small K keeps exact. Probed: n_res=8192 (5.3x input, 8x tonight's 1024) trains at
+5.9GB/8GB; 12288 peaks 7.5GB (edge). train_large gained epoch-count mode (RESERVOIR_EPOCHS) +
+RESERVOIR_INSCALE (detune). Crons scheduled (session-only): 09:55 initial paper writeup of the
+8h run; 12:00 launch the massive run (8192 nodes, input_scaling 0.1, E+1=17 epochs, upload
+each epoch to reservoir-agent-qwen-battery-massive-v3) and set up an hourly paper-update cron.
+Full 25%/60k-node vision needs sparse W_r + a down-projection + bigger hardware (future work).
