@@ -56,16 +56,31 @@ def build_batch_card(manifest: dict, *, repo_id: str) -> str:
     signal, the bad ones included — because preserving them is the point (learning what
     makes a reservoir good). The recommended best is flagged and is what to load by default.
     """
-    model = manifest["model_name"]
+    model = manifest.get("model_name") or manifest["model"]
     best = manifest["best"]["seed"]
-    rows = ["| rank | seed | recall | loss_end | pr_frac | recommended |",
-            "|---|---|---|---|---|---|"]
-    for p in manifest["population"]:
-        rows.append(
-            f"| {p['rank']} | `seed_{p['seed']}` | {float(p.get('recall_accuracy', 0)):.2f} "
-            f"| {float(p.get('loss_end', float('nan'))):.3f} "
-            f"| {float(p.get('pr_frac', float('nan'))):.3f} "
-            f"| {'**yes**' if p.get('recommended') else ''} |")
+    is_battery = (manifest.get("kind") == "battery"
+                  or any("metrics" in p for p in manifest["population"]))
+    if is_battery:                                     # the multi-task stateful battery
+        tasks = sorted({t for p in manifest["population"] for t in p.get("metrics", {})})
+        rows = ["| rank | seed | mean | " + " | ".join(tasks) + " | recommended |",
+                "|---|---|---|" + "---|" * len(tasks) + "---|"]
+        for p in manifest["population"]:
+            mt = p.get("metrics", {})
+            rows.append(f"| {p['rank']} | `seed_{p['seed']}` | {p.get('mean_acc', 0):.2f} | "
+                        + " | ".join(f"{mt.get(t, 0):.2f}" for t in tasks)
+                        + f" | {'**yes**' if p.get('recommended') else ''} |")
+        task_desc = ("the multi-task stateful battery (recall, accumulate, sequence, "
+                     "deferred, timed, interrupt, self-initiation, silence)")
+    else:                                              # the original cross-pass recall batch
+        rows = ["| rank | seed | recall | loss_end | pr_frac | recommended |",
+                "|---|---|---|---|---|---|"]
+        for p in manifest["population"]:
+            rows.append(
+                f"| {p['rank']} | `seed_{p['seed']}` | {float(p.get('recall_accuracy', 0)):.2f} "
+                f"| {float(p.get('loss_end', float('nan'))):.3f} "
+                f"| {float(p.get('pr_frac', float('nan'))):.3f} "
+                f"| {'**yes**' if p.get('recommended') else ''} |")
+        task_desc = "the cross-pass recall task"
     table = "\n".join(rows)
     return f"""---
 license: mit
@@ -81,7 +96,7 @@ library_name: reservoir-agent
 # Reservoir Agent batch — {model}
 
 A **batch** of {manifest['n']} reservoir agents (different fixed-random reservoir seeds)
-trained on the cross-pass recall task. A reservoir agent is a new model type: a pretrained
+trained on {task_desc}. A reservoir agent is a new model type: a pretrained
 transformer with a fixed reservoir brain-surgeried in (attended, cross-pass-stateful,
 RNN-like) — see the [project](https://github.com/EmmaLeonhart/reservoiragent) and
 `RESERVOIR_AGENTS.md`.
