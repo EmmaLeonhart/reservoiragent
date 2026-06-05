@@ -80,6 +80,10 @@ def save_reservoir_model(out_dir, lm, *, extra_meta: dict | None = None) -> str:
     readout = {k: v.detach().cpu().numpy() for k, v in lm.W_res.state_dict().items()}
     save_array_dict(out_dir, "reservoir_readout", readout)
 
+    if hasattr(lm, "gate_head"):                                  # the speak/silent gate head
+        gate = {k: v.detach().cpu().numpy() for k, v in lm.gate_head.state_dict().items()}
+        save_array_dict(out_dir, "gate_head", gate)
+
     lm.model.save_pretrained(os.path.join(out_dir, "adapter"))   # peft LoRA adapter
     return out_dir
 
@@ -101,6 +105,11 @@ def load_reservoir_model(out_dir, *, device: str | None = None):
     readout = load_array_dict(out_dir, "reservoir_readout")
     lm.W_res.load_state_dict(
         {k: torch.tensor(v, device=lm.device) for k, v in readout.items()})
+
+    if os.path.exists(os.path.join(out_dir, "gate_head.npz")):   # backward-compatible
+        gate = load_array_dict(out_dir, "gate_head")
+        lm.gate_head.load_state_dict(
+            {k: torch.tensor(v, device=lm.device) for k, v in gate.items()})
 
     # peft wraps a fresh adapter at construction; load the trained adapter weights over it
     adapter_dir = os.path.join(out_dir, "adapter")

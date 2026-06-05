@@ -57,9 +57,14 @@ def _target_ids(lm, step):
     return lm.tokenizer(step.target, add_special_tokens=False)["input_ids"]
 
 
-def episode_loss(lm, episode: Episode):
-    """Run ``episode`` and return the mean per-target-token cross-entropy as a torch scalar
-    whose graph spans every pass (so ``.backward()`` trains through the carried state)."""
+def episode_loss(lm, episode: Episode, *, gate_weight: float = 1.0):
+    """Run ``episode`` and return the mean loss as a torch scalar whose graph spans every
+    pass (so ``.backward()`` trains through the carried state).
+
+    Each supervised pass supervises the **gate head** (speak vs silent, BCE) and — only on
+    *emit* passes — the **content** (teacher-forced cross-entropy on the LM output). Silence
+    is the gate head's job, not "predict eos", so it no longer competes with content.
+    Requires a model exposing ``gate_logit()`` (``TorchReservoirPrefixInjectedLM``)."""
     import torch
     import torch.nn.functional as F
 
@@ -67,6 +72,12 @@ def episode_loss(lm, episode: Episode):
     ctx = ""
     total = None
     nterms = 0
+
+    def add(x):
+        nonlocal total, nterms
+        total = x if total is None else total + x
+        nterms += 1
+
     for step in episode.steps:
         if step.wipe:
             ctx = ""
@@ -76,27 +87,31 @@ def episode_loss(lm, episode: Episode):
         if step.target is None:
             lm.forward_logits(ids, mask)               # free tick: advance state only
             continue
-        tgt = _target_ids(lm, step)
+        logits = lm.forward_logits(ids, mask)          # ticks the state
+        g = lm.gate_logit()                            # speak/silent from the updated state
+        if step.target is SILENCE:
+            add(gate_weight * F.binary_cross_entropy_with_logits(g, torch.zeros_like(g)))
+            continue
+        add(gate_weight * F.binary_cross_entropy_with_logits(g, torch.ones_like(g)))
         cur_ids, cur_mask = ids, mask
-        for t in tgt:                                  # teacher-forced over the target tokens
-            logits = lm.forward_logits(cur_ids, cur_mask)
-            ce = F.cross_entropy(logits[0, -1].unsqueeze(0),
-                                 torch.tensor([t], device=lm.device))
-            total = ce if total is None else total + ce
-            nterms += 1
+        for t in _target_ids(lm, step):                # teacher-forced content
+            add(F.cross_entropy(logits[0, -1].unsqueeze(0),
+                                torch.tensor([t], device=lm.device)))
             cur_ids = torch.cat([cur_ids, torch.tensor([[t]], device=lm.device)], dim=1)
             cur_mask = torch.cat(
                 [cur_mask, torch.ones((1, 1), dtype=cur_mask.dtype, device=lm.device)], dim=1)
-        if step.target is not SILENCE:                 # teacher-force the true emit into context
-            ctx = _ctx_add(ctx, step.target)
-    if total is None:                                  # no supervised step
+            logits = lm.forward_logits(cur_ids, cur_mask)
+        ctx = _ctx_add(ctx, step.target)
+    if total is None:
         return torch.zeros((), device=lm.device, requires_grad=True)
     return total / max(nterms, 1)
 
 
 def episode_eval(lm, episode: Episode) -> list[dict]:
-    """Greedy-decode each target under no_grad; return one record per supervised step:
-    ``{"task", "target", "pred", "ok"}`` (SILENCE is ``ok`` when the model picks eos)."""
+    """Greedy-decode each target under no_grad using the gate head + content output; return
+    one record per supervised step ``{"task", "target", "pred", "ok"}``. A SILENCE step is
+    ``ok`` when the gate stays shut; an emit step is ``ok`` when the gate opens **and** the
+    content decodes exactly."""
     import torch
 
     lm.reset_state()
@@ -112,23 +127,26 @@ def episode_eval(lm, episode: Episode) -> list[dict]:
             if step.target is None:
                 lm.forward_logits(ids, mask)
                 continue
+            logits = lm.forward_logits(ids, mask)
+            speak = float(lm.gate_logit()) > 0.0
+            if step.target is SILENCE:
+                records.append({"task": episode.task, "target": "<silence>",
+                                "pred": "<silent>" if not speak else "<spoke>",
+                                "ok": (not speak)})
+                continue
             tgt = _target_ids(lm, step)
             cur_ids, cur_mask = ids, mask
             pred = []
             for _ in tgt:                              # greedy-decode len(target) tokens
-                logits = lm.forward_logits(cur_ids, cur_mask)
                 nid = int(logits[0, -1].argmax())
                 pred.append(nid)
                 cur_ids = torch.cat([cur_ids, torch.tensor([[nid]], device=lm.device)], dim=1)
                 cur_mask = torch.cat(
                     [cur_mask, torch.ones((1, 1), dtype=cur_mask.dtype, device=lm.device)], dim=1)
-            ok = pred == tgt
-            if step.target is SILENCE:
-                shown = "<silent>" if ok else lm.tokenizer.decode(pred).strip()
-            else:
-                shown = lm.tokenizer.decode(pred).strip()
-                ctx = _ctx_add(ctx, step.target)
-            records.append({"task": episode.task,
-                            "target": "<silence>" if step.target is SILENCE else step.target,
-                            "pred": shown, "ok": bool(ok)})
+                logits = lm.forward_logits(cur_ids, cur_mask)
+            shown = lm.tokenizer.decode(pred).strip()
+            records.append({"task": episode.task, "target": step.target,
+                            "pred": shown if speak else shown + " [gated-silent]",
+                            "ok": bool(speak and pred == tgt)})
+            ctx = _ctx_add(ctx, step.target)
     return records

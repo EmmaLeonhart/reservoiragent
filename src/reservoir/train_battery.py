@@ -31,7 +31,8 @@ def train_battery(model_name: str = "gpt2", *, steps: int = 400, lr: float = 1e-
                   seed: int = 0, weights: dict | None = None, device: str | None = None,
                   dtype: str | None = None, load_in_4bit: bool = False,
                   save_dir: str | None = None, eval_every: int = 100,
-                  eval_n: int = 6, log=print) -> dict:
+                  eval_n: int = 16, n_reservoir: int = 512, n_prefix: int = 8,
+                  log=print) -> dict:
     import numpy as np
     import torch
 
@@ -41,7 +42,8 @@ def train_battery(model_name: str = "gpt2", *, steps: int = 400, lr: float = 1e-
 
     weights = weights or DEFAULT_WEIGHTS
     lm = TorchReservoirPrefixInjectedLM(model_name, seed=seed, device=device, dtype=dtype,
-                                        load_in_4bit=load_in_4bit)
+                                        load_in_4bit=load_in_4bit, n_reservoir=n_reservoir,
+                                        n_prefix=n_prefix)
     rng = np.random.default_rng(seed)
     eval_set = make_eval_set(np.random.default_rng(seed + 9991), n_per_task=eval_n,
                              weights=weights)
@@ -78,12 +80,13 @@ def train_battery(model_name: str = "gpt2", *, steps: int = 400, lr: float = 1e-
             history.append({"step": i + 1, "loss": recent, **m})
             log(f"  step {i + 1:>4}: loss={recent:.3f}  mean={mean_acc(m):.2f}  "
                 + "  ".join(f"{t}={m[t]:.2f}" for t in m))
-            if save_dir is not None and mean_acc(m) > best["mean_acc"]:
-                from .persist import save_reservoir_model
+            if mean_acc(m) > best["mean_acc"]:
                 best = {"mean_acc": mean_acc(m), "step": i + 1, "metrics": m}
-                save_reservoir_model(save_dir, lm, extra_meta={"best": best,
-                                                               "model": model_name})
-                log(f"           ^ new best (mean {best['mean_acc']:.2f}) -> saved")
+                if save_dir is not None:           # persist the best-so-far (not the last)
+                    from .persist import save_reservoir_model
+                    save_reservoir_model(save_dir, lm, extra_meta={"best": best,
+                                                                   "model": model_name})
+                    log(f"           ^ new best (mean {best['mean_acc']:.2f}) -> saved")
 
     result = {"model": model_name, "steps": steps, "tasks": sorted(weights),
               "loss_start": losses[0], "loss_end": losses[-1],
@@ -91,3 +94,42 @@ def train_battery(model_name: str = "gpt2", *, steps: int = 400, lr: float = 1e-
     if save_dir is not None:
         result["saved_to"] = save_dir
     return result
+
+
+def train_battery_population(model_name: str, *, n_seeds: int = 4,
+                             out_root: str = "artifacts/battery-pop", steps: int = 1500,
+                             log=print, **kw) -> dict:
+    """Train a **population of N reservoirs** (one per seed) on the battery and keep them
+    ALL — the N-seed selection design (RESERVOIR_AGENTS.md / reservoir_agent_plan.md). Each
+    seed is a different fixed-random reservoir, LoRA-fine-tuned on the battery; the best by
+    mean per-task accuracy is *recommended* but the whole population is preserved (bad seeds
+    are signal). Writes a ``batch_manifest.json`` so the installer/app can load the best.
+    """
+    import json
+    import os
+
+    population = []
+    for seed in range(n_seeds):
+        seed_dir = os.path.join(out_root, f"seed_{seed}")
+        log(f"\n=== reservoir seed {seed}/{n_seeds - 1} -> {seed_dir} ===")
+        res = train_battery(model_name, seed=seed, steps=steps, save_dir=seed_dir,
+                            log=log, **kw)
+        b = res["best"]
+        population.append({"seed": seed, "mean_acc": b["mean_acc"],
+                           "best_step": b["step"], "metrics": b["metrics"]})
+
+    population.sort(key=lambda p: -p["mean_acc"])
+    best_seed = population[0]["seed"]
+    for rank, p in enumerate(population):
+        p["rank"] = rank
+        p["recommended"] = (p["seed"] == best_seed)
+
+    manifest = {"model": model_name, "kind": "battery", "n": n_seeds,
+                "best": {"seed": best_seed, "mean_acc": population[0]["mean_acc"]},
+                "population": population}
+    os.makedirs(out_root, exist_ok=True)
+    with open(os.path.join(out_root, "batch_manifest.json"), "w", encoding="utf-8") as f:
+        json.dump(manifest, f, indent=2)
+    log(f"\npopulation of {n_seeds}; recommended seed {best_seed} "
+        f"(mean {population[0]['mean_acc']:.2f}). saved under {out_root}/")
+    return manifest
