@@ -408,6 +408,14 @@
   dynamics so it genuinely expands — rather than a limit of the architecture.
 </p>
 <p>
+  <strong>The expansion test, in progress.</strong> An 8192-node reservoir (5.3× the input,
+  detuned) is now training — the largest that fits an 8 GB GPU. Through its first epoch the
+  content-memory tasks are still at zero while temporal/gating holds, so the modest expansion
+  that fits this hardware has not yet recovered symbolic content. Whether it recovers over the
+  full run, or needs a reservoir far larger than fits here, is what this run is measuring;
+  every epoch is checkpointed to the Hub.
+</p>
+<p>
   <strong>First result (synthetic-input dynamics sweep).</strong> Driving a 200-unit
   reservoir across spectral radius ρ ∈ [0.1, 2.0], the echo state property &mdash; the
   reservoir forgetting its initial condition &mdash; holds cleanly for ρ &lt; 1 and breaks

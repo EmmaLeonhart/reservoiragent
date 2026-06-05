@@ -687,10 +687,15 @@ parameters (tens of thousands of nodes, tens-of-× the 1536-dim input). The fixe
 readout is what scales badly, so it is kept tractable by a fixed random down-projection of the
 large state before a small trained readout. Combine with detuned dynamics (lower ρ and input
 scaling, higher leak) to stop the saturation and collapse. A first step within an 8 GB GPU —
-an 8192-node reservoir (5.3× the input) with detuned dynamics — is set up; the full scale
-needs sparse `W_r` and larger hardware. (Enabling change this session: `_build_reservoir_weights`
-estimates the spectral radius by power iteration, since the exact eigendecomposition is O(K³)
-and stalls past ~12k nodes.)
+an 8192-node reservoir (5.3× the input) with detuned dynamics — is now running (17 epochs,
+each checkpointed to the Hub). Through its first epoch the content-memory tasks remain at
+zero (recall/accumulate/sequence/deferred = 0.00) while temporal/gating behaviour holds
+(timed 0.44, self-init 0.47): the 5.3× expansion that fits an 8 GB budget has not yet
+recovered symbolic content. Whether it recovers over the full run, or whether recovery needs
+a reservoir far larger than fits here, is the open result this experiment is measuring; the
+full scale needs sparse `W_r` and larger hardware. (Enabling change this session:
+`_build_reservoir_weights` estimates the spectral radius by power iteration, since the exact
+eigendecomposition is O(K³) and stalls past ~12k nodes.)
 
 ## Limitations (current)
 
