@@ -45,6 +45,11 @@ class TorchReservoirPrefixInjectedLM:
 
         self.torch = torch
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        # Live gain on the reservoir->prefix write path. 1.0 = the trained behaviour
+        # (unchanged for saved recall models). The always-alive harness drives an
+        # *untrained* W_res, so it dials this down to keep a chat base coherent and lets
+        # the user fade the reservoir's influence in/out at runtime (see src/reservoir/alive.py).
+        self.readout_scale = 1.0
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
@@ -137,7 +142,7 @@ class TorchReservoirPrefixInjectedLM:
         torch = self.torch
         B, T = input_ids.shape
         tok_emb = self.embed(input_ids)                              # (B, T, d)
-        prefix = self.W_res(self._state.to(self.W_res.weight.dtype))
+        prefix = self.W_res(self._state.to(self.W_res.weight.dtype)) * self.readout_scale
         prefix = prefix.view(self.n_prefix, self.d_model).unsqueeze(0).expand(B, -1, -1)
         inputs_embeds = torch.cat([prefix.to(tok_emb.dtype), tok_emb], dim=1)
         ext_mask = torch.cat(
