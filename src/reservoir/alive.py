@@ -17,15 +17,17 @@ reservoir-state *direction* moved) is unit-tested with a fake LM. The token stre
 """
 from __future__ import annotations
 
+import contextlib
+
 import numpy as np
 
 from .runtime import ConfidenceGate  # reuse the entropy gate (model-agnostic)
 
-DEFAULT_SYSTEM = (
-    "You are a reservoir agent: a continuously running mind whose internal state "
-    "persists from moment to moment. You think in short bursts, sometimes speak "
-    "unprompted, and answer when the user says something. Keep it brief and natural."
-)
+# Minimal and NEUTRAL on purpose. The agent's stateful / "alive" behaviour must come
+# from TRAINING the reservoir readout (+LoRA), not from describing it in the prompt —
+# putting "you are a continuously running mind" here would just have the base model
+# parrot it back, which demonstrates nothing about the reservoir. Keep this tiny or None.
+DEFAULT_SYSTEM = "You are a helpful assistant."
 
 
 def _to_numpy(x):
@@ -68,6 +70,14 @@ class AliveEngine:
         """Live-set the reservoir->output gain (0 = base model, higher = more reservoir)."""
         self.lm.readout_scale = float(value)
 
+    def _inference(self):
+        """No-grad context for the live loop. The reservoir state carries the autograd
+        graph across passes (intended for *training* backprop-through-passes); in a
+        continuous loop that graph would grow every tick until the GPU OOMs, so every
+        forward here runs under no_grad. ``nullcontext`` keeps the fake-LM tests torch-free."""
+        torch = getattr(self.lm, "torch", None)
+        return torch.no_grad() if torch is not None else contextlib.nullcontext()
+
     # ---- context ----
     def _messages(self) -> list[dict]:
         head = [{"role": "system", "content": self.system}] if self.system else []
@@ -106,7 +116,8 @@ class AliveEngine:
         ``stream_emit`` continues from this exact pass (no redundant forward)."""
         had_input = self._drain()
         ids, mask = self._encode()
-        logits = self.lm.forward_logits(ids, mask)
+        with self._inference():
+            logits = self.lm.forward_logits(ids, mask)
         last = _to_numpy(logits[0, -1]).ravel()
         emit, h = self.gate.decide(last)
         cos = self._state_cos()
@@ -134,7 +145,8 @@ class AliveEngine:
             ids = torch.cat([ids, torch.tensor([[nid]], device=self.lm.device)], dim=1)
             mask = torch.cat(
                 [mask, torch.ones((1, 1), dtype=mask.dtype, device=self.lm.device)], dim=1)
-            logits = self.lm.forward_logits(ids, mask)
+            with self._inference():
+                logits = self.lm.forward_logits(ids, mask)
         text = tok.decode(produced, skip_special_tokens=True).strip()
         if text:
             self.turns.append({"role": "assistant", "content": text})

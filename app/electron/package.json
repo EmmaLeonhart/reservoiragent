@@ -1,0 +1,13 @@
+{
+  "name": "reservoir-agent-app",
+  "version": "0.1.0",
+  "description": "Real-time side-by-side reservoir agent (live always-alive harness)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^32.2.0"
+  }
+}
