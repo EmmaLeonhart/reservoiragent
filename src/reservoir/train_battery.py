@@ -46,15 +46,21 @@ def train_battery(model_name: str = "gpt2", *, steps: int = 400, lr: float = 1e-
     eval_set = make_eval_set(np.random.default_rng(seed + 9991), n_per_task=eval_n,
                              weights=weights)
     opt = torch.optim.AdamW(lm.trainable_parameters(), lr=lr)
+    # cosine decay to 0 over the run — the flat lr=1e-3 overshot and degraded past its peak.
+    sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=steps)
+
+    def mean_acc(m):
+        return sum(m.values()) / len(m) if m else 0.0
 
     log(f"battery training {model_name} on {sorted(weights)} for {steps} steps "
-        f"(device {lm.device})…")
+        f"(lr {lr} cosine, device {lm.device})…")
     lm.model.eval()
     base = _evaluate(lm, eval_set)
     log("  step    0 (untrained): " + "  ".join(f"{t}={base[t]:.2f}" for t in base))
 
     history = [{"step": 0, **base}]
     losses = []
+    best = {"mean_acc": -1.0, "step": 0, "metrics": base}   # keep the BEST eval, not the last
     lm.model.train()
     for i in range(steps):
         ep = sample_episode(rng, weights)
@@ -62,6 +68,7 @@ def train_battery(model_name: str = "gpt2", *, steps: int = 400, lr: float = 1e-
         opt.zero_grad()
         loss.backward()
         opt.step()
+        sched.step()
         losses.append(float(loss.item()))
         if (i + 1) % eval_every == 0 or i == steps - 1:
             lm.model.eval()
@@ -69,14 +76,18 @@ def train_battery(model_name: str = "gpt2", *, steps: int = 400, lr: float = 1e-
             lm.model.train()
             recent = sum(losses[-eval_every:]) / len(losses[-eval_every:])
             history.append({"step": i + 1, "loss": recent, **m})
-            log(f"  step {i + 1:>4}: loss={recent:.3f}  "
+            log(f"  step {i + 1:>4}: loss={recent:.3f}  mean={mean_acc(m):.2f}  "
                 + "  ".join(f"{t}={m[t]:.2f}" for t in m))
+            if save_dir is not None and mean_acc(m) > best["mean_acc"]:
+                from .persist import save_reservoir_model
+                best = {"mean_acc": mean_acc(m), "step": i + 1, "metrics": m}
+                save_reservoir_model(save_dir, lm, extra_meta={"best": best,
+                                                               "model": model_name})
+                log(f"           ^ new best (mean {best['mean_acc']:.2f}) -> saved")
 
     result = {"model": model_name, "steps": steps, "tasks": sorted(weights),
               "loss_start": losses[0], "loss_end": losses[-1],
-              "final": history[-1], "history": history}
+              "final": history[-1], "best": best, "history": history}
     if save_dir is not None:
-        from .persist import save_reservoir_model
-        save_reservoir_model(save_dir, lm, extra_meta=result)
         result["saved_to"] = save_dir
     return result
