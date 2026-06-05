@@ -1400,3 +1400,15 @@ RESERVOIR_INSCALE (detune). Crons scheduled (session-only): 09:55 initial paper 
 8h run; 12:00 launch the massive run (8192 nodes, input_scaling 0.1, E+1=17 epochs, upload
 each epoch to reservoir-agent-qwen-battery-massive-v3) and set up an hourly paper-update cron.
 Full 25%/60k-node vision needs sparse W_r + a down-projection + bigger hardware (future work).
+
+## 2026-06-05 (cont.) — massive (8192-node) run: stopped at 5 epochs, peaks at epoch 1
+
+Ran the 8192-node reservoir (5.3x the 1536-dim input, input_scaling 0.1 detuned) on the
+battery, epoch-count mode, uploading each epoch to hf.co/EmmaLeonhart/reservoir-agent-qwen-
+battery-massive-v3. Trajectory: epoch 0 mean 0.239, epoch 1 0.349 (BEST, past the 1024-node
+run's 0.332), epoch 2 0.302, epoch 3 0.286, epoch 4 0.008 (collapse). Stopped by decision
+after epoch 4 — the result peaks within ~1 epoch and only degrades after, so one epoch is
+enough. Content-memory tasks never recovered (recall 0 throughout; accumulate flickered to
+<=0.12 then vanished); the 5.3x expansion lifts temporal/gating but not symbolic content. A
+reservoir genuinely larger than its input needs sparse W_r + bigger hardware (future work).
+FINDINGS + docs updated to the final result; hourly paper-tracking cron retired.
