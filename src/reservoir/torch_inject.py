@@ -27,7 +27,22 @@ def _build_reservoir_weights(K, d_in, spectral_radius, input_scaling, sparsity, 
     W_in = rng.uniform(-1, 1, (K, d_in)) * input_scaling
     mask = rng.random((K, K)) < sparsity
     W = rng.uniform(-1, 1, (K, K)) * mask
-    rho = np.max(np.abs(np.linalg.eigvals(W)))
+    if K > 2048:
+        # Full eigvals is O(K^3) and stalls for large reservoirs (a 12k reservoir hangs for
+        # minutes). Estimate |lambda_max| by power iteration — ||W^k v|| grows by the
+        # spectral radius. Only for large K, so small reservoirs keep the exact value and
+        # existing models/tests are unchanged.
+        v = rng.standard_normal(K)
+        v /= np.linalg.norm(v)
+        rho = 0.0
+        for _ in range(200):
+            w = W @ v
+            rho = float(np.linalg.norm(w))
+            if rho == 0:
+                break
+            v = w / rho
+    else:
+        rho = np.max(np.abs(np.linalg.eigvals(W)))
     if rho > 0:
         W = W * (spectral_radius / rho)
     return W.astype(np.float32), W_in.astype(np.float32)
