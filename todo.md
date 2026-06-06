@@ -64,6 +64,11 @@ rather than noise?
   routes are structural: a **curriculum** (key in-context first, anneal out), a stronger
   prefix coupling (inject the prefix at multiple layers, or larger n_prefix), or unfreezing
   more of the model. Substantial; needs real compute + a dedicated effort.
+  - **UPDATE (2026-06-06): the moderate versions of all three are now tried and exhausted** on
+    GPT-2-medium (355M), all chance: curriculum (`--curriculum`), wider coupling (`--n-prefix 32`),
+    broad-LoRA unfreeze (`--lora-target all --lora-r 32`); Qwen2.5-0.5B also chance. The boundary
+    is robust to moderate fixes. **Only the heavy routes remain:** training actual backbone weights
+    (full fine-tune, not LoRA) and/or a much larger compute budget — a GPU-heavy dedicated effort.
 - **Make the reservoir actually USED across passes (redirect from the C negative).**
   The cross-pass *content-recall* experiment showed the model ignores the reservoir
   (stateful ≈ stateless ≈ chance). Two directions the result points to: (1) **wire

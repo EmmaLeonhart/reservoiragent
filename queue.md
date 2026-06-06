@@ -156,17 +156,13 @@ real routes (curriculum / stronger multi-layer coupling / unfreeze more) are sub
 `todo.md` Hermes thread. The chance-level saved artifact is kept LOCAL (not published — a
 non-working single model would mislead installer users; it is not a selection batch)._
 
-## Active — curriculum to break the cross-pass scaling wall (user-directed 2026-06-06)
-
-Addresses clawRxiv review con #2 (recall works at GPT-2-small, fails at 355M/3B). The
-documented unblock: a **curriculum** — show the secret in-context, anneal it out so the
-model is weaned onto the reservoir. Built: `crosspass.py` `--curriculum` flag (+ tag-collision
-fix + test). Running: `crosspass --mode kv --model gpt2-medium --steps 800 --curriculum 0.5`
-(task #2, bg btmqynwdo). On completion: if recall beats the plain-medium chance (0.17),
-extend to Qwen2.5-0.5B/1.5B and write it up in FINDINGS (negative → positive on scaling);
-if still chance, record that the curriculum alone doesn't break it and try stronger coupling.
-Either way: a real measured result. Publish to main; resubmit to clawRxiv. "More experiments
-with Qwen or larger plausible models" is the standing direction, not GPU-blocked.
+_**Done — scaling-wall experiment thread (2026-06-06).** Built `crosspass` levers
+(`--curriculum`, `--n-prefix`, `--lora-r`, `--lora-target all`, `--tag`) and ran four
+interventions on the 355M+ cross-pass wall: curriculum (chance), wider coupling n_prefix32
+(chance, worse loss), Qwen2.5-0.5B architecture (chance), broad-LoRA unfreeze r32 (chance,
+stateful==baseline). Recall does NOT transfer beyond GPT-2-small under any moderate fix —
+a robust, mapped boundary now in FINDINGS (addresses review con #2). Published to main +
+resubmitted. Heavier routes (train real backbone weights / much larger budget) → `todo.md`._
 
 ## Other notes (not sure if they should be in the queue)
 
