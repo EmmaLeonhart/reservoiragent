@@ -312,6 +312,7 @@ def cmd_crosspass(args) -> int:
                                   load_in_4bit=args.bits4,
                                   input_scaling=args.input_scaling, dtype=args.dtype,
                                   curriculum=args.curriculum, n_prefix=args.n_prefix,
+                                  lora_r=args.lora_r, lora_target=args.lora_target,
                                   save_dir=(args.save if stateful else None))
         else:
             r = run_cross_pass(args.model, n_keys=args.n_keys, steps=args.steps,
@@ -690,6 +691,12 @@ def main(argv=None) -> int:
     cp.add_argument("--tag", default=None,
                     help="suffix for output filenames, to keep config variants of one model "
                          "from clobbering each other (e.g. --tag np32-curric).")
+    cp.add_argument("--lora-r", type=int, default=8,
+                    help="kv mode: LoRA rank. Higher = more adaptation capacity for the "
+                         "frozen backbone to learn to read the reservoir prefix.")
+    cp.add_argument("--lora-target", choices=["attn", "all"], default="attn",
+                    help="kv mode: 'attn' adapts only attention projections; 'all' also adapts "
+                         "the MLP (the unfreeze-more lever for the cross-pass scaling wall).")
     cp.add_argument("--4bit", dest="bits4", action="store_true",
                     help="load the base in 4-bit (for large models like Hermes 3B)")
     cp.add_argument("--input-scaling", type=float, default=0.5,

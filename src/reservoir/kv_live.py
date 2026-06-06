@@ -36,7 +36,8 @@ class TorchReservoirPrefixInjectedLM:
                  input_scaling: float = 0.5, sparsity: float = 0.1, leak: float = 1.0,
                  seed: int = 0, device: str | None = None, lora_r: int = 8,
                  lora_alpha: int = 16, summary: str = "last", load_in_4bit: bool = False,
-                 dtype: str | None = None, train_seed: int | None = None):
+                 dtype: str | None = None, train_seed: int | None = None,
+                 lora_target: str = "attn"):
         import torch
         import torch.nn as nn
         from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -101,7 +102,16 @@ class TorchReservoirPrefixInjectedLM:
         # LM output is free to learn content only. >0 logit => speak.
         self.gate_head = nn.Linear(n_reservoir, 1)
 
-        target = ["c_attn"] if hasattr(base.config, "n_embd") else ["q_proj", "v_proj"]
+        # "attn" = adapt only the attention projections (default, light touch).
+        # "all" = also adapt the MLP, giving the upper layers far more capacity to learn to
+        # *read* the reservoir prefix — the unfreeze-more lever for the cross-pass scaling wall.
+        gpt2 = hasattr(base.config, "n_embd")
+        if lora_target == "all":
+            target = (["c_attn", "c_proj", "c_fc"] if gpt2
+                      else ["q_proj", "k_proj", "v_proj", "o_proj",
+                            "gate_proj", "up_proj", "down_proj"])
+        else:
+            target = ["c_attn"] if gpt2 else ["q_proj", "v_proj"]
         lcfg = LoraConfig(r=lora_r, lora_alpha=lora_alpha, target_modules=target,
                           lora_dropout=0.0, bias="none", task_type="CAUSAL_LM")
         self.model = get_peft_model(base, lcfg)
@@ -120,7 +130,7 @@ class TorchReservoirPrefixInjectedLM:
             model_name=model_name, n_reservoir=n_reservoir, n_prefix=n_prefix,
             layer=self.layer, spectral_radius=spectral_radius, input_scaling=input_scaling,
             sparsity=sparsity, leak=leak, seed=seed, lora_r=lora_r, lora_alpha=lora_alpha,
-            summary=summary)
+            summary=summary, lora_target=lora_target)
         self._register_read_hook()
 
     def _register_read_hook(self):
