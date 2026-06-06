@@ -187,9 +187,11 @@
   characterized, and a Reservoir Agent (GPT-2) <strong>recalls information that exists
   only in the carried state</strong> across an otherwise-wiped context. The deciding
   factor is <em>how</em> the reservoir is injected (additive &rarr; ignored;
-  content-addressable &rarr; 100% recall); the result holds at GPT-2-small and meets a
-  well-diagnosed <strong>scaling wall</strong> at 355M and on Hermes-3B, which we report
-  as the contribution&rsquo;s honest boundary.
+  content-addressable &rarr; 100% recall). High-dimensional <em>content</em> recall is
+  GPT-2-small-specific (a well-diagnosed wall at 355M+), but the low-dimensional
+  <em>temporal/agency</em> behaviours an agent runs on &mdash; selective silence, timed
+  response, self-initiation &mdash; <strong>train on Qwen2.5-1.5B</strong> (&asymp;12&times;
+  larger): statefulness scales; only symbolic content does not yet.
 </p>
 
 <div class="question">

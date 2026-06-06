@@ -1589,3 +1589,14 @@ compute-limited throughout, smoothed a redundant intro line. Remaining cons (sca
 reservoir already documented, HF blocker, untrained harness) are genuine limitations. Response
 map in paper/reviews/post2695_response_notes.md. Published; resubmitting. Presentation is now
 essentially cleared across reviews; standing Reject is scientific scope only.
+
+## 2026-06-06 — reframe the scaling story: it's a content wall, not a statefulness wall (user point)
+
+User pointed out we have Qwen (more scaled than GPT-2). Right — the "fails to scale past
+GPT-2-small" framing conflated two threads. Fixed: the cross-pass CONTENT-recall wall is
+high-dimensional and GPT-2-small-specific, but the TEMPORAL/AGENCY battery on Qwen2.5-1.5B
+(~12x larger) DOES train (silence 1.00, timed 0.71, self-init 0.67; content ~0). So statefulness
+scales to a modern 1.5B model for the low-dimensional signals an agent runs on; only symbolic
+content stays GPT-2-small-specific. Updated the abstract, added a "scope of the wall" paragraph
+to the cross-pass section, and rewrote the site lede. This converts the reviewers' flat
+"doesn't scale" reading into a measured split. Published; resubmitting.
