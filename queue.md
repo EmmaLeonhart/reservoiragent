@@ -166,13 +166,7 @@ resubmitted. Heavier routes (train real backbone weights / much larger budget) �
 
 _**Done — trained GRU baseline (2026-06-06).** GRU on the cross-pass task: stateful 1.00 (loss->0.00), stateless 0.17 (chance). Task is trivial for trained recurrence — situates the contribution (fixed reservoir in a frozen LM; scaling is the open problem). Answers post-2692 review con #2 with evidence. In FINDINGS; published + resubmitted._
 
-## Active — capacity of the GPT-2-small cross-pass result vs vocabulary size (2026-06-06)
-
-The headline positive (100% cross-pass recall) is at n_keys=6. Robustness question a reviewer
-would raise: does it hold at 12/24 secret words, or is 6 a tiny-vocab artifact? Run
-`crosspass --mode kv --model gpt2 --steps 600 --n-keys {12,24}` (use `--tag` so it does NOT
-clobber the published n=6 figure/json). Characterizes the working regime's capacity; folds into
-FINDINGS as a robustness check on the load-bearing result. GPU-light. Publish to main.
+_**Done — capacity sweep (2026-06-06).** GPT-2-small cross-pass recall over n_keys 6/12/24/48: stateful 1.00/0.58/0.92/0.02 vs chance baseline. NOT a 6-word artifact (0.92 at 24), but training-noisy and non-convergent by 48 at 600 steps. Pool expanded 10->50. In FINDINGS; addresses post-2694 review. Published + resubmitted._
 
 ## Other notes (not sure if they should be in the queue)
 
