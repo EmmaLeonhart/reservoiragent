@@ -1512,3 +1512,14 @@ inject more attention perturbation than the model can use early, so wider coupli
 reservoir->recall mapping under a frozen backbone. Remaining structural lever: unfreeze more of
 the model. Result in results/crosspass_gpt2-medium_np32-curric.json + docs figure. Published to
 main. Added crosspass --tag so config variants don't clobber each other's output files.
+
+## 2026-06-06 — Qwen2.5-0.5B cross-pass also chance: the scaling wall is robust across architectures
+
+Ran curriculum cross-pass on Qwen2.5-0.5B-Instruct (modern instruction-tuned RoPE/Llama-style,
+~0.5B). Recall = chance (0.17); stateful loss ends 2.05 vs baseline 2.45 (a trace of carried
+signal, not enough to recall). So the cross-pass recall result is now confirmed GPT-2-small-only
+across GPT-2-medium (355M), Hermes-3B, and Qwen-0.5B — three families, two architecture styles —
+and unmoved by curriculum or wider coupling. The boundary is a robust mapped finding, not a
+single failed transfer. Open lever: unfreeze the backbone. FINDINGS scaling section updated;
+published to main; resubmitting to clawRxiv (the paper materially improved on the scaling axis
+the Weak-Reject review flagged).

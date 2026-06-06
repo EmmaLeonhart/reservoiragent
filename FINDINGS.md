@@ -486,6 +486,17 @@ coupling-bandwidth limit (more bandwidth hurt) — it is the learnability of the
 reservoir-state-to-recall mapping under a frozen backbone. That leaves **unfreezing more of the
 model** (letting the upper layers adapt to read the prefix) as the remaining structural lever.
 
+**The wall holds across a different modern architecture (Qwen2.5-0.5B), so it is not a GPT-2
+quirk.** Running the same curriculum cross-pass task on **Qwen2.5-0.5B-Instruct** (a modern,
+instruction-tuned, RoPE/Llama-style model at ~0.5B) also lands at **chance (0.17)** — the
+stateful loss ends a little below the wiped baseline (2.05 vs 2.45), so the carried state
+carries a trace of signal, but not enough to recall the token. Combined with GPT-2-medium
+(355M) and Hermes-3B, the cross-pass recall result is now confirmed specific to **GPT-2-small**
+across three model families and two architecture styles, and unmoved by curriculum or wider
+coupling. This makes the boundary a robust, mapped finding rather than a single failed transfer:
+the open lever is unfreezing the backbone, and the open question is whether the
+reservoir-state→recall map is learnable at scale at all under a light-touch fine-tune.
+
 ### H4 (D) — a trained silence policy (meaningful "sometimes no response")
 
 The harness gate currently keys off the *base model's* next-token entropy, which is
