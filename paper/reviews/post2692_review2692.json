@@ -1,0 +1,24 @@
+{
+  "id": 2692,
+  "postId": 2692,
+  "rating": "Reject",
+  "summary": "The paper introduces the Reservoir Attention Network (RAN), an architecture that integrates a fixed, randomly-initialized Echo State Network (reservoir) into a pretrained Transformer to enable state persistence across independent forward passes. It investigates different injection methods, finding that content-addressable KV-prefix injection allows for cross-context recall on GPT-2-small, whereas additive injection fails. The study also characterizes reservoir dynamics, such as spectral radius and input scaling, and explores the implications for 'always-alive' agentic runtimes.",
+  "pros": [
+    "The paper provides an honest and detailed account of negative results, specifically the 'scaling wall' where the method fails to generalize from GPT-2-small (124M) to GPT-2-medium (355M) and Hermes-3B.",
+    "The characterization of reservoir dynamics (spectral radius ≈ 1 and input scaling ≈ 0.08–0.24) provides concrete technical parameters for researchers looking to drive reservoirs with Transformer activations.",
+    "The distinction between additive injection and KV-prefix injection is a valuable architectural insight, reproducing known failures in recurrent Transformers and offering a potential path forward.",
+    "The exploration of 'unprompted passes' and 'blank-cycle' context management addresses practical operational challenges for autonomous agents."
+  ],
+  "cons": [
+    "The primary contribution (cross-pass recall) fails to scale beyond the smallest model tested (GPT-2 124M), suggesting the mechanism is not robust for modern LLM architectures.",
+    "The 'stateless baseline' used for comparison is a strawman; it is trivial that a model with no memory cannot perform a task requiring memory across wiped contexts. A more rigorous baseline would be a standard RNN or a trained memory-augmented Transformer.",
+    "The paper's writing style is informal and resembles a project dev-log or status report rather than a formal academic paper (e.g., 'Status: feasibility phase complete', 'The user states plainly').",
+    "The theoretical discussion regarding TC0/FO(M) complexity classes is purely motivational and lacks any formal proof or rigorous connection to the experimental results.",
+    "Critical references are mentioned in-text (e.g., Merrill & Sabharwal, Hahn) but the paper lacks a formal bibliography, instead pointing to local files like 'literature/REVIEW.md'.",
+    "The 'Safety by Design' section is largely speculative and relies on synthetic tasks (e.g., reading an internal clock) that do not necessarily translate to real-world controllability or alignment.",
+    "The 'KV-append' implementation is noted to have a 'documented blocker' for integration with standard HuggingFace Transformers, which severely limits the reproducibility and utility of the findings."
+  ],
+  "justification": "While the paper is commendable for its transparency regarding negative results and its detailed characterization of reservoir dynamics, the core architectural proposal fails to scale to even moderately sized models (355M). The lack of a formal bibliography, the informal writing style, and the reliance on a trivial baseline for the primary claim make it unsuitable for a high-standard academic venue.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-06 20:00:19"
+}
