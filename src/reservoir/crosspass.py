@@ -37,14 +37,21 @@ def _single_token_keys(tokenizer, n: int):
     return keys
 
 
-def _kv_forward_pair(lm, key_word, *, reset_between):
+def _kv_forward_pair(lm, key_word, *, reset_between, hint=False):
     """One cross-pass recall trial on a kv-prefix reservoir model: encode the key in
     pass 1, optionally wipe the reservoir state, then read the recall logits in pass 2.
+
+    ``hint=True`` (curriculum scaffold) leaves the key visible in pass 2's context so the
+    model can read it directly; annealing ``hint`` from True->False over training weans the
+    model off the in-context key onto the carried reservoir state. Evaluation always uses
+    ``hint=False`` (the true cross-pass task).
 
     Returns the next-token logits at the recall point (``logits[0, -1]``)."""
     tok = lm.tokenizer
     p1 = tok(f"The secret word is {key_word}.", return_tensors="pt").to(lm.device)
-    p2 = tok("The secret word was", return_tensors="pt").to(lm.device)
+    p2_text = (f"The secret word is {key_word}. The secret word was" if hint
+               else "The secret word was")
+    p2 = tok(p2_text, return_tensors="pt").to(lm.device)
     lm.reset_state()
     lm.forward_logits(p1["input_ids"], p1["attention_mask"])     # pass 1: read the key
     if reset_between:
@@ -141,7 +148,8 @@ def run_cross_pass_kv(model_name: str = "gpt2", *, n_keys: int = 6, steps: int =
                       stateful: bool = True, n_prefix: int = 8,
                       load_in_4bit: bool = False, input_scaling: float = 0.5,
                       dtype: str | None = None, save_dir: str | None = None,
-                      train_seed: int | None = None, deterministic: bool = False) -> dict:
+                      train_seed: int | None = None, deterministic: bool = False,
+                      curriculum: float = 0.0) -> dict:
     """Same cross-pass recall task, but with the **content-addressable** injection:
     the model attends to reservoir-derived prefix tokens (see ``kv_live``). This is the
     fix for the additive-injection negative result.
@@ -169,9 +177,15 @@ def run_cross_pass_kv(model_name: str = "gpt2", *, n_keys: int = 6, steps: int =
     opt = torch.optim.AdamW(lm.trainable_parameters(), lr=lr)
     lm.model.train()
     losses = []
-    for _ in range(steps):
+    for step in range(steps):
         word, tok_id = keys[int(rng.integers(n_keys))]
-        logits = _kv_forward_pair(lm, word, reset_between=not stateful)
+        # Curriculum: keep the key visible in pass 2 early, anneal that probability to 0
+        # over the first ``curriculum`` fraction of training, weaning onto the reservoir.
+        hint = False
+        if curriculum > 0:
+            p_hint = max(0.0, 1.0 - step / (curriculum * steps))
+            hint = bool(rng.random() < p_hint)
+        logits = _kv_forward_pair(lm, word, reset_between=not stateful, hint=hint)
         loss = torch.nn.functional.cross_entropy(
             logits.unsqueeze(0), torch.tensor([tok_id], device=lm.device))
         opt.zero_grad()
@@ -186,7 +200,7 @@ def run_cross_pass_kv(model_name: str = "gpt2", *, n_keys: int = 6, steps: int =
             if int(_kv_forward_pair(lm, word, reset_between=not stateful).argmax().item()) == tok_id:
                 correct += 1
     result = {"model": model_name, "stateful": stateful, "n_keys": n_keys, "steps": steps,
-              "loss_start": losses[0], "loss_end": losses[-1],
+              "loss_start": losses[0], "loss_end": losses[-1], "curriculum": curriculum,
               "recall_accuracy": correct / n_keys, "device": lm.device, "mode": "kv-prefix"}
     if save_dir is not None:
         # persist the trained model so it is a loadable, shippable artifact (the fix for
