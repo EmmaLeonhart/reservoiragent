@@ -1474,3 +1474,16 @@ So more budget strengthens, not overturns, the controlled negative — the train
 dominates over the fixed reservoir. Verdict now holds across 250→1500 steps: select over runs,
 not reservoir seeds. Wrote results/controlled_1500.json + docs/controlled_1500.png (separate
 files — the published 250-step result is untouched). FINDINGS N-seed section updated.
+
+## 2026-06-06 — paper: academic-register pass (addresses clawRxiv review con #5)
+
+Work-loop fallback (queue drained, user said "work on the paper"). The clawRxiv reviews
+(Gemini 3 Flash, "Weak Reject", posts 2680/2685) flag con #5: informal, project-log register
+("cleanvibe research project", "brain surgery"). Most other cons are already-stated limitations
+or GPU-gated (see paper/reviews/post2680_response_notes.md). The one non-GPU, no-claim-change
+lever is register. Did a targeted pass on FINDINGS.md removing the self-congratulatory
+"honest/honestly/named plainly/papered over" framing (also per the writing-style skill) and the
+"brain surgery"/"cleanvibe research project" phrasings — 11 edits, register only, no claim or
+result changed. Committed to the feature branch only; NOT published to main and NOT resubmitted
+to clawRxiv — left for the user (they flagged concern about autonomous paper publishing). The
+submit script's TITLE/ABSTRACT may need a sync before any resubmit.

@@ -75,7 +75,7 @@ boundary of the claims:
   well-diagnosed, verified-wired non-convergence (a bootstrapping/scale wall, plausibly
   signal dilution through depth), and the most effective injection variant (KV-append)
   has a documented HuggingFace-integration blocker that currently limits its
-  reproducibility. Neither is hidden; both bound the contribution honestly.
+  reproducibility. Neither is hidden; both bound the contribution.
 - **The contribution is the injection-design finding.** What this study *does*
   establish, decisively and reproducibly on GPT-2, is that **how** the reservoir is
   injected is the deciding factor: additive injection is ignored (chance recall), while
@@ -137,12 +137,12 @@ across steps**: the TC⁰/FO(M) upper-bound proof explicitly breaks once generat
 is fed back into the next step, and finite recurrent nets are Turing-complete in
 principle (Siegelmann & Sontag 1992/1995). The reservoir is exactly such a recurrent
 system, so the Reservoir Agent has the *structural ingredient* a stateless pass lacks.
-**The caveat we do not paper over:** the transformer Turing-completeness results
+**The caveat:** the transformer Turing-completeness results
 (Pérez et al. 2019) require *arbitrary precision* — the dense representations act as
 unbounded memory. The Reservoir Agent runs at finite precision, and **no result here
 or in the literature proves that a finite-precision continuous reservoir state lifts
 the per-pass TC⁰/FO(M) bound.** We pose this as the project's central open theoretical
-question, not as an established result. The honest claim is narrow and true: the
+question, not as an established result. The claim is narrow: the
 architecture has a *capacity for endogenous cross-pass state evolution that a single
 finite-precision transformer pass structurally lacks.*
 
@@ -254,7 +254,7 @@ within-seed (trainable-init) noise. So at 250 steps, **reservoir "selection" is 
 signal** — which fixed reservoir you drew matters less than which trainable init you happened to
 get. This turns the earlier *suspected* artifact into a *controlled* negative result. It does
 not rule out selection mattering with far more training (where init noise should shrink) — that
-larger-budget run is the natural follow-up — but at this budget the honest verdict is: train and
+larger-budget run is the natural follow-up — but at this budget the verdict is: train and
 select over *runs*, not over reservoir seeds.
 
 **The larger-budget run — done, and the negative holds: at 1500 steps selection is still not
@@ -321,7 +321,7 @@ measured:
   selection signal the plan relies on most likely emerges only after fine-tuning. The
   mechanism is in place; the verdict on its usefulness is compute-gated.
 
-**Named plainly as not done (compute-gated), not papered over:**
+**Not done (compute-gated):**
 
 - The full **N-seed LoRA fine-tuning + benchmark selection** — there is no training
   pipeline or benchmark suite here; only the *dynamics* proxy was run.
@@ -347,7 +347,7 @@ substrate fine-tuning will later plug into (`src/reservoir/runtime.py`,
 
 A scripted session runs end-to-end: across five interleaved prompted/unprompted passes
 the reservoir state |r| evolves continuously (state carried, including through the
-idle ticks). **Named plainly:** on the untrained model the gate keys off the *base
+idle ticks). On the untrained model the gate keys off the *base
 model's* next-token entropy, so its emit/silence decisions and the generated text
 (GPT-2 babble) are not yet meaningful — the harness is the mechanism, and a meaningful
 self-initiation policy needs the trained readout/LoRA. The point of this step is that
@@ -364,7 +364,7 @@ trained loss. So the full pipeline — inject, freeze the backbone, train W_out 
 select across seeds — **runs end-to-end on the real architecture**, on the GPU. With
 W_out zero-initialised the fine-tune starts exactly at the base model (H1 preserved).
 
-**The honest boundary, named plainly:** the injection hook fires *once per forward pass*
+**The boundary:** the injection hook fires *once per forward pass*
 (a transformer processes the whole sequence through each layer once), so this
 single-forward fine-tune exercises the *training machinery on the real model*, not the
 reservoir's distinctive **cross-pass** value. Exercising that requires the multi-pass
@@ -424,7 +424,7 @@ isolates the injection design as the decisive factor, ruling out the naive varia
 validating the attention-based one. (Demonstrated on GPT-2; the same `kv_live` path is
 architecture-agnostic and runs on Hermes via the generalized injection.)
 
-**Transfer to Hermes 3B — not yet, and well diagnosed (honest).** The same
+**Transfer to Hermes 3B — not yet, and well diagnosed.** The same
 content-addressable experiment was run on the real target, Hermes-3-Llama-3.2-3B, across
 **four** attempts: 4-bit at input scaling 0.5 (300 steps), 4-bit at 0.1 (600 steps),
 **bf16 (non-4-bit) at 0.1 with a higher LR 3e-3** (600 steps), and a dedicated
@@ -478,7 +478,7 @@ stream of events where a rare trigger opens a thread that should be addressed (l
   keep speaking after the input has returned to baseline. (`src/reservoir/silence.py`;
   `scripts/run.py silence`.)
 
-## D: a trained silence policy — and why this is hard brain surgery
+## D: a trained silence policy — and why it is difficult
 
 A real agent must sometimes **stay silent** and sometimes **speak on its own**. The
 current harness gate keys off the base model's next-token entropy, which is arbitrary.
@@ -513,7 +513,7 @@ of the real agent is subtler and worth stating plainly:
   reservoir empties (its state decays toward zero), the agent eventually reaches a state
   close to what the base model was historically trained on — so it naturally *stops* and
   drifts back to default, context-driven responding once the internal activity subsides.
-- **This is aggressive brain surgery on a pretrained model, and it is genuinely hard.**
+- **This is an aggressive modification of an already-trained model, and it is genuinely hard.**
   We are trying to teach an already-trained model an entirely new behavioural axis —
   *when to stay silent, when to self-initiate* — against its strong priors. The fact that
   the Hermes cross-pass recall would not bootstrap (above) is the same difficulty showing
@@ -776,5 +776,5 @@ eigendecomposition is O(K³) and stalls past ~12k nodes.)
 
 ---
 
-*Reservoir Agent · a cleanvibe research project · report site:
+*Reservoir Agent · research report · report site:
 <https://emmaleonhart.github.io/reservoiragent/>*
