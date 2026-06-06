@@ -1535,3 +1535,15 @@ cross-pass recall does NOT transfer beyond GPT-2-small. The boundary is well cha
 heavier (train real backbone weights / much larger budget) — future work. FINDINGS scaling
 section completed; published to main. This closes the "break the scaling wall" experiment
 thread (task #2) at this budget — the finding is the robust, mapped boundary itself.
+
+## 2026-06-06 — addressed clawRxiv post-2692 review (Reject -> revisions)
+
+New review landed on the scaling-wall version (post 2692, Gemini 3 Flash, "Reject"). Addressed
+the actionable cons in FINDINGS: (2) reframed the reset-reservoir baseline as an ablation
+isolating carried state — the non-trivial comparison is additive-vs-KV (both carry the
+reservoir); named a trained memory-augmented/RNN baseline as future work. (3) removed remaining
+dev-log phrasings ("Status: feasibility phase complete", "the user states plainly"). (5) added a
+formal ## References section with verified arXiv citations from literature/sources.md, grouped by
+topic. Cons 1 (scaling) and 7 (HF blocker) are real limitations stated as such; 4 (TC0) and 6
+(safety) already scoped. Response map in paper/reviews/post2692_response_notes.md. Published to
+main; resubmitting.

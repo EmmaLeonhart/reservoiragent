@@ -2,10 +2,10 @@
 
 **Architecture:** Reservoir Attention Network (RAN)  
 **Implementation:** Reservoir Agent (GPT-2, Hermes 3B)  
-**Status: feasibility phase complete.** This document is the project's write-up.
-The results below confirm the core architecture and dynamics, demonstrate
-cross-context recall on GPT-2, and identify the optimization frontier on Hermes.
-This is a **feasibility + dynamics study, not an agentic-capability demonstration**:
+This is a **feasibility and dynamics study, not an agentic-capability demonstration.**
+The results below establish the core architecture and dynamics, demonstrate
+cross-context recall on GPT-2-small, and characterize the scaling boundary above it.
+As a feasibility and dynamics study:
 the tasks are deliberately minimal probes, each chosen to isolate one mechanism, and
 the broader agentic vision is named throughout as future, compute-gated work.
 
@@ -397,6 +397,18 @@ on pass 2 from the carried reservoir state alone (`src/reservoir/crosspass.py`;
 passes, training the injection (+ LoRA), and is compared against a **stateless baseline**
 (the reservoir is reset between the two passes, destroying the carried state).
 
+**On the choice of baseline (in response to review).** The reset-reservoir baseline is not
+meant as a competitive memory model — it is an **ablation** that holds the architecture, the
+trained parameters, and the optimizer fixed and toggles *only* whether the reservoir state
+survives between passes. Its purpose is to attribute any cross-pass recall specifically to the
+carried state rather than to capacity added elsewhere, which is why "a stateless model cannot do
+this" is a property of the ablation, not a claim of difficulty. The genuinely non-trivial
+comparison is the one this section turns on: **additive vs. KV-prefix injection**, where *both*
+arms carry the identical reservoir state and only the injection pathway differs — additive lands
+at chance, KV-prefix at 100%. A stronger external baseline (a trained memory-augmented
+transformer or a small RNN on the same task) would situate the absolute difficulty and is named
+here as future work; it does not change what the ablation isolates.
+
 **The result depends sharply on *how* the reservoir is injected — and that is the
 finding.**
 
@@ -573,7 +585,7 @@ of the real agent is subtler and worth stating plainly:
 
 ## Safety by design (the rule, and what backs it)
 
-This project follows a rule the user states plainly: **never introduce a new capability to an
+This project follows a guiding rule: **never introduce a new capability to an
 AI without meaningfully taking its safety into account** — capability work is acceptable only
 when paired with concrete improvements in controllability, monitorability, or risk reduction.
 The Reservoir Attention Network adds capability (genuine cross-pass state, autonomous ticks,
@@ -822,6 +834,41 @@ eigendecomposition is O(K³) and stalls past ~12k nodes.)
   questions); a citation-checked follow-up precedes any hard novelty claim.
 - Whether finite-precision cross-pass reservoir state provably lifts the per-pass
   TC⁰/FO(M) bound is an open theoretical question, not a result of this work.
+
+---
+
+## References
+
+The full annotated survey, including verification notes and excluded/refuted claims, is in
+[`literature/sources.md`](literature/sources.md) and [`literature/REVIEW.md`](literature/REVIEW.md).
+The works the claims above rest on:
+
+**Reservoir computing.**
+Jaeger, H. (2001). *The "echo state" approach to analysing and training recurrent neural networks.* GMD Report 148.
+Maass, W., Natschläger, T., & Markram, H. (2002). *Real-time computing without stable states (liquid state machines).* Neural Computation 14(11):2531–2560.
+Lukoševičius, M., & Jaeger, H. (2009). *Reservoir computing approaches to recurrent neural network training.* Computer Science Review.
+
+**Transformer expressivity (motivation, not a result here).**
+Hahn, M. (2020). *Theoretical Limitations of Self-Attention in Neural Sequence Models.* TACL. arXiv:1906.06755.
+Merrill, W., Sabharwal, A., & Smith, N. A. (2022). *Saturated transformers are constant-depth threshold circuits (⊆ TC⁰).* arXiv:2106.16213.
+Merrill, W., & Sabharwal, A. (2023). *The Parallelism Tradeoff: Limitations of Log-Precision Transformers.*
+Pérez, J., Barceló, P., & Marinkovic, J. (2019/2021). *Attention is Turing-Complete* (arbitrary-precision). arXiv:1901.03429.
+Siegelmann, H. T., & Sontag, E. D. (1991/1995). *Turing-completeness of finite recurrent neural networks.*
+Weiss, G., Goldberg, Y., & Yahav, E. (2021). *Thinking Like Transformers (RASP).* ICML. arXiv:2106.06981.
+
+**Recurrence-augmented transformers (all carry state *within* a sequence via *trained* recurrence).**
+Dai, Z., et al. (2019). *Transformer-XL.* ACL. arXiv:1901.02860.
+Wu, Y., et al. (2022). *Memorizing Transformers.* ICLR. arXiv:2203.08913.
+Hutchins, D., et al. (2022). *Block-Recurrent Transformers.* NeurIPS. arXiv:2203.07852.
+Bulatov, A., Kuratov, Y., & Burtsev, M. (2022). *Recurrent Memory Transformer.* NeurIPS. arXiv:2207.06881.
+Gu, A., Goel, K., & Ré, C. (2022). *Efficiently Modeling Long Sequences with Structured State Spaces (S4).* arXiv:2111.00396.
+Gu, A., & Dao, T. (2023). *Mamba: Linear-Time Sequence Modeling with Selective State Spaces.* arXiv:2312.00752.
+Behrouz, A., Zhong, P., & Mirrokni, V. (2024). *Titans: Learning to Memorize at Test Time.* arXiv:2501.00663.
+
+**KV-cache management / efficient attention.**
+Xiao, G., et al. (2023). *Efficient Streaming Language Models with Attention Sinks (StreamingLLM).* arXiv:2309.17453.
+Zhang, Z., et al. (2023). *H2O: Heavy-Hitter Oracle for Efficient Generative Inference.* arXiv:2306.14048.
+DeepSeek-AI (2024). *DeepSeek-V2* (Multi-head Latent Attention). arXiv:2405.04434.
 
 ---
 
