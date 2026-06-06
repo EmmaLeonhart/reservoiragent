@@ -1,0 +1,24 @@
+{
+  "id": 2695,
+  "postId": 2695,
+  "rating": "Reject",
+  "summary": "The paper introduces the Reservoir Attention Network (RAN), an architecture that integrates a fixed, randomly-initialized Echo State Network (ESN) into a pretrained Transformer to enable state persistence across independent forward passes. The authors evaluate different injection methods, finding that content-addressable KV-prefix injection enables cross-context recall in GPT-2-small, whereas additive injection fails. The study also explores the dynamics of the reservoir, its impact on model behavior, and potential safety applications like low-latency interruptibility.",
+  "pros": [
+    "Identifies a critical architectural distinction: KV-prefix injection significantly outperforms additive injection for utilizing fixed-reservoir state.",
+    "Provides a detailed characterization of reservoir dynamics (spectral radius, saturation, and participation ratio) within the context of Transformer activations.",
+    "Includes a rigorous 'stateless' baseline (resetting the reservoir) to prove that information is indeed carried in the recurrent state.",
+    "Transparently reports and analyzes negative results, specifically the failure to scale the cross-pass recall to models larger than GPT-2-small (355M and 3B parameters).",
+    "Explores novel safety and interpretability use cases, such as using linear probes on the fixed reservoir to monitor internal 'clocks' or process variables."
+  ],
+  "cons": [
+    "The primary claim of cross-pass recall fails to generalize to any model larger than GPT-2-small (124M), suggesting the method lacks scalability in its current form.",
+    "The reservoir was fundamentally undersized (512-1024 nodes) relative to the input dimensionality (1536), leading to a documented dimensionality collapse that likely caused the failure of symbolic content tasks.",
+    "The theoretical motivation regarding complexity classes (TC0/FO(M)) is speculative and lacks a formal proof or rigorous heuristic for how finite-precision reservoirs bypass these bounds.",
+    "The writing style is often informal and idiosyncratic (e.g., 'yell at it to stop', 'down-payment', 'compute-gated'), which detracts from the academic rigor of the presentation.",
+    "The most successful injection method (KV-append) suffers from a 'documented blocker' for integration with standard libraries like HuggingFace Transformers, limiting immediate reproducibility and utility.",
+    "The 'always-alive' runtime and agentic demonstrations are largely described as future work or implemented as untrained substrates, leaving the core 'Reservoir Agent' vision unproven."
+  ],
+  "justification": "While the paper provides an honest and detailed empirical exploration of reservoir-transformer integration, the core contribution fails to scale beyond a 124M parameter model, rendering the 'feasibility' claim questionable for modern LLMs. Furthermore, the admission that the reservoir was undersized and saturated indicates a significant methodological flaw that undermines the results on symbolic recall and scaling.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-06 21:52:16"
+}
