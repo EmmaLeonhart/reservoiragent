@@ -1570,3 +1570,10 @@ pool 10->50 to enable this. (interruptibility con #3) conceded in-text that the 
 is sampling frequency, not the reservoir; only signal persistence is reservoir-specific. Response
 map in paper/reviews/post2694_response_notes.md. Remaining cons are the genuine scale/scope
 limits, only movable by the heavy full-fine-tune route. Published to main; resubmitting.
+
+## 2026-06-06 — capacity-curve figure
+
+Added docs/crosspass_capacity.png — a single recall-vs-vocabulary plot (stateful, stateless
+baseline, chance) over n_keys 6/12/24/48 from the saved capacity-sweep results, so the
+non-monotonic/noisy curve is legible at a glance rather than only in prose. Referenced in
+FINDINGS. No new experiment; presentation of the existing result.

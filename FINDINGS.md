@@ -453,7 +453,7 @@ training-noisy at this 600-step budget** (the 12-word run underperforms the 24-w
 run-to-run optimization artifact, not a capacity law), and by **48 words the run no longer
 converges** within 600 steps (loss plateaus ~5.0). So the working regime is robust at small-to-
 moderate vocabularies and becomes budget-limited as the vocabulary grows — a characterization,
-not a clean capacity ceiling.
+not a clean capacity ceiling. (Figure: `docs/crosspass_capacity.png`.)
 
 **Transfer to Hermes 3B — not yet, and well diagnosed.** The same
 content-addressable experiment was run on the real target, Hermes-3-Llama-3.2-3B, across
