@@ -497,6 +497,19 @@ coupling. This makes the boundary a robust, mapped finding rather than a single 
 the open lever is unfreezing the backbone, and the open question is whether the
 reservoir-state→recall map is learnable at scale at all under a light-touch fine-tune.
 
+**Unfreezing more of the model (broad LoRA on attention + MLP, rank 32) does not break it
+either — and now the carried state gives no advantage at all.** Adapting the MLP as well as
+attention, at 4× the LoRA rank (`crosspass --lora-target all --lora-r 32`, GPT-2-medium, 800
+steps, curriculum), still lands at **chance (0.17)** — and unlike the earlier runs, the stateful
+and wiped-baseline traces are now identical (loss 2.16 vs 2.14), so the extra capacity buys the
+reservoir pathway nothing. This exhausts the light-to-moderate levers: across **four
+interventions — a curriculum, wider prefix coupling, a modern architecture (Qwen-0.5B), and
+broad-LoRA unfreezing — the cross-pass recall result does not transfer beyond GPT-2-small.**
+The boundary is therefore well characterized: the 100% recall is real and reproducible at 124M,
+and resists every moderate fix at 355M+. The remaining untested routes are heavier — training
+actual backbone weights (not just LoRA) and/or a much larger compute budget — and are recorded
+as future work; this study establishes the boundary, not a way past it.
+
 ### H4 (D) — a trained silence policy (meaningful "sometimes no response")
 
 The harness gate currently keys off the *base model's* next-token entropy, which is
