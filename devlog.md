@@ -1412,3 +1412,18 @@ enough. Content-memory tasks never recovered (recall 0 throughout; accumulate fl
 <=0.12 then vanished); the 5.3x expansion lifts temporal/gating but not symbolic content. A
 reservoir genuinely larger than its input needs sparse W_r + bigger hardware (future work).
 FINDINGS + docs updated to the final result; hourly paper-tracking cron retired.
+
+## 2026-06-06 — reproducibility audit: KV cross-pass recall reproduces from scratch
+
+User asked to audit the reproducibility of the load-bearing result (the 100% cross-pass
+recall via content-addressable KV-prefix injection — the one a reviewer is most likely to
+rerun, since it goes through kv_live.py's bespoke attention path rather than stock HF). Ran
+the documented recipe from a clean checkout: `python scripts/run.py crosspass --mode kv
+--steps 600 --model gpt2`. Result matches FINDINGS exactly: **stateful recall = 1.00** (loss
+12.51 -> 0.0001), **stateless baseline (reservoir wiped between passes) = 0.17** (chance =
+1/6, loss 16.31 -> 2.61), on CUDA. So the central claim reproduces end-to-end through the
+bespoke path. The reproducibility *limitation* is unchanged and still named in FINDINGS: the
+winning variant runs through kv_live.py, not a stock `transformers` model (the HF GPT-2
+KV-append integration is a documented blocker) — the audit confirms the bespoke path itself
+is reliable, not that it's been ported to stock HF. Audit was non-mutating (backed up and
+restored docs/crosspass.png; results/ is gitignored). No code change.
