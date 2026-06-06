@@ -87,3 +87,30 @@ def test_eval_recall_stateful_hits_baseline_misses():
 
 def test_recall_accuracy_empty_is_zero():
     assert recall_accuracy([], "stateful") == 0.0
+
+
+def test_kv_forward_pair_curriculum_hint_controls_pass2_text():
+    """The curriculum scaffold: hint=True leaves the key visible in pass 2; hint=False
+    (the true cross-pass task, used at eval) does not."""
+    from reservoir.crosspass import _kv_forward_pair
+
+    seen = []
+
+    class _RecLM:
+        tokenizer = _FakeTok()
+        device = "cpu"
+
+        def reset_state(self):
+            pass
+
+        def forward_logits(self, input_ids, attention_mask):
+            seen.append(input_ids)            # _FakeTok makes input_ids == the raw text
+            return np.full((1, 1, 4), -1.0)
+
+    lm = _RecLM()
+    _kv_forward_pair(lm, "red", reset_between=False, hint=False)
+    assert seen[-1] == "The secret word was"          # key not in pass 2 (hard task)
+
+    seen.clear()
+    _kv_forward_pair(lm, "red", reset_between=False, hint=True)
+    assert "red" in seen[-1] and seen[-1].endswith("The secret word was")  # key visible
