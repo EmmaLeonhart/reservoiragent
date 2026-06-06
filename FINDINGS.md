@@ -543,11 +543,16 @@ target. The agent-relevant *temporal/agency* behaviours are low-dimensional (a c
 unresolved thread), and those **do scale to a modern model**: the 8-task battery on
 **Qwen2.5-1.5B** (≈12× GPT-2-small) trains selective silence to **1.00**, timed response to
 **0.71**, and self-initiation to **0.67**, while the symbolic-content tasks stay near zero (the
-same split, same dimensionality cause; see "The stateful-task battery" below). So the correct
-reading is not "the architecture fails above 124M" — it is that **carried state becomes usable
-behaviour at 1.5B for the low-dimensional signals an agent actually runs on, and only the
-high-dimensional content recall remains GPT-2-small-specific.** That reframes the scaling story
-from a flat negative into a split with a measured, mechanistic boundary.
+same split, same dimensionality cause; see "The stateful-task battery" below). The split holds
+**within a single model**: on the very same Qwen2.5-1.5B, a *dedicated* single-task cross-pass
+content-recall run — the identical KV-prefix mechanism that reaches 100% on GPT-2-small, given
+its best focused shot rather than the joint 8-task setup — stays at **chance (0.17), equal to the
+wiped baseline** (`crosspass --model Qwen/Qwen2.5-1.5B-Instruct`). So on one model, at one scale,
+low-dimensional temporal state trains to 1.00 and high-dimensional content recall sits at chance.
+The correct reading is not "the architecture fails above 124M" — it is that **carried state
+becomes usable behaviour at 1.5B for the low-dimensional signals an agent actually runs on, and
+only the high-dimensional content recall remains GPT-2-small-specific.** That reframes the scaling
+story from a flat negative into a split with a measured, mechanistic boundary.
 
 ### H4 (D) — a trained silence policy (meaningful "sometimes no response")
 

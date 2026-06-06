@@ -1600,3 +1600,12 @@ scales to a modern 1.5B model for the low-dimensional signals an agent runs on; 
 content stays GPT-2-small-specific. Updated the abstract, added a "scope of the wall" paragraph
 to the cross-pass section, and rewrote the site lede. This converts the reviewers' flat
 "doesn't scale" reading into a measured split. Published; resubmitting.
+
+## 2026-06-06 — same-model split confirmed: Qwen-1.5B content recall = chance, silence = 1.00
+
+Dedicated single-task cross-pass content recall on Qwen2.5-1.5B (best focused shot, not the joint
+battery): stateful 0.17 = baseline 0.17 (chance), loss 13.19->2.36. So on the VERY SAME model
+where the battery trains silence to 1.00 / timed 0.71, high-dimensional content recall via the
+identical KV-prefix mechanism stays at chance. The temporal-vs-content split now holds within one
+model at one scale, not just across the GPT-2 vs Qwen comparison — airtight. Folded into the
+"scope of the wall" paragraph. Published; resubmitting.
