@@ -311,7 +311,7 @@ def cmd_crosspass(args) -> int:
                                   lr=args.lr, seed=args.seed, stateful=stateful,
                                   load_in_4bit=args.bits4,
                                   input_scaling=args.input_scaling, dtype=args.dtype,
-                                  curriculum=args.curriculum,
+                                  curriculum=args.curriculum, n_prefix=args.n_prefix,
                                   save_dir=(args.save if stateful else None))
         else:
             r = run_cross_pass(args.model, n_keys=args.n_keys, steps=args.steps,
@@ -325,6 +325,8 @@ def cmd_crosspass(args) -> int:
     short = args.model.split("/")[-1].lower()
     tag = "" if short == "gpt2" else "_" + "".join(
         c if c.isalnum() else "-" for c in short)[:24]
+    if getattr(args, "tag", None):   # distinguish config variants of the same model
+        tag = tag + "_" + "".join(c if c.isalnum() else "-" for c in args.tag.lower())[:24]
     out = ROOT / "results" / f"crosspass{tag}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps({"params": {"model": args.model, "n_keys": args.n_keys,
@@ -682,6 +684,12 @@ def main(argv=None) -> int:
                     help="kv mode: anneal the in-context key hint to 0 over this fraction of "
                          "training (0 = off; 0.5 = weaned off by mid-training). Targets the "
                          "scaling wall — bootstrap recall on larger models.")
+    cp.add_argument("--n-prefix", type=int, default=8,
+                    help="kv mode: number of reservoir-derived prefix tokens the model attends "
+                         "to. Larger = stronger reservoir->model coupling (a scaling-wall lever).")
+    cp.add_argument("--tag", default=None,
+                    help="suffix for output filenames, to keep config variants of one model "
+                         "from clobbering each other (e.g. --tag np32-curric).")
     cp.add_argument("--4bit", dest="bits4", action="store_true",
                     help="load the base in 4-bit (for large models like Hermes 3B)")
     cp.add_argument("--input-scaling", type=float, default=0.5,
