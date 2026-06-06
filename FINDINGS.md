@@ -257,6 +257,20 @@ not rule out selection mattering with far more training (where init noise should
 larger-budget run is the natural follow-up — but at this budget the honest verdict is: train and
 select over *runs*, not over reservoir seeds.
 
+**The larger-budget run — done, and the negative holds: at 1500 steps selection is still not
+real.** We then ran exactly the natural follow-up (`scripts/run.py controlled --steps 1500`,
+6× the budget; `docs/controlled_1500.png`), to test whether selection becomes a real signal
+once run-to-run init noise shrinks. It does not. Per-seed mean recall spreads a little wider
+(0.21–0.83 vs the 250-step run's 0.33–0.75), but the **within-seed spread stays just as wide**
+(e.g. seed 4 lands at 1.00, 1.00, 0.17, 0.17 across its four inits): **F = 1.43 (df 5, 18),
+p = 0.26** — the between-seed (reservoir) variation still does not exceed the within-seed
+(trainable-init) noise. So 6× more training **strengthens, rather than overturns,** the
+controlled negative: which trainable init you draw matters more than which fixed reservoir you
+drew, at both 250 and 1500 steps. The verdict is unchanged and now holds across a budget
+range — select over *runs*, not over reservoir seeds. (Whether selection ever becomes real at a
+far larger budget than fits a quick local job is open, but the trend across 250→1500 steps does
+not point that way.)
+
 ### H2 — the reservoir-dynamics regime
 
 Sweeping spectral radius ρ ∈ [0.1, 2.0] (figures: `docs/sweep_synthetic.png`,

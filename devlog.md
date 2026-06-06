@@ -1462,3 +1462,15 @@ Brief handoff of what this session did and what's still in flight.
 
 **Crons:** three session-local crons are running (work-loop :03, auto-flush :15,
 status-report :42); they die when this session ends.
+
+## 2026-06-06 — longer-budget controlled run (1500 steps): negative strengthened
+
+Ran the user-approved follow-up `scripts/run.py controlled --steps 1500 --n-seeds 6 --runs 4`
+(6× the 250-step budget) to test whether reservoir-seed selection becomes a real signal once
+run-to-run init noise shrinks. It does not. Per-seed mean recall 0.21–0.83 (wider than the
+250-step 0.33–0.75), but within-seed spread is still as wide (seed 4: 1.00,1.00,0.17,0.17):
+**F=1.43 (df 5,18), p=0.26 → selection_is_real=False** (best seed 5 @0.83, worst seed 2 @0.21).
+So more budget strengthens, not overturns, the controlled negative — the trainable init still
+dominates over the fixed reservoir. Verdict now holds across 250→1500 steps: select over runs,
+not reservoir seeds. Wrote results/controlled_1500.json + docs/controlled_1500.png (separate
+files — the published 250-step result is untouched). FINDINGS N-seed section updated.

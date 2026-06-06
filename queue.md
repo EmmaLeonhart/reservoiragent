@@ -26,22 +26,11 @@ A far-longer-budget run (where init noise should shrink) is the natural follow-u
 
 ---
 
-## Active — longer-budget controlled run (user-approved 2026-06-06)
-
-The 250-step verdict is "noise-dominated" (ANOVA F=1.30, p=0.31 → selection NOT real). Open
-sub-question, now greenlit by the user: does reservoir-seed selection become a real signal with
-far more training, where run-to-run init noise should shrink? Run `controlled --steps 1500`
-(6 seeds × 4 runs = 24 trains, GPT-2, ~1 hr local GPU).
-
-**Hard requirement: do NOT clobber the published 250-step result.** Write to separate files —
-`--out results/controlled_1500.json --fig docs/controlled_1500.png` — leaving
-`docs/controlled.png` / the FINDINGS 250-step ANOVA intact. Command:
-`python scripts/run.py controlled --steps 1500 --n-seeds 6 --runs 4 --out results/controlled_1500.json --fig docs/controlled_1500.png`
-
-On completion: report F/p and per-seed means; add a FINDINGS paragraph + the new figure (a
-higher-budget point alongside the 250-step negative — either a real reservoir signal emerges or
-the negative is strengthened); append a dated `devlog.md` entry; delete this queue item; push.
-The outcome is real either way — a measured number, not a guess.
+_**Done — longer-budget controlled run (2026-06-06).** `controlled --steps 1500` (6 seeds × 4
+runs): F=1.43 (df 5,18), p=0.26 → selection still NOT real; within-seed spread as wide as
+between-seed. 6× budget strengthens the controlled negative — select over runs, not reservoir
+seeds. Separate files (controlled_1500.json/png); published 250-step result untouched. FINDINGS
+N-seed section + devlog updated._
 
 ---
 
