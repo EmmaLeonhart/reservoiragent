@@ -476,6 +476,16 @@ rules the curriculum *alone* out as the fix and narrows the remaining levers to 
 reservoir→model coupling (more prefix tokens / multi-layer injection) or unfreezing more of the
 model — a measured negative that localizes the bottleneck rather than a hyperparameter guess.
 
+**Stronger coupling (more prefix tokens) also fails — and tells us the bottleneck is not
+bandwidth.** Widening the attended reservoir prefix from 8 to 32 tokens (same curriculum,
+GPT-2-medium, 800 steps; `crosspass --n-prefix 32`) leaves recall at **chance (0.17)** as well,
+and makes training *worse*: the stateful loss now *starts* at 10.18 rather than the 8-prefix
+run's 0.89, because 32 untrained prefix tokens perturb attention more than the model can exploit
+early, so it cannot even ride the in-context hint cleanly. So the 355M failure is **not** a
+coupling-bandwidth limit (more bandwidth hurt) — it is the learnability of the
+reservoir-state-to-recall mapping under a frozen backbone. That leaves **unfreezing more of the
+model** (letting the upper layers adapt to read the prefix) as the remaining structural lever.
+
 ### H4 (D) — a trained silence policy (meaningful "sometimes no response")
 
 The harness gate currently keys off the *base model's* next-token entropy, which is
