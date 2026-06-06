@@ -164,6 +164,8 @@ stateful==baseline). Recall does NOT transfer beyond GPT-2-small under any moder
 a robust, mapped boundary now in FINDINGS (addresses review con #2). Published to main +
 resubmitted. Heavier routes (train real backbone weights / much larger budget) → `todo.md`._
 
+_**Done — trained GRU baseline (2026-06-06).** GRU on the cross-pass task: stateful 1.00 (loss->0.00), stateless 0.17 (chance). Task is trivial for trained recurrence — situates the contribution (fixed reservoir in a frozen LM; scaling is the open problem). Answers post-2692 review con #2 with evidence. In FINDINGS; published + resubmitted._
+
 ## Other notes (not sure if they should be in the queue)
 
 **Reality note (kept honest):** each item landed as real, tested, committed work or a

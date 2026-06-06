@@ -405,9 +405,15 @@ carried state rather than to capacity added elsewhere, which is why "a stateless
 this" is a property of the ablation, not a claim of difficulty. The genuinely non-trivial
 comparison is the one this section turns on: **additive vs. KV-prefix injection**, where *both*
 arms carry the identical reservoir state and only the injection pathway differs — additive lands
-at chance, KV-prefix at 100%. A stronger external baseline (a trained memory-augmented
-transformer or a small RNN on the same task) would situate the absolute difficulty and is named
-here as future work; it does not change what the ablation isolates.
+at chance, KV-prefix at 100%. For the absolute difficulty, we add a **stronger external baseline**: a small **trained GRU** on
+the identical task (read `the secret word is <KEY>`, wipe, recall at `the secret word was` from
+the carried hidden state; `src/reservoir/rnn_baseline.py`, `scripts/run.py rnn-baseline`). It
+reaches **100% recall (loss → 0.00)** when it carries its hidden state and **chance (0.17)** when
+the state is reset between passes. So the task is *trivial for trained recurrence* — which is the
+point: the contribution is not that cross-pass recall is hard in general, but that it can be done
+with a **fixed, random** reservoir inside a **frozen** pretrained transformer (and the open
+problem is scaling that, not the task). This both answers the strawman objection and frames the
+result correctly.
 
 **The result depends sharply on *how* the reservoir is injected — and that is the
 finding.**
