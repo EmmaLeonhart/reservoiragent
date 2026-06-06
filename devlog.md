@@ -1558,3 +1558,15 @@ pretrained transformer, and the open problem is scaling, not the task. Directly 
 reviewer con #2 (the reset baseline is an ablation; a trained recurrent baseline situates
 difficulty) with evidence rather than a future-work placeholder. FINDINGS baseline paragraph
 updated; published to main; resubmitting.
+
+## 2026-06-06 — capacity sweep + post-2694 review response
+
+New review post2694 (the bibliography/baseline/GRU version) held at Reject — cons now almost all
+substantive (scale, trivial tasks, TC0 unproven, harness untrained), not presentation. Two
+addressed: (capacity) swept GPT-2-small cross-pass recall over n_keys 6/12/24/48 — stateful
+1.00/0.58/0.92/0.02 vs chance baseline. NOT a 6-word artifact (0.92 at 24), but training-noisy
+at 600 steps (12<24 non-monotonicity) and non-convergent by 48. Expanded the single-token key
+pool 10->50 to enable this. (interruptibility con #3) conceded in-text that the latency advantage
+is sampling frequency, not the reservoir; only signal persistence is reservoir-specific. Response
+map in paper/reviews/post2694_response_notes.md. Remaining cons are the genuine scale/scope
+limits, only movable by the heavy full-fine-tune route. Published to main; resubmitting.

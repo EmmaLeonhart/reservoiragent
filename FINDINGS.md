@@ -442,6 +442,19 @@ isolates the injection design as the decisive factor, ruling out the naive varia
 validating the attention-based one. (Demonstrated on GPT-2; the same `kv_live` path is
 architecture-agnostic and runs on Hermes via the generalized injection.)
 
+**The result is not a 6-word artifact: it holds to ~24 secret words, with a collapse beyond.**
+To check the headline is not specific to a tiny vocabulary, we swept the number of single-token
+secret words on GPT-2-small (`crosspass --mode kv --n-keys {12,24,48}`, 600 steps each). Stateful
+recall is **1.00 at 6, 0.58 at 12, 0.92 at 24, and 0.02 (chance) at 48**, against a wiped-state
+baseline at chance throughout (0.17 → 0.02 as the vocabulary grows). Two things are true and
+stated as such: the win **generalizes well past 6** (0.92 at 24 words, far above the 1/24 chance
+floor), so it is not a cherry-picked vocabulary; but the curve is **non-monotonic and
+training-noisy at this 600-step budget** (the 12-word run underperforms the 24-word run, a
+run-to-run optimization artifact, not a capacity law), and by **48 words the run no longer
+converges** within 600 steps (loss plateaus ~5.0). So the working regime is robust at small-to-
+moderate vocabularies and becomes budget-limited as the vocabulary grows — a characterization,
+not a clean capacity ceiling.
+
 **Transfer to Hermes 3B — not yet, and well diagnosed.** The same
 content-addressable experiment was run on the real target, Hermes-3-Llama-3.2-3B, across
 **four** attempts: 4-bit at input scaling 0.5 (300 steps), 4-bit at 0.1 (600 steps),
@@ -634,10 +647,13 @@ running every tick, with the reservoir continuously integrating input — "will 
 frantic messages from a human as indicating stop immediately." We measured both halves on CPU
 (`scripts/run.py interrupt`; `docs/interrupt.png`).
 
-**Polling latency (structural).** A poller that only reads input every `period` passes
-registers an arrival at the next boundary: latency is uniform on `0..period-1` (mean
-`(period-1)/2`). At period 8 the turn-based agent's mean latency is **3.57 passes** (max 7);
-a **per-tick agent's latency is 0** — it reads on the pass the input arrives.
+**Polling latency (structural) — and what is *not* reservoir-specific (per review).** A poller
+that only reads input every `period` passes registers an arrival at the next boundary: latency
+is uniform on `0..period-1` (mean `(period-1)/2`). At period 8 the turn-based agent's mean
+latency is **3.57 passes** (max 7); a **per-tick agent's latency is 0** — it reads on the pass
+the input arrives. We grant the reviewer's point that this latency half is a consequence of
+**sampling frequency** (per-tick vs per-turn), not of the reservoir as such — any per-tick agent
+gets it. The reservoir-specific half is the *next* point.
 
 **Signal persistence (dynamics).** The sharper point is what happens to a *one-shot* burst —
 the user yells STOP once, then goes quiet because the agent isn't answering. A matched-filter

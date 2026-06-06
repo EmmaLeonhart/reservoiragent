@@ -19,9 +19,16 @@ from __future__ import annotations
 
 import numpy as np
 
-# single-token-friendly secret words (verified at runtime against the tokenizer)
+# single-token-friendly secret words (each verified against the tokenizer at runtime, so
+# non-single-token candidates are simply skipped). Enough common words to support a capacity
+# sweep well past the original 6/10 — colours, then everyday nouns/adjectives.
 _CANDIDATE_KEYS = [" red", " blue", " green", " black", " white", " brown",
-                   " gold", " silver", " orange", " purple"]
+                   " gold", " silver", " orange", " purple", " pink", " gray",
+                   " dog", " cat", " fish", " bird", " tree", " house", " car", " book",
+                   " door", " hand", " water", " fire", " moon", " star", " king", " queen",
+                   " north", " south", " east", " west", " day", " night", " light", " dark",
+                   " road", " field", " river", " mountain", " stone", " glass", " iron",
+                   " wind", " rain", " snow", " cloud", " grass", " leaf", " wood"]
 
 
 def _single_token_keys(tokenizer, n: int):
