@@ -1577,3 +1577,15 @@ Added docs/crosspass_capacity.png — a single recall-vs-vocabulary plot (statef
 baseline, chance) over n_keys 6/12/24/48 from the saved capacity-sweep results, so the
 non-monotonic/noisy curve is legible at a glance rather than only in prose. Referenced in
 FINDINGS. No new experiment; presentation of the existing result.
+
+## 2026-06-06 — post-2695 review response: TC0 trim + register pass
+
+Review post2695 held at Reject but pros grew — baseline now credited as "rigorous" (strawman
+objection resolved), interruptibility con gone. Addressed two: (3, flagged in ALL FIVE reviews)
+condensed the TC0/FO(M) expressivity paragraph to clearly-labeled motivation-only, removed the
+formal-sounding exposition, added a skip-to-results pointer. (4) register: reworded the
+interruptibility motivation (dropped "yell at it to stop"), down-payment->step, compute-gated->
+compute-limited throughout, smoothed a redundant intro line. Remaining cons (scale, undersized
+reservoir already documented, HF blocker, untrained harness) are genuine limitations. Response
+map in paper/reviews/post2695_response_notes.md. Published; resubmitting. Presentation is now
+essentially cleared across reviews; standing Reject is scientific scope only.

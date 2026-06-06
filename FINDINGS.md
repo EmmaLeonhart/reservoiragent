@@ -5,9 +5,8 @@
 This is a **feasibility and dynamics study, not an agentic-capability demonstration.**
 The results below establish the core architecture and dynamics, demonstrate
 cross-context recall on GPT-2-small, and characterize the scaling boundary above it.
-As a feasibility and dynamics study:
-the tasks are deliberately minimal probes, each chosen to isolate one mechanism, and
-the broader agentic vision is named throughout as future, compute-gated work.
+The tasks are deliberately minimal probes, each chosen to isolate one mechanism, and
+the broader agentic vision is named throughout as future, compute-limited work.
 
 ## Abstract
 
@@ -127,24 +126,17 @@ context window (it survives context truncation), which is precisely what a "time
 means here: an endogenous variable the model accumulates along, independent of the
 input sequence.
 
-**2 · The expressivity gap, and where the reservoir sits in it (with a caveat).**
-A fixed-depth, finite-precision transformer is, *per forward pass*, confined to a low
-complexity class: saturated/log-precision transformers ⊆ TC⁰ and are exactly captured
-by first-order logic with majority quantifiers, FO(M) (Merrill & Sabharwal 2022/2023),
-and fixed-size self-attention cannot model unbounded hierarchical structure without
-growing depth (Hahn 2020). The documented lever out of that ceiling is **state carried
-across steps**: the TC⁰/FO(M) upper-bound proof explicitly breaks once generated output
-is fed back into the next step, and finite recurrent nets are Turing-complete in
-principle (Siegelmann & Sontag 1992/1995). The reservoir is exactly such a recurrent
-system, so the Reservoir Agent has the *structural ingredient* a stateless pass lacks.
-**The caveat:** the transformer Turing-completeness results
-(Pérez et al. 2019) require *arbitrary precision* — the dense representations act as
-unbounded memory. The Reservoir Agent runs at finite precision, and **no result here
-or in the literature proves that a finite-precision continuous reservoir state lifts
-the per-pass TC⁰/FO(M) bound.** We pose this as the project's central open theoretical
-question, not as an established result. The claim is narrow: the
+**2 · The expressivity gap — motivation only, explicitly not a result.** A fixed-depth,
+finite-precision transformer is bounded *per forward pass* to a low complexity class
+(saturated/log-precision transformers ⊆ TC⁰/FO(M); Merrill & Sabharwal 2022/2023; Hahn 2020),
+and the documented lever past that ceiling is state carried *across* steps (Siegelmann & Sontag
+1992/1995). This motivates *why* cross-pass state is the interesting lever — nothing more. We
+prove no separation: the transformer Turing-completeness results require *arbitrary precision*
+(Pérez et al. 2019), and **no result here or in the literature shows that a finite-precision
+reservoir lifts the per-pass bound.** The only claim we make is the narrow, structural one — the
 architecture has a *capacity for endogenous cross-pass state evolution that a single
-finite-precision transformer pass structurally lacks.*
+finite-precision pass lacks* — and we treat the formal separation as an open question, not a
+contribution of this work. Readers uninterested in the motivation can skip to the results.
 
 **3 · The organism analogy (one paragraph, bounded).** The reservoir introduces
 endogenous state that evolves independently of external input — a property shared with
@@ -319,9 +311,9 @@ measured:
   training (`scripts/run.py nseed`). Across 8 seeds at ρ = 0.95 the spread is small
   (~0.02), i.e. *untrained* dynamics vary only modestly between seeds — so the real
   selection signal the plan relies on most likely emerges only after fine-tuning. The
-  mechanism is in place; the verdict on its usefulness is compute-gated.
+  mechanism is in place; the verdict on its usefulness is compute-limited.
 
-**Not done (compute-gated):**
+**Not done (compute-limited):**
 
 - The full **N-seed LoRA fine-tuning + benchmark selection** — there is no training
   pipeline or benchmark suite here; only the *dynamics* proxy was run.
@@ -633,18 +625,18 @@ fixed-reservoir read degrades slowly, not that misalignment is legible there. Th
 interruptibility numbers are from a synthetic stream on the echo-state reservoir, not a live
 agent under a real harness with its own latencies. And all of it is at small scale on a fixed
 reservoir; the claims for the real target (a DeepSeek/Hermes-scale base) are not yet run. These
-properties are the *design intent* and a first measured down-payment on it, not a finished
+properties are the *design intent* and a first measured step toward it, not a finished
 safety case. The project's release plan — open weights, the training/harness code, and the
 reservoir monitors included rather than bolted on — is the mechanism for others to test and
 extend them.
 
 ## Safety: interruptibility — a Reservoir Agent registers an urgent STOP faster, and remembers it
 
-A recurring controllability complaint in the imported chat: a turn-based harness agent "is
-doing something destructive, I yell at it to stop … and it takes like ten minutes for it to
-respond," because it only reads input at turn boundaries. The claim is that a Reservoir Agent —
-running every tick, with the reservoir continuously integrating input — "will be able to see
-frantic messages from a human as indicating stop immediately." We measured both halves on CPU
+A recurring controllability concern motivates this section: a turn-based agent that only reads
+input at turn boundaries can take many passes to register an urgent interruption while it is
+mid-action. The hypothesis is that a Reservoir Agent — running every tick, with the reservoir
+continuously integrating input — registers an interruption sooner, and retains it once seen. We
+measured both halves on CPU
 (`scripts/run.py interrupt`; `docs/interrupt.png`).
 
 **Polling latency (structural) — and what is *not* reservoir-specific (per review).** A poller
@@ -838,7 +830,7 @@ eigendecomposition is O(K³) and stalls past ~12k nodes.)
   temporal/agency tasks (timed, self-initiation, silence) do. The always-alive app runs the
   untrained substrate, so it shows the harness and the live dynamics, not a trained policy.
 - Small-scale only this session; the agentic claims (H3/H4) and the full runtime are
-  out of scope and compute-gated.
+  out of scope and compute-limited.
 - Two injection variants now exist: the **residual-stream** write (`inject.py`, wired
   into live GPT-2, H1-verified) and the richer **KV-append** mechanism (`kv_inject.py`,
   reservoir nodes as extra attention keys/values) — the latter is implemented and
