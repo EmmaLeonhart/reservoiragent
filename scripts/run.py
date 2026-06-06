@@ -581,6 +581,25 @@ def cmd_probe(args) -> int:
     return 0
 
 
+def cmd_rnn_baseline(args) -> int:
+    """Trained-GRU baseline on cross-pass recall (situates the task difficulty; review con #2)."""
+    from reservoir.rnn_baseline import run_rnn_baseline
+
+    print(f"RNN (GRU) baseline on cross-pass recall ({args.n_keys} keys, {args.steps} steps)…")
+    recs = {}
+    for stateful in (True, False):
+        r = run_rnn_baseline(n_keys=args.n_keys, steps=args.steps, lr=args.lr, seed=args.seed,
+                             hidden_size=args.hidden, stateful=stateful, device=args.device)
+        recs["stateful" if stateful else "baseline"] = r
+        tag = "stateful (carries hidden state)" if stateful else "stateless (hidden state reset)"
+        print(f"  {tag}: recall accuracy = {r['recall_accuracy']:.2f} "
+              f"(loss {r['loss_start']:.2f}->{r['loss_end']:.2f}, {r['device']})")
+    out = ROOT / "results" / "rnn_baseline.json"
+    out.write_text(json.dumps(recs, indent=2))
+    print(f"wrote {out.relative_to(ROOT)}")
+    return 0
+
+
 def cmd_controlled(args) -> int:
     """Controlled N-seed selection: train R runs per reservoir seed, ANOVA-test signal vs noise."""
     from reservoir.controlled import controlled_selection, selection_signal, plot_controlled
@@ -707,6 +726,16 @@ def main(argv=None) -> int:
                     help="directory to persist the trained stateful model (kv mode) as a "
                          "loadable artifact (config + W_res readout + LoRA adapter)")
     cp.set_defaults(func=cmd_crosspass, bits4=False, save=None)
+
+    rb = sub.add_parser("rnn-baseline",
+                        help="trained-GRU baseline on cross-pass recall (situates task difficulty)")
+    rb.add_argument("--n-keys", type=int, default=6)
+    rb.add_argument("--steps", type=int, default=400)
+    rb.add_argument("--lr", type=float, default=1e-2)
+    rb.add_argument("--seed", type=int, default=0)
+    rb.add_argument("--hidden", type=int, default=64)
+    rb.add_argument("--device", default=None)
+    rb.set_defaults(func=cmd_rnn_baseline)
 
     bt = sub.add_parser("batch", help="N-seed batch: train a population, save ALL, rank + manifest")
     bt.add_argument("--model", default="gpt2")

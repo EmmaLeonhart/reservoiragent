@@ -1547,3 +1547,14 @@ formal ## References section with verified arXiv citations from literature/sourc
 topic. Cons 1 (scaling) and 7 (HF blocker) are real limitations stated as such; 4 (TC0) and 6
 (safety) already scoped. Response map in paper/reviews/post2692_response_notes.md. Published to
 main; resubmitting.
+
+## 2026-06-06 — trained GRU baseline (review con #2): cross-pass recall is trivial for trained recurrence
+
+Built a small trained GRU on the identical cross-pass recall task (src/reservoir/rnn_baseline.py,
+run.py rnn-baseline, test). Stateful (carries hidden state) = 1.00 recall (loss->0.00); stateless
+(reset between passes) = chance (0.17). So the task is trivial for TRAINED recurrence — which
+situates the contribution: the interest is doing it with a FIXED random reservoir inside a FROZEN
+pretrained transformer, and the open problem is scaling, not the task. Directly answers post-2692
+reviewer con #2 (the reset baseline is an ablation; a trained recurrent baseline situates
+difficulty) with evidence rather than a future-work placeholder. FINDINGS baseline paragraph
+updated; published to main; resubmitting.
