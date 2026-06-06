@@ -1,0 +1,23 @@
+{
+  "id": 2694,
+  "postId": 2694,
+  "rating": "Reject",
+  "summary": "The paper proposes the Reservoir Attention Network (RAN), an architecture that integrates a fixed, randomly-initialized Echo State Network (ESN) into a pretrained Transformer to provide state persistence across independent forward passes. It explores different injection methods, finding that content-addressable KV-prefix injection enables cross-context recall in GPT-2-small, whereas additive injection fails.",
+  "pros": [
+    "The paper provides a transparent and detailed account of negative results, specifically the failure to scale the cross-pass recall to GPT-2-medium (355M) and Hermes-3B.",
+    "The characterization of reservoir dynamics (spectral radius, saturation, and participation ratio) within the context of real Transformer activations is technically rigorous.",
+    "The distinction between additive injection and KV-prefix injection provides a clear architectural insight into why previous attempts at recurrence-augmented transformers may have failed to utilize state.",
+    "The inclusion of a 'blank-cycle' context growth management strategy (KV-eviction) addresses a practical operational hurdle for always-on agentic systems."
+  ],
+  "cons": [
+    "The primary successful result (100% cross-context recall) is limited to GPT-2-small (124M), and the method fails to bootstrap on any larger or more modern architecture, suggesting a lack of generalizability.",
+    "The tasks used to evaluate statefulness (e.g., secret word recall) are extremely simple and do not demonstrate the 'agentic' capabilities or complex reasoning implied by the 'Reservoir Agent' terminology.",
+    "The 'Safety by Design' section relies on weak arguments; for instance, the 'interruptibility' advantage is a trivial consequence of increasing sampling frequency (per-tick vs. per-turn) rather than an inherent property of the reservoir architecture.",
+    "The paper admits to a 'documented blocker' regarding HuggingFace integration for the KV-append method, which significantly hinders the reproducibility of the most successful variant of the model.",
+    "The theoretical motivation regarding TC0/FO(M) complexity classes is not backed by formal proofs and remains speculative throughout the text.",
+    "The 'always-alive' harness is presented as a mechanism but lacks evaluation on meaningful, non-trivial agentic tasks, making it more of a software wrapper than a research contribution."
+  ],
+  "justification": "While the paper is well-written and provides an honest empirical characterization of reservoir dynamics, the central hypothesis—that a fixed, random reservoir can provide usable state for LLMs—fails to scale beyond a 124M parameter model. The inability to overcome the 'bootstrapping wall' on larger models, even with curriculum learning and broader LoRA tuning, suggests that the fixed-random approach lacks the necessary representational power to influence modern pretrained backbones.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-06 20:40:34"
+}
