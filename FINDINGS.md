@@ -9,6 +9,35 @@ This is a **feasibility + dynamics study, not an agentic-capability demonstratio
 the tasks are deliberately minimal probes, each chosen to isolate one mechanism, and
 the broader agentic vision is named throughout as future, compute-gated work.
 
+## Abstract
+
+A standard transformer is stateless across forward passes: it has no endogenous variable
+that evolves between calls, only position within a context window. We ask whether a fixed,
+randomly-initialized reservoir (in the sense of echo-state networks) injected into a
+pretrained transformer's mid-layer attention can give it genuine state *between* passes — a
+real time axis — without retraining the backbone, and under what reservoir-dynamics regime
+that injected state becomes usable signal rather than noise. This is a feasibility and
+dynamics study at GPT-2 scale on a single GPU. Our central finding is that **how** the
+reservoir is injected is the deciding factor. Writing the reservoir state additively into the
+residual stream reproduces the known "learns to ignore the recurrent state" failure:
+cross-context recall stays at chance and the stateful model is indistinguishable from a
+state-reset baseline. Re-injecting the same state as content-addressable prefix pseudo-tokens
+that the upper layers can attend to instead yields 100% cross-context recall — a secret shown
+on pass 1, the context wiped, recalled on pass 2 from carried state alone — while the reset
+baseline stays at chance (verified reproducible: 1.00 vs 0.17). We characterize the dynamics:
+the edge-of-chaos boundary at spectral radius ≈ 1 survives the move to real transformer
+activations, which over-drive a unit-scaled reservoir and must be fed at roughly ¼–⅒ scale.
+We then bound the result. The recall win holds at GPT-2-small (124M) but does not transfer to
+GPT-2-medium (355M) or a 3B instruction-tuned model: the injection is verified-wired (state
+updates, gradients flow) yet recall does not bootstrap within budget, and 6.7× more steps does
+not break the wall — a structural optimization barrier, not under-training. On an eight-task
+stateful battery, temporal and agency behaviours (timed response, self-initiation, selective
+silence) train while symbolic-content recall does not at scale; we trace this to a reservoir
+undersized relative to its input, whose effective dimensionality plateaus near 180 and
+saturates, sparing low-dimensional temporal state and starving high-dimensional content. We
+release weights and code. The contribution is the injection-design result and its scaling
+boundary, not an agentic-capability demonstration.
+
 ## Question
 
 Can a fixed, randomly-initialized reservoir injected into a pretrained transformer's
