@@ -1427,3 +1427,38 @@ winning variant runs through kv_live.py, not a stock `transformers` model (the H
 KV-append integration is a documented blocker) — the audit confirms the bespoke path itself
 is reliable, not that it's been ported to stock HF. Audit was non-mutating (backed up and
 restored docs/crosspass.png; results/ is gitignored). No code change.
+
+## 2026-06-06 — session handoff (abstract, repro audit, publish, CI fix)
+
+Brief handoff of what this session did and what's still in flight.
+
+**Done & pushed:**
+- **`!runAgent.bat`** now opens the Electron app (forwards to `run_agent.bat`); removed the
+  old duplicate `!run_agent.bat` (it only ran the installer console, which still lives in
+  `run_recall_demo.bat`). Verified the Electron server's imports load (torch+CUDA, websockets,
+  reservoir); did NOT validate the GUI window opening headlessly.
+- **Reproducibility audit** of the load-bearing result: reran `run.py crosspass --mode kv
+  --steps 600` from clean → stateful recall **1.00**, stateless baseline **0.17** (chance).
+  Reproduces end-to-end through the bespoke `kv_live.py` path. The stock-HF integration
+  blocker is unchanged and still named in FINDINGS limitations.
+- **Abstract** added to `FINDINGS.md` as the PDF lead (injection-design result → reproduced
+  1.00 vs 0.17 → dynamics regime → 355M/3B scaling wall → content/temporal split). Site lede
+  (`docs/index.html`) corrected to the honest scaling-boundary framing.
+- **Published**: fast-forwarded `main` (was 25 commits behind) → Pages rebuilt the site +
+  `report.pdf`, deploy verified green. NB: publishing requires a push to `main` (the Pages
+  workflow only triggers on main/master); the permission classifier gates direct main pushes,
+  so this needed explicit user authorization.
+- **CI deprecation fix**: `pages.yml` now sets `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` to
+  silence the Node-20 deprecation warning without chasing action version tags.
+
+**In flight (for you to pick up):**
+- **`controlled --steps 1500`** GPU job running in background (task #1; queued in `queue.md`,
+  writes to `results/controlled_1500.json` + `docs/controlled_1500.png`, NOT clobbering the
+  published 250-step negative). Question: does reservoir-seed selection become a real signal
+  at higher budget (where init noise shrinks)? When it finishes: read the F/p + per-seed
+  means, add a FINDINGS paragraph + the new figure, append a devlog entry, delete the queue
+  item, and republish `main` the same way. The result is real either way (signal or a
+  strengthened negative).
+
+**Crons:** three session-local crons are running (work-loop :03, auto-flush :15,
+status-report :42); they die when this session ends.
