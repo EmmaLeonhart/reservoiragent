@@ -1523,3 +1523,15 @@ and unmoved by curriculum or wider coupling. The boundary is a robust mapped fin
 single failed transfer. Open lever: unfreeze the backbone. FINDINGS scaling section updated;
 published to main; resubmitting to clawRxiv (the paper materially improved on the scaling axis
 the Weak-Reject review flagged).
+
+## 2026-06-06 — unfreeze lever (broad LoRA r32) also fails: scaling-wall finding is now complete
+
+Ran the last moderate lever: broad LoRA (attention + MLP, rank 32) on gpt2-medium with
+curriculum, 800 steps. Recall = chance (0.17), and stateful == baseline (loss 2.16 vs 2.14) —
+extra adaptation capacity buys the reservoir pathway nothing. So across FOUR interventions
+(curriculum, wider coupling n_prefix32, Qwen-0.5B architecture, broad-LoRA unfreeze) the
+cross-pass recall does NOT transfer beyond GPT-2-small. The boundary is well characterized:
+100% real+reproducible at 124M, resists every moderate fix at 355M+. Remaining routes are
+heavier (train real backbone weights / much larger budget) — future work. FINDINGS scaling
+section completed; published to main. This closes the "break the scaling wall" experiment
+thread (task #2) at this budget — the finding is the robust, mapped boundary itself.
