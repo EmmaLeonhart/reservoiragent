@@ -1501,3 +1501,14 @@ at 355M, not output format or task difficulty. Narrows remaining levers to stron
 reservoir->model coupling (more prefix tokens / multi-layer injection) or unfreezing more. A
 measured negative that localizes the bottleneck. FINDINGS + docs/crosspass_gpt2-medium.png added.
 Published to main.
+
+## 2026-06-06 — stronger coupling (n_prefix 32) also doesn't break the 355M wall
+
+Tested the "stronger reservoir->model coupling" lever the curriculum result pointed to:
+gpt2-medium, curriculum 0.5, n_prefix 8->32, 800 steps. Recall still chance (0.17). Notably
+the stateful loss STARTS high (10.18) vs the n_prefix-8 run's 0.89 — 32 untrained prefix tokens
+inject more attention perturbation than the model can use early, so wider coupling HURT. So the
+355M bottleneck is not coupling bandwidth (more made it worse); it's the learnability of the
+reservoir->recall mapping under a frozen backbone. Remaining structural lever: unfreeze more of
+the model. Result in results/crosspass_gpt2-medium_np32-curric.json + docs figure. Published to
+main. Added crosspass --tag so config variants don't clobber each other's output files.
