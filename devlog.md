@@ -1487,3 +1487,17 @@ lever is register. Did a targeted pass on FINDINGS.md removing the self-congratu
 result changed. Committed to the feature branch only; NOT published to main and NOT resubmitted
 to clawRxiv — left for the user (they flagged concern about autonomous paper publishing). The
 submit script's TITLE/ABSTRACT may need a sync before any resubmit.
+
+## 2026-06-06 — curriculum cross-pass on GPT-2-medium: doesn't break the 355M wall (but localizes it)
+
+Built the curriculum scaffold (crosspass.py --curriculum: anneal the in-context key hint to 0,
+weaning the model onto the reservoir; eval stays hard) + a tag-collision fix so larger models
+don't clobber the gpt2-small figure + a pure-logic test. Ran gpt2-medium 800 steps, curriculum
+0.5. Final recall = 0.17 (chance), = the wiped baseline — so curriculum ALONE doesn't break the
+355M wall. But the stateful loss starts at 0.89 (key visible early) and RISES to 2.05 as the
+hint anneals out: the model solves the task in-context, then collapses when it must recall from
+the reservoir alone. Diagnosis: the reservoir-state -> recall pathway is what fails to bootstrap
+at 355M, not output format or task difficulty. Narrows remaining levers to stronger
+reservoir->model coupling (more prefix tokens / multi-layer injection) or unfreezing more. A
+measured negative that localizes the bottleneck. FINDINGS + docs/crosspass_gpt2-medium.png added.
+Published to main.

@@ -461,6 +461,21 @@ sharpens (not contradicts) the open challenge: scaling the win needs the curricu
 stronger-coupling routes above, not a parameter tweak. The failed medium population is
 preserved as signal at `EmmaLeonhart/reservoir-agent-gpt2-medium-batch`.
 
+**The curriculum route, tested — it does not break the 355M wall alone, and the loss
+trajectory says why.** We implemented the documented curriculum (show the secret in pass-2
+context, anneal that hint to zero over the first half of training, weaning the model onto the
+reservoir; `scripts/run.py crosspass --mode kv --curriculum 0.5`,
+`docs/crosspass_gpt2-medium.png`) and ran it on GPT-2-medium for 800 steps. Final recall stays
+at **chance (0.17)**, equal to the wiped-state baseline — but the *stateful training loss starts
+at 0.89 and rises to 2.05* as the hint anneals out. That rise is the diagnosis: while the key is
+visible in context the model solves the task easily (low loss), and the moment it must recall
+from the carried reservoir alone the loss climbs back to the chance plateau. So the model can
+emit the right token when the information is accessible; what fails to bootstrap at 355M is
+specifically the **reservoir-state → recall pathway**, not the output format or the task. This
+rules the curriculum *alone* out as the fix and narrows the remaining levers to stronger
+reservoir→model coupling (more prefix tokens / multi-layer injection) or unfreezing more of the
+model — a measured negative that localizes the bottleneck rather than a hyperparameter guess.
+
 ### H4 (D) — a trained silence policy (meaningful "sometimes no response")
 
 The harness gate currently keys off the *base model's* next-token entropy, which is
