@@ -185,8 +185,11 @@
   this architecture as a <strong>Reservoir Agent</strong>. The mechanism is
   demonstrated &mdash; the injection is non-destructive, the reservoir dynamics are
   characterized, and a Reservoir Agent (GPT-2) <strong>recalls information that exists
-  only in the carried state</strong> across an otherwise-wiped context. The work is
-  now being carried onto <strong>Hermes</strong> (Llama-3.2-3B).
+  only in the carried state</strong> across an otherwise-wiped context. The deciding
+  factor is <em>how</em> the reservoir is injected (additive &rarr; ignored;
+  content-addressable &rarr; 100% recall); the result holds at GPT-2-small and meets a
+  well-diagnosed <strong>scaling wall</strong> at 355M and on Hermes-3B, which we report
+  as the contribution&rsquo;s honest boundary.
 </p>
 
 <div class="question">
