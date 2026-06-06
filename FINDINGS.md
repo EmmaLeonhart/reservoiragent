@@ -29,13 +29,17 @@ activations, which over-drive a unit-scaled reservoir and must be fed at roughly
 We then bound the result. The recall win holds at GPT-2-small (124M) but does not transfer to
 GPT-2-medium (355M) or a 3B instruction-tuned model: the injection is verified-wired (state
 updates, gradients flow) yet recall does not bootstrap within budget, and 6.7× more steps does
-not break the wall — a structural optimization barrier, not under-training. On an eight-task
-stateful battery, temporal and agency behaviours (timed response, self-initiation, selective
-silence) train while symbolic-content recall does not at scale; we trace this to a reservoir
-undersized relative to its input, whose effective dimensionality plateaus near 180 and
-saturates, sparing low-dimensional temporal state and starving high-dimensional content. We
-release weights and code. The contribution is the injection-design result and its scaling
-boundary, not an agentic-capability demonstration.
+not break the wall — a structural optimization barrier, not under-training. Crucially, this
+boundary is specific to *high-dimensional symbolic content recall*: on an eight-task stateful
+battery run on **Qwen2.5-1.5B (a modern model ~12× larger than GPT-2-small)**, the
+*temporal/agency* behaviours **do train at scale** — selective silence 1.00, timed response
+0.71, self-initiation 0.67 — while symbolic-content tasks stay near zero. So statefulness scales
+to a modern 1.5B model for the low-dimensional state an agent needs (a clock, a gate, an
+unresolved thread); what does not yet scale is *which specific token* was carried, which we trace
+to a reservoir undersized relative to its input (effective dimensionality plateaus near 180 and
+saturates, sparing low-dimensional temporal state and starving high-dimensional content). We
+release weights and code. The contribution is the injection-design result, the temporal/content
+scaling split, and the boundaries of each — not an agentic-capability demonstration.
 
 ## Question
 
@@ -532,6 +536,18 @@ The boundary is therefore well characterized: the 100% recall is real and reprod
 and resists every moderate fix at 355M+. The remaining untested routes are heavier — training
 actual backbone weights (not just LoRA) and/or a much larger compute budget — and are recorded
 as future work; this study establishes the boundary, not a way past it.
+
+**Scope of the wall, stated precisely: it is a *content-recall* wall, not a statefulness wall.**
+Everything above concerns recalling *which specific token* was carried — a high-dimensional
+target. The agent-relevant *temporal/agency* behaviours are low-dimensional (a clock, a gate, an
+unresolved thread), and those **do scale to a modern model**: the 8-task battery on
+**Qwen2.5-1.5B** (≈12× GPT-2-small) trains selective silence to **1.00**, timed response to
+**0.71**, and self-initiation to **0.67**, while the symbolic-content tasks stay near zero (the
+same split, same dimensionality cause; see "The stateful-task battery" below). So the correct
+reading is not "the architecture fails above 124M" — it is that **carried state becomes usable
+behaviour at 1.5B for the low-dimensional signals an agent actually runs on, and only the
+high-dimensional content recall remains GPT-2-small-specific.** That reframes the scaling story
+from a flat negative into a split with a measured, mechanistic boundary.
 
 ### H4 (D) — a trained silence policy (meaningful "sometimes no response")
 
