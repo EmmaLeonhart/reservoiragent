@@ -168,6 +168,16 @@ _**Done — trained GRU baseline (2026-06-06).** GRU on the cross-pass task: sta
 
 _**Done — capacity sweep (2026-06-06).** GPT-2-small cross-pass recall over n_keys 6/12/24/48: stateful 1.00/0.58/0.92/0.02 vs chance baseline. NOT a 6-word artifact (0.92 at 24), but training-noisy and non-convergent by 48 at 600 steps. Pool expanded 10->50. In FINDINGS; addresses post-2694 review. Published + resubmitted._
 
+## Active — same-model split: dedicated cross-pass content recall on Qwen-1.5B (2026-06-06)
+
+Strengthen the reframe (statefulness scales, content recall doesn't). The battery showed content
+~0 on Qwen-1.5B, but in the joint 8-task setup. A dedicated single-task cross-pass run gives
+content its BEST shot and is the apples-to-apples comparison to GPT-2-small's 100%. Run
+`crosspass --mode kv --model Qwen/Qwen2.5-1.5B-Instruct --steps 600 --dtype bfloat16 --tag qwen15`.
+Expected chance (airtight same-model split: on the very model where silence trains to 1.00,
+content recall via the identical KV-prefix mechanism stays at chance); if it works, even better.
+Fold into FINDINGS. Publish to main.
+
 ## Other notes (not sure if they should be in the queue)
 
 **Reality note (kept honest):** each item landed as real, tested, committed work or a
