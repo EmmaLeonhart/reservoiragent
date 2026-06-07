@@ -1705,3 +1705,12 @@ demonstrated (content chance; temporal is LoRA). Methodological lesson added: a 
 doesn't move under a stateless control isn't evidence of statefulness. This is the second
 self-caught walk-back today (content-lift noise, now the temporal reframe) — both from running
 the controls. Published; resubmitting.
+
+## 2026-06-07 — emit-focused loss validated on GPT-2: timed emit 0.00->0.25 (honest metric), gate tradeoff
+
+New emit-focused loss/metric validated on GPT-2-small (emit_weight=5, 2048 res, 600 steps).
+Honest emit-step accuracy (no silence inflation): timed 0.00->0.25, recall 0.19, selfinit/accum ~0;
+silence DROPPED 1.00->0.38 because emit_weight=5 made the gate over-speak. So (a) the metric now
+measures the real capability, (b) timed emission is partially learnable (0.25, not solved), (c)
+emit_weight=5 too high — gate precision/recall tradeoff. Next: Qwen-1.5B + large reservoir (8192)
+with balanced emit_weight=3. The gamed 0.64 is replaced by honest weak-but-real numbers.
