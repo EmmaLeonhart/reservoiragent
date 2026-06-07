@@ -40,7 +40,7 @@ def train_battery(model_name: str = "gpt2", *, steps: int = 400, lr: float = 1e-
                   eval_n: int = 16, n_reservoir: int = 512, n_prefix: int = 8,
                   lora_target: str = "attn", input_scaling: float = 0.5,
                   unfreeze_from: int | None = None, lora_r: int = 8,
-                  stateless: bool = False, emit_weight: float = 1.0, proj_dim: int | None = None, log=print) -> dict:
+                  stateless: bool = False, emit_weight: float = 1.0, silence_weight: float = 1.0, proj_dim: int | None = None, log=print) -> dict:
     import numpy as np
     import torch
 
@@ -80,7 +80,7 @@ def train_battery(model_name: str = "gpt2", *, steps: int = 400, lr: float = 1e-
     lm.model.train()
     for i in range(steps):
         ep = sample_episode(rng, weights)
-        loss = episode_loss(lm, ep, stateless=stateless, emit_weight=emit_weight)
+        loss = episode_loss(lm, ep, stateless=stateless, emit_weight=emit_weight, silence_weight=silence_weight)
         opt.zero_grad()
         loss.backward()
         opt.step()
