@@ -58,7 +58,7 @@ def _target_ids(lm, step):
 
 
 def episode_loss(lm, episode: Episode, *, gate_weight: float = 1.0, stateless: bool = False,
-                 emit_weight: float = 1.0):
+                 emit_weight: float = 1.0, silence_weight: float = 1.0):
     """Run ``episode`` and return the mean loss as a torch scalar whose graph spans every
     pass (so ``.backward()`` trains through the carried state).
 
@@ -93,7 +93,8 @@ def episode_loss(lm, episode: Episode, *, gate_weight: float = 1.0, stateless: b
         logits = lm.forward_logits(ids, mask)          # ticks the state
         g = lm.gate_logit()                            # speak/silent from the updated state
         if step.target is SILENCE:
-            add(gate_weight * F.binary_cross_entropy_with_logits(g, torch.zeros_like(g)))
+            # silence_weight up-weights "stay shut" to fight gate over-firing on pre-emit steps.
+            add(silence_weight * gate_weight * F.binary_cross_entropy_with_logits(g, torch.zeros_like(g)))
             continue
         # emit step: the part that actually needs carried state. Up-weight it (emit_weight) so
         # training selects for "say the right token at the right time" rather than free silence.
