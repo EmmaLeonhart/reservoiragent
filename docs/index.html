@@ -335,10 +335,10 @@
   </figcaption>
 </figure>
 
-<h2>Theory — a real time axis, scoped honestly</h2>
+<h2>Motivation and framing (not formal results)</h2>
 <p>
-  Three claims about the <em>kind</em> of capability, not the level. Full grounding +
-  citations in <code>literature/REVIEW.md</code>.
+  Three framing points about the <em>kind</em> of capability, not the level — motivation for
+  the design, not results. Full grounding + citations in the literature review.
 </p>
 <div class="pillars">
   <div class="pillar">
@@ -351,15 +351,12 @@
     </p>
   </div>
   <div class="pillar">
-    <h3>2 &middot; The expressivity gap (with its caveat)</h3>
+    <h3>2 &middot; The expressivity motivation (no result claimed)</h3>
     <p>
-      A finite-precision transformer is bounded to TC&#8304;/FO(M) <em>per pass</em>
-      (Merrill&ndash;Sabharwal; Hahn); state carried across steps is the documented lever
-      past that ceiling, and finite recurrent nets are Turing-complete (Siegelmann&ndash;Sontag).
-      The reservoir is such a recurrent system &mdash; the structural ingredient is present.
-      <strong>But</strong> the transformer Turing-completeness results need <em>arbitrary
-      precision</em>; whether a <em>finite-precision</em> reservoir state lifts the bound
-      is the project&rsquo;s central <em>open</em> question, posed not asserted.
+      A finite-precision transformer is bounded to TC&#8304;/FO(M) <em>per pass</em> and
+      state carried across steps is the standard lever past it &mdash; this only motivates
+      <em>why</em> cross-pass state is interesting. We prove no separation, and nothing in
+      the results depends on it.
     </p>
   </div>
   <div class="pillar">
@@ -413,20 +410,19 @@
   project its input into a far higher-dimensional space. Measured effective dimensionality
   <strong>plateaus at ~150–186 regardless of node count</strong> (16× more nodes barely moves
   it), with 74% of cells saturated. Low-dimensional temporal state (a clock, a gate) fits
-  inside ~180 usable dimensions and learns; high-dimensional symbolic content exceeds it and
-  fails. That working dynamics and small-vocabulary recall emerged anyway makes the ceiling a
-  fixable engineering failure — size the reservoir well above its input and detune the
-  dynamics so it genuinely expands — rather than a limit of the architecture.
+  inside ~180 usable dimensions; high-dimensional symbolic content exceeds it. Undersizing is
+  part of the story — but, tested, <em>not</em> the whole fix.
 </p>
 <p>
-  <strong>The expansion test, in progress.</strong> An 8192-node reservoir (5.3× the input,
-  detuned) was run — the largest that fits an 8 GB GPU — and stopped after 5 epochs once the
-  trajectory was clear. It peaked at epoch 1 (mean 0.349, past the smaller run's 0.332), then
-  degraded each epoch and collapsed to near-zero by epoch 4: more training only hurt, and the
-  useful signal arrives within about one epoch. The content-memory tasks never recovered —
-  the modest expansion that fits this hardware lifts temporal behaviour without recovering
-  symbolic content. A reservoir genuinely larger than its input, beyond what this hardware
-  fits, remains the open test.
+  <strong>The expansion + capacity tests — necessary, not sufficient.</strong> We expanded the
+  reservoir (a 5.3× run, then 16384 nodes via a fixed down-projection — the correct ESN regime),
+  added broad LoRA and full backbone unfreezing, and trained far longer (15000 steps), with the
+  emit-focused loss (after finding the original temporal metric was gameable by staying silent).
+  Symbolic content still did not recover at 1.5B. A clean decomposition then isolated why: strip
+  the recall component (timing with a fixed word) and the low-dimensional timing signal
+  substantially trains — so the wall is dominated by <em>high-dimensional recall</em>, and a
+  bigger reservoir alone does not lift it. Pushing content past this needs much greater
+  scale/compute, not another local knob.
 </p>
 <p>
   <strong>First result (synthetic-input dynamics sweep).</strong> Driving a 200-unit
