@@ -77,12 +77,14 @@ boundary of the claims:
  framing explains *why* cross-pass state is the interesting lever; we state plainly that
  there is **no proof** a finite-precision reservoir lifts the per-pass bound, and we
  treat it as the project's central open theoretical question, not an established finding.
-- **The Hermes-3B negative and the KV-append integration blocker are limitations, stated
- as such.** The cross-pass recall result is GPT-2-only; on Hermes-3B it is a
- well-diagnosed, verified as correctly wired non-convergence (a bootstrapping/scale wall, plausibly
- signal dilution through depth), and the most effective injection variant (KV-append)
- has a documented HuggingFace-integration blocker that currently limits its
- reproducibility. Neither is hidden; both bound the contribution.
+- **The Hermes-3B negative and the KV-append integration constraint are limitations, stated
+ as such.** The cross-pass recall result holds on GPT-2-small only; on Hermes-3B the
+ injection is verified as correctly wired but does not converge — consistent with a
+ bootstrapping/scale wall, plausibly signal dilution through depth. The most effective
+ injection variant (KV-append) is a standard key/value prefix, but HuggingFace's
+ `generate` does not expose a hook for appending external KV entries, so our results use a
+ bespoke forward loop; this is an integration constraint, not a difference in method, and
+ the implementation is open. Neither limitation is hidden; both bound the contribution.
 - **The contribution is the injection-design finding.** What this study *does*
  establish, decisively and reproducibly on GPT-2, is that **how** the reservoir is
  injected is the deciding factor: additive injection is ignored (chance recall), while

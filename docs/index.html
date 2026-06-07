@@ -189,7 +189,7 @@
   factor is <em>how</em> the reservoir is injected (additive &rarr; ignored;
   content-addressable &rarr; 100% recall, with a wiped-state control). The usable carried
   state is shown at GPT-2-small; it does <strong>not</strong> scale to 1.5B in this study
-  &mdash; content recall hits a well-diagnosed wall at 355M+, and a stateless ablation shows
+  &mdash; content recall hits a well-characterized wall at 355M+, and a stateless ablation shows
   the larger model&rsquo;s temporal scores come from the adapters, not the reservoir. The
   contribution is the injection-design result and a clearly-bounded scaling negative.
 </p>
@@ -589,7 +589,7 @@
 </p>
 
 <p>
-  <strong>Transfer to Hermes 3B — not yet, and well diagnosed.</strong> The port to
+  <strong>Transfer to Hermes 3B — not yet, and well characterized.</strong> The port to
   <strong>Hermes-3-Llama-3.2-3B</strong> (Llama-3.2-3B) verified the mechanism is
   correctly wired (logits are byte-identical when zeroed, and gradients flow to the
   injection) &mdash; but the 100% recall result on GPT-2 did <strong>not</strong>
