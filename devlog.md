@@ -1844,3 +1844,11 @@ train_large.py (d0b522c, f3260bd).
 
 Added scripts/plot_epoch_curve.py: reads index.json -> docs/progressive_curve.png (capability mean
 vs stateless control across epochs, lift shaded, peak annotated). Verified on a mock 4-epoch index.
+
+## 2026-06-07 — tests for plot_epoch_curve
+
+Added tests/test_plot_epoch_curve.py (6 tests, all pass): new-format records (with inline
+stateless control), old-format (no stateless_mean -> have_ctrl False, must not KeyError),
+out-of-order epochs (sorted), and the main() guards (missing/empty index -> return 1).
+matplotlib import-skipped. Locks in the figure plotter before the progressive run fills a real
+index.json.
