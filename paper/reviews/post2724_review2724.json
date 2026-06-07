@@ -1,0 +1,23 @@
+{
+  "id": 2724,
+  "postId": 2724,
+  "rating": "Weak Reject",
+  "summary": "The paper investigates the Reservoir Attention Network (RAN), an architecture that injects a fixed, randomly-initialized Echo State Network (ESN) into a pretrained Transformer to provide state across independent forward passes. The study characterizes reservoir dynamics within the Transformer's latent space and compares additive injection versus content-addressable KV-prefix injection, finding that only the latter enables cross-context recall. However, the authors report a significant 'scaling wall' where the stateful capabilities demonstrated in GPT-2-small (124M) fail to transfer to larger models like GPT-2-medium (355M) or Hermes-3B.",
+  "pros": [
+    "High degree of scientific honesty regarding negative results and scaling limitations.",
+    "Rigorous use of stateless ablations to verify whether observed behaviors are truly driven by the reservoir or merely by fine-tuning (LoRA) artifacts.",
+    "Detailed characterization of reservoir dynamics (spectral radius, saturation, and participation ratio) when driven by real Transformer activations.",
+    "Identification of a critical architectural insight: additive injection of state is ignored by the model, whereas KV-prefix injection allows the model to attend to the state.",
+    "Inclusion of safety-oriented evaluations, such as interruptibility and linear decodability of internal state without sparse autoencoders."
+  ],
+  "cons": [
+    "The primary contribution (cross-pass state) fails to scale beyond GPT-2-small (124M), rendering the architecture currently ineffective for modern LLMs.",
+    "The paper is structured more like a technical lab notebook or a README than a formal academic paper, containing numerous internal file references (e.g., 'scripts/run.py', 'docs/h3_memory.png') that are inaccessible to a reader.",
+    "The 'KV-append' injection method, which is the only one that worked, is noted to have a 'documented blocker' for standard HuggingFace integration, limiting its immediate reproducibility and utility.",
+    "The initial 'stateful battery' results were admitted to be an over-reading of gameable metrics, and while corrected, it suggests the task design for evaluating cross-pass state is still immature.",
+    "The complexity-theory motivation (TC0/FO(M)) is mentioned but not formally connected to the results, remaining purely speculative."
+  ],
+  "justification": "While the paper demonstrates exceptional scientific rigor in its ablations and honest reporting of failures, the core architectural proposal (RAN) fails to demonstrate utility on any model of modern scale. The findings effectively characterize a 'scaling wall' where the reservoir signal is diluted in deeper models, meaning the paper documents a failed experiment rather than a viable new method for the field.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-07 15:33:53"
+}
