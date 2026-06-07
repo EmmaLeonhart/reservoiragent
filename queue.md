@@ -189,22 +189,13 @@ weak nonzero. Soft scale wall (weak, dilution-sensitive), not a hard zero. In FI
 
 _**Done — timing-vs-recall decomposition (2026-06-07).** 1-word-vocab timed on Qwen (verified full-timing eval): emit 1.00, pre-emit silence-shut 0.53 (>> always-open's 0) vs recall-bundled ~0.08. Recall (high-dim) is the dominant temporal blocker; low-dim timing trains much better but the gate over-fires. In FINDINGS._
 
-## SUPERSEDED — timing-vs-recall decomposition on Qwen (2026-06-07)
-
-`timed` conflates COUNTING passes + RECALLING the word. Recall fails at scale; isolate the two:
-run focused timed-only with a 1-WORD vocab (set_word_pool(["red"]) -> always the same word -> no
-recall, pure pass-counting). If timing-only works at Qwen-1.5B but word+timing doesn't, the
-failure is the recall component (consistent with content-recall failing); if timing-only is also
-noisy ~0, even counting doesn't bootstrap at 1.5B. Running b... on Qwen, 2000 steps. Genuinely
-diagnostic, not more-of-the-same. Fold into FINDINGS.
-
-## Active — longer focused timed-only on Qwen (2026-06-07)
-
-Focused Qwen timed = stable 0.12 (the most promising temporal-at-scale signal). RUNNING
-(b475gkls9, task #13): 4000 steps, eval every 250 — does 0.12 climb with more training? If it
-climbs, per-task focused/specialized training (or curriculum / N specialized agents) is the path
-to temporal-at-scale; if it plateaus, that bounds focused training. Fold the timed-vs-steps curve
-into FINDINGS.
+_**Done — temporal investigation concluded (2026-06-07).** Timing-vs-recall decomposition +
+longer focused + gate-balance: pure pass-counting (1-word vocab) at Qwen-1.5B reaches emit-step
+1.00 with gate-shut 0.53 on pre-emit steps (robust at emit_weight 1 and 2) — recall (high-dim) is
+the dominant blocker; low-dim timing partially trains, gate over-fires. Longer focused (4000 steps)
+is noise-dominated (doesn't climb). Caught the emit-only 1.00 as gate-gaming by scoring both
+halves. All in FINDINGS; site updated to the honest reading. Local temporal exploration exhausted;
+content/recall at scale needs cloud-scale._
 
 ## Other notes (not sure if they should be in the queue)
 
