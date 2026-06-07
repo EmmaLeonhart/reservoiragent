@@ -579,14 +579,19 @@ the emit-focused loss produces genuine (if noisy) timed emission (timed emit-acc
 bouncing) — the mechanism and loss are right at small scale. At 1.5B the picture is more nuanced
 than a flat zero: the **joint 8-task** run (16384-node reservoir via down-projection, broad LoRA,
 5 epochs / 15000 steps) trains **timed to 0.00 and collapses to mean 0.000** — but a **focused,
-single-task** timed-only run on the same Qwen-1.5B reaches a **stable timed ≈ 0.12** (held across
-steps 1200–1500, well above the ~1/vocab chance of emitting the exact word). So the joint battery
-*dilutes* the temporal signal at 1.5B (the other seven tasks drown it), and focusing recovers a
-**weak but nonzero** emission. The honest read: temporal emission is **partially learnable at
-1.5B (≈0.12 focused), far below GPT-2-small's ≈0.25 and far from solved, and easily lost in joint
-training** — a soft scale wall (weak signal, dilution-sensitive), not the hard zero the joint run
-alone suggested. The metric bug was real and is fixed; the capability is present-but-weak at scale.
-(Per-epoch models + optimizer states preserved at
+single-task** timed-only run on the same Qwen-1.5B lifts timed *off zero* — but a longer run
+(4000 steps, eval every 250) shows it is a **noise-dominated weak signal, not a stable or
+improving capability**: the timed curve oscillates `0.0 / 0.12 / 0.0 / 0.12 / 0.06 / 0.25 / 0.0
+…`, averaging ≈0.08 with frequent zeros and one 0.25 spike (immediately followed by 0.0), and it
+**does not climb with more steps**. So the joint battery does dilute the signal (focused beats
+joint's flat 0), but focusing only buys a noisy ≈0–0.25 band centered near 0.08 — above the
+~1/vocab chance of the exact word, yet unstable and non-converging. The honest read: at 1.5B,
+temporal emission is **weak and noise-dominated** (like content recall at this budget), not a
+reliably trainable capability; more steps do not help. It is a soft wall (a faint, unstable signal
+rather than a hard zero), and a *stable* capability would need either much more compute or a
+fundamentally different training regime — not another local run. GPT-2-small is similar but
+higher (~0.25, also noisy). The metric bug was real and fixed; the capability is faint-and-unstable
+at scale. (Per-epoch models + optimizer states preserved at
 `hf.co/EmmaLeonhart/reservoir-agent-qwen-battery-emit`.)
 
 **What the carried-state demonstration actually rests on.** The valid evidence that the reservoir
