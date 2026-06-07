@@ -187,7 +187,9 @@ timed = 0.25 = diluted (no help at small scale). Qwen-1.5B focused timed = **sta
 (above chance) vs joint 0 — so the joint battery DILUTES temporal at 1.5B; focusing recovers a
 weak nonzero. Soft scale wall (weak, dilution-sensitive), not a hard zero. In FINDINGS._
 
-## Active — timing-vs-recall decomposition on Qwen (2026-06-07)
+_**Done — timing-vs-recall decomposition (2026-06-07).** 1-word-vocab timed on Qwen (verified full-timing eval): emit 1.00, pre-emit silence-shut 0.53 (>> always-open's 0) vs recall-bundled ~0.08. Recall (high-dim) is the dominant temporal blocker; low-dim timing trains much better but the gate over-fires. In FINDINGS._
+
+## SUPERSEDED — timing-vs-recall decomposition on Qwen (2026-06-07)
 
 `timed` conflates COUNTING passes + RECALLING the word. Recall fails at scale; isolate the two:
 run focused timed-only with a 1-WORD vocab (set_word_pool(["red"]) -> always the same word -> no
