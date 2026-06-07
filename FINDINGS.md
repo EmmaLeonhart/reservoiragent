@@ -865,6 +865,17 @@ high-dimensional reservoir is necessary but the model also needs enough *trainab
 direction is therefore both: a larger reservoir *and* broader/heavier readout adaptation.
 (`train_battery ... --lora-target all`; `results/battery_qwen_newlevers.json`.)
 
+**But more capacity is not monotonic — full backbone unfreeze overshoots into instability.**
+Pushing capacity further (broad LoRA **plus** full weight training of the top 4 Qwen-1.5B layers,
+`unfreeze_from=24`) raises *recall* further still (0.19 → **0.25**, the best single content-task
+number on the battery) — confirming capacity is the live lever — but it is **not** a clean win:
+the run peaks at **step 200** then degrades, the overall best mean drops to **0.321** (below
+broad-LoRA's 0.392), and *accumulate* collapses back to 0. So full-rank weight training adds
+enough capacity to push one task but destabilizes the rest at this budget. The balanced sweet
+spot is **broad LoRA without full unfreeze**; the corrective is "more capacity, applied
+carefully (and likely with more regularization / a larger stable budget)", not "unfreeze
+everything." (`results/battery_qwen_unfreeze.json`.)
+
 ## Limitations (current)
 
 - The reservoir was **undersized relative to its input** (0.3–0.7× the 1536-dim layer it

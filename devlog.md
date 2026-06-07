@@ -1647,3 +1647,13 @@ needs broad TRAINABLE capacity (MLP adaptation), not just attention LoRA, to rea
 content. The 8192 massive run had expansion but only attn-LoRA, which is why content stayed 0.
 Wired lora_target/input_scaling/unfreeze_from into train_battery. FINDINGS battery section +
 abstract updated. results/battery_qwen_newlevers.json. Published; resubmitting.
+
+## 2026-06-07 — capacity follow-up: full unfreeze pushes recall (0.25) but destabilizes (mean 0.321)
+
+Pushed capacity further: broad LoRA + full unfreeze of top 4 Qwen-1.5B layers (unfreeze_from=24),
+4096 reservoir, 1 epoch. Mixed: recall 0.19->0.25 (best content single-task on the battery,
+confirming capacity is the lever) BUT peaks at step 200 then degrades, best mean drops 0.392->
+0.321, accumulate collapses 0.19->0.00. So full-rank weight training overshoots into instability
+at this budget — broad LoRA (no full unfreeze) remains the balanced sweet spot. Corrective: more
+capacity applied CAREFULLY (regularization / larger stable budget), not unfreeze-everything.
+FINDINGS battery section updated. results/battery_qwen_unfreeze.json. Published.
