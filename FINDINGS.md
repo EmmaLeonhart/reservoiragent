@@ -188,7 +188,7 @@ the same readout trained on the *current* input u(t) — scores **exactly 0** at
 delay ≥ 1, because i.i.d. inputs carry no information about their own past. So the
 information needed to answer is provably *in the carried state, not the input*: a light
 trained readout makes the reservoir's history usable, and a stateless model structurally
-cannot match it. (Figure: `docs/h3_memory.png`; `scripts/run.py h3`.) This is the H3
+cannot match it. (Figure: `docs/h3_memory.png`.) This is the H3
 mechanism on a clean synthetic task; doing it on a *semantic* agent task (unresolved
 thread, elapsed time) is future work that needs the readout trained through the LM.
 
@@ -202,8 +202,7 @@ selection is worth doing. But the open "seed pre-selection proxy" question (can 
 clean **negative answer for this proxy**: the untrained participation ratio has **no
 rank correlation** with trained memory capacity (**Spearman ρ = 0.08, p = 0.80**, n=12).
 So seeds cannot be pre-filtered by participation ratio — the N-seed *training* does real
-work this dynamics proxy can't shortcut. (Figure: `docs/nseed_select.png`;
-`scripts/run.py nseed-select`. Other proxies remain untested.) **The cost implication,
+work this dynamics proxy can't shortcut. (Figure: `docs/nseed_select.png`. Other proxies remain untested.) **The cost implication,
 stated plainly (per review):** because this proxy fails, selecting a good fixed reservoir
 currently requires training each seed's readout — i.e. genuine trial-and-error, not a
 cheap pre-filter. Finding an untrained proxy that *does* correlate is open work; until
@@ -311,7 +310,7 @@ measured:
 - **The seed-selection mechanism works; the pre-training signal is weak.** A dynamics
   pre-selection proxy ranks N fixed-random reservoir seeds by responsiveness,
   dimensionality, and (penalised) saturation on real GPT-2 activations, before any
-  training (`scripts/run.py nseed`). Across 8 seeds at ρ = 0.95 the spread is small
+  training. Across 8 seeds at ρ = 0.95 the spread is small
   (~0.02), i.e. *untrained* dynamics vary only modestly between seeds — so the real
   selection signal the plan relies on most likely emerges only after fine-tuning. The
   mechanism is in place; the verdict on its usefulness is compute-limited.
@@ -351,8 +350,7 @@ the whole loop is now testable before spending compute on training.
 ## Compute-gated: a real LoRA fine-tune on GPU
 
 The culminating run, on local CUDA (RTX 4070): a genuine **LoRA + W_out fine-tune** of
-GPT-2 with the *differentiable* reservoir injection (`src/reservoir/torch_inject.py`;
-`scripts/run.py finetune`). Across **3 reservoir seeds × 60 steps**, training loss falls
+GPT-2 with the *differentiable* reservoir injection (`src/reservoir/torch_inject.py`). Across **3 reservoir seeds × 60 steps**, training loss falls
 decisively (≈ **6.3 → 0.85–1.1**) with **491,520 trainable parameters** (LoRA on the
 attention projections + the reservoir readout W_out), and the best seed is selected by
 trained loss. So the full pipeline — inject, freeze the backbone, train W_out + LoRA,
@@ -387,8 +385,7 @@ wants, already agent-fine-tuned).
 
 The central experiment. The task is one a stateless model
 **structurally cannot** do: show a secret word on pass 1, **wipe the context**, recall it
-on pass 2 from the carried reservoir state alone (`src/reservoir/crosspass.py`;
-`scripts/run.py crosspass`). The multi-pass differentiable harness backprops through both
+on pass 2 from the carried reservoir state alone (`src/reservoir/crosspass.py`). The multi-pass differentiable harness backprops through both
 passes, training the injection (+ LoRA), and is compared against a **stateless baseline**
 (the reservoir is reset between the two passes, destroying the carried state).
 
@@ -490,7 +487,7 @@ preserved as signal at `EmmaLeonhart/reservoir-agent-gpt2-medium-batch`.
 **The curriculum route, tested — it does not break the 355M wall alone, and the loss
 trajectory says why.** We implemented the documented curriculum (show the secret in pass-2
 context, anneal that hint to zero over the first half of training, weaning the model onto the
-reservoir; `scripts/run.py crosspass --mode kv --curriculum 0.5`,
+reservoir,
 `docs/crosspass_gpt2-medium.png`) and ran it on GPT-2-medium for 800 steps. Final recall stays
 at **chance (0.17)**, equal to the wiped-state baseline — but the *stateful training loss starts
 at 0.89 and rises to 2.05* as the hint anneals out. That rise is the diagnosis: while the key is
@@ -641,8 +638,7 @@ stream of events where a rare trigger opens a thread that should be addressed (l
 - **The difference is recall.** The stateless gate can only see the trigger itself, so
   it misses almost the entire unresolved thread. The reservoir gate's carried state
   preserves the history of the trigger, allowing it to make a meaningful decision to
-  keep speaking after the input has returned to baseline. (`src/reservoir/silence.py`;
-  `scripts/run.py silence`.)
+  keep speaking after the input has returned to baseline. (`src/reservoir/silence.py`.)
 
 ## D: a trained silence policy — and why it is difficult
 

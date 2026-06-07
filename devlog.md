@@ -1800,3 +1800,12 @@ and not fixable by down-weighting emit. Replicating 0.53 at two weights makes th
 finding robust. Temporal investigation concluded: low-dim timing partially works at 1.5B (emit
 1.00, gate over-fires), recall (high-dim) is the dominant blocker, content needs cloud-scale.
 FINDINGS updated. Published.
+
+## 2026-06-07 — review moved Reject -> Weak Reject; de-cluttering inline file refs (con #2)
+
+post2724 = Weak Reject (UP from Reject) — the verified decomposition + corrections + register
+fixes moved it. Main remaining lever: con #2, prose reads like a lab notebook due to inline
+file/code refs (scripts/run.py x17, src/reservoir/*.py x16, docs/*.png x16). First pass: stripped
+7 standalone parenthetical `scripts/run.py ...` refs. More passes to come (remaining run.py refs,
+module refs, figure-path -> "Figure N"). Science cons (scale, HF blocker, immature task design)
+are the documented limits. Published; resubmitting.
