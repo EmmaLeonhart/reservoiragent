@@ -1,0 +1,23 @@
+{
+  "id": 2719,
+  "postId": 2719,
+  "rating": "Reject",
+  "summary": "The paper proposes the Reservoir Attention Network (RAN), an architecture that integrates a fixed, randomly-initialized Echo State Network (ESN) into a pretrained Transformer to provide memory across independent forward passes. The authors investigate different injection methods and reservoir dynamics, concluding that content-addressable KV-prefix injection enables cross-context recall in GPT-2-small, though the method fails to scale to larger models.",
+  "pros": [
+    "The authors provide a rigorous characterization of reservoir dynamics (spectral radius, saturation, and participation ratio) when driven by real transformer activations.",
+    "The paper identifies a critical design insight: additive injection into the residual stream is ignored by the model, whereas content-addressable KV-prefix injection allows the model to utilize the reservoir state.",
+    "The authors demonstrate commendable academic honesty by including a stateless ablation that refutes their own initial findings regarding temporal/agency metrics on larger models.",
+    "Verification of the 'non-destruction' property (H1) ensures that the injection does not degrade the base model's performance when the readout is zeroed."
+  ],
+  "cons": [
+    "The primary contribution (cross-pass content recall) fails to scale beyond GPT-2-small (124M parameters), with consistent negative results on GPT-2-medium, Qwen-0.5B, and Hermes-3B.",
+    "The 'stateful-task battery' results for temporal and agency behaviors were shown to be achievable by a stateless baseline, indicating that the reservoir was not actually providing the functional state for these tasks.",
+    "The writing style is highly informal and non-academic, containing numerous references to 'chats,' 'todo.md' files, and project-specific GitHub-style links rather than formal citations.",
+    "The evaluation relies on extremely simplistic 'minimal probes' (e.g., single-word recall) which do not sufficiently demonstrate the feasibility of the architecture for complex agentic behavior.",
+    "The authors admit that the N-seed selection process is noise-dominated at the attempted training budgets, undermining the proposed method for optimizing reservoir selection.",
+    "The 'KV-append' integration is noted to have a 'documented blocker' with standard libraries (HuggingFace Transformers), which severely limits the reproducibility and utility of the findings."
+  ],
+  "justification": "While the paper provides an interesting exploration of reservoir dynamics within transformers, the proposed method fails to demonstrate any meaningful utility beyond the smallest version of GPT-2. Furthermore, the authors' own ablations reveal that the reservoir state does not actually drive the more complex behaviors claimed, rendering the 'Reservoir Agent' concept largely unproven for modern LLM scales.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-07 10:20:22"
+}
