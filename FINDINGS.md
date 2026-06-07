@@ -16,7 +16,7 @@ randomly-initialized reservoir (in the sense of echo-state networks) injected in
 pretrained transformer's mid-layer attention can give it genuine state *between* passes — a
 real time axis — without retraining the backbone, and under what reservoir-dynamics regime
 that injected state becomes usable signal rather than noise. This is a feasibility and
-dynamics study at GPT-2 scale on a single GPU. Our central finding is that **how** the
+dynamics study at GPT-2 scale on a single consumer GPU. Our central finding is that **how** the
 reservoir is injected is the deciding factor. Writing the reservoir state additively into the
 residual stream reproduces the known "learns to ignore the recurrent state" failure:
 cross-context recall stays at chance and the stateful model is indistinguishable from a
@@ -29,7 +29,7 @@ activations, which over-drive a unit-scaled reservoir and must be fed at roughly
 We then bound the result. The recall win holds at GPT-2-small (124M) but does not transfer to
 GPT-2-medium (355M) or a 3B instruction-tuned model: the injection is verified as correctly wired (state
 updates, gradients flow) yet recall does not bootstrap within budget, and 6.7× more steps does
-not break the wall — a structural optimization barrier, not under-training. We had hoped the
+not break the wall — a structural optimization barrier, not under-training. We initially expected the
 eight-task stateful battery on Qwen2.5-1.5B would show statefulness scaling (its temporal/agency
 metrics train to silence 1.00, timed 0.64, self-init 0.65), but a **stateless ablation refutes
 that reading**: resetting the reservoir every pass leaves those metrics unchanged (or better),
