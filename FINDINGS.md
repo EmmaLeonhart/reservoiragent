@@ -563,6 +563,20 @@ evidence of usable statefulness at scale, and the reviewer's con on this point (
 correct for the battery. The "statefulness scales to Qwen-1.5B" framing was an over-reading of
 metrics a stateless control matches, and is withdrawn.
 
+**Why the temporal metrics were gameable (the mechanism, and a loss-design bug).** The battery's
+temporal tasks (`timed`, `selfinit`) are scored per supervised step, and most steps are SILENCE
+steps whose "correct" answer is to **stay quiet**; only the *final* step requires emitting the
+right word at the right time — the part that actually needs carried state. A model that simply
+learns to stay silent therefore scores the free silence steps and fails only the emit step. The
+arithmetic matches exactly: `timed` has `n−1` silence steps + 1 emit step with `n∈{2,3,4}`, so
+passing the silence steps and failing the emit gives `(n−1)/n` = 0.5/0.67/0.75, averaging **≈
+0.64** — precisely the observed `timed` score. `silence` (all-silence) hits 1.00 for the same
+reason. So the temporal metric is dominated by free "stay silent" steps and the memory-requiring
+emit was failing all along, hidden in the average. This is a **loss/metric design bug**, not
+evidence the behaviour is unlearnable: the objective rewarded silence instead of selecting for
+*emitting the right token at the right time*. The fix — an emit-focused loss/metric and a larger
+reservoir — is being trained next; results to follow.
+
 **What the carried-state demonstration actually rests on.** The valid evidence that the reservoir
 carries *usable* state is the controlled, memory-requiring tasks, not the battery metrics:
 (i) GPT-2-small cross-pass recall — 100% with the carried state vs **chance (0.17) when the
