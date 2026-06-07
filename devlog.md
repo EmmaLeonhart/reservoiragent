@@ -1809,3 +1809,11 @@ file/code refs (scripts/run.py x17, src/reservoir/*.py x16, docs/*.png x16). Fir
 7 standalone parenthetical `scripts/run.py ...` refs. More passes to come (remaining run.py refs,
 module refs, figure-path -> "Figure N"). Science cons (scale, HF blocker, immature task design)
 are the documented limits. Published; resubmitting.
+
+## 2026-06-07 — de-clutter pass 3: removed all 16 figure path-mentions (con #2)
+
+Replaced all docs/*.png path mentions (not rendered in the PDF anyway) with "the report site" /
+"(figure on the report site)" and added one note that figures are rendered at the report-site URL.
+Fixed doubled phrasing from multi-figure lists. Addresses the reviewer's cited "inaccessible file
+references" (docs/h3_memory.png etc.). Remaining: inline scripts/run.py command refs (woven in
+sentences) — a careful rewording pass. Published; resubmitting (material de-clutter).
