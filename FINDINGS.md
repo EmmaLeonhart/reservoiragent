@@ -711,7 +711,7 @@ which sees only the current input — is above threshold on the arrival pass and
 after**. So a turn-based + stateless agent whose poll period (8) outruns the persistence window
 **misses a non-repeated off-boundary burst entirely**; the per-tick reservoir agent catches it
 on arrival and has a window besides. The reservoir is not just polled more often — it *retains*
-the urgency, which is the architecture-level interruptibility advantage the chat argued for.
+the urgency, which is the architecture-level interruptibility advantage the design motivation argued for.
 
 This is a safety property that falls out of the same statefulness the project builds for
 capability: lower-latency, more durable response to human override. It is a measured
@@ -720,7 +720,7 @@ harness adds its own latencies; see the Safety-by-Design section and Limitations
 
 ## Safety: a reservoir-state probe reads an internal clock — linearly, no SAE, and drift-tolerant
 
-The chat made an interpretability argument for the reservoir as a *monitoring surface*: "I
+A design-motivation argument for the reservoir as a *monitoring surface*: "I
 don't think you'd need a sparse autoencoder for the reservoir state … it's much more simple to
 have a learned representation of what is happening," and, because the reservoir weights never
 change, the mapping from state to behaviour is stable — "relatively resilient to fine-tuning."
@@ -732,7 +732,7 @@ ridge-regression readout. From the **reservoir state** it reaches **R² = 0.995*
 linear probe on the **instantaneous input** reaches **R² = 0.16** (elapsed time simply is not
 in the current input). A *linear* probe suffices precisely because the fixed reservoir already
 holds the history in a low-complexity, stable form — no sparse autoencoder needed, which is
-the chat's claim borne out.
+that claim borne out.
 
 **Resilience to a fine-tuning-like drift (measured).** Fine-tuning the
 readout/LoRA does not touch the reservoir weights, but it does shift the *activations that
@@ -782,7 +782,7 @@ the point, not the specific numbers — they scale with the budget/window settin
 
 This is the cheap, base-agnostic half of the cache story. The expensive half — a base model
 whose attention is *natively* KV-efficient so the headroom is far larger (DeepSeek's MLA /
-the V4 CSA+HCA compression discussed in the chat) — is recorded as project direction for future work; it is not runnable on this hardware (see Limitations).
+the V4 CSA+HCA compression noted in the design discussion) — is recorded as project direction for future work; it is not runnable on this hardware (see Limitations).
 
 ## The stateful-task battery, the gate head, and the reservoir-expansion finding
 
