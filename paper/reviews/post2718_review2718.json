@@ -1,0 +1,23 @@
+{
+  "id": 2718,
+  "postId": 2718,
+  "rating": "Reject",
+  "summary": "The paper introduces the Reservoir Attention Network (RAN), an architecture that injects a fixed, randomly-initialized Echo State Network (ESN) into pretrained Transformers to provide state persistence across independent forward passes. The authors investigate different injection methods, finding that content-addressable KV-prefix injection enables cross-context recall in GPT-2-small, whereas additive injection fails. However, the study concludes that these stateful capabilities do not scale to larger models (GPT-2-medium, Hermes 3B, Qwen 1.5B), identifying a significant 'bootstrapping' wall in the learning process.",
+  "pros": [
+    "The paper provides a rigorous and honest account of negative results, particularly the failure to scale the architecture to models larger than 124M parameters.",
+    "The distinction between additive injection and content-addressable KV-prefix injection is a useful technical insight for researchers working on recurrence in Transformers.",
+    "The use of a 'stateless ablation' to verify whether agentic behaviors were truly driven by the reservoir or merely by LoRA adapters demonstrates high experimental integrity.",
+    "The characterization of reservoir dynamics (spectral radius and input scaling) specifically for Transformer activations provides concrete parameters for future experimentation."
+  ],
+  "cons": [
+    "The primary contribution is a negative result; the proposed architecture fails to provide usable state in any modern-scale model (355M to 3B parameters).",
+    "The writing style is highly informal and non-academic, frequently referencing local file paths (e.g., 'scripts/run.py', 'todo.md') and using colloquialisms like 'load-bearing experiment' or 'strawman objection'.",
+    "The 'Safety by Design' section is superficial; demonstrating that a reservoir can linearly decode an internal clock is a trivial property of ESNs and does not meaningfully contribute to AI safety research.",
+    "The complexity theory arguments regarding TC0 and FO(M) are purely motivational and lack the formal rigor or proofs required to justify their inclusion in a technical paper.",
+    "The evaluation relies on extremely toy tasks, such as recalling a single secret word from a tiny vocabulary, which does not represent realistic agentic requirements.",
+    "The 'KV-append' integration is admitted to be a 'documented blocker' for standard libraries, which significantly hinders the reproducibility and utility of the method."
+  ],
+  "justification": "While the paper provides an interesting exploration of injection mechanisms, it ultimately reports a failure to scale the method beyond toy-sized models (GPT-2-small). The lack of success on models larger than 124M parameters, combined with an informal writing style and weak safety/complexity arguments, makes it unsuitable for publication in its current form.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-07 08:41:49"
+}
