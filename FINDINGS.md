@@ -33,9 +33,9 @@ not break the wall — a structural optimization barrier, not under-training. Cr
 boundary is specific to *high-dimensional symbolic content recall*: on an eight-task stateful
 battery run on **Qwen2.5-1.5B (a modern model ~12× larger than GPT-2-small)**, the
 *temporal/agency* behaviours **do train at scale** — selective silence 1.00, timed response
-0.71, self-initiation 0.67 — while symbolic-content tasks stay near zero (a broad-LoRA + expanded-
-reservoir variant lifts recall and accumulate from 0.00 to 0.19 — the first move off the floor,
-still partial). So statefulness scales
+0.71, self-initiation 0.67 — while symbolic-content tasks stay near zero (broad-LoRA + expanded-
+reservoir runs occasionally flicker content recall to ~0.2, but a same-config re-run returns it
+to 0.00 — within run-to-run noise, not a reliable lift). So statefulness scales
 to a modern 1.5B model for the low-dimensional state an agent needs (a clock, a gate, an
 unresolved thread); what does not yet scale is *which specific token* was carried, which we trace
 to a reservoir undersized relative to its input (effective dimensionality plateaus near 180 and
@@ -863,42 +863,30 @@ full scale needs sparse `W_r` and larger hardware. (Enabling change:
 `_build_reservoir_weights` estimates the spectral radius by power iteration, since the exact
 eigendecomposition is O(K³) and stalls past ~12k nodes.)
 
-**Update — the missing ingredient was not reservoir size but trainable-readout capacity, and
-adding it lifts content off zero.** The 8192-node run above used reservoir expansion but
-*attention-only* LoRA. Re-running the battery on Qwen-1.5B with **broad LoRA (adapting the MLPs
-too, `lora_target="all"`) on a 4096-node detuned reservoir** for one epoch changes the content
-result for the first time: **recall rises 0.00 → 0.19 and accumulate 0.00 → 0.19**, while the
-temporal/agency tasks hold (silence 1.00, timed 0.64, self-initiation 0.65) and the overall best
-mean improves **0.344 → 0.392**. The longer-range content tasks (sequence, deferred) stay at 0,
-so this is a partial lift, not a solved content channel — but it is the first time symbolic
-content moves off the floor at this scale, and it points the cause more precisely: a
-high-dimensional reservoir is necessary but the model also needs enough *trainable* capacity
-(MLP adaptation), not just attention LoRA, to read that state into content. The corrective
-direction is therefore both: a larger reservoir *and* broader/heavier readout adaptation.
-(`train_battery ... --lora-target all`; `results/battery_qwen_newlevers.json`.)
+**Attempted content improvement on the battery via readout capacity — and why it does not hold
+up.** The 8192-node run above used reservoir expansion but *attention-only* LoRA, so we tried
+broader/heavier readout adaptation on a 4096-node detuned reservoir (Qwen-1.5B, one epoch): broad
+LoRA on the MLPs (`lora_target="all"`), higher LoRA rank, and full upper-layer unfreeze. Content
+tasks *sometimes* read above zero — recall came in at 0.19 (broad LoRA r8), 0.25 (+ full
+unfreeze), 0.19 (rank-32) across configurations, with temporal/agency holding (silence 1.00). It
+looked like the first move off the floor. **But the effect does not reproduce.** A same-config
+re-run of the broad-LoRA-r8 setting — identical hyperparameters — returned recall and accumulate
+to **0.00** (best mean 0.337). So battery content recall bounces between **0.00 and ~0.25** across
+runs of the same or near-identical configuration, with **no reliable lift**: the apparent
+improvement is within run-to-run training noise, consistent with the controlled-selection finding
+above that training at this budget is noise-dominated.
 
-**But more capacity is not monotonic — full backbone unfreeze overshoots into instability.**
-Pushing capacity further (broad LoRA **plus** full weight training of the top 4 Qwen-1.5B layers,
-`unfreeze_from=24`) raises *recall* further still (0.19 → **0.25**, the best single content-task
-number on the battery) — confirming capacity is the live lever — but it is **not** a clean win:
-the run peaks at **step 200** then degrades, the overall best mean drops to **0.321** (below
-broad-LoRA's 0.392), and *accumulate* collapses back to 0. So full-rank weight training adds
-enough capacity to push one task but destabilizes the rest at this budget. The balanced sweet
-spot is **broad LoRA without full unfreeze**; the corrective is "more capacity, applied
-carefully (and likely with more regularization / a larger stable budget)", not "unfreeze
-everything." (`results/battery_qwen_unfreeze.json`.)
-
-**And higher-rank LoRA does not help either, so broad-LoRA-r8 is the sweet spot.** Adding
-*stable* capacity instead of full unfreeze — broad LoRA at rank 32 rather than 8 — gives no gain
-(best mean 0.317, recall 0.19, accumulate back to 0; `results/battery_qwen_r32.json`). So across
-the capacity sweep — rank-8 broad LoRA (mean 0.392, recall/accumulate 0.19/0.19), full unfreeze
-(recall 0.25 but unstable), rank-32 broad LoRA (no gain) — the **rank-8 broad LoRA is the best
-balanced configuration**, and capacity *beyond* it neither improves content nor holds the other
-tasks. Conclusion for the content channel at this scale: broad readout adaptation is what lifts
-content off the floor (0 → ~0.19), but more capacity past that point does not climb further on
-this hardware/budget — the next gain needs the larger-scale budget, not another local capacity
-knob. The content thread is characterized; symbolic content reaches a partial ~0.19 plateau at
-1.5B and the path past it is scale, consistent with the GPT-2-small-only cross-pass result.
+**The honest conclusion for the content channel:** at 1.5B on this budget, symbolic content stays
+effectively at the floor — it occasionally flickers to ~0.2 on a lucky run, but a matched re-run
+gives 0.00 — so we **do not** claim that broad readout adaptation lifts content. Establishing any
+genuine lift would need multi-seed averaging (as the controlled experiment required for
+selection), which this hardware/budget has not done. What *is* robust across every one of these
+runs is that **temporal/agency holds (silence ≈ 1.0) while content does not** — the
+temporal/content split, not a content gain. Full unfreeze additionally destabilizes (peaks at
+step 200, mean drops to 0.321) and higher rank gives nothing, so more readout capacity is not the
+missing piece; the path to content at this scale is budget/scale, consistent with the
+GPT-2-small-only cross-pass result. (`results/battery_qwen_newlevers.json`, `_unfreeze.json`,
+`_r32.json`, `_broadlora_saved.json`.)
 
 ## Limitations (current)
 

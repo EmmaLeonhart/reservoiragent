@@ -174,21 +174,7 @@ _**Done — capacity follow-up (2026-06-07).** Broad LoRA + full unfreeze (top 4
 
 _**Done — capacity thread closed (2026-06-07).** r32 broad LoRA: no gain (mean 0.317, recall 0.19, accum 0). Sweep: r8 broad LoRA best balanced (0.392, recall/accum 0.19/0.19); full unfreeze recall 0.25 but unstable; r32 no gain. Content lifts off floor with broad readout adaptation (~0.19) but capacity past that doesn't climb locally — path past the plateau is scale. In FINDINGS; published._
 
-## Active — preserve + publish the best battery model (broad-LoRA-r8) (2026-06-07)
-
-The best battery result (broad-LoRA-r8, mean 0.392, content off zero) was run WITHOUT save_dir, so
-its weights were never saved — only metrics. The project preserves every model. Re-run that exact
-sweet-spot config WITH save_dir, then publish_hf --artifact-dir to HF (update the published model).
-Report the saved metrics (CUDA nondeterminism may shift slightly from 0.392).
-
-## Active — battery-level stateless ablation (review con #6, 2026-06-07)
-
-Reviewer (post2713): the Qwen-1.5B temporal success might be LoRA-learnable without the reservoir.
-Existing per-task controls counter this (silence gate F1 0.96 reservoir vs 0.34 stateless; cross-
-pass wiped->chance), but the rigorous SAME-SETUP test is a battery stateless ablation: train the
-battery on Qwen-1.5B with the reservoir RESET between passes and show temporal drops. Needs a
-stateless mode in train_battery/episode_loss. If temporal holds without the reservoir, con #6 is
-right; if it drops, the reservoir is doing the work. Fold into FINDINGS.
+_**Done/moot — preserve+publish (2026-06-07).** Re-ran broad-LoRA-r8 WITH save_dir; it did NOT reproduce the content lift (recall/accum 0.00 vs 0.19, mean 0.337). So the 0.19 was run noise; HELD the HF publish (a content-0.00 model isn't the claimed success). Model saved locally at artifacts/qwen-battery-broadlora. FINDINGS corrected: no content-lift claim, only the robust temporal/content split._
 
 ## Other notes (not sure if they should be in the queue)
 

@@ -1677,3 +1677,16 @@ controls (silence gate F1 0.96 reservoir vs 0.34 stateless; cross-pass wiped->ch
 tasks need cross-pass state and fail without it) and queued the rigorous battery-level stateless
 ablation as the clean same-setup test. Cons 1/2/4/5 are scope/known. Response map in
 paper/reviews/post2713_response_notes.md. Published; resubmitting.
+
+## 2026-06-07 — CORRECTION: the battery content "lift" does not reproduce (noise, not a real effect)
+
+Re-ran the broad-LoRA-r8 sweet-spot config WITH save_dir (to preserve the best model). It did NOT
+reproduce: same config, recall/accumulate = 0.00 (vs the original run's 0.19/0.19), best mean
+0.337. Across runs content recall is 0.19/0.25/0.19/0.00 — bouncing 0.00-0.25 with a same-config
+re-run giving 0.00. So the earlier "content lifts off zero to 0.19" was a single noisy run, NOT a
+reliable effect — consistent with the controlled-selection finding that training is noise-
+dominated at this budget. CORRECTED FINDINGS (abstract + battery section): no content-lift claim;
+content stays effectively at the floor, flickers on lucky runs, needs multi-seed averaging to
+establish anything. What's robust is the temporal/content SPLIT (silence ~1.0 holds, content
+doesn't), not a content gain. HELD the HF publish — this model (content 0.00) is not a content
+success; publishing it as one would mislead. Task #9's publish purpose is moot.
