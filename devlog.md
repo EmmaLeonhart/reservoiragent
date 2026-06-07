@@ -1746,3 +1746,12 @@ timed ~0.25 with the same loss, so loss+mechanism are right at small scale; the 
 the same 1.5B wall as content recall under every local lever (curriculum, broad LoRA, full
 unfreeze, larger reservoir, more epochs). FINDINGS updated (replaced the results-to-follow
 placeholder). Next: focused single-task timed-only run (test task-dilution). Published; resubmitting.
+
+## 2026-06-07 — focused timed-only refutes task-dilution: GPT-2 timed ~0.25 (same as joint), noisy
+
+Focused single-task timed-only (weights={timed:1}, emit_weight=5) on GPT-2-small: timed bounces
+0.00/0.12/0.25, best 0.25 — SAME as the diluted 8-task run. So dilution wasn't the problem; 0.25
+is a real noisy ceiling for GPT-2-small timed emission. Running focused timed-only on Qwen-1.5B to
+close the last variant (expected ~0, but running per the explore mandate). Temporal emission
+levers now exhausted: emit loss, huge reservoir, more epochs, broad LoRA, full unfreeze, focused
+single-task — all give ~0.25 noisy at GPT-2-small, 0 at 1.5B. Same wall as content.
