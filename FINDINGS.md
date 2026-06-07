@@ -571,8 +571,19 @@ passing the silence steps and failing the emit gives `(n−1)/n` = 0.5/0.67/0.75
 reason. So the temporal metric is dominated by free "stay silent" steps and the memory-requiring
 emit was failing all along, hidden in the average. This is a **loss/metric design bug**, not
 evidence the behaviour is unlearnable: the objective rewarded silence instead of selecting for
-*emitting the right token at the right time*. The fix — an emit-focused loss/metric and a larger
-reservoir — is being trained next; results to follow.
+*emitting the right token at the right time*. We rebuilt the loss/metric accordingly (`emit_weight`
+up-weights the emit step; evaluation now scores the emit step only, not the free silence steps).
+
+**With the fixed loss, the result is honest and negative at scale.** On GPT-2-small the emit-focused
+loss does produce some genuine timed emission (timed emit-accuracy 0.00 → ~0.25), so the mechanism
+and the loss are right at small scale. But the proper run on **Qwen-1.5B — a 16384-node reservoir
+(via a fixed down-projection), broad LoRA, emit-focused loss, 5 epochs / 15000 steps** — trains
+**timed emission to 0.00 and collapses to mean 0.000 after the first epoch**. So fixing the loss
+removed the silence inflation and the honest number at 1.5B is zero: temporal/agentic *emission*,
+like content recall, does not train at 1.5B under any local lever (curriculum, broad LoRA, full
+unfreeze, larger reservoir, more epochs). The metric bug was real and is fixed; the capability
+nonetheless hits the same scale wall. (Per-epoch models + optimizer states preserved at
+`hf.co/EmmaLeonhart/reservoir-agent-qwen-battery-emit`.)
 
 **What the carried-state demonstration actually rests on.** The valid evidence that the reservoir
 carries *usable* state is the controlled, memory-requiring tasks, not the battery metrics:

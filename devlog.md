@@ -1735,3 +1735,14 @@ point from a paragraph to a single sentence pointing to REVIEW.md (flagged ~7 re
 Cons 1/3/5/6 (negative-result-at-scale, safety triviality, toy tasks, HF blocker) are
 scope/known. Diminishing returns on polish — the rating ceiling is the science (negative at
 scale); the real work is the in-flight big training run. Published; resubmitting.
+
+## 2026-06-07 — big emit run DONE: temporal emission collapses to 0 at Qwen-1.5B (conclusive negative)
+
+train_large: Qwen-1.5B, 16384-node reservoir (down-projection), broad LoRA, emit-focused loss,
+5 epochs / 15000 steps / 3.1h, per-epoch model+optimizer streamed to HF. Result: timed emit 0.00
+throughout; mean 0.044 (ep0) -> 0.031 (ep1) -> 0.000 (ep2,3,4) — collapses after epoch 1. So with
+the FIXED emit loss (no silence inflation), the honest number at 1.5B is zero. GPT-2-small gets
+timed ~0.25 with the same loss, so loss+mechanism are right at small scale; the capability hits
+the same 1.5B wall as content recall under every local lever (curriculum, broad LoRA, full
+unfreeze, larger reservoir, more epochs). FINDINGS updated (replaced the results-to-follow
+placeholder). Next: focused single-task timed-only run (test task-dilution). Published; resubmitting.
