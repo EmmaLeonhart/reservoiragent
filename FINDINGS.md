@@ -179,7 +179,7 @@ reservoir and its state is written back into the residual stream (`h' = h + W_ou
  architecture degrades gracefully to the base model.
 - **The injection is live.** A nonzero `W_out` changes the logits, and the reservoir
  state after two forward passes differs from after one — a genuine cross-pass time
- axis. (`tests/test_inject.py`.)
+ axis.
 
 ### H3 — a trained readout extracts history a stateless model cannot
 
@@ -226,7 +226,7 @@ seeded by the reservoir seed), and a single run per seed cannot separate reservo
 from training noise. Consistently, **no untrained reservoir metric predicts recall**:
 realized ρ, mean/std |eigenvalue|, Henrici non-normality, participation ratio, and
 delay-memory capacity all give |Spearman ρ| < 0.36 (p > 0.14, n=20) against the recall
-labels (`scripts/run.py`/`reservoir.seed_metrics.correlate_seed_metrics`) — but with
+labels  — but with
 noise-dominated labels this cannot distinguish "no cheap predictor" from "labels too noisy
 to correlate". **What this does and does not support:** it supports *keeping the whole
 population* (cheap metrics don't let you pre-filter, so you train and measure) and the H2
@@ -236,8 +236,7 @@ Establishing that needs a **controlled** experiment: seed the trainable init too
 deterministic CUDA, and **average several runs per seed**. (figure on the report site)
 
 **The controlled experiment — run, and it confirms: at 250 steps selection is noise, not
-signal.** We then ran exactly that experiment (`scripts/run.py controlled`;
-the report site). Root cause of the noise was first removed: `kv_live` had a `train_seed`
+signal.** We then ran exactly that experiment (figure on the report site). Root cause of the noise was first removed: `kv_live` had a `train_seed`
 parameter that was never used, so the trainable `W_res` + LoRA init was uncontrolled; it now
 seeds the init, and a `set_deterministic` helper (RNGs + `CUBLAS_WORKSPACE_CONFIG` + cudnn
 flags + the deterministic math SDP kernel) makes two runs of the same reservoir with the same
@@ -254,8 +253,7 @@ larger-budget run is the natural follow-up — but at this budget the verdict is
 select over *runs*, not over reservoir seeds.
 
 **The larger-budget run — done, and the negative holds: at 1500 steps selection is still not
-real.** We then ran exactly the natural follow-up (`scripts/run.py controlled --steps 1500`,
-6× the budget; the report site), to test whether selection becomes a real signal
+real.** We then ran exactly the natural follow-up (6× the budget; the report site), to test whether selection becomes a real signal
 once run-to-run init noise shrinks. It does not. Per-seed mean recall spreads a little wider
 (0.21–0.83 vs the 250-step run's 0.33–0.75), but the **within-seed spread stays just as wide**
 (e.g. seed 4 lands at 1.00, 1.00, 0.17, 0.17 across its four inits): **F = 1.43 (df 5, 18),
@@ -305,7 +303,7 @@ measured:
 - **The time axis is real and behavioural.** Running the *same* prompt after different
  prior history, with the reservoir state carried across the (otherwise independent)
  forward passes and a small random readout, shifts the next-token logits by an L2
- distance of ≈ 22 (`scripts/run.py alive`, GPT-2). The same input produces a different
+ distance of ≈ 22 (GPT-2). The same input produces a different
  output distribution depending on what the model processed before — something a
  stateless transformer structurally cannot do.
 - **The seed-selection mechanism works; the pre-training signal is weak.** A dynamics
@@ -328,8 +326,7 @@ measured:
 ## The always-alive runtime (harness)
 
 Built and exercised the stateful-agent loop on the *untrained* injected model — the
-substrate fine-tuning will later plug into (`src/reservoir/runtime.py`,
-`scripts/run.py agent`). It has the four pieces the architecture requires:
+substrate fine-tuning will later plug into (the released code). It has the four pieces the architecture requires:
 
 - a **context buffer** owned by the runtime, never wiped between passes;
 - a **reservoir state store** that persists across passes and checkpoints/restores to
@@ -373,7 +370,7 @@ The GPT-2 work validated the mechanisms; this phase moves to the smallest Hermes
 wants, already agent-fine-tuned).
 
 - **(A) Injection generalized to the Llama architecture.** The injection was GPT-2-only
- (`transformer.h`); `src/reservoir/_arch.py` now locates decoder blocks across families
+ (`transformer.h`); the architecture-adaptation layer now locates decoder blocks across families
  (`model.model.layers` for Llama), and H1 is verified on a tiny Llama as well as GPT-2.
 - **(B) Hermes 3B loads and H1 holds, on the laptop GPU.** Loaded in 4-bit (bitsandbytes
  nf4) with the reservoir injected at layer 14 of 28 (d_model 3072): with the readout
@@ -400,7 +397,7 @@ comparison is the one this section turns on: **additive vs. KV-prefix injection*
 arms carry the identical reservoir state and only the injection pathway differs — additive lands
 at chance, KV-prefix at 100%. For the absolute difficulty, we add a **stronger external baseline**: a small **trained GRU** on
 the identical task (read `the secret word is <KEY>`, wipe, recall at `the secret word was` from
-the carried hidden state; `src/reservoir/rnn_baseline.py`, `scripts/run.py rnn-baseline`). It
+the carried hidden state; the released code). It
 reaches **100% recall (loss → 0.00)** when it carries its hidden state and **chance (0.17)** when
 the state is reset between passes. So the task is *trivial for trained recurrence* — which is the
 point: the contribution is not that cross-pass recall is hard in general, but that it can be done
@@ -421,7 +418,7 @@ finding.**
 
 - **Content-addressable (KV-append) injection → works, decisively.** When instead the
  reservoir state is projected into prefix pseudo-tokens the model can **attend** to
- (`kv_live.py`, `--mode kv`), the stateful model reaches **100% cross-context recall
+ (the KV-prefix path), the stateful model reaches **100% cross-context recall
  (loss → 0.02)** while the stateless baseline stays at **chance (0.17)**. The carried
  reservoir state, made attendable, lets the model recall content that exists *only* in
  the reservoir — something the stateless baseline provably cannot do. (figure on the report site)
@@ -638,7 +635,7 @@ stream of events where a rare trigger opens a thread that should be addressed (l
 - **The difference is recall.** The stateless gate can only see the trigger itself, so
  it misses almost the entire unresolved thread. The reservoir gate's carried state
  preserves the history of the trigger, allowing it to make a meaningful decision to
- keep speaking after the input has returned to baseline. (`src/reservoir/silence.py`.)
+ keep speaking after the input has returned to baseline.
 
 ## D: a trained silence policy — and why it is difficult
 
@@ -654,7 +651,7 @@ the **stateless gate** — the same gate on the current input — collapses to F
 because it cannot see the past trigger, so it can only *always speak* (recall ≈ 1,
 precision ≈ the base rate). The point is not the exact number: a stateless model **cannot
 implement a selective silence policy at all**, while a reservoir-state gate can.
-(`scripts/run.py silence`; the report site.)
+(figure on the report site).
 
 **The harder conceptual point (the intended behaviour, and why it is difficult).** This
 experiment trains a gate to read silence off the reservoir, but the *intended* behaviour
@@ -727,7 +724,7 @@ input at turn boundaries can take many passes to register an urgent interruption
 mid-action. The hypothesis is that a Reservoir Agent — running every tick, with the reservoir
 continuously integrating input — registers an interruption sooner, and retains it once seen. We
 measured both halves on CPU
-(`scripts/run.py interrupt`; the report site).
+(figure on the report site).
 
 **Polling latency (structural) — and what is *not* reservoir-specific (per review).** A poller
 that only reads input every `period` passes registers an arrival at the next boundary: latency
@@ -758,7 +755,7 @@ A design-motivation argument for the reservoir as a *monitoring surface*: "I
 don't think you'd need a sparse autoencoder for the reservoir state … it's much more simple to
 have a learned representation of what is happening," and, because the reservoir weights never
 change, the mapping from state to behaviour is stable — "relatively resilient to fine-tuning."
-We tested the falsifiable parts (`scripts/run.py probe`; the report site).
+We tested the falsifiable parts (figure on the report site).
 
 **Linearly decodable, no SAE.** We defined a temporal *process property* a stateless pass
 cannot see — *elapsed passes since the last trigger*, an internal clock — and fit a plain
@@ -806,7 +803,7 @@ per-position importance scores, switching the ordinary-token choice from recency
 heavy-hitter retention while still pinning the reservoir — position-based and importance-based
 eviction under one interface.
 
-Simulating 512 blank ticks (`scripts/run.py blankcycle`; the report site): the
+Simulating 512 blank ticks (figure on the report site): the
 **vanilla** cache grows linearly to **524 positions**, while the **reservoir-protected**
 policy stays bounded at the **budget (128)** from tick ~116 onward — and **all 8 reservoir
 entries are retained on every single tick**, even under heavy eviction. So the cache-burn
@@ -829,7 +826,7 @@ low-level symbolic recall emerged from a reservoir misconfigured in a specific, 
 ### The real-time always-alive harness
 
 `run_agent.bat` launches an Electron two-pane app over a Python WebSocket server
-(`app/server`) driving `src/reservoir/alive.py` (`AliveEngine`): the reservoir ticks
+(`app/server`) driving the always-alive engine: the reservoir ticks
 continuously (prompted passes on user input, idle ticks otherwise), streams tokens when an
 output gate opens, and the user injects into the live context without pausing it. It runs
 Qwen2.5-1.5B + reservoir. It runs the **untrained substrate** — coherence comes from the base
@@ -847,8 +844,7 @@ deferred** (content memory) and **timed, interrupt, self-initiation, silence**
 through the carried state. A **separate gate head** (a small readout deciding speak-vs-silent)
 was added after training silence as "predict end-of-text" suppressed content in the shared
 output; the gate head separates *when to act* from *what to say*, and recall then coexists
-with silence instead of being driven to zero by it. (`episode.py`, `battery.py`,
-`train_battery.py`.)
+with silence instead of being driven to zero by it.
 
 ### Result 1 — content-vs-temporal split
 
@@ -949,8 +945,8 @@ GPT-2-small-only cross-pass result. (`results/battery_qwen_newlevers.json`, `_un
  untrained substrate, so it shows the harness and the live dynamics, not a trained policy.
 - Small-scale only in this study; the agentic claims (H3/H4) and the full runtime are
  out of scope and compute-limited.
-- Two injection variants now exist: the **residual-stream** write (`inject.py`, wired
- into live GPT-2, H1-verified) and the richer **KV-append** mechanism (`kv_inject.py`,
+- Two injection variants now exist: the **residual-stream** write (wired
+ into live GPT-2, H1-verified) and the richer **KV-append** mechanism (
  reservoir nodes as extra attention keys/values) — the latter is implemented and
  unit-tested in isolation with a clean H1 *masking* property, but **wiring it into HF
  GPT-2 (transformers 5.4) is a documented blocker** (`GPT2_INTEGRATION_BLOCKER`), left

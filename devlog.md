@@ -1817,3 +1817,13 @@ Replaced all docs/*.png path mentions (not rendered in the PDF anyway) with "the
 Fixed doubled phrasing from multi-figure lists. Addresses the reviewer's cited "inaccessible file
 references" (docs/h3_memory.png etc.). Remaining: inline scripts/run.py command refs (woven in
 sentences) — a careful rewording pass. Published; resubmitting (material de-clutter).
+
+## 2026-06-07 — de-clutter pass 4: all inline file refs removed (con #2 substantially done)
+
+Removed the remaining 10 inline scripts/run.py refs and 10 .py module file refs (stripped
+parenthetical reproduction notes; reworded the few inline architectural ones, e.g. "src/reservoir/
+_arch.py" -> "the architecture-adaptation layer", "kv_live.py" -> "the KV-prefix path"). Now: 0
+scripts/run.py, 0 docs/*.png, 0 *.py file paths in FINDINGS. Only a couple of class/constant names
+remain (GPT2_INTEGRATION_BLOCKER, kv_evict.ReservoirEvictionPolicy) — normal for a methods section.
+Directly addresses the reviewer's con #2 (reads like a lab notebook / inaccessible file refs).
+Rating had moved Reject->Weak Reject; this should help further. Published; resubmitting.
