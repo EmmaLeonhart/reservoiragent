@@ -172,6 +172,13 @@ _**Done — same-model split (2026-06-06).** Dedicated cross-pass content recall
 
 _**Done — capacity follow-up (2026-06-07).** Broad LoRA + full unfreeze (top 4 Qwen-1.5B layers): recall 0.19->0.25 (capacity helps) but unstable — peaks step 200, mean drops 0.392->0.321, accumulate collapses. Broad LoRA alone is the balanced sweet spot; corrective is more capacity applied carefully, not unfreeze-everything. In FINDINGS; published._
 
+## Active — careful capacity: higher-rank broad LoRA on the battery (2026-06-07)
+
+Full unfreeze pushed recall to 0.25 but destabilized. The STABLE way to add readout capacity is a
+higher-rank broad LoRA (bigger adapters, not full-rank weights). Run broad LoRA at lora_r 8->32 on
+Qwen-1.5B, 4096 detuned reservoir, 1 epoch. Does stable extra capacity push content past the 0.19
+broad-LoRA-r8 baseline without the full-unfreeze collapse? Fold into FINDINGS. Publish.
+
 ## Other notes (not sure if they should be in the queue)
 
 **Reality note (kept honest):** each item landed as real, tested, committed work or a
