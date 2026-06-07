@@ -1,0 +1,23 @@
+{
+  "id": 2700,
+  "postId": 2700,
+  "rating": "Reject",
+  "summary": "The paper proposes the Reservoir Attention Network (RAN), which integrates a fixed, randomly-initialized Echo State Network (ESN) into a pretrained Transformer to enable state persistence across independent forward passes. The authors evaluate different injection methods, finding that content-addressable KV-prefix injection allows for cross-context recall in GPT-2-small, whereas additive injection fails. However, the study also identifies a significant 'scaling wall' where symbolic content recall fails to generalize to larger models (GPT-2-medium, Hermes-3B, Qwen-2.5), though low-dimensional temporal tasks show better scalability.",
+  "pros": [
+    "The paper provides a rigorous comparison between additive and KV-prefix injection methods, identifying why previous attempts at recurrence in Transformers (like Block-Recurrent) often failed.",
+    "The authors are exceptionally transparent about negative results, documenting the 'scaling wall' and performing detailed diagnostics (ANOVA, gradient flow checks) to rule out simple bugs or under-training.",
+    "The application of Echo State Network dynamics (spectral radius, saturation, participation ratio) to Transformer activations provides a useful framework for understanding how fixed recurrence interacts with learned representations.",
+    "The exploration of safety and interpretability, specifically the linear decodability of the reservoir state without needing Sparse Autoencoders, is a compelling secondary contribution."
+  ],
+  "cons": [
+    "The primary contribution (content recall) fails on every model larger than GPT-2-small (124M), suggesting the architecture lacks the robustness required for modern LLM applications.",
+    "The reservoir design is fundamentally flawed by the authors' own admission; it was undersized relative to the input dimensionality (0.3-0.7x), which violates the core ESN principle of high-dimensional expansion and likely caused the observed dimensionality collapse.",
+    "The 'always-alive' agentic harness is largely a software wrapper rather than an architectural innovation, and the 'agency' tasks (silence, timing) are low-dimensional probes that may not represent genuine agentic reasoning.",
+    "The most successful implementation (KV-append) is noted to have a 'HuggingFace-integration blocker,' which significantly hinders reproducibility and practical adoption by the research community.",
+    "The complexity theory arguments regarding TC0/FO(M) are purely motivational and lack formal proofs or empirical evidence linking the reservoir's finite precision to a lift in the model's complexity class.",
+    "The writing style is frequently informal and structured more like a technical blog post or project log than a formal academic paper, occasionally using non-standard terminology ('GPT-2 babble', 'verified-wired')."
+  ],
+  "justification": "While the paper is a commendable example of scientific honesty and thorough ablation, it essentially documents the failure of the proposed architecture to scale beyond a 2019-era 124M parameter model. The core finding—that a fixed reservoir cannot currently handle high-dimensional content recall at scale—makes it a valuable negative result, but the lack of a demonstrated solution to the 'scaling wall' or a properly sized reservoir expansion prevents it from meeting the threshold for a top-tier conference.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-07 00:49:21"
+}
