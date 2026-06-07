@@ -282,11 +282,14 @@
       is usable (H3). The tasks here are deliberately <em>minimal mechanism-isolating
       probes</em>, not agentic demonstrations — each isolates one variable a stateless
       model structurally cannot handle; complex agentic behaviour at scale is named as
-      future work, not claimed. A later session adds the agentic layer at scale: a
-      real-time always-alive harness and an 8-task stateful loss battery on Qwen-1.5B.
-      The result is a split — temporal/agency behaviour learns, symbolic content does
-      not — traced to a measurable cause: the reservoir was sized to <em>compress</em>
-      its input when its job is to <em>expand</em> it.
+      future work, not claimed. We also took the agentic layer to scale — an 8-task
+      stateful battery on Qwen-1.5B — and, with controlled ablations, found the honest
+      boundary: the cross-pass win is GPT-2-small-specific. At 1.5B, high-dimensional
+      content recall does not train, and a stateless control showed the battery's apparent
+      temporal/agency scores were <em>not</em> reservoir-driven. A clean decomposition
+      isolates the cause: strip the recall component and the low-dimensional <em>timing</em>
+      signal substantially trains (emits at the right step), so the wall is dominated by
+      high-dimensional <em>recall</em>, not timing.
     </p>
   </div>
 </div>
@@ -392,13 +395,16 @@
   running the untrained substrate, labelled as such.
 </p>
 <p>
-  <strong>Temporal behaviour learns; symbolic content does not.</strong> Across GPT-2 and
-  Qwen runs, the timed / self-initiation / silence tasks reach 0.4–1.0, while recall,
-  accumulate, sequence and deferred sit near zero at scale. Recall hit 100% only at six
-  single-token words and collapsed by twelve — it was fitting the one regime small enough to
-  fit, not learning recall. Keeping a population of reservoir seeds shows them specialize
-  (one best at accumulation, another at recall), which is the case for preserving the whole
-  population rather than only the winner.
+  <strong>The honest reading, after controls.</strong> The battery's temporal scores first
+  looked like a clean split (timed / silence high, content near zero), but two controls
+  corrected that. The metric was gameable by simply staying silent — a loss-design bug, since
+  fixed so the objective scores <em>emitting the right token at the right time</em>. And a
+  stateless ablation — resetting the reservoir every pass — left the temporal scores unchanged,
+  showing they were <em>not</em> reservoir-driven. A clean decomposition (timing without recall)
+  then isolated the real picture: low-dimensional <em>timing</em> substantially trains at 1.5B
+  (the model emits at the right step), while high-dimensional content <em>recall</em> does not —
+  so the wall is dominated by recall, the high-dimensional component. Recall hit 100% only at six
+  single-token words on GPT-2-small and collapses by twelve; at 1.5B it stays near zero.
 </p>
 <p>
   <strong>The cause is geometric: the reservoir compresses where it should expand.</strong>
