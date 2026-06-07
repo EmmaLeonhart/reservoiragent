@@ -87,7 +87,7 @@ boundary of the claims:
   establish, decisively and reproducibly on GPT-2, is that **how** the reservoir is
   injected is the deciding factor: additive injection is ignored (chance recall), while
   content-addressable KV-prefix injection gives 100% cross-context recall. That negative-
-  then-positive result is the load-bearing contribution.
+  then-positive result is the central contribution.
 
 ## Architecture
 
@@ -135,14 +135,11 @@ context window (it survives context truncation), which is precisely what a "time
 means here: an endogenous variable the model accumulates along, independent of the
 input sequence.
 
-**2 · The expressivity gap (one-paragraph motivation, not a result — and not relied on).**
-A finite-precision transformer is bounded per forward pass to a low complexity class (TC⁰/FO(M);
-Merrill & Sabharwal; Hahn), and cross-pass state is the documented lever past it (Siegelmann &
-Sontag) — this is *why* cross-pass state is worth studying, nothing more. We prove no separation,
-the Turing-completeness results require arbitrary precision (Pérez et al. 2019), and no result
-here or in the literature shows a finite-precision reservoir lifts the bound (details:
-[`literature/REVIEW.md`](literature/REVIEW.md)). None of the empirical results below depend on
-this argument; it can be skipped entirely.
+**2 · The expressivity motivation (one sentence; no result claimed).** A finite-precision
+transformer is bounded per forward pass to a low complexity class (TC⁰/FO(M)) and cross-pass
+state is the standard lever past it — this only motivates *why* cross-pass state is interesting;
+we prove no separation and nothing below depends on it (full discussion + citations in
+[`literature/REVIEW.md`](literature/REVIEW.md)).
 
 **3 · The organism analogy (one paragraph, bounded).** The reservoir introduces
 endogenous state that evolves independently of external input — a property shared with
@@ -388,7 +385,7 @@ wants, already agent-fine-tuned).
 
 ## C: cross-pass recall — the injection design decides everything
 
-The load-bearing experiment, and the central result. The task is one a stateless model
+The central experiment. The task is one a stateless model
 **structurally cannot** do: show a secret word on pass 1, **wipe the context**, recall it
 on pass 2 from the carried reservoir state alone (`src/reservoir/crosspass.py`;
 `scripts/run.py crosspass`). The multi-pass differentiable harness backprops through both
@@ -410,7 +407,7 @@ reaches **100% recall (loss → 0.00)** when it carries its hidden state and **c
 the state is reset between passes. So the task is *trivial for trained recurrence* — which is the
 point: the contribution is not that cross-pass recall is hard in general, but that it can be done
 with a **fixed, random** reservoir inside a **frozen** pretrained transformer (and the open
-problem is scaling that, not the task). This both answers the strawman objection and frames the
+problem is scaling that, not the task). This both situates the difficulty and frames the
 result correctly.
 
 **The result depends sharply on *how* the reservoir is injected — and that is the

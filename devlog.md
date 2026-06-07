@@ -1726,3 +1726,12 @@ steps (10x the budget), each epoch's MODEL + OPTIMIZER streamed to HF (reservoir
 battery-emit). Note: W_r is dense so 16384 (~1GB) is the cap on 8GB; truly huge (32k+) needs
 sparse W_r (next enabler). Residual: best-selection mean still includes silence (inflates "best");
 per-task emit numbers are honest.
+
+## 2026-06-07 — post-2718 review: cut colloquialisms + hard-cut TC0 to one sentence
+
+Review post2718 (Reject; cons now science-of-the-negative + recurring style/TC0). Addressed the
+clear ones: removed colloquialisms ("load-bearing", "strawman") and cut the TC0/FO(M) expressivity
+point from a paragraph to a single sentence pointing to REVIEW.md (flagged ~7 reviews running).
+Cons 1/3/5/6 (negative-result-at-scale, safety triviality, toy tasks, HF blocker) are
+scope/known. Diminishing returns on polish — the rating ceiling is the science (negative at
+scale); the real work is the in-flight big training run. Published; resubmitting.
