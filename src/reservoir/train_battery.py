@@ -62,7 +62,11 @@ def train_battery(model_name: str = "gpt2", *, steps: int = 400, lr: float = 1e-
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=steps)
 
     def mean_acc(m):
-        return sum(m.values()) / len(m) if m else 0.0
+        # Capability mean: average over the EMIT-requiring tasks only, excluding the pure
+        # 'silence' task — otherwise a gate that just stays quiet inflates "best" without
+        # demonstrating anything. (Silence accuracy is still reported per-task.)
+        keys = [t for t in m if t != "silence"]
+        return (sum(m[t] for t in keys) / len(keys)) if keys else 0.0
 
     log(f"battery training {model_name} on {sorted(weights)} for {steps} steps "
         f"(lr {lr} cosine, device {lm.device})…")

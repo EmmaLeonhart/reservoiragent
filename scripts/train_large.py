@@ -108,7 +108,10 @@ def main() -> int:
         lm.model.eval()
         m = _evaluate(lm, eval_set)
         lm.model.train()
-        mean = sum(m.values()) / len(m)
+        # capability mean: emit-requiring tasks only (exclude pure 'silence', which a quiet
+        # gate passes for free) — honest headline number; per-task silence still reported.
+        _keys = [t for t in m if t != "silence"]
+        mean = (sum(m[t] for t in _keys) / len(_keys)) if _keys else 0.0
         meta = {"epoch": epoch, "step": step, "elapsed_min": round((time.time() - start) / 60, 1),
                 "lr": lr, "vocab": len(pool), "mean": mean, "metrics": m, "model": model}
         d = os.path.join(out_root, f"epoch_{epoch}")
