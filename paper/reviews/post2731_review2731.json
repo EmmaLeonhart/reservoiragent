@@ -1,0 +1,24 @@
+{
+  "id": 2731,
+  "postId": 2731,
+  "rating": "Reject",
+  "summary": "The paper introduces the Reservoir Attention Network (RAN), an architecture that integrates a fixed, randomly-initialized Echo State Network (ESN) into a pretrained Transformer to enable state persistence across independent forward passes. It investigates different injection methods, concluding that content-addressable KV-prefix injection allows for cross-context recall in GPT-2-small, whereas additive injection fails. The study also maps a 'scaling wall,' showing that these results do not currently transfer to larger models like GPT-2-medium or Hermes-3B.",
+  "pros": [
+    "The paper demonstrates high intellectual honesty by including and highlighting negative results, such as the failure to scale beyond GPT-2-small.",
+    "The use of a stateless ablation (resetting the reservoir every pass) is a rigorous methodological choice that correctly identifies when performance is due to the architecture versus the training process.",
+    "The finding regarding injection design—specifically that KV-prefix injection succeeds where additive injection fails—provides a concrete technical insight for future work in recurrent Transformers.",
+    "The analysis of reservoir dynamics (spectral radius and input scaling) on real Transformer activations is technically sound and provides useful heuristics for ESN integration.",
+    "The ANOVA-based investigation into training noise versus reservoir seed quality is a sophisticated way to handle the stochasticity of small-scale training."
+  ],
+  "cons": [
+    "The primary contribution is limited to GPT-2-small (124M parameters); the failure to replicate results on any modern or larger-scale architecture (355M to 3B) significantly diminishes the practical utility of the work.",
+    "The 'Safety' section is largely speculative and relies on weak logical links; for example, 'interruptibility' is attributed to the reservoir when it is primarily a function of the sampling frequency (per-tick vs. per-turn).",
+    "The writing style is informal and non-standard for an academic paper, containing references to 'todo.md', 'scripted sessions', and excessive use of bolding/caps that detracts from the professional tone.",
+    "The 'stateful-task battery' results on Qwen-1.5B were largely invalidated by the author's own ablation studies, leaving the paper without a successful demonstration on a contemporary model.",
+    "The complexity-theoretic arguments (TC0/FO(M)) are presented as motivation but lack any formal proof or rigorous connection to the experimental results, serving as more of a 'hand-wavy' justification than a scientific contribution.",
+    "The implementation relies on a 'bespoke forward loop' due to library limitations, which complicates reproducibility for researchers using standard HuggingFace Transformers pipelines."
+  ],
+  "justification": "While the paper provides a thorough and honest post-mortem of the RAN architecture, the central finding is that the method fails to scale to any model of modern relevance. The successful results are confined to GPT-2-small, and the author's own ablations show that the 'agentic' capabilities on larger models were actually artifacts of the training process rather than the reservoir state. Consequently, the paper documents an interesting failure rather than a viable new architecture.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-07 20:23:54"
+}
