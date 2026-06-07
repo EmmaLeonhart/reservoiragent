@@ -33,6 +33,23 @@ def test_cross_pass_kv_pipeline_runs():
     assert 0.0 <= r["recall_accuracy"] <= 1.0
 
 
+def test_proj_dim_decouples_readout_from_reservoir_size():
+    """The fixed down-projection: a huge reservoir must run with a trained readout sized by
+    proj_dim (not n_reservoir), so reservoir size and trained-param count are decoupled."""
+    pytest.importorskip("torch")
+    pytest.importorskip("transformers")
+    pytest.importorskip("peft")
+    from reservoir.kv_live import TorchReservoirPrefixInjectedLM as M
+
+    big = M("sshleifer/tiny-gpt2", device="cpu", seed=0, n_reservoir=20000, proj_dim=64)
+    ids = big.tokenizer("hi there", return_tensors="pt")
+    big.reset_state()
+    big.forward_logits(ids["input_ids"], ids["attention_mask"])   # must run, not OOM/crash
+    readout_in = big.W_res.weight.shape[1]
+    assert readout_in == 64                       # readout sees proj_dim, not 20000
+    assert big.P is not None and big.P.shape == (64, 20000)
+
+
 def test_unfreeze_adds_backbone_params():
     """The unfreeze-backbone lever: training decoder layers from an index up must add trainable
     parameters beyond the LoRA-only default (full weight training, not low-rank adaptation)."""
