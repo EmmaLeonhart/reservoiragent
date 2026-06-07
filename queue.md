@@ -187,6 +187,15 @@ timed = 0.25 = diluted (no help at small scale). Qwen-1.5B focused timed = **sta
 (above chance) vs joint 0 — so the joint battery DILUTES temporal at 1.5B; focusing recovers a
 weak nonzero. Soft scale wall (weak, dilution-sensitive), not a hard zero. In FINDINGS._
 
+## Active — timing-vs-recall decomposition on Qwen (2026-06-07)
+
+`timed` conflates COUNTING passes + RECALLING the word. Recall fails at scale; isolate the two:
+run focused timed-only with a 1-WORD vocab (set_word_pool(["red"]) -> always the same word -> no
+recall, pure pass-counting). If timing-only works at Qwen-1.5B but word+timing doesn't, the
+failure is the recall component (consistent with content-recall failing); if timing-only is also
+noisy ~0, even counting doesn't bootstrap at 1.5B. Running b... on Qwen, 2000 steps. Genuinely
+diagnostic, not more-of-the-same. Fold into FINDINGS.
+
 ## Active — longer focused timed-only on Qwen (2026-06-07)
 
 Focused Qwen timed = stable 0.12 (the most promising temporal-at-scale signal). RUNNING
