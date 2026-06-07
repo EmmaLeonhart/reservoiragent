@@ -383,7 +383,7 @@
 <h3>The agentic layer at scale — and why it splits</h3>
 <p>
   <strong>An 8-task stateful loss battery.</strong> A later session generalizes cross-pass
-  recall into a battery of eight tasks, each an <em>episode</em> — a scripted sequence of
+  recall into a battery of eight tasks, each an <em>episode</em> — a fixed sequence of
   forward passes with the context wiped at chosen points, so the only bridge between passes
   is the reservoir state. Four are <em>content memory</em> (recall, accumulate, sequence,
   deferred); four are <em>temporal/agency</em> (timed, interrupt, self-initiation, silence).
@@ -406,6 +406,10 @@
   right step (1.00) but over-fires on ~half the silent steps (silence-shut 0.53), and up-weighting
   the silence supervision to fix that (silence-shut &rarr; 1.00) instead collapses the emit to 0.00
   &mdash; the two failure modes trade off, the signature of a capacity limit rather than a tuning miss.
+  The same tension dominates the full 8-task battery run progressively at 1.5B: the gate falls into
+  the silent attractor (silence accuracy oscillating across epochs), every emit task stays at 0.00,
+  and the lift over the stateless control stays +0.00 &mdash; the reservoir contributes nothing
+  measurable on the battery at this scale.
 </p>
 <p>
   <strong>The cause is geometric: the reservoir compresses where it should expand.</strong>
@@ -717,7 +721,9 @@
   <strong>Interruptibility &mdash; a faster, more durable response to &ldquo;STOP&rdquo;
   (a safety property).</strong> A turn-based harness agent only reads input at turn
   boundaries, so an urgent override waits: at a poll period of 8 passes its mean latency is
-  3.57 passes, while a per-tick Reservoir Agent&rsquo;s is <strong>0</strong>. The sharper
+  3.57 passes, while a per-tick Reservoir Agent&rsquo;s is <strong>0</strong>. We grant that
+  this latency half is a consequence of <em>sampling frequency</em> (per-tick vs per-turn), not
+  of the reservoir as such &mdash; any per-tick agent gets it. The reservoir-specific, sharper
   point is a <em>one-shot</em> burst (the user yells STOP once, then goes quiet): a
   matched-filter monitor on the reservoir state stays detectable for <strong>3 passes
   after</strong> arrival via fading memory, while a stateless monitor catches it on the

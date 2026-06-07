@@ -1852,3 +1852,17 @@ stateless control), old-format (no stateless_mean -> have_ctrl False, must not K
 out-of-order epochs (sorted), and the main() guards (missing/empty index -> return 1).
 matplotlib import-skipped. Locks in the figure plotter before the progressive run fills a real
 index.json.
+
+## 2026-06-07 — review 2731 (Reject) + battery gate-collapse folded in
+
+Review 2731: Reject (strong pros: honesty on negatives, the stateless ablation, injection insight,
+dynamics, ANOVA). Addressed the two actionable cons: (2) interruptibility = sampling frequency not
+reservoir — added that caveat to the SITE (FINDINGS already had it); reservoir-specific claim is
+signal persistence. (3) informal refs — removed todo.md ref, replaced "scripted session/sequence"
+with "fixed evaluation session/sequence" in FINDINGS+site. Kept the figure "Regenerate with"
+commands (reproducibility aid, per con 6).
+
+Folded in the killed sw=2 progressive run (#17): full 8-task battery at 1.5B collapses the gate to
+always-silent (silence oscillates 0.71->1.00->0.00->0.71, every emit task 0.00, lift +0.00 through
+3 epochs) — same basin as the timed-only sw=4 result. Relaunched (#18) with sw=0.3/emit_weight=4.
+Added post2731 response note.

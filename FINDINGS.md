@@ -60,7 +60,7 @@ specific instantiation of this architecture as a **Reservoir Agent**.
 We scope the question as a **feasibility + dynamics study** at small scale
 (GPT-2-scale base, single machine). The full vision — forking an agent harness into an
 always-alive runtime and N-seed LoRA selection at agent scale — is the long-horizon
-target (see `todo.md`).
+target, outside the scope of this study.
 
 ## Scope, and what this study does and does not claim
 
@@ -339,7 +339,7 @@ substrate fine-tuning will later plug into (the released code). It has the four 
 - an **output confidence gate** (normalized top-k logit entropy) deciding emit vs.
  silence.
 
-A scripted session runs end-to-end: across five interleaved prompted/unprompted passes
+A fixed evaluation session runs end-to-end: across five interleaved prompted/unprompted passes
 the reservoir state |r| evolves continuously (state carried, including through the
 idle ticks). On the untrained model the gate keys off the *base
 model's* next-token entropy, so its emit/silence decisions and the generated text
@@ -614,6 +614,19 @@ pre-emit steps are scored, which is why we measured both halves.) So the tempora
 a **recall (high-dimensional content)** problem: strip recall and the low-dimensional timing
 signal trains much better, consistent with the content-vs-temporal dimensionality split — but
 even low-dimensional timing is not perfectly gated at 1.5B on this budget.
+
+**The same gate tension dominates the full battery over epochs.** Extending the check from the
+isolated `timed` task to the **full 8-task battery** run progressively on Qwen-1.5B (8192-node
+reservoir down-projected to 512, broad LoRA, per-epoch checkpoints with an inline stateless
+control), the gate falls into the silent attractor rather than learning to emit. At
+`silence_weight=2` the gate's silence accuracy oscillates across epochs (0.71 → 1.00 → 0.00 →
+0.71) while **every emit task stays at 0.00 and the lift over the stateless control stays
++0.000** through the first several epochs — the reservoir contributes nothing measurable, and
+the gate never settles into reliable emission. Lowering to `silence_weight=0.3` (with
+`emit_weight=4`) to relieve the always-silent pressure is the natural next setting; either way,
+the capability mean on the battery is **0.00 with zero lift** at 1.5B on this budget, consistent
+with the recall wall and the gate tension above. (Per-epoch models + optimizer states are
+preserved on the Hub for analysis.)
 
 **What the carried-state demonstration actually rests on.** The valid evidence that the reservoir
 carries *usable* state is the controlled, memory-requiring tasks, not the battery metrics:
