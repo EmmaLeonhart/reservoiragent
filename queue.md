@@ -170,14 +170,7 @@ _**Done — capacity sweep (2026-06-06).** GPT-2-small cross-pass recall over n_
 
 _**Done — same-model split (2026-06-06).** Dedicated cross-pass content recall on Qwen-1.5B = chance (0.17), = baseline, while the battery on the same model trains silence to 1.00. The temporal-vs-content split holds within one model at one scale — airtight. In FINDINGS scope paragraph; published + resubmitted._
 
-## Active — push readout capacity further on the battery (follow-up to the content lift, 2026-06-07)
-
-The broad-LoRA + 4096 reservoir run lifted battery content off zero (recall/accumulate 0.00->0.19)
-and pointed the cause at trainable-readout capacity. Next: push capacity further — broad LoRA +
-**full backbone unfreeze** (unfreeze_from upper layers) on Qwen-1.5B, 4096 detuned reservoir,
-1 epoch. Tests whether more trainable capacity pushes content past 0.19 (capacity hypothesis) or
-whether it plateaus. Memory-bound on 8GB → unfreeze only the top few layers; reduce reservoir if
-OOM. Compare content to the 0.19 baseline. Fold into FINDINGS. Publish.
+_**Done — capacity follow-up (2026-06-07).** Broad LoRA + full unfreeze (top 4 Qwen-1.5B layers): recall 0.19->0.25 (capacity helps) but unstable — peaks step 200, mean drops 0.392->0.321, accumulate collapses. Broad LoRA alone is the balanced sweet spot; corrective is more capacity applied carefully, not unfreeze-everything. In FINDINGS; published._
 
 ## Other notes (not sure if they should be in the queue)
 
