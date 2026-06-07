@@ -1609,3 +1609,15 @@ where the battery trains silence to 1.00 / timed 0.71, high-dimensional content 
 identical KV-prefix mechanism stays at chance. The temporal-vs-content split now holds within one
 model at one scale, not just across the GPT-2 vs Qwen comparison — airtight. Folded into the
 "scope of the wall" paragraph. Published; resubmitting.
+
+## 2026-06-06 — full backbone unfreeze also fails: scaling-lever thread definitively closed
+
+Built --unfreeze-from (full weight training of upper decoder layers, not LoRA) and ran
+gpt2-medium upper-12-of-24 + curriculum, 800 steps: recall = chance (0.17), stateful == baseline.
+So even full-rank weight training of half the network doesn't let content recall bootstrap at
+355M. That closes the "did you actually try unfreezing?" question rigorously. FIVE interventions
+now tried and all fail beyond GPT-2-small: curriculum, wider coupling (n_prefix32), Qwen-0.5B
+arch, broad-LoRA (lora_target all r32), full unfreeze (unfreeze_from 12). The one remaining route
+is not a technique but a budget (far more steps / much larger model than this hardware fits).
+Updated FINDINGS (the two now-outdated "remaining lever = unfreeze" claims corrected; reminder
+that this is the CONTENT wall, temporal still scales to Qwen-1.5B). Published; resubmitting.
