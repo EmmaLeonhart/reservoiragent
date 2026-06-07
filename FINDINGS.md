@@ -876,6 +876,18 @@ spot is **broad LoRA without full unfreeze**; the corrective is "more capacity, 
 carefully (and likely with more regularization / a larger stable budget)", not "unfreeze
 everything." (`results/battery_qwen_unfreeze.json`.)
 
+**And higher-rank LoRA does not help either, so broad-LoRA-r8 is the sweet spot.** Adding
+*stable* capacity instead of full unfreeze — broad LoRA at rank 32 rather than 8 — gives no gain
+(best mean 0.317, recall 0.19, accumulate back to 0; `results/battery_qwen_r32.json`). So across
+the capacity sweep — rank-8 broad LoRA (mean 0.392, recall/accumulate 0.19/0.19), full unfreeze
+(recall 0.25 but unstable), rank-32 broad LoRA (no gain) — the **rank-8 broad LoRA is the best
+balanced configuration**, and capacity *beyond* it neither improves content nor holds the other
+tasks. Conclusion for the content channel at this scale: broad readout adaptation is what lifts
+content off the floor (0 → ~0.19), but more capacity past that point does not climb further on
+this hardware/budget — the next gain needs the larger-scale budget, not another local capacity
+knob. The content thread is characterized; symbolic content reaches a partial ~0.19 plateau at
+1.5B and the path past it is scale, consistent with the GPT-2-small-only cross-pass result.
+
 ## Limitations (current)
 
 - The reservoir was **undersized relative to its input** (0.3–0.7× the 1536-dim layer it

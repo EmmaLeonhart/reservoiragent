@@ -1657,3 +1657,13 @@ confirming capacity is the lever) BUT peaks at step 200 then degrades, best mean
 at this budget — broad LoRA (no full unfreeze) remains the balanced sweet spot. Corrective: more
 capacity applied CAREFULLY (regularization / larger stable budget), not unfreeze-everything.
 FINDINGS battery section updated. results/battery_qwen_unfreeze.json. Published.
+
+## 2026-06-07 — capacity thread closed: broad-LoRA-r8 is the sweet spot, more capacity doesn't help
+
+r32 broad-LoRA run: best mean 0.317 (below r8's 0.392), recall 0.19 (same), accumulate back to 0.
+So higher LoRA rank gives no gain. Full capacity sweep: r8 broad LoRA (0.392, recall/accum
+0.19/0.19) BEST balanced; full unfreeze (recall 0.25, unstable); r32 (no gain). Capacity beyond
+broad-LoRA-r8 neither improves content nor holds the other tasks. Content channel conclusion:
+broad readout adaptation lifts content off the floor (0 -> ~0.19) but more capacity past that
+doesn't climb on this hardware; the path past the ~0.19 plateau is scale, consistent with the
+GPT-2-small-only cross-pass result. Thread characterized and closed. FINDINGS updated. Published.
