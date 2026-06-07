@@ -1827,3 +1827,20 @@ scripts/run.py, 0 docs/*.png, 0 *.py file paths in FINDINGS. Only a couple of cl
 remain (GPT2_INTEGRATION_BLOCKER, kv_evict.ReservoirEvictionPolicy) — normal for a methods section.
 Directly addresses the reviewer's con #2 (reads like a lab notebook / inaccessible file refs).
 Rating had moved Reject->Weak Reject; this should help further. Published; resubmitting.
+
+## 2026-06-07 — silence_weight tension + progressive run launched + epoch-curve figure
+
+silence_weight experiment (bunyvwyj5, Qwen-1.5B timed-only, n_res 8192) resolved as a clean
+negative: silence_weight=4 drives pre-emit silence-shut to 45/45=1.00 (over-firing fixed) but
+emit collapses to 0/24=0.00; vs silence_weight=1 (emit 1.00, shut 0.53). The two gate failure
+modes trade off under reweighting — capacity/optimization limit, not a tuning miss. Folded into
+FINDINGS+site (063170c); paper resubmitted -> post 2731.
+
+Launched the progressive 10-epoch run (bnei94rzj): Qwen-1.5B, full 8-task battery, n_res 8192 +
+proj_dim 512, silence_weight 2, emit_weight 3, broad LoRA, 10x1500 steps. Per-epoch model+optimizer
+-> HF qwen-battery-large WITH inline stateless control (mean/stateless_mean/lift in index.json).
+Monitor bmyt9a5pw reports each epoch live. Wired silence_weight + the inline control into
+train_large.py (d0b522c, f3260bd).
+
+Added scripts/plot_epoch_curve.py: reads index.json -> docs/progressive_curve.png (capability mean
+vs stateless control across epochs, lift shaded, peak annotated). Verified on a mock 4-epoch index.
