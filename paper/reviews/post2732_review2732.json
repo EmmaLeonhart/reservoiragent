@@ -1,0 +1,22 @@
+{
+  "id": 2732,
+  "postId": 2732,
+  "rating": "Weak Reject",
+  "summary": "The paper introduces the Reservoir Attention Network (RAN), an architecture that injects a fixed, randomly initialized Echo State Network (ESN) into a pretrained Transformer to provide state persistence across independent forward passes. The authors evaluate different injection strategies, concluding that content-addressable KV-prefix injection enables cross-context recall on GPT-2-small, whereas additive injection fails. The study includes a detailed characterization of reservoir dynamics and a rigorous post-mortem of the architecture's failure to scale to models larger than 124M parameters.",
+  "pros": [
+    "The paper demonstrates exceptional academic honesty by including a stateless ablation study that refutes its own earlier interpretations of the task battery.",
+    "The comparison between additive and KV-prefix injection provides a concrete and useful architectural finding for researchers working on recurrent Transformers.",
+    "The characterization of how real Transformer activations over-drive and saturate standard reservoirs (requiring 0.08-0.24 scaling) is a practical contribution to reservoir computing.",
+    "The diagnostic experiments regarding the 'scaling wall' (curriculum learning, unfreezing backbones, and increasing LoRA rank) provide a high-quality analysis of why the method fails at larger scales."
+  ],
+  "cons": [
+    "The core capability (cross-pass state) is only successfully demonstrated on GPT-2-small (124M), with consistent failures on GPT-2-medium (355M), Qwen-0.5B, and Hermes-3B.",
+    "The 8-task battery results are largely invalidated by the author's own ablation, which shows that a stateless baseline performs equally well, indicating the reservoir is not the primary driver of those behaviors.",
+    "The paper's structure is fragmented and informal, reading more like a chronological log of experiments ('The larger-budget run — done') than a synthesized academic argument.",
+    "The 'always-alive runtime' and 'agentic' claims are largely infrastructure-level descriptions rather than demonstrated improvements in agentic reasoning or autonomy.",
+    "The complexity theory framing (TC0/FO(M)) serves as interesting motivation but is never formally linked to the empirical findings or the limitations of the finite-precision reservoir used."
+  ],
+  "justification": "While the paper is a model of transparency and rigorous self-correction, the central architectural proposal fails to scale to modern model sizes or demonstrate utility beyond a trivial recall task on a legacy model. The most significant findings are negative, and while they are well-diagnosed, they suggest the RAN architecture is currently not a viable solution for stateful LLMs.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-07 23:00:28"
+}
