@@ -37,7 +37,7 @@ class TorchReservoirPrefixInjectedLM:
                  seed: int = 0, device: str | None = None, lora_r: int = 8,
                  lora_alpha: int = 16, summary: str = "last", load_in_4bit: bool = False,
                  dtype: str | None = None, train_seed: int | None = None,
-                 lora_target: str = "attn"):
+                 lora_target: str = "attn", unfreeze_from: int | None = None):
         import torch
         import torch.nn as nn
         from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -115,6 +115,14 @@ class TorchReservoirPrefixInjectedLM:
         lcfg = LoraConfig(r=lora_r, lora_alpha=lora_alpha, target_modules=target,
                           lora_dropout=0.0, bias="none", task_type="CAUSAL_LM")
         self.model = get_peft_model(base, lcfg)
+        # Full backbone unfreeze (the heavy lever): train the actual weights of decoder layers
+        # from `unfreeze_from` upward, not just low-rank LoRA. PEFT froze the base; re-enable
+        # grads on the upper blocks so trainable_parameters() picks them up.
+        self.unfreeze_from = unfreeze_from
+        if unfreeze_from is not None:
+            for blk in list(decoder_blocks(self.model))[unfreeze_from:]:
+                for p in blk.parameters():
+                    p.requires_grad_(True)
         if not load_in_4bit:
             self.model.to(self.device)
         self.W_res.to(self.device)
@@ -130,7 +138,7 @@ class TorchReservoirPrefixInjectedLM:
             model_name=model_name, n_reservoir=n_reservoir, n_prefix=n_prefix,
             layer=self.layer, spectral_radius=spectral_radius, input_scaling=input_scaling,
             sparsity=sparsity, leak=leak, seed=seed, lora_r=lora_r, lora_alpha=lora_alpha,
-            summary=summary, lora_target=lora_target)
+            summary=summary, lora_target=lora_target, unfreeze_from=unfreeze_from)
         self._register_read_hook()
 
     def _register_read_hook(self):

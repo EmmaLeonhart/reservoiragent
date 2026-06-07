@@ -33,6 +33,21 @@ def test_cross_pass_kv_pipeline_runs():
     assert 0.0 <= r["recall_accuracy"] <= 1.0
 
 
+def test_unfreeze_adds_backbone_params():
+    """The unfreeze-backbone lever: training decoder layers from an index up must add trainable
+    parameters beyond the LoRA-only default (full weight training, not low-rank adaptation)."""
+    pytest.importorskip("torch")
+    pytest.importorskip("transformers")
+    pytest.importorskip("peft")
+    from reservoir.kv_live import TorchReservoirPrefixInjectedLM as M
+
+    lora_only = M("sshleifer/tiny-gpt2", device="cpu", seed=0)
+    unfrozen = M("sshleifer/tiny-gpt2", device="cpu", seed=0, unfreeze_from=1)
+    n0 = sum(p.numel() for p in lora_only.trainable_parameters())
+    n1 = sum(p.numel() for p in unfrozen.trainable_parameters())
+    assert n1 > n0
+
+
 import numpy as np
 from reservoir.crosspass import eval_recall, recall_accuracy
 
