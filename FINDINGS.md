@@ -254,9 +254,9 @@ not rule out selection mattering with far more training (where init noise should
 larger-budget run is the natural follow-up — but at this budget the verdict is: train and
 select over *runs*, not over reservoir seeds.
 
-**The larger-budget run — done, and the negative holds: at 1500 steps selection is still not
-real.** We then ran exactly the natural follow-up (6× the budget; the report site), to test whether selection becomes a real signal
-once run-to-run init noise shrinks. It does not. Per-seed mean recall spreads a little wider
+**At a larger budget the negative holds: at 1500 steps, selection is still not real.** A
+6×-budget follow-up tests whether selection becomes a real signal once run-to-run init noise
+shrinks. It does not. Per-seed mean recall spreads a little wider
 (0.21–0.83 vs the 250-step run's 0.33–0.75), but the **within-seed spread stays just as wide**
 (e.g. seed 4 lands at 1.00, 1.00, 0.17, 0.17 across its four inits): **F = 1.43 (df 5, 18),
 p = 0.26** — the between-seed (reservoir) variation still does not exceed the within-seed
