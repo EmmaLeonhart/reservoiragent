@@ -1866,3 +1866,15 @@ Folded in the killed sw=2 progressive run (#17): full 8-task battery at 1.5B col
 always-silent (silence oscillates 0.71->1.00->0.00->0.71, every emit task 0.00, lift +0.00 through
 3 epochs) — same basin as the timed-only sw=4 result. Relaunched (#18) with sw=0.3/emit_weight=4.
 Added post2731 response note.
+
+## 2026-06-07 — lowsw epoch 0: gate flips to always-open, emit still 0 + out_root fix
+
+lowsw run (#18, sw=0.3/emit_weight=4) epoch 0: silence 0.00 (gate now always-OPEN, never shuts) —
+the complement of sw=2 (silence->1.00, always shut). Both: every emit task 0.00, lift +0.00. So
+silence_weight only moves the gate between stuck-open and stuck-shut; emission/content never trains
+at 1.5B either way -> confirms the content/recall wall is the blocker, not the gate weight. Letting
+lowsw continue (gate-open + emit_weight=4 is the most favorable config for emit we have tried).
+
+Fix: train_large.py out_root now derives from the HF repo name (RESERVOIR_OUT override) so distinct
+runs no longer clobber each others local artifacts/index.json — caused stale-index confusion when
+the lowsw run reused artifacts/qwen-large/ from the killed sw=2 run.

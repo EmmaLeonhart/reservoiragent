@@ -19,6 +19,7 @@ Config via env vars (with defaults):
     RESERVOIR_EVALN   16
     RESERVOIR_EMIT_WEIGHT    3.0   up-weight the emit step
     RESERVOIR_SILENCE_WEIGHT 1.0   up-weight "stay shut" (fights gate over-firing)
+    RESERVOIR_OUT     <repo name>  local artifact dir under artifacts/ (default: HF repo segment)
 
 Run:  python scripts/train_large.py        (needs torch + GPU + HF write auth)
 """
@@ -68,7 +69,10 @@ def main() -> int:
     silence_weight = _env("RESERVOIR_SILENCE_WEIGHT", "1.0", float)  # up-weight "stay shut" to fight gate over-firing
     proj_dim = _env("RESERVOIR_PROJ", "0", int) or None        # fixed down-projection for huge reservoirs
     lora_target = _env("RESERVOIR_LORA_TARGET", "all", str)    # adapt MLP too, not just attention
-    out_root = os.path.join(ROOT, "artifacts", "qwen-large")
+    # Local artifact dir, derived from the HF repo's last path segment by default so distinct
+    # runs (e.g. different silence_weight) don't clobber each other's local index.json /
+    # epoch_<n> dirs. Override with RESERVOIR_OUT.
+    out_root = os.path.join(ROOT, "artifacts", _env("RESERVOIR_OUT", repo.split("/")[-1]))
     os.makedirs(out_root, exist_ok=True)
 
     # content-upweighted; silence down so it doesn't dominate
