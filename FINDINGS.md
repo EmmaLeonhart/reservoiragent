@@ -603,7 +603,9 @@ the model opens the gate and emits at the **right step 24/24 = 1.00** and the ga
 the pre-emit silence steps 24/45 = 0.53** — well above the 0 an always-open gate would score, so
 it genuinely discriminates the emit step from the silent ones, versus the recall-bundled timed's
 ~0.08. But 0.53 silence-shut also means the gate **over-fires on roughly half the silent steps**,
-so pure timing is *partially* learned, not cleanly solved. (An emit-only metric reads this as
+so pure timing is *partially* learned, not cleanly solved — and this is **structural, not a
+gate-weight artifact**: re-running with a balanced `emit_weight=1` (vs 2) gives the identical
+emit 1.00 / silence-shut 0.53, so down-weighting the emit term does not clean up the over-firing. (An emit-only metric reads this as
 1.00 and overstates it — the gate's false-positives on silence steps only show up when the
 pre-emit steps are scored, which is why we measured both halves.) So the temporal wall is largely
 a **recall (high-dimensional content)** problem: strip recall and the low-dimensional timing
