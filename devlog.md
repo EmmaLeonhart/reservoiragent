@@ -1778,3 +1778,15 @@ unfreeze, focused single-task, longer training) temporal emission is ~0.25 noisy
 and a faint noisy ~0-0.25 at 1.5B, doesn't converge — same noise/scale wall as content. Local
 temporal exploration is exhausted; a stable capability needs cloud-scale or a different regime.
 Published; resubmitting.
+
+## 2026-06-07 — timing-vs-recall decomposition: recall is the dominant blocker (verified, not gaming)
+
+1-word-vocab timed (pure pass-counting, no recall) on Qwen-1.5B. CAUGHT a near-overclaim: emit-only
+metric = 1.00, but that could be always-speak gaming. Verified with full-timing eval (re-ran w/
+save_dir, emit_weight=2): emit step 24/24=1.00, pre-emit silence gate-shut 24/45=0.53. So NOT
+always-speak (would be ~0 silence-shut) and NOT clean timing (would be ~1.0) — gate opens at the
+right step + discriminates (1.00 vs 0.53 >> always-open's 0) but over-fires on ~half the silence
+steps. vs recall-bundled timed ~0.08. Conclusion: RECALL (high-dim) is the dominant temporal
+blocker; low-dim pass-counting is substantially more learnable at 1.5B though not cleanly gated.
+Supports the content-vs-temporal dimensionality split with a clean decomposition. FINDINGS updated.
+4th potential overclaim of the day, caught by measuring both halves before claiming. Published.

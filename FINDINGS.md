@@ -594,6 +594,22 @@ higher (~0.25, also noisy). The metric bug was real and fixed; the capability is
 at scale. (Per-epoch models + optimizer states preserved at
 `hf.co/EmmaLeonhart/reservoir-agent-qwen-battery-emit`.)
 
+**Decomposition — recall is the dominant blocker; pure pass-counting is substantially more
+learnable (though not cleanly gated).** The `timed` task bundles two skills: *counting* elapsed
+passes and *recalling which word* to emit. We isolated them by running `timed` with a **1-word
+vocabulary** (the target is always the same token, so there is no recall — only pass-counting).
+At Qwen-1.5B this trains far better than the recall-bundled version: on a full-timing evaluation
+the model opens the gate and emits at the **right step 24/24 = 1.00** and the gate **stays shut on
+the pre-emit silence steps 24/45 = 0.53** — well above the 0 an always-open gate would score, so
+it genuinely discriminates the emit step from the silent ones, versus the recall-bundled timed's
+~0.08. But 0.53 silence-shut also means the gate **over-fires on roughly half the silent steps**,
+so pure timing is *partially* learned, not cleanly solved. (An emit-only metric reads this as
+1.00 and overstates it — the gate's false-positives on silence steps only show up when the
+pre-emit steps are scored, which is why we measured both halves.) So the temporal wall is largely
+a **recall (high-dimensional content)** problem: strip recall and the low-dimensional timing
+signal trains much better, consistent with the content-vs-temporal dimensionality split — but
+even low-dimensional timing is not perfectly gated at 1.5B on this budget.
+
 **What the carried-state demonstration actually rests on.** The valid evidence that the reservoir
 carries *usable* state is the controlled, memory-requiring tasks, not the battery metrics:
 (i) GPT-2-small cross-pass recall — 100% with the carried state vs **chance (0.17) when the
