@@ -17,6 +17,8 @@ Config via env vars (with defaults):
     RESERVOIR_NPREFIX 16           prefix tokens
     RESERVOIR_LR      5e-4
     RESERVOIR_EVALN   16
+    RESERVOIR_EMIT_WEIGHT    3.0   up-weight the emit step
+    RESERVOIR_SILENCE_WEIGHT 1.0   up-weight "stay shut" (fights gate over-firing)
 
 Run:  python scripts/train_large.py        (needs torch + GPU + HF write auth)
 """
@@ -63,6 +65,7 @@ def main() -> int:
     lr = _env("RESERVOIR_LR", "5e-4", float)
     eval_n = _env("RESERVOIR_EVALN", "16", int)
     emit_weight = _env("RESERVOIR_EMIT_WEIGHT", "3.0", float)  # up-weight the emit step (not silence)
+    silence_weight = _env("RESERVOIR_SILENCE_WEIGHT", "1.0", float)  # up-weight "stay shut" to fight gate over-firing
     proj_dim = _env("RESERVOIR_PROJ", "0", int) or None        # fixed down-projection for huge reservoirs
     lora_target = _env("RESERVOIR_LORA_TARGET", "all", str)    # adapt MLP too, not just attention
     out_root = os.path.join(ROOT, "artifacts", "qwen-large")
@@ -80,8 +83,8 @@ def main() -> int:
     lm = TorchReservoirPrefixInjectedLM(model, n_reservoir=n_res, n_prefix=n_prefix,
                                         input_scaling=inscale, dtype="bfloat16", seed=0,
                                         lora_target=lora_target, proj_dim=proj_dim)
-    print(f"[train_large] emit_weight {emit_weight} | proj_dim {proj_dim} | lora_target {lora_target}",
-          flush=True)
+    print(f"[train_large] emit_weight {emit_weight} | silence_weight {silence_weight} | "
+          f"proj_dim {proj_dim} | lora_target {lora_target}", flush=True)
     pool = B.large_word_pool(lm.tokenizer, vocab)
     B.set_word_pool(pool)
     print(f"[train_large] word pool: {len(pool)} single-token words "
@@ -142,7 +145,7 @@ def main() -> int:
     def train_step():
         nonlocal step, running
         ep = sample_episode(rng, weights)
-        loss = episode_loss(lm, ep, emit_weight=emit_weight)
+        loss = episode_loss(lm, ep, emit_weight=emit_weight, silence_weight=silence_weight)
         opt.zero_grad()
         loss.backward()
         opt.step()
