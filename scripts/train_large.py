@@ -110,13 +110,20 @@ def main() -> int:
         nonlocal epoch, next_ckpt
         lm.model.eval()
         m = _evaluate(lm, eval_set)
+        # CONTROL: same eval set with the reservoir reset every pass (no cross-pass carry).
+        # Any capability above this stateless floor is attributable to the carried state.
+        m_ctrl = _evaluate(lm, eval_set, stateless=True)
         lm.model.train()
         # capability mean: emit-requiring tasks only (exclude pure 'silence', which a quiet
-        # gate passes for free) — honest headline number; per-task silence still reported.
+        # gate passes for free) — headline number; per-task silence still reported.
         _keys = [t for t in m if t != "silence"]
         mean = (sum(m[t] for t in _keys) / len(_keys)) if _keys else 0.0
+        ctrl_keys = [t for t in m_ctrl if t != "silence"]
+        ctrl_mean = (sum(m_ctrl[t] for t in ctrl_keys) / len(ctrl_keys)) if ctrl_keys else 0.0
         meta = {"epoch": epoch, "step": step, "elapsed_min": round((time.time() - start) / 60, 1),
-                "lr": lr, "vocab": len(pool), "mean": mean, "metrics": m, "model": model}
+                "lr": lr, "vocab": len(pool), "mean": mean, "metrics": m,
+                "stateless_mean": ctrl_mean, "stateless_metrics": m_ctrl,
+                "lift": round(mean - ctrl_mean, 3), "model": model}
         d = os.path.join(out_root, f"epoch_{epoch}")
         save_reservoir_model(d, lm, extra_meta=meta)
         # Optimizer state per epoch (resumable training / analysis); lands in the epoch dir so
@@ -137,8 +144,8 @@ def main() -> int:
         except Exception as e:
             print(f"[train_large] index upload failed: {e!r}", flush=True)
         print(f"[train_large] epoch {epoch} step {step} ({meta['elapsed_min']}m) "
-              f"mean {mean:.3f} :: " + "  ".join(f"{k}={v:.2f}" for k, v in m.items()),
-              flush=True)
+              f"mean {mean:.3f} (stateless ctrl {ctrl_mean:.3f}, lift {mean - ctrl_mean:+.3f}) :: "
+              + "  ".join(f"{k}={v:.2f}" for k, v in m.items()), flush=True)
         epoch += 1
         next_ckpt = time.time() + ckpt_min * 60
 
