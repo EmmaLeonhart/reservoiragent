@@ -57,7 +57,8 @@ def _target_ids(lm, step):
     return lm.tokenizer(step.target, add_special_tokens=False)["input_ids"]
 
 
-def episode_loss(lm, episode: Episode, *, gate_weight: float = 1.0, stateless: bool = False):
+def episode_loss(lm, episode: Episode, *, gate_weight: float = 1.0, stateless: bool = False,
+                 emit_weight: float = 1.0):
     """Run ``episode`` and return the mean loss as a torch scalar whose graph spans every
     pass (so ``.backward()`` trains through the carried state).
 
@@ -94,10 +95,12 @@ def episode_loss(lm, episode: Episode, *, gate_weight: float = 1.0, stateless: b
         if step.target is SILENCE:
             add(gate_weight * F.binary_cross_entropy_with_logits(g, torch.zeros_like(g)))
             continue
-        add(gate_weight * F.binary_cross_entropy_with_logits(g, torch.ones_like(g)))
+        # emit step: the part that actually needs carried state. Up-weight it (emit_weight) so
+        # training selects for "say the right token at the right time" rather than free silence.
+        add(emit_weight * gate_weight * F.binary_cross_entropy_with_logits(g, torch.ones_like(g)))
         cur_ids, cur_mask = ids, mask
         for t in _target_ids(lm, step):                # teacher-forced content
-            add(F.cross_entropy(logits[0, -1].unsqueeze(0),
+            add(emit_weight * F.cross_entropy(logits[0, -1].unsqueeze(0),
                                 torch.tensor([t], device=lm.device)))
             cur_ids = torch.cat([cur_ids, torch.tensor([[t]], device=lm.device)], dim=1)
             cur_mask = torch.cat(
@@ -136,7 +139,7 @@ def episode_eval(lm, episode: Episode, *, stateless: bool = False) -> list[dict]
             if step.target is SILENCE:
                 records.append({"task": episode.task, "target": "<silence>",
                                 "pred": "<silent>" if not speak else "<spoke>",
-                                "ok": (not speak)})
+                                "ok": (not speak), "is_emit": False})
                 continue
             tgt = _target_ids(lm, step)
             cur_ids, cur_mask = ids, mask
@@ -151,6 +154,6 @@ def episode_eval(lm, episode: Episode, *, stateless: bool = False) -> list[dict]
             shown = lm.tokenizer.decode(pred).strip()
             records.append({"task": episode.task, "target": step.target,
                             "pred": shown if speak else shown + " [gated-silent]",
-                            "ok": bool(speak and pred == tgt)})
+                            "ok": bool(speak and pred == tgt), "is_emit": True})
             ctx = _ctx_add(ctx, step.target)
     return records

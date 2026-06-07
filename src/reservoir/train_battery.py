@@ -15,16 +15,22 @@ from collections import defaultdict
 
 
 def _evaluate(lm, eval_set, stateless: bool = False) -> dict:
-    """Per-task accuracy over the eval set (fraction of supervised steps decoded exactly)."""
+    """Per-task accuracy. For tasks with an emit step (the part that needs carried state), the
+    score is the **emit-step** accuracy — NOT averaged with the free SILENCE steps, which a
+    silent model passes for nothing. Pure-silence tasks (no emit step) keep silence accuracy."""
     from .episode import episode_eval
 
-    hits = defaultdict(int)
-    tot = defaultdict(int)
+    e_hits, e_tot = defaultdict(int), defaultdict(int)   # emit steps only
+    a_hits, a_tot = defaultdict(int), defaultdict(int)   # all steps (fallback for silence task)
     for ep in eval_set:
         for rec in episode_eval(lm, ep, stateless=stateless):
-            tot[rec["task"]] += 1
-            hits[rec["task"]] += int(rec["ok"])
-    return {t: hits[t] / tot[t] for t in sorted(tot)}
+            t = rec["task"]
+            a_tot[t] += 1
+            a_hits[t] += int(rec["ok"])
+            if rec.get("is_emit"):
+                e_tot[t] += 1
+                e_hits[t] += int(rec["ok"])
+    return {t: (e_hits[t] / e_tot[t] if e_tot[t] else a_hits[t] / a_tot[t]) for t in sorted(a_tot)}
 
 
 def train_battery(model_name: str = "gpt2", *, steps: int = 400, lr: float = 1e-3,
@@ -34,7 +40,7 @@ def train_battery(model_name: str = "gpt2", *, steps: int = 400, lr: float = 1e-
                   eval_n: int = 16, n_reservoir: int = 512, n_prefix: int = 8,
                   lora_target: str = "attn", input_scaling: float = 0.5,
                   unfreeze_from: int | None = None, lora_r: int = 8,
-                  stateless: bool = False, log=print) -> dict:
+                  stateless: bool = False, emit_weight: float = 1.0, log=print) -> dict:
     import numpy as np
     import torch
 
@@ -70,7 +76,7 @@ def train_battery(model_name: str = "gpt2", *, steps: int = 400, lr: float = 1e-
     lm.model.train()
     for i in range(steps):
         ep = sample_episode(rng, weights)
-        loss = episode_loss(lm, ep, stateless=stateless)
+        loss = episode_loss(lm, ep, stateless=stateless, emit_weight=emit_weight)
         opt.zero_grad()
         loss.backward()
         opt.step()
