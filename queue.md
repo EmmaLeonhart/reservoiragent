@@ -186,6 +186,14 @@ honest emit accuracy (timed/selfinit); if it climbs above 0.25, temporal is genu
 fold into FINDINGS either way. Larger-than-8192 reservoir needs a fixed down-projection (readout
 grows with reservoir size) — follow-up if 8192 helps.
 
+## Planned (run when GPU frees) — focused single-task timed training
+
+Big run (16384, 5 epochs, emit loss) is collapsing (mean 0.044->0.031->0.000, timed 0) — size
++ epochs aren't the lever. Next idea: the joint 8-task battery may DILUTE the temporal signal.
+Train timed-only (weights={"timed":1}) emit-focused, GPT-2-small AND Qwen-1.5B — gives timed
+emission its best focused shot. If GPT-2 timed beats the diluted 0.25 and Qwen still fails, the
+wall is robust; if focused Qwen works, dilution was the problem. No new code (custom weights).
+
 ## Other notes (not sure if they should be in the queue)
 
 **Reality note (kept honest):** each item landed as real, tested, committed work or a
