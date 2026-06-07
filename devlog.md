@@ -1714,3 +1714,15 @@ silence DROPPED 1.00->0.38 because emit_weight=5 made the gate over-speak. So (a
 measures the real capability, (b) timed emission is partially learnable (0.25, not solved), (c)
 emit_weight=5 too high — gate precision/recall tradeoff. Next: Qwen-1.5B + large reservoir (8192)
 with balanced emit_weight=3. The gamed 0.64 is replaced by honest weak-but-real numbers.
+
+## 2026-06-07 — Qwen 8192 emit-focused: timed emission ~0 (small-works/large-fails again); big run next
+
+train_battery Qwen-1.5B, 8192 res, broad LoRA, emit_weight=3, 1500 steps. Honest emit accuracy:
+timed 0.00, selfinit 0.00, recall ~0.06 — emission did NOT train at 1.5B (loss fell 4.9->3.9 but
+emit didn't climb). Mirrors the content wall: GPT-2-small got timed 0.25, Qwen-1.5B ~0. NOT
+concluding from one run (user directive) — launching the big run: train_large.py, 16384-node
+reservoir via down-projection (proj_dim=512), broad LoRA, emit_weight=3, detuned, 5 epochs x 3000
+steps (10x the budget), each epoch's MODEL + OPTIMIZER streamed to HF (reservoir-agent-qwen-
+battery-emit). Note: W_r is dense so 16384 (~1GB) is the cap on 8GB; truly huge (32k+) needs
+sparse W_r (next enabler). Residual: best-selection mean still includes silence (inflates "best");
+per-task emit numbers are honest.
