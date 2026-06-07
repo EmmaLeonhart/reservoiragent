@@ -401,7 +401,11 @@
   then isolated the real picture: low-dimensional <em>timing</em> substantially trains at 1.5B
   (the model emits at the right step), while high-dimensional content <em>recall</em> does not —
   so the wall is dominated by recall, the high-dimensional component. Recall hit 100% only at six
-  single-token words on GPT-2-small and collapses by twelve; at 1.5B it stays near zero.
+  single-token words on GPT-2-small and collapses by twelve; at 1.5B it stays near zero. Even the
+  low-dimensional timing gate is not <em>cleanly</em> solved: at balanced weighting it emits at the
+  right step (1.00) but over-fires on ~half the silent steps (silence-shut 0.53), and up-weighting
+  the silence supervision to fix that (silence-shut &rarr; 1.00) instead collapses the emit to 0.00
+  &mdash; the two failure modes trade off, the signature of a capacity limit rather than a tuning miss.
 </p>
 <p>
   <strong>The cause is geometric: the reservoir compresses where it should expand.</strong>
