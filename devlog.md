@@ -1690,3 +1690,18 @@ content stays effectively at the floor, flickers on lucky runs, needs multi-seed
 establish anything. What's robust is the temporal/content SPLIT (silence ~1.0 holds, content
 doesn't), not a content gain. HELD the HF publish — this model (content 0.00) is not a content
 success; publishing it as one would mislead. Task #9's publish purpose is moot.
+
+## 2026-06-07 — CORRECTION: stateless ablation refutes the "statefulness scales to Qwen-1.5B" reframe
+
+Ran the matched battery ablation (con #6): Qwen-1.5B, broad LoRA, same seed, stateful vs
+stateless (reservoir reset every pass). Result: temporal metrics IDENTICAL — silence 1.00, timed
+0.64, selfinit 0.65 in both — and stateless mean is HIGHER (0.415 vs 0.345). So the battery's
+temporal/agency success is NOT from carried reservoir state; it's LoRA + current-pass features.
+Con #6 is correct for the battery. WITHDRAWN the "statefulness scales to Qwen-1.5B" reframe
+(abstract, scope section, site lede). The valid carried-state evidence remains the controlled
+memory-requiring tasks whose controls DO swing: GPT-2-small cross-pass recall (1.00 vs 0.17 wiped)
+and the dedicated D-section gate (F1 0.96 vs 0.34). At 1.5B usable cross-pass state is NOT
+demonstrated (content chance; temporal is LoRA). Methodological lesson added: a metric that
+doesn't move under a stateless control isn't evidence of statefulness. This is the second
+self-caught walk-back today (content-lift noise, now the temporal reframe) — both from running
+the controls. Published; resubmitting.
