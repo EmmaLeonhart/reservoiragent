@@ -174,6 +174,13 @@ _**Done — capacity follow-up (2026-06-07).** Broad LoRA + full unfreeze (top 4
 
 _**Done — capacity thread closed (2026-06-07).** r32 broad LoRA: no gain (mean 0.317, recall 0.19, accum 0). Sweep: r8 broad LoRA best balanced (0.392, recall/accum 0.19/0.19); full unfreeze recall 0.25 but unstable; r32 no gain. Content lifts off floor with broad readout adaptation (~0.19) but capacity past that doesn't climb locally — path past the plateau is scale. In FINDINGS; published._
 
+## Active — preserve + publish the best battery model (broad-LoRA-r8) (2026-06-07)
+
+The best battery result (broad-LoRA-r8, mean 0.392, content off zero) was run WITHOUT save_dir, so
+its weights were never saved — only metrics. The project preserves every model. Re-run that exact
+sweet-spot config WITH save_dir, then publish_hf --artifact-dir to HF (update the published model).
+Report the saved metrics (CUDA nondeterminism may shift slightly from 0.392).
+
 ## Other notes (not sure if they should be in the queue)
 
 **Reality note (kept honest):** each item landed as real, tested, committed work or a
