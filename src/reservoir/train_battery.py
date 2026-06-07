@@ -32,7 +32,8 @@ def train_battery(model_name: str = "gpt2", *, steps: int = 400, lr: float = 1e-
                   dtype: str | None = None, load_in_4bit: bool = False,
                   save_dir: str | None = None, eval_every: int = 100,
                   eval_n: int = 16, n_reservoir: int = 512, n_prefix: int = 8,
-                  log=print) -> dict:
+                  lora_target: str = "attn", input_scaling: float = 0.5,
+                  unfreeze_from: int | None = None, log=print) -> dict:
     import numpy as np
     import torch
 
@@ -43,7 +44,8 @@ def train_battery(model_name: str = "gpt2", *, steps: int = 400, lr: float = 1e-
     weights = weights or DEFAULT_WEIGHTS
     lm = TorchReservoirPrefixInjectedLM(model_name, seed=seed, device=device, dtype=dtype,
                                         load_in_4bit=load_in_4bit, n_reservoir=n_reservoir,
-                                        n_prefix=n_prefix)
+                                        n_prefix=n_prefix, lora_target=lora_target,
+                                        input_scaling=input_scaling, unfreeze_from=unfreeze_from)
     rng = np.random.default_rng(seed)
     eval_set = make_eval_set(np.random.default_rng(seed + 9991), n_per_task=eval_n,
                              weights=weights)
