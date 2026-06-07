@@ -33,7 +33,9 @@ not break the wall — a structural optimization barrier, not under-training. Cr
 boundary is specific to *high-dimensional symbolic content recall*: on an eight-task stateful
 battery run on **Qwen2.5-1.5B (a modern model ~12× larger than GPT-2-small)**, the
 *temporal/agency* behaviours **do train at scale** — selective silence 1.00, timed response
-0.71, self-initiation 0.67 — while symbolic-content tasks stay near zero. So statefulness scales
+0.71, self-initiation 0.67 — while symbolic-content tasks stay near zero (a broad-LoRA + expanded-
+reservoir variant lifts recall and accumulate from 0.00 to 0.19 — the first move off the floor,
+still partial). So statefulness scales
 to a modern 1.5B model for the low-dimensional state an agent needs (a clock, a gate, an
 unresolved thread); what does not yet scale is *which specific token* was carried, which we trace
 to a reservoir undersized relative to its input (effective dimensionality plateaus near 180 and
@@ -848,6 +850,20 @@ a reservoir far larger than fits here, is the open result this experiment is mea
 full scale needs sparse `W_r` and larger hardware. (Enabling change this session:
 `_build_reservoir_weights` estimates the spectral radius by power iteration, since the exact
 eigendecomposition is O(K³) and stalls past ~12k nodes.)
+
+**Update — the missing ingredient was not reservoir size but trainable-readout capacity, and
+adding it lifts content off zero.** The 8192-node run above used reservoir expansion but
+*attention-only* LoRA. Re-running the battery on Qwen-1.5B with **broad LoRA (adapting the MLPs
+too, `lora_target="all"`) on a 4096-node detuned reservoir** for one epoch changes the content
+result for the first time: **recall rises 0.00 → 0.19 and accumulate 0.00 → 0.19**, while the
+temporal/agency tasks hold (silence 1.00, timed 0.64, self-initiation 0.65) and the overall best
+mean improves **0.344 → 0.392**. The longer-range content tasks (sequence, deferred) stay at 0,
+so this is a partial lift, not a solved content channel — but it is the first time symbolic
+content moves off the floor at this scale, and it points the cause more precisely: a
+high-dimensional reservoir is necessary but the model also needs enough *trainable* capacity
+(MLP adaptation), not just attention LoRA, to read that state into content. The corrective
+direction is therefore both: a larger reservoir *and* broader/heavier readout adaptation.
+(`train_battery ... --lora-target all`; `results/battery_qwen_newlevers.json`.)
 
 ## Limitations (current)
 

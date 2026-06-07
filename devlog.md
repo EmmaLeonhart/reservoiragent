@@ -1634,3 +1634,16 @@ depends on it. (6) register: GPT-2 babble->incoherent base-model output, verifie
 as correctly wired. Cons 1/3/4 are genuine limitations. Presentation cons now essentially
 retired across 6 reviews; standing Reject is scientific scope (needs scale beyond this hardware).
 Response map in paper/reviews/post2700_response_notes.md. Published; resubmitting.
+
+## 2026-06-07 — new-levers battery run IMPROVES content: recall/accumulate 0.00 -> 0.19 on Qwen-1.5B
+
+Answering the user's "any suggested training to improve?": ran the battery on Qwen-1.5B with the
+combination never tried there — broad LoRA (lora_target=all, adapts MLPs) + 4096-node detuned
+reservoir (input_scaling 0.1), 1200 steps. Result: best mean 0.344 -> 0.392; content lifts off
+zero for the FIRST time at scale — recall 0.00 -> 0.19, accumulate 0.00 -> 0.19 — while temporal
+holds (silence 1.00, timed 0.64, selfinit 0.65). sequence/deferred still 0 (partial lift, not
+solved). Refines the cause: a high-dim reservoir is necessary but not sufficient; the model also
+needs broad TRAINABLE capacity (MLP adaptation), not just attention LoRA, to read state into
+content. The 8192 massive run had expansion but only attn-LoRA, which is why content stayed 0.
+Wired lora_target/input_scaling/unfreeze_from into train_battery. FINDINGS battery section +
+abstract updated. results/battery_qwen_newlevers.json. Published; resubmitting.
