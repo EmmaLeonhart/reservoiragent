@@ -37,7 +37,8 @@ class TorchReservoirPrefixInjectedLM:
                  seed: int = 0, device: str | None = None, lora_r: int = 8,
                  lora_alpha: int = 16, summary: str = "last", load_in_4bit: bool = False,
                  dtype: str | None = None, train_seed: int | None = None,
-                 lora_target: str = "attn", unfreeze_from: int | None = None):
+                 lora_target: str = "attn", unfreeze_from: int | None = None,
+                 proj_dim: int | None = None):
         import torch
         import torch.nn as nn
         from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -93,14 +94,28 @@ class TorchReservoirPrefixInjectedLM:
         self.train_seed = train_seed
         if train_seed is not None:
             torch.manual_seed(int(train_seed))
-        # reservoir -> n_prefix prefix-token embeddings
-        self.W_res = nn.Linear(n_reservoir, n_prefix * d_model)
+        # Optional FIXED random down-projection: when proj_dim is set, the (possibly huge)
+        # reservoir state is projected to proj_dim by a fixed random P *before* the trained
+        # readout — so the reservoir can grow to tens of thousands of nodes while the trained
+        # readout stays small (proj_dim x n_prefix*d_model). P regenerates from seed (not saved).
+        self.proj_dim = proj_dim
+        if proj_dim is not None:
+            import numpy as _np
+            _prng = _np.random.default_rng(seed + 4242)
+            _P = _prng.standard_normal((proj_dim, n_reservoir)) / (n_reservoir ** 0.5)
+            self.P = torch.tensor(_P, dtype=torch.float32)
+            readout_in = proj_dim
+        else:
+            self.P = None
+            readout_in = n_reservoir
+        # reservoir (or its down-projection) -> n_prefix prefix-token embeddings
+        self.W_res = nn.Linear(readout_in, n_prefix * d_model)
         # Separate GATE HEAD: a tiny readout from the reservoir state that decides
         # speak-vs-silent, independent of *what* to say. Without it, "stay silent" had to
         # be trained as "predict end-of-text" on the LM output, which competed with content
         # tokens and suppressed them. The gate head owns the act/don't-act decision so the
         # LM output is free to learn content only. >0 logit => speak.
-        self.gate_head = nn.Linear(n_reservoir, 1)
+        self.gate_head = nn.Linear(readout_in, 1)
 
         # "attn" = adapt only the attention projections (default, light touch).
         # "all" = also adapt the MLP, giving the upper layers far more capacity to learn to
@@ -130,6 +145,8 @@ class TorchReservoirPrefixInjectedLM:
         self.W_r = self.W_r.to(self.device)
         self.W_in = self.W_in.to(self.device)
         self._state = self._state.to(self.device)
+        if self.P is not None:
+            self.P = self.P.to(self.device)
         self.embed = self.model.get_input_embeddings()
         # everything needed to reconstruct this model on load (device is chosen at load
         # time, not saved). The reservoir (W_r, W_in) regenerates from seed, so only the
@@ -138,7 +155,7 @@ class TorchReservoirPrefixInjectedLM:
             model_name=model_name, n_reservoir=n_reservoir, n_prefix=n_prefix,
             layer=self.layer, spectral_radius=spectral_radius, input_scaling=input_scaling,
             sparsity=sparsity, leak=leak, seed=seed, lora_r=lora_r, lora_alpha=lora_alpha,
-            summary=summary, lora_target=lora_target, unfreeze_from=unfreeze_from)
+            summary=summary, lora_target=lora_target, unfreeze_from=unfreeze_from, proj_dim=proj_dim)
         self._register_read_hook()
 
     def _register_read_hook(self):
@@ -167,7 +184,7 @@ class TorchReservoirPrefixInjectedLM:
         torch = self.torch
         B, T = input_ids.shape
         tok_emb = self.embed(input_ids)                              # (B, T, d)
-        prefix = self.W_res(self._state.to(self.W_res.weight.dtype)) * self.readout_scale
+        prefix = self.W_res(self._readout_state().to(self.W_res.weight.dtype)) * self.readout_scale
         prefix = prefix.view(self.n_prefix, self.d_model).unsqueeze(0).expand(B, -1, -1)
         inputs_embeds = torch.cat([prefix.to(tok_emb.dtype), tok_emb], dim=1)
         ext_mask = torch.cat(
@@ -176,10 +193,17 @@ class TorchReservoirPrefixInjectedLM:
         out = self.model(inputs_embeds=inputs_embeds, attention_mask=ext_mask)
         return out.logits[:, self.n_prefix:, :]                     # strip the prefix
 
+    def _readout_state(self):
+        """The state the trained readouts see: the raw reservoir state, or its fixed
+        down-projection P·state when proj_dim is set (keeps the readout small for huge K)."""
+        if self.P is None:
+            return self._state
+        return self.P.to(self._state.dtype) @ self._state
+
     def gate_logit(self):
         """Speak-vs-silent decision read from the *current* reservoir state (call after a
         ``forward_logits`` pass has ticked the state). A scalar logit; >0 => speak."""
-        return self.gate_head(self._state.to(self.gate_head.weight.dtype)).squeeze(-1)
+        return self.gate_head(self._readout_state().to(self.gate_head.weight.dtype)).squeeze(-1)
 
     def trainable_parameters(self):
         params = [p for p in self.model.parameters() if p.requires_grad]
