@@ -1790,3 +1790,13 @@ steps. vs recall-bundled timed ~0.08. Conclusion: RECALL (high-dim) is the domin
 blocker; low-dim pass-counting is substantially more learnable at 1.5B though not cleanly gated.
 Supports the content-vs-temporal dimensionality split with a clean decomposition. FINDINGS updated.
 4th potential overclaim of the day, caught by measuring both halves before claiming. Published.
+
+## 2026-06-07 — gate-balance refuted: timing over-firing is structural (0.53 at emit_weight 1 and 2)
+
+Re-ran timing-only Qwen with emit_weight=1 (vs 2): emit 1.00, pre-emit silence-shut 0.53 —
+IDENTICAL to emit_weight=2. So the gate over-firing isn't a weight-balance issue; pure timing is
+robustly PARTIAL at 1.5B (emit perfect, gate fires on ~half the silent steps), not cleanly gated,
+and not fixable by down-weighting emit. Replicating 0.53 at two weights makes the decomposition
+finding robust. Temporal investigation concluded: low-dim timing partially works at 1.5B (emit
+1.00, gate over-fires), recall (high-dim) is the dominant blocker, content needs cloud-scale.
+FINDINGS updated. Published.
