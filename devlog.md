@@ -1667,3 +1667,13 @@ broad-LoRA-r8 neither improves content nor holds the other tasks. Content channe
 broad readout adaptation lifts content off the floor (0 -> ~0.19) but more capacity past that
 doesn't climb on this hardware; the path past the ~0.19 plateau is scale, consistent with the
 GPT-2-small-only cross-pass result. Thread characterized and closed. FINDINGS updated. Published.
+
+## 2026-06-07 — post-2713 review: register pass + counter the "temporal is trivial LoRA" con
+
+Review post2713 (Reject; pros stable). Addressed: (3) register — removed "this session"
+throughout, the "Grok conversation" reference, inline todo.md pointers. (6, NEW sharp con:
+temporal success may be LoRA-learnable without the reservoir) countered with existing stateless
+controls (silence gate F1 0.96 reservoir vs 0.34 stateless; cross-pass wiped->chance — temporal
+tasks need cross-pass state and fail without it) and queued the rigorous battery-level stateless
+ablation as the clean same-setup test. Cons 1/2/4/5 are scope/known. Response map in
+paper/reviews/post2713_response_notes.md. Published; resubmitting.
