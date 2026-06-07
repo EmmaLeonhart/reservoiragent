@@ -27,7 +27,7 @@ baseline stays at chance (verified reproducible: 1.00 vs 0.17). We characterize 
 the edge-of-chaos boundary at spectral radius ≈ 1 survives the move to real transformer
 activations, which over-drive a unit-scaled reservoir and must be fed at roughly ¼–⅒ scale.
 We then bound the result. The recall win holds at GPT-2-small (124M) but does not transfer to
-GPT-2-medium (355M) or a 3B instruction-tuned model: the injection is verified-wired (state
+GPT-2-medium (355M) or a 3B instruction-tuned model: the injection is verified as correctly wired (state
 updates, gradients flow) yet recall does not bootstrap within budget, and 6.7× more steps does
 not break the wall — a structural optimization barrier, not under-training. Crucially, this
 boundary is specific to *high-dimensional symbolic content recall*: on an eight-task stateful
@@ -75,7 +75,7 @@ boundary of the claims:
   treat it as the project's central open theoretical question, not an established finding.
 - **The Hermes-3B negative and the KV-append integration blocker are limitations, stated
   as such.** The cross-pass recall result is GPT-2-only; on Hermes-3B it is a
-  well-diagnosed, verified-wired non-convergence (a bootstrapping/scale wall, plausibly
+  well-diagnosed, verified as correctly wired non-convergence (a bootstrapping/scale wall, plausibly
   signal dilution through depth), and the most effective injection variant (KV-append)
   has a documented HuggingFace-integration blocker that currently limits its
   reproducibility. Neither is hidden; both bound the contribution.
@@ -115,10 +115,11 @@ Block-Recurrent, Mamba, Titans, …) uses *trained* recurrence carrying state *w
 sequence; none uses a *fixed-random* reservoir with state across *independent* passes.
 The full survey with citations is in [`literature/REVIEW.md`](literature/REVIEW.md).
 
-## Theory (formal claims, scoped)
+## Motivation and framing (not formal results)
 
-Three claims, stated at the level of *kind* of capability, not level of capability.
-Grounding and citations are in [`literature/REVIEW.md`](literature/REVIEW.md).
+Three framing points, stated at the level of *kind* of capability, not level of capability —
+motivation for the design, not results. Grounding and citations are in
+[`literature/REVIEW.md`](literature/REVIEW.md).
 
 **1 · A genuine time dimension.** A standard transformer represents time as token
 *position* — an index into a sequence, not a dimension the model evolves along. With
@@ -130,17 +131,14 @@ context window (it survives context truncation), which is precisely what a "time
 means here: an endogenous variable the model accumulates along, independent of the
 input sequence.
 
-**2 · The expressivity gap — motivation only, explicitly not a result.** A fixed-depth,
-finite-precision transformer is bounded *per forward pass* to a low complexity class
-(saturated/log-precision transformers ⊆ TC⁰/FO(M); Merrill & Sabharwal 2022/2023; Hahn 2020),
-and the documented lever past that ceiling is state carried *across* steps (Siegelmann & Sontag
-1992/1995). This motivates *why* cross-pass state is the interesting lever — nothing more. We
-prove no separation: the transformer Turing-completeness results require *arbitrary precision*
-(Pérez et al. 2019), and **no result here or in the literature shows that a finite-precision
-reservoir lifts the per-pass bound.** The only claim we make is the narrow, structural one — the
-architecture has a *capacity for endogenous cross-pass state evolution that a single
-finite-precision pass lacks* — and we treat the formal separation as an open question, not a
-contribution of this work. Readers uninterested in the motivation can skip to the results.
+**2 · The expressivity gap (one-paragraph motivation, not a result — and not relied on).**
+A finite-precision transformer is bounded per forward pass to a low complexity class (TC⁰/FO(M);
+Merrill & Sabharwal; Hahn), and cross-pass state is the documented lever past it (Siegelmann &
+Sontag) — this is *why* cross-pass state is worth studying, nothing more. We prove no separation,
+the Turing-completeness results require arbitrary precision (Pérez et al. 2019), and no result
+here or in the literature shows a finite-precision reservoir lifts the bound (details:
+[`literature/REVIEW.md`](literature/REVIEW.md)). None of the empirical results below depend on
+this argument; it can be skipped entirely.
 
 **3 · The organism analogy (one paragraph, bounded).** The reservoir introduces
 endogenous state that evolves independently of external input — a property shared with
@@ -345,7 +343,7 @@ A scripted session runs end-to-end: across five interleaved prompted/unprompted 
 the reservoir state |r| evolves continuously (state carried, including through the
 idle ticks). On the untrained model the gate keys off the *base
 model's* next-token entropy, so its emit/silence decisions and the generated text
-(GPT-2 babble) are not yet meaningful — the harness is the mechanism, and a meaningful
+(incoherent base-model output) are not yet meaningful — the harness is the mechanism, and a meaningful
 self-initiation policy needs the trained readout/LoRA. The point of this step is that
 the whole loop is now testable before spending compute on training.
 
@@ -475,7 +473,7 @@ has now been tested and ruled out** (a 2000-step 4-bit run, ≈6.7×, still chan
 the remaining plausible routes (left open, not faked) are structural: a curriculum (start
 with the key in-context, anneal it out) / a stronger multi-layer prefix coupling / unfreezing
 more of the model. **The result holds decisively on GPT-2; on Hermes the mechanism is
-verified-wired but the recall has not yet been trained to converge, and it is not a
+verified as correctly wired but the recall has not yet been trained to converge, and it is not a
 step-count problem.** (`results/crosspass_hermes-3-llama-3-2-3b.json`,
 `docs/crosspass_hermes-3-llama-3-2-3b.png`.)
 
@@ -622,7 +620,7 @@ of the real agent is subtler and worth stating plainly:
   *when to stay silent, when to self-initiate* — against its strong priors. The fact that
   the Hermes cross-pass recall would not bootstrap (above) is the same difficulty showing
   up: rewiring a pretrained model's behaviour through an injected reservoir is a hard
-  optimization problem even when the mechanism is verified-wired. The clean GPT-2 results
+  optimization problem even when the mechanism is verified as correctly wired. The clean GPT-2 results
   show the mechanism *can* carry and use state; making a large pretrained agent
   *behave* differently is the real, hard frontier this project is pushing on.
 
@@ -855,9 +853,13 @@ eigendecomposition is O(K³) and stalls past ~12k nodes.)
 
 - The reservoir was **undersized relative to its input** (0.3–0.7× the 1536-dim layer it
   reads) and saturated (74% of cells pinned); effective dimensionality plateaus at ~150–186,
-  which caps symbolic content. Symbolic-recall results therefore hold only at tiny
-  vocabularies (≈6 words); at 12+ words recall collapses. A correctly-sized, detuned reservoir
-  is future work, not a result here.
+  which caps symbolic content. **But undersizing is not the whole explanation, and we tested
+  that:** a 5.3× *expansion* (an 8192-node reservoir, well above the input dimension, the
+  correct ESN regime, with detuned dynamics) was run on the battery and **symbolic content still
+  did not recover** (it peaked within one epoch then collapsed; see "The stateful-task battery").
+  So a properly high-dimensional reservoir is necessary but, on this hardware/budget, not
+  sufficient — the content-recall limit is not simply "they undersized it." A correctly-sized
+  reservoir at a *much larger training budget* than fits here remains the open test.
 - Content-memory tasks (recall, accumulate, sequence, deferred) do not learn at scale; only
   temporal/agency tasks (timed, self-initiation, silence) do. The always-alive app runs the
   untrained substrate, so it shows the harness and the live dynamics, not a trained policy.

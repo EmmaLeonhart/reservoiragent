@@ -1621,3 +1621,16 @@ arch, broad-LoRA (lora_target all r32), full unfreeze (unfreeze_from 12). The on
 is not a technique but a budget (far more steps / much larger model than this hardware fits).
 Updated FINDINGS (the two now-outdated "remaining lever = unfreeze" claims corrected; reminder
 that this is the CONTENT wall, temporal still scales to Qwen-1.5B). Published; resubmitting.
+
+## 2026-06-07 — post-2700 review response: undersizing counter, TC0 cut harder, register
+
+First review of the fully-revised version (post2700) held at Reject but pros grew again
+("rigorous", "exceptionally transparent", "useful framework", "compelling secondary
+contribution"). Addressed three cons: (2) defused "you just undersized it" — noted the 5.3x
+expansion (8192 nodes, correct ESN regime) was run and content STILL didn't recover, so
+undersizing is necessary-not-sufficient. (5, flagged 6th time) cut the TC0 paragraph harder,
+renamed the section "Motivation and framing (not formal results)", stated no empirical result
+depends on it. (6) register: GPT-2 babble->incoherent base-model output, verified-wired->verified
+as correctly wired. Cons 1/3/4 are genuine limitations. Presentation cons now essentially
+retired across 6 reviews; standing Reject is scientific scope (needs scale beyond this hardware).
+Response map in paper/reviews/post2700_response_notes.md. Published; resubmitting.
