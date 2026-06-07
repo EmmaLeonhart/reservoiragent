@@ -62,6 +62,9 @@ def main() -> int:
     inscale = _env("RESERVOIR_INSCALE", "0.5", float)   # detune (lower) to avoid saturation
     lr = _env("RESERVOIR_LR", "5e-4", float)
     eval_n = _env("RESERVOIR_EVALN", "16", int)
+    emit_weight = _env("RESERVOIR_EMIT_WEIGHT", "3.0", float)  # up-weight the emit step (not silence)
+    proj_dim = _env("RESERVOIR_PROJ", "0", int) or None        # fixed down-projection for huge reservoirs
+    lora_target = _env("RESERVOIR_LORA_TARGET", "all", str)    # adapt MLP too, not just attention
     out_root = os.path.join(ROOT, "artifacts", "qwen-large")
     os.makedirs(out_root, exist_ok=True)
 
@@ -75,7 +78,10 @@ def main() -> int:
           f"| input_scaling {inscale} | -> hf.co/{repo}", flush=True)
 
     lm = TorchReservoirPrefixInjectedLM(model, n_reservoir=n_res, n_prefix=n_prefix,
-                                        input_scaling=inscale, dtype="bfloat16", seed=0)
+                                        input_scaling=inscale, dtype="bfloat16", seed=0,
+                                        lora_target=lora_target, proj_dim=proj_dim)
+    print(f"[train_large] emit_weight {emit_weight} | proj_dim {proj_dim} | lora_target {lora_target}",
+          flush=True)
     pool = B.large_word_pool(lm.tokenizer, vocab)
     B.set_word_pool(pool)
     print(f"[train_large] word pool: {len(pool)} single-token words "
@@ -107,6 +113,10 @@ def main() -> int:
                 "lr": lr, "vocab": len(pool), "mean": mean, "metrics": m, "model": model}
         d = os.path.join(out_root, f"epoch_{epoch}")
         save_reservoir_model(d, lm, extra_meta=meta)
+        # Optimizer state per epoch (resumable training / analysis); lands in the epoch dir so
+        # the upload_folder below ships it to HF alongside the model.
+        torch.save({"optimizer": opt.state_dict(), "step": step, "epoch": epoch},
+                   os.path.join(d, "optimizer.pt"))
         try:
             api.upload_folder(folder_path=d, repo_id=repo, path_in_repo=f"epoch_{epoch}",
                               commit_message=f"epoch {epoch} step {step} mean {mean:.3f}")
@@ -129,7 +139,7 @@ def main() -> int:
     def train_step():
         nonlocal step, running
         ep = sample_episode(rng, weights)
-        loss = episode_loss(lm, ep)
+        loss = episode_loss(lm, ep, emit_weight=emit_weight)
         opt.zero_grad()
         loss.backward()
         opt.step()
