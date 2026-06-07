@@ -176,23 +176,24 @@ _**Done — capacity thread closed (2026-06-07).** r32 broad LoRA: no gain (mean
 
 _**Done/moot — preserve+publish (2026-06-07).** Re-ran broad-LoRA-r8 WITH save_dir; it did NOT reproduce the content lift (recall/accum 0.00 vs 0.19, mean 0.337). So the 0.19 was run noise; HELD the HF publish (a content-0.00 model isn't the claimed success). Model saved locally at artifacts/qwen-battery-broadlora. FINDINGS corrected: no content-lift claim, only the robust temporal/content split._
 
-## Active — emit-focused temporal training (user-directed 2026-06-07)
+_**Done — emit-focused temporal training (2026-06-07).** Fixed the loss-design bug (emit_weight
+up-weights the emit step; eval scores emit-only, not free silence). GPT-2-small: timed 0.00->~0.25
+(noisy). Qwen-1.5B big run (16384 res via down-projection, broad LoRA, 5 epochs/15000 steps,
+model+optimizer per epoch to HF): joint timed collapses to 0. Built: emit loss, down-projection
+(huge reservoirs), per-epoch optimizer-to-HF, capability-mean fix. In FINDINGS._
 
-The temporal metric was gamed by free silence steps (loss-design bug). Fixed: emit-focused loss
-(`emit_weight` up-weights the emit step) + emit-only eval metric. Validated GPT-2-small (timed
-emit 0.00->0.25, honest; emit_weight=5 over-suppressed silence -> use 3). RUNNING: Qwen-1.5B +
-8192-node reservoir + emit_weight=3, 1500 steps (bj6l5x0s5, task #11). On completion: report
-honest emit accuracy (timed/selfinit); if it climbs above 0.25, temporal is genuinely trainable;
-fold into FINDINGS either way. Larger-than-8192 reservoir needs a fixed down-projection (readout
-grows with reservoir size) — follow-up if 8192 helps.
+_**Done — focused single-task timed (2026-06-07).** Dilution hypothesis: GPT-2-small focused
+timed = 0.25 = diluted (no help at small scale). Qwen-1.5B focused timed = **stable 0.12**
+(above chance) vs joint 0 — so the joint battery DILUTES temporal at 1.5B; focusing recovers a
+weak nonzero. Soft scale wall (weak, dilution-sensitive), not a hard zero. In FINDINGS._
 
-## Planned (run when GPU frees) — focused single-task timed training
+## Active — longer focused timed-only on Qwen (2026-06-07)
 
-Big run (16384, 5 epochs, emit loss) is collapsing (mean 0.044->0.031->0.000, timed 0) — size
-+ epochs aren't the lever. Next idea: the joint 8-task battery may DILUTE the temporal signal.
-Train timed-only (weights={"timed":1}) emit-focused, GPT-2-small AND Qwen-1.5B — gives timed
-emission its best focused shot. If GPT-2 timed beats the diluted 0.25 and Qwen still fails, the
-wall is robust; if focused Qwen works, dilution was the problem. No new code (custom weights).
+Focused Qwen timed = stable 0.12 (the most promising temporal-at-scale signal). RUNNING
+(b475gkls9, task #13): 4000 steps, eval every 250 — does 0.12 climb with more training? If it
+climbs, per-task focused/specialized training (or curriculum / N specialized agents) is the path
+to temporal-at-scale; if it plateaus, that bounds focused training. Fold the timed-vs-steps curve
+into FINDINGS.
 
 ## Other notes (not sure if they should be in the queue)
 
