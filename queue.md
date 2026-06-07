@@ -181,6 +181,15 @@ its weights were never saved — only metrics. The project preserves every model
 sweet-spot config WITH save_dir, then publish_hf --artifact-dir to HF (update the published model).
 Report the saved metrics (CUDA nondeterminism may shift slightly from 0.392).
 
+## Active — battery-level stateless ablation (review con #6, 2026-06-07)
+
+Reviewer (post2713): the Qwen-1.5B temporal success might be LoRA-learnable without the reservoir.
+Existing per-task controls counter this (silence gate F1 0.96 reservoir vs 0.34 stateless; cross-
+pass wiped->chance), but the rigorous SAME-SETUP test is a battery stateless ablation: train the
+battery on Qwen-1.5B with the reservoir RESET between passes and show temporal drops. Needs a
+stateless mode in train_battery/episode_loss. If temporal holds without the reservoir, con #6 is
+right; if it drops, the reservoir is doing the work. Fold into FINDINGS.
+
 ## Other notes (not sure if they should be in the queue)
 
 **Reality note (kept honest):** each item landed as real, tested, committed work or a

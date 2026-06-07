@@ -55,7 +55,7 @@ The Reservoir Attention Network (RAN) architecture introduces a fixed-random
 recurrent substrate into the transformer's attention mechanism. We refer to a
 specific instantiation of this architecture as a **Reservoir Agent**.
 
-This session scopes the question as a **feasibility + dynamics study** at small scale
+We scope the question as a **feasibility + dynamics study** at small scale
 (GPT-2-scale base, single machine). The full vision — forking an agent harness into an
 always-alive runtime and N-seed LoRA selection at agent scale — is the long-horizon
 target (see `todo.md`).
@@ -151,7 +151,7 @@ certain classes of genuinely agentic behaviour (noticing an unresolved thread,
 estimating elapsed time, self-initiating) that are inaccessible to a stateless model
 regardless of its capability level.
 
-## Method (this session)
+## Method
 
 1. **Reservoir core.** A tested echo-state reservoir with spectral-radius control and
    dynamics observability (variance, saturation fraction, effective rank, trajectory
@@ -324,7 +324,7 @@ measured:
 - A productionized **always-alive runtime** (pass scheduler, idle timer, output
   confidence gate) — only the two-pass state-carry was demonstrated.
 - The **KV-append** injection (reservoir nodes as extra keys/values the upper layers
-  attend to) and **agent-scale (Hermes)** models — beyond local compute this session.
+  attend to) and **agent-scale (Hermes)** models — beyond local compute here.
 
 ## The always-alive runtime (harness)
 
@@ -565,6 +565,19 @@ becomes usable behaviour at 1.5B for the low-dimensional signals an agent actual
 only the high-dimensional content recall remains GPT-2-small-specific.** That reframes the scaling
 story from a flat negative into a split with a measured, mechanistic boundary.
 
+**Is the temporal success actually the reservoir, or could LoRA learn it without carried state
+(per review)?** A fair challenge: the temporal/agency tasks are low-dimensional, so perhaps the
+adapters learn them and the reservoir is incidental. The evidence says the carried state is
+required. The silence policy is the clean control: a linear gate on the **reservoir state**
+reaches F1 ≈ 0.96, while the **same gate on the current input** (no carried state) collapses to
+F1 ≈ 0.34 — the cue is strictly in the past, invisible without the reservoir (see "D: a trained
+silence policy"). The cross-pass baselines make the same point: wipe the reservoir between passes
+and the task drops to chance. So the temporal tasks are *defined* to need cross-pass state and
+fail without it; they are not trivially LoRA-learnable. The one control not yet run is a *battery-
+level* stateless ablation (reset the reservoir between the battery's passes and retrain) — that
+is the rigorous same-setup version and is the next experiment; the existing per-task stateless
+controls already point the same way.
+
 ### H4 (D) — a trained silence policy (meaningful "sometimes no response")
 
 The harness gate currently keys off the *base model's* next-token entropy, which is
@@ -733,7 +746,7 @@ input. Each silent tick still appends to the KV cache, so a continuously-running
 burns its context window *faster* than a turn-based model that only runs when prompted.
 Left unmanaged the cache grows linearly with the number of ticks and the agent eventually
 hits its context limit on idle activity alone. This is the operational pain point raised in
-the imported Grok conversation (`data_lake/transcripts/attention-reservoir-architecture-grok.md`):
+an architecture design discussion (transcript in `data_lake/transcripts/`):
 *"context explodes on a reservoir agent because a reservoir agent gets an input of blank."*
 
 The standard remedy is StreamingLLM-style eviction — keep a few **attention-sink** tokens
@@ -758,12 +771,11 @@ the point, not the specific numbers — they scale with the budget/window settin
 
 This is the cheap, base-agnostic half of the cache story. The expensive half — a base model
 whose attention is *natively* KV-efficient so the headroom is far larger (DeepSeek's MLA /
-the V4 CSA+HCA compression discussed in the chat) — is recorded as project direction in
-`todo.md`; it is not runnable on this session's hardware (see Limitations).
+the V4 CSA+HCA compression discussed in the chat) — is recorded as project direction for future work; it is not runnable on this hardware (see Limitations).
 
 ## The stateful-task battery, the gate head, and the reservoir-expansion finding
 
-This session built the agentic layer the earlier scope deferred and ran it at scale. The
+We built the agentic layer the earlier scope deferred and ran it at scale. The
 outcome is a clear split — temporal/agency behaviour learns, symbolic content does not — and
 a measured root cause: the reservoir is sized and tuned to *compress* its input when its job
 is to *expand* it. The result to carry forward is that working temporal dynamics and
@@ -847,7 +859,7 @@ symbolic content, and the useful signal arrives within ~1 epoch. A reservoir gen
 than its input — beyond what this hardware fits — remains the open test; the full scale needs
 sparse `W_r` and larger hardware. Whether it recovers over the full run, or whether recovery needs
 a reservoir far larger than fits here, is the open result this experiment is measuring; the
-full scale needs sparse `W_r` and larger hardware. (Enabling change this session:
+full scale needs sparse `W_r` and larger hardware. (Enabling change:
 `_build_reservoir_weights` estimates the spectral radius by power iteration, since the exact
 eigendecomposition is O(K³) and stalls past ~12k nodes.)
 
@@ -902,7 +914,7 @@ knob. The content thread is characterized; symbolic content reaches a partial ~0
 - Content-memory tasks (recall, accumulate, sequence, deferred) do not learn at scale; only
   temporal/agency tasks (timed, self-initiation, silence) do. The always-alive app runs the
   untrained substrate, so it shows the harness and the live dynamics, not a trained policy.
-- Small-scale only this session; the agentic claims (H3/H4) and the full runtime are
+- Small-scale only in this study; the agentic claims (H3/H4) and the full runtime are
   out of scope and compute-limited.
 - Two injection variants now exist: the **residual-stream** write (`inject.py`, wired
   into live GPT-2, H1-verified) and the richer **KV-append** mechanism (`kv_inject.py`,
