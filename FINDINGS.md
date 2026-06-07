@@ -511,7 +511,7 @@ run's 0.89, because 32 untrained prefix tokens perturb attention more than the m
 early, so it cannot even ride the in-context hint cleanly. So the 355M failure is **not** a
 coupling-bandwidth limit (more bandwidth hurt) — it is the learnability of the
 reservoir-state-to-recall mapping under a frozen backbone. That leaves **unfreezing more of the
-model** (letting the upper layers adapt to read the prefix) as the remaining structural lever.
+model** (letting the upper layers adapt to read the prefix) as the next lever to test — which we then do below (it also fails).
 
 **The wall holds across a different modern architecture (Qwen2.5-0.5B), so it is not a GPT-2
 quirk.** Running the same curriculum cross-pass task on **Qwen2.5-0.5B-Instruct** (a modern,
@@ -529,13 +529,24 @@ either — and now the carried state gives no advantage at all.** Adapting the M
 attention, at 4× the LoRA rank (`crosspass --lora-target all --lora-r 32`, GPT-2-medium, 800
 steps, curriculum), still lands at **chance (0.17)** — and unlike the earlier runs, the stateful
 and wiped-baseline traces are now identical (loss 2.16 vs 2.14), so the extra capacity buys the
-reservoir pathway nothing. This exhausts the light-to-moderate levers: across **four
-interventions — a curriculum, wider prefix coupling, a modern architecture (Qwen-0.5B), and
-broad-LoRA unfreezing — the cross-pass recall result does not transfer beyond GPT-2-small.**
-The boundary is therefore well characterized: the 100% recall is real and reproducible at 124M,
-and resists every moderate fix at 355M+. The remaining untested routes are heavier — training
-actual backbone weights (not just LoRA) and/or a much larger compute budget — and are recorded
-as future work; this study establishes the boundary, not a way past it.
+reservoir pathway nothing.
+
+**And full backbone unfreezing — training the actual weights, not LoRA — also fails.** The
+heaviest single-machine lever is to train the upper decoder weights directly rather than adapt
+them low-rank (`crosspass --unfreeze-from 12`, GPT-2-medium's upper 12 of 24 layers, curriculum,
+800 steps). Recall still lands at **chance (0.17), equal to the wiped baseline.** So the failure
+is not a capacity limit of LoRA: even full-rank weight training of half the network does not let
+the model learn to read the carried reservoir state into a recalled token at 355M.
+
+This exhausts every single-machine lever: across **five interventions — a curriculum, wider
+prefix coupling, a modern architecture (Qwen-0.5B), broad-LoRA adaptation, and full backbone
+unfreezing — the cross-pass *content*-recall result does not transfer beyond GPT-2-small.** The
+boundary is therefore well characterized: the 100% recall is real and reproducible at 124M, and
+resists every fix short of much greater scale. The one remaining route is not a technique but a
+budget — far more training steps and/or a substantially larger model than fits this hardware —
+recorded as future work. This study establishes the boundary rigorously, not a way past it.
+(Reminder of scope: this is the high-dimensional *content*-recall boundary; the low-dimensional
+temporal/agency behaviours do scale to Qwen-1.5B, as above.)
 
 **Scope of the wall, stated precisely: it is a *content-recall* wall, not a statefulness wall.**
 Everything above concerns recalling *which specific token* was carried — a high-dimensional
