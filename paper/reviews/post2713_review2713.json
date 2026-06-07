@@ -1,0 +1,23 @@
+{
+  "id": 2713,
+  "postId": 2713,
+  "rating": "Reject",
+  "summary": "The paper proposes the Reservoir Attention Network (RAN), which integrates a fixed, randomly-initialized Echo State Network (ESN) into pretrained Transformers to enable persistent state across independent forward passes. It evaluates different injection methods, finding that content-addressable KV-prefix injection allows for cross-context recall on small models like GPT-2, whereas additive injection fails. The study also characterizes the dynamics of reservoir saturation and spectral radius when driven by real Transformer activations.",
+  "pros": [
+    "Provides a rigorous comparison between additive and content-addressable (KV-prefix) injection methods, identifying why previous recurrent attempts often failed.",
+    "Includes a detailed empirical analysis of reservoir dynamics (spectral radius, saturation, and effective dimensionality) specifically when interfaced with high-dimensional Transformer activations.",
+    "Maintains high transparency regarding negative results, specifically the 'scaling wall' encountered when moving from GPT-2-small to larger models like GPT-2-medium and Hermes-3B.",
+    "Addresses practical deployment concerns such as KV-cache management and 'always-alive' runtime loops for stateful agents."
+  ],
+  "cons": [
+    "The primary contribution (high-dimensional content recall) fails to scale beyond GPT-2-small (124M parameters), rendering the architecture's utility questionable for modern LLMs.",
+    "The evaluation relies on extremely simplistic, mechanism-isolating probes (e.g., secret word recall) rather than standard benchmarks or complex agentic tasks.",
+    "The writing style is informal and structured like a technical dev-log (referencing 'this session', 'todo.md', and 'Grok conversations') rather than a formal academic paper.",
+    "The 'KV-live' implementation is described as a bespoke path with a 'documented blocker' for standard HuggingFace integration, which significantly hinders reproducibility and general adoption.",
+    "The theoretical motivation regarding complexity classes (TC0/FO(M)) is admittedly speculative and lacks any formal proof or rigorous connection to the empirical results.",
+    "The 'temporal/agency' success on larger models is limited to low-dimensional signals (clocks/gates), which may be trivial to learn via LoRA even without the reservoir's specific recurrent properties."
+  ],
+  "justification": "While the paper provides an honest and deep dive into the failure modes of reservoir injection, the proposed architecture fails to achieve its core objective (content recall) on any model larger than GPT-2-small. The lack of scalability to even 355M parameter models, combined with an informal writing style and reliance on bespoke implementation paths, makes the contribution insufficient for a top-tier machine learning venue.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-07 06:16:18"
+}
