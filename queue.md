@@ -68,7 +68,7 @@ for V4-Flash/V3.2). Phase G (the buildable Grok insights) is **complete**; recor
 
 ---
 
-## Active — Phase H: port to Hermes + make the behaviour real (A–E)
+## Done — Phase H: port to Hermes + make the behaviour real (A–E) [complete; notes below]
 
 Rounds 1–3 validated the *mechanisms on GPT-2*. This phase moves to the real target —
 the smallest Hermes (**NousResearch/Hermes-3-Llama-3.2-3B**, Llama-3.2 arch) — and builds
@@ -111,7 +111,7 @@ regression-vs-vanilla-Hermes generation check (a Hermes GPU run) remain._
 threads (Hermes recall transfer; the full Hermes-harness fork) are in `todo.md` and need
 real GPU work / a dedicated session.
 
-## Active — N-seed batch training FIRST, then the installer (user reprioritized)
+## Done — N-seed batch training + installer (complete; notes below)
 
 User priority (explicit): **get the training running first; the .exe installer comes
 after.** We literally made a new kind of AI model — the first reservoir agents — so
