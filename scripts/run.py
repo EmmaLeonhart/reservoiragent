@@ -313,6 +313,7 @@ def cmd_crosspass(args) -> int:
                                   input_scaling=args.input_scaling, dtype=args.dtype,
                                   curriculum=args.curriculum, n_prefix=args.n_prefix,
                                   lora_r=args.lora_r, lora_target=args.lora_target,
+                                  unfreeze_from=args.unfreeze_from,
                                   save_dir=(args.save if stateful else None))
         else:
             r = run_cross_pass(args.model, n_keys=args.n_keys, steps=args.steps,
@@ -710,6 +711,9 @@ def main(argv=None) -> int:
     cp.add_argument("--tag", default=None,
                     help="suffix for output filenames, to keep config variants of one model "
                          "from clobbering each other (e.g. --tag np32-curric).")
+    cp.add_argument("--unfreeze-from", type=int, default=None,
+                    help="kv mode: full-train (not LoRA) the backbone decoder layers from this "
+                         "index up — the heavy 'unfreeze the backbone' scaling-wall lever.")
     cp.add_argument("--lora-r", type=int, default=8,
                     help="kv mode: LoRA rank. Higher = more adaptation capacity for the "
                          "frozen backbone to learn to read the reservoir prefix.")

@@ -157,7 +157,7 @@ def run_cross_pass_kv(model_name: str = "gpt2", *, n_keys: int = 6, steps: int =
                       dtype: str | None = None, save_dir: str | None = None,
                       train_seed: int | None = None, deterministic: bool = False,
                       curriculum: float = 0.0, lora_r: int = 8,
-                      lora_target: str = "attn") -> dict:
+                      lora_target: str = "attn", unfreeze_from: int | None = None) -> dict:
     """Same cross-pass recall task, but with the **content-addressable** injection:
     the model attends to reservoir-derived prefix tokens (see ``kv_live``). This is the
     fix for the additive-injection negative result.
@@ -178,7 +178,7 @@ def run_cross_pass_kv(model_name: str = "gpt2", *, n_keys: int = 6, steps: int =
                                         n_prefix=n_prefix, load_in_4bit=load_in_4bit,
                                         input_scaling=input_scaling, dtype=dtype,
                                         train_seed=train_seed, lora_r=lora_r,
-                                        lora_target=lora_target)
+                                        lora_target=lora_target, unfreeze_from=unfreeze_from)
     tok = lm.tokenizer
     keys = _single_token_keys(tok, n_keys)
     rng = np.random.default_rng(seed if train_seed is None else train_seed)
@@ -210,7 +210,7 @@ def run_cross_pass_kv(model_name: str = "gpt2", *, n_keys: int = 6, steps: int =
                 correct += 1
     result = {"model": model_name, "stateful": stateful, "n_keys": n_keys, "steps": steps,
               "loss_start": losses[0], "loss_end": losses[-1], "curriculum": curriculum,
-              "lora_r": lora_r, "lora_target": lora_target,
+              "lora_r": lora_r, "lora_target": lora_target, "unfreeze_from": unfreeze_from,
               "recall_accuracy": correct / n_keys, "device": lm.device, "mode": "kv-prefix"}
     if save_dir is not None:
         # persist the trained model so it is a loadable, shippable artifact (the fix for
