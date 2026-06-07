@@ -1755,3 +1755,13 @@ is a real noisy ceiling for GPT-2-small timed emission. Running focused timed-on
 close the last variant (expected ~0, but running per the explore mandate). Temporal emission
 levers now exhausted: emit loss, huge reservoir, more epochs, broad LoRA, full unfreeze, focused
 single-task — all give ~0.25 noisy at GPT-2-small, 0 at 1.5B. Same wall as content.
+
+## 2026-06-07 — focused timed-only on Qwen: timed 0.12 (stable, nonzero) — joint training dilutes it
+
+Focused single-task timed-only on Qwen-1.5B (8192 res, broad LoRA, emit_weight=5, 1500 steps):
+timed = 0.12 STABLE (held across steps 1200-1500), above ~1/vocab chance. vs joint 8-task Qwen = 0.
+So the joint battery DILUTES temporal at 1.5B (7 other tasks drown it); focusing recovers a weak
+nonzero 0.12. GPT-2-small focused = diluted = 0.25 (dilution didn't matter there). Updated read:
+temporal emission is partially learnable at 1.5B (~0.12 focused, weak, dilution-sensitive), not a
+hard zero — a soft scale wall. Below GPT-2-small's 0.25, far from solved. FINDINGS conclusion
+nuanced accordingly. Published; resubmitting.

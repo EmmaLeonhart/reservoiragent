@@ -574,15 +574,19 @@ evidence the behaviour is unlearnable: the objective rewarded silence instead of
 *emitting the right token at the right time*. We rebuilt the loss/metric accordingly (`emit_weight`
 up-weights the emit step; evaluation now scores the emit step only, not the free silence steps).
 
-**With the fixed loss, the result is honest and negative at scale.** On GPT-2-small the emit-focused
-loss does produce some genuine timed emission (timed emit-accuracy 0.00 → ~0.25), so the mechanism
-and the loss are right at small scale. But the proper run on **Qwen-1.5B — a 16384-node reservoir
-(via a fixed down-projection), broad LoRA, emit-focused loss, 5 epochs / 15000 steps** — trains
-**timed emission to 0.00 and collapses to mean 0.000 after the first epoch**. So fixing the loss
-removed the silence inflation and the honest number at 1.5B is zero: temporal/agentic *emission*,
-like content recall, does not train at 1.5B under any local lever (curriculum, broad LoRA, full
-unfreeze, larger reservoir, more epochs). The metric bug was real and is fixed; the capability
-nonetheless hits the same scale wall. (Per-epoch models + optimizer states preserved at
+**With the fixed loss: weak but real at small scale, dilution-sensitive at 1.5B.** On GPT-2-small
+the emit-focused loss produces genuine (if noisy) timed emission (timed emit-accuracy 0.00 → ~0.25,
+bouncing) — the mechanism and loss are right at small scale. At 1.5B the picture is more nuanced
+than a flat zero: the **joint 8-task** run (16384-node reservoir via down-projection, broad LoRA,
+5 epochs / 15000 steps) trains **timed to 0.00 and collapses to mean 0.000** — but a **focused,
+single-task** timed-only run on the same Qwen-1.5B reaches a **stable timed ≈ 0.12** (held across
+steps 1200–1500, well above the ~1/vocab chance of emitting the exact word). So the joint battery
+*dilutes* the temporal signal at 1.5B (the other seven tasks drown it), and focusing recovers a
+**weak but nonzero** emission. The honest read: temporal emission is **partially learnable at
+1.5B (≈0.12 focused), far below GPT-2-small's ≈0.25 and far from solved, and easily lost in joint
+training** — a soft scale wall (weak signal, dilution-sensitive), not the hard zero the joint run
+alone suggested. The metric bug was real and is fixed; the capability is present-but-weak at scale.
+(Per-epoch models + optimizer states preserved at
 `hf.co/EmmaLeonhart/reservoir-agent-qwen-battery-emit`.)
 
 **What the carried-state demonstration actually rests on.** The valid evidence that the reservoir
