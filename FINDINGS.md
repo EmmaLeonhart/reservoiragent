@@ -787,7 +787,7 @@ An always-alive Reservoir Agent runs **blank ticks** — autonomous passes with 
 input. Each silent tick still appends to the KV cache, so a continuously-running agent
 burns its context window *faster* than a turn-based model that only runs when prompted.
 Left unmanaged the cache grows linearly with the number of ticks and the agent eventually
-hits its context limit on idle activity alone. This is the operational pain point raised in
+hits its context limit on idle activity alone. This is the operational challenge raised in
 an architecture design discussion (transcript in `data_lake/transcripts/`):
 *"context explodes on a reservoir agent because a reservoir agent gets an input of blank."*
 
