@@ -1765,3 +1765,16 @@ nonzero 0.12. GPT-2-small focused = diluted = 0.25 (dilution didn't matter there
 temporal emission is partially learnable at 1.5B (~0.12 focused, weak, dilution-sensitive), not a
 hard zero — a soft scale wall. Below GPT-2-small's 0.25, far from solved. FINDINGS conclusion
 nuanced accordingly. Published; resubmitting.
+
+## 2026-06-07 — longer focused timed-only: noise-dominated, doesn't climb (temporal local exploration exhausted)
+
+4000-step focused timed-only Qwen, eval/250: timed oscillates 0.0/0.12/0.0/0.12/0.06/0.25/0.0...
+avg ~0.08, frequent zeros, one 0.25 spike (then 0.0), NO upward trend. So the earlier "stable
+0.12" was within a noisy band; more steps don't help. Honest read: temporal emission at 1.5B is
+weak + noise-dominated (like content), not a reliably trainable capability. Corrected the FINDINGS
+"stable 0.12" claim (3rd temporal nuance today, each from running the next control/longer run).
+CONSOLIDATED: across all local levers (emit loss, huge reservoir, more epochs, broad LoRA, full
+unfreeze, focused single-task, longer training) temporal emission is ~0.25 noisy at GPT-2-small
+and a faint noisy ~0-0.25 at 1.5B, doesn't converge — same noise/scale wall as content. Local
+temporal exploration is exhausted; a stable capability needs cloud-scale or a different regime.
+Published; resubmitting.
