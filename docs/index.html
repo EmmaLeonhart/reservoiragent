@@ -7,13 +7,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,900&display=swap" rel="stylesheet">
-<meta name="description" content="Reservoir Attention Network (RAN): a fixed random reservoir injected into a pretrained transformer's mid-layer attention gives it genuine state between forward passes — a real time axis. The mechanism is demonstrated and is being carried onto Hermes (Llama-3.2-3B) as a Reservoir Agent.">
+<meta name="description" content="Reservoir Attention Network (RAN): a fixed random reservoir injected into a pretrained transformer's mid-layer attention gives it genuine state between forward passes — a real time axis. The mechanism is demonstrated at GPT-2-small; the scaling boundary above it (recall walls; low-dim timing partially scales) is characterized.">
 
 <!-- Social / link previews -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Reservoir Agent">
 <meta property="og:title" content="Reservoir Attention Network (RAN) — a transformer with a genuine time axis">
-<meta property="og:description" content="A fixed random reservoir injected into a pretrained transformer's mid-layer attention, so its state persists across forward passes — not just within a context window. Demonstrated, and being carried onto Hermes.">
+<meta property="og:description" content="A fixed random reservoir injected into a pretrained transformer's mid-layer attention, so its state persists across forward passes — not just within a context window. Demonstrated at GPT-2-small; scaling boundary characterized.">
 <meta property="og:url" content="https://reservoir.emmaleonhart.com/">
 <meta property="og:image" content="https://reservoir.emmaleonhart.com/og-preview.png">
 <meta property="og:image:type" content="image/png">
@@ -22,7 +22,7 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Reservoir Agent — a transformer with a genuine time axis">
-<meta name="twitter:description" content="A fixed random reservoir injected into a pretrained transformer's mid-layer attention, so its state persists across forward passes. Demonstrated; now on Hermes.">
+<meta name="twitter:description" content="A fixed random reservoir injected into a pretrained transformer's mid-layer attention, so its state persists across forward passes. Demonstrated at GPT-2-small; scaling boundary characterized.">
 <meta name="twitter:image" content="https://reservoir.emmaleonhart.com/og-preview.png">
 <style>
   :root {
@@ -735,7 +735,7 @@
   <strong>Blank-tick context burn &mdash; bounded by pinning the reservoir.</strong> An
   always-alive agent runs <em>blank ticks</em>: autonomous passes with no user input. Each
   silent tick still appends to the KV cache, so a continuously-running agent burns its
-  context window <em>faster</em> than a turn-based one &mdash; the operational pain point
+  context window <em>faster</em> than a turn-based one &mdash; the operational challenge
   raised in the imported Grok chat (<em>&ldquo;context explodes&hellip; a reservoir agent
   gets an input of blank&rdquo;</em>). The fix is StreamingLLM-style eviction (a few
   attention-sink tokens + a recent window, drop the middle) with the reservoir&rsquo;s K/V
