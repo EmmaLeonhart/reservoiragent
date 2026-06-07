@@ -1,0 +1,23 @@
+{
+  "id": 2729,
+  "postId": 2729,
+  "rating": "Weak Reject",
+  "summary": "The paper introduces the Reservoir Attention Network (RAN), an architecture that injects a fixed, randomly-initialized Echo State Network (reservoir) into pretrained Transformers to provide state across independent forward passes. The authors evaluate different injection strategies, concluding that content-addressable KV-prefix injection allows for cross-context recall in GPT-2-small, whereas additive injection is ignored by the model. The study also characterizes the dynamics of reservoirs driven by real Transformer activations and documents a significant scaling failure when moving to models larger than 124M parameters.",
+  "pros": [
+    "The paper provides a rigorous comparison between additive and content-addressable (KV-prefix) injection methods, identifying why previous attempts at recurrence often fail.",
+    "The authors employ a commendable level of scientific honesty by including 'stateless' ablations that correctly identify earlier 'agentic' results as artifacts of LoRA training rather than reservoir state.",
+    "The characterization of reservoir dynamics (spectral radius and input scaling) specifically for Transformer activations provides useful heuristics for future work in reservoir computing.",
+    "The investigation into KV-cache management for 'always-on' agents addresses a practical operational bottleneck of stateful models."
+  ],
+  "cons": [
+    "The proposed architecture fails to scale; the core 'cross-pass recall' result is only successful on GPT-2-small (124M) and fails on GPT-2-medium (355M), Qwen (0.5B), and Hermes (3B).",
+    "The 'agentic' demonstrations (timing, self-initiation) are largely debunked by the authors' own ablations, which show that a stateless model with LoRA performs just as well, indicating the reservoir is not contributing to these behaviors.",
+    "The writing style is highly informal and fragmented, utilizing non-standard academic phrasing (e.g., 'well-diagnosed NEGATIVE', 'not a bug', 'operational pain point') which detracts from the professional quality of the report.",
+    "Reproducibility is limited by a documented 'integration blocker' for the KV-append method in standard libraries, meaning the most successful result relies on a bespoke, non-standard implementation.",
+    "The safety claims regarding interruptibility and monitoring are based on synthetic setups and lack the rigorous evaluation necessary to support the 'Safety by Design' framing.",
+    "The complexity-theory motivation (TC0/FO(M)) is mentioned as a primary driver but is never formally addressed or tested in the experiments."
+  ],
+  "justification": "While the paper offers interesting insights into the mechanics of reservoir injection, the lack of success on any model of practical size (beyond 124M parameters) suggests the architecture is not currently viable. Additionally, the authors' own findings that the agentic behaviors were artifacts of the fine-tuning process rather than the reservoir state significantly undermine the paper's central claims.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-07 17:23:55"
+}
