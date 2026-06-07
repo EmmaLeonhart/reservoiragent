@@ -29,19 +29,21 @@ activations, which over-drive a unit-scaled reservoir and must be fed at roughly
 We then bound the result. The recall win holds at GPT-2-small (124M) but does not transfer to
 GPT-2-medium (355M) or a 3B instruction-tuned model: the injection is verified as correctly wired (state
 updates, gradients flow) yet recall does not bootstrap within budget, and 6.7× more steps does
-not break the wall — a structural optimization barrier, not under-training. Crucially, this
-boundary is specific to *high-dimensional symbolic content recall*: on an eight-task stateful
-battery run on **Qwen2.5-1.5B (a modern model ~12× larger than GPT-2-small)**, the
-*temporal/agency* behaviours **do train at scale** — selective silence 1.00, timed response
-0.71, self-initiation 0.67 — while symbolic-content tasks stay near zero (broad-LoRA + expanded-
-reservoir runs occasionally flicker content recall to ~0.2, but a same-config re-run returns it
-to 0.00 — within run-to-run noise, not a reliable lift). So statefulness scales
-to a modern 1.5B model for the low-dimensional state an agent needs (a clock, a gate, an
-unresolved thread); what does not yet scale is *which specific token* was carried, which we trace
-to a reservoir undersized relative to its input (effective dimensionality plateaus near 180 and
-saturates, sparing low-dimensional temporal state and starving high-dimensional content). We
-release weights and code. The contribution is the injection-design result, the temporal/content
-scaling split, and the boundaries of each — not an agentic-capability demonstration.
+not break the wall — a structural optimization barrier, not under-training. We had hoped the
+eight-task stateful battery on Qwen2.5-1.5B would show statefulness scaling (its temporal/agency
+metrics train to silence 1.00, timed 0.64, self-init 0.65), but a **stateless ablation refutes
+that reading**: resetting the reservoir every pass leaves those metrics unchanged (or better),
+so the battery's temporal scores are learned from current-pass features + LoRA, *not* from
+carried reservoir state. The genuine demonstration of usable cross-pass state therefore rests on
+the controlled tasks — GPT-2-small cross-pass recall (100% with the carried state vs chance when
+it is wiped, on a task that provably needs memory) and the dedicated unresolved-thread gate — and
+that demonstration remains **GPT-2-small-specific**: at 1.5B neither content recall (stays near
+zero) nor the battery's temporal tasks (not reservoir-dependent) show usable carried state. We
+release weights and code. The contribution is the injection-design result (additive ignored vs
+content-addressable 100% recall at GPT-2-small, with a wiped-state control), the reservoir-
+dynamics characterization, and a clearly-bounded scaling negative — not an agentic-capability
+demonstration, and not a claim that statefulness scales (the stateless ablation rules that out
+on the battery).
 
 ## Question
 
@@ -548,35 +550,33 @@ recorded as future work. This study establishes the boundary rigorously, not a w
 (Reminder of scope: this is the high-dimensional *content*-recall boundary; the low-dimensional
 temporal/agency behaviours do scale to Qwen-1.5B, as above.)
 
-**Scope of the wall, stated precisely: it is a *content-recall* wall, not a statefulness wall.**
-Everything above concerns recalling *which specific token* was carried — a high-dimensional
-target. The agent-relevant *temporal/agency* behaviours are low-dimensional (a clock, a gate, an
-unresolved thread), and those **do scale to a modern model**: the 8-task battery on
-**Qwen2.5-1.5B** (≈12× GPT-2-small) trains selective silence to **1.00**, timed response to
-**0.71**, and self-initiation to **0.67**, while the symbolic-content tasks stay near zero (the
-same split, same dimensionality cause; see "The stateful-task battery" below). The split holds
-**within a single model**: on the very same Qwen2.5-1.5B, a *dedicated* single-task cross-pass
-content-recall run — the identical KV-prefix mechanism that reaches 100% on GPT-2-small, given
-its best focused shot rather than the joint 8-task setup — stays at **chance (0.17), equal to the
-wiped baseline** (`crosspass --model Qwen/Qwen2.5-1.5B-Instruct`). So on one model, at one scale,
-low-dimensional temporal state trains to 1.00 and high-dimensional content recall sits at chance.
-The correct reading is not "the architecture fails above 124M" — it is that **carried state
-becomes usable behaviour at 1.5B for the low-dimensional signals an agent actually runs on, and
-only the high-dimensional content recall remains GPT-2-small-specific.** That reframes the scaling
-story from a flat negative into a split with a measured, mechanistic boundary.
+**Scope of the wall — and a stateless ablation that corrects an earlier over-reading.** The
+content-recall wall concerns recalling *which specific token* was carried (high-dimensional). We
+initially read the battery's temporal/agency metrics on Qwen-1.5B (silence 1.00, timed 0.64,
+self-init 0.65) as evidence that low-dimensional statefulness *scales* where content does not. **A
+stateless ablation refutes that reading.** Re-running the battery with the reservoir reset before
+every pass (`stateless=True`, no cross-pass carry; `results/battery_ablation.json`) leaves the
+temporal metrics **unchanged** — silence 1.00, timed 0.64, self-init 0.65 — with a slightly
+*higher* overall mean (0.415 vs 0.345). So the battery's temporal success comes from the LoRA
+adapters and current-pass features, **not** from carried reservoir state; those numbers are not
+evidence of usable statefulness at scale, and the reviewer's con on this point (con #6) is
+correct for the battery. The "statefulness scales to Qwen-1.5B" framing was an over-reading of
+metrics a stateless control matches, and is withdrawn.
 
-**Is the temporal success actually the reservoir, or could LoRA learn it without carried state
-(per review)?** A fair challenge: the temporal/agency tasks are low-dimensional, so perhaps the
-adapters learn them and the reservoir is incidental. The evidence says the carried state is
-required. The silence policy is the clean control: a linear gate on the **reservoir state**
-reaches F1 ≈ 0.96, while the **same gate on the current input** (no carried state) collapses to
-F1 ≈ 0.34 — the cue is strictly in the past, invisible without the reservoir (see "D: a trained
-silence policy"). The cross-pass baselines make the same point: wipe the reservoir between passes
-and the task drops to chance. So the temporal tasks are *defined* to need cross-pass state and
-fail without it; they are not trivially LoRA-learnable. The one control not yet run is a *battery-
-level* stateless ablation (reset the reservoir between the battery's passes and retrain) — that
-is the rigorous same-setup version and is the next experiment; the existing per-task stateless
-controls already point the same way.
+**What the carried-state demonstration actually rests on.** The valid evidence that the reservoir
+carries *usable* state is the controlled, memory-requiring tasks, not the battery metrics:
+(i) GPT-2-small cross-pass recall — 100% with the carried state vs **chance (0.17) when the
+reservoir is wiped between passes**, on a task that cannot be done without memory; and (ii) the
+dedicated unresolved-thread gate (D), where a readout on the reservoir state reaches F1 ≈ 0.96 vs
+≈ 0.34 on the current input. Both are GPT-2-scale, and both have controls that *do* swing with the
+carried state (unlike the battery). At 1.5B the same KV-prefix mechanism on the controlled
+cross-pass task stays at **chance** (`crosspass --model Qwen/Qwen2.5-1.5B-Instruct`). So the
+honest scope is narrower than the withdrawn reframe: **usable cross-pass reservoir state is
+demonstrated at GPT-2-small and does not, in this study, scale to 1.5B** — neither as content
+recall (chance) nor as genuinely reservoir-driven temporal behaviour (the battery temporal is
+LoRA, per the ablation). The lesson is methodological too: a metric that does not move under a
+stateless control is not evidence of statefulness, and the battery's temporal tasks are not, as
+constructed, a clean test of carried state.
 
 ### H4 (D) — a trained silence policy (meaningful "sometimes no response")
 
