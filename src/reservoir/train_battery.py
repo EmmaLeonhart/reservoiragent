@@ -14,14 +14,14 @@ from __future__ import annotations
 from collections import defaultdict
 
 
-def _evaluate(lm, eval_set) -> dict:
+def _evaluate(lm, eval_set, stateless: bool = False) -> dict:
     """Per-task accuracy over the eval set (fraction of supervised steps decoded exactly)."""
     from .episode import episode_eval
 
     hits = defaultdict(int)
     tot = defaultdict(int)
     for ep in eval_set:
-        for rec in episode_eval(lm, ep):
+        for rec in episode_eval(lm, ep, stateless=stateless):
             tot[rec["task"]] += 1
             hits[rec["task"]] += int(rec["ok"])
     return {t: hits[t] / tot[t] for t in sorted(tot)}
@@ -33,7 +33,8 @@ def train_battery(model_name: str = "gpt2", *, steps: int = 400, lr: float = 1e-
                   save_dir: str | None = None, eval_every: int = 100,
                   eval_n: int = 16, n_reservoir: int = 512, n_prefix: int = 8,
                   lora_target: str = "attn", input_scaling: float = 0.5,
-                  unfreeze_from: int | None = None, lora_r: int = 8, log=print) -> dict:
+                  unfreeze_from: int | None = None, lora_r: int = 8,
+                  stateless: bool = False, log=print) -> dict:
     import numpy as np
     import torch
 
@@ -60,7 +61,7 @@ def train_battery(model_name: str = "gpt2", *, steps: int = 400, lr: float = 1e-
     log(f"battery training {model_name} on {sorted(weights)} for {steps} steps "
         f"(lr {lr} cosine, device {lm.device})…")
     lm.model.eval()
-    base = _evaluate(lm, eval_set)
+    base = _evaluate(lm, eval_set, stateless=stateless)
     log("  step    0 (untrained): " + "  ".join(f"{t}={base[t]:.2f}" for t in base))
 
     history = [{"step": 0, **base}]
@@ -69,7 +70,7 @@ def train_battery(model_name: str = "gpt2", *, steps: int = 400, lr: float = 1e-
     lm.model.train()
     for i in range(steps):
         ep = sample_episode(rng, weights)
-        loss = episode_loss(lm, ep)
+        loss = episode_loss(lm, ep, stateless=stateless)
         opt.zero_grad()
         loss.backward()
         opt.step()
@@ -77,7 +78,7 @@ def train_battery(model_name: str = "gpt2", *, steps: int = 400, lr: float = 1e-
         losses.append(float(loss.item()))
         if (i + 1) % eval_every == 0 or i == steps - 1:
             lm.model.eval()
-            m = _evaluate(lm, eval_set)
+            m = _evaluate(lm, eval_set, stateless=stateless)
             lm.model.train()
             recent = sum(losses[-eval_every:]) / len(losses[-eval_every:])
             history.append({"step": i + 1, "loss": recent, **m})

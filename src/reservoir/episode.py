@@ -57,7 +57,7 @@ def _target_ids(lm, step):
     return lm.tokenizer(step.target, add_special_tokens=False)["input_ids"]
 
 
-def episode_loss(lm, episode: Episode, *, gate_weight: float = 1.0):
+def episode_loss(lm, episode: Episode, *, gate_weight: float = 1.0, stateless: bool = False):
     """Run ``episode`` and return the mean loss as a torch scalar whose graph spans every
     pass (so ``.backward()`` trains through the carried state).
 
@@ -79,6 +79,8 @@ def episode_loss(lm, episode: Episode, *, gate_weight: float = 1.0):
         nterms += 1
 
     for step in episode.steps:
+        if stateless:
+            lm.reset_state()       # ablation: wipe the reservoir each pass -> no cross-pass carry
         if step.wipe:
             ctx = ""
         if step.inject:
@@ -107,7 +109,7 @@ def episode_loss(lm, episode: Episode, *, gate_weight: float = 1.0):
     return total / max(nterms, 1)
 
 
-def episode_eval(lm, episode: Episode) -> list[dict]:
+def episode_eval(lm, episode: Episode, *, stateless: bool = False) -> list[dict]:
     """Greedy-decode each target under no_grad using the gate head + content output; return
     one record per supervised step ``{"task", "target", "pred", "ok"}``. A SILENCE step is
     ``ok`` when the gate stays shut; an emit step is ``ok`` when the gate opens **and** the
@@ -119,6 +121,8 @@ def episode_eval(lm, episode: Episode) -> list[dict]:
     records = []
     with torch.no_grad():
         for step in episode.steps:
+            if stateless:
+                lm.reset_state()   # ablation: wipe the reservoir each pass -> no cross-pass carry
             if step.wipe:
                 ctx = ""
             if step.inject:
