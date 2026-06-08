@@ -10,9 +10,18 @@
 
 ## Current work
 
-- **More reservoir-computing diagrams (optional follow-up).** The RC schematic SVG
-  (`docs/diagram-reservoir-computing.svg`) is in the paper + site. Could add a second (e.g. the
-  echo-state-property / fading-memory picture) from the reference set if more illustration is wanted.
+- **#33 harder-retention battery (in flight, ~3h).** Follow-up to the #32 negative. #32 gave the
+  stateless shortcut max adapter capacity (`lora_target=all`, r=8) and the shortcut won despite the
+  aux penalty; #33 **denies the capacity** (`lora_target=attn`, `lora_r=4` — the regime where clean
+  cross-pass recall works) **and** cranks the counterfactual penalty (`aux_weight=3.0`,
+  `aux_margin=2.0`), content-only, recall regime (2048/16, inscale 0.1, vocab 16). Run:
+  `results/_w33_retain_hard.log`. Fold the verdict into FINDINGS + site; claim retention only if the
+  lift survives the stateless control across epochs.
+
+- **Second reservoir-computing diagram — echo-state-property / fading memory.** The RC schematic SVG
+  (`docs/diagram-reservoir-computing.svg`) is in the paper + site. Add a second node-style figure
+  illustrating fading memory / the echo state property (past input influence decaying) from the
+  reference set, to pair with the existing RC schematic.
 
 ## Grok's reception (address the negatives and lean into the positives if possible)
 
