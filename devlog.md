@@ -2324,3 +2324,13 @@ unstable — lift +0.255 -> +0.339 (recall 1.00, peak) -> +0.062 -> +0.135 over 
 peak not held. So the two failure modes are distinct: capacity denial trades shortcut-drift (#32) for
 training-instability (#33); retention needs both fixed and stays open. Folded into FINDINGS
 (battery limitation) + site battery section. Task #33 done. Run log results/_w33_retain_hard.log.
+
+## 2026-06-08 — train_large: optional cosine LR decay (env-gated) + #34 staged
+
+Diagnosed the #33 oscillation: train_large uses a FLAT LR (no scheduler), while train_battery.py
+already found a flat lr "overshoots and degrades past its peak" and uses cosine. Added an env-gated
+cosine decay to train_large (RESERVOIR_COSINE, default OFF so existing behaviour is unchanged; when on
+in epoch-count mode it decays lr->0 over all steps). Compile-checked. Staged #34 (= #33 config +
+RESERVOIR_COSINE=1) to test whether the instability is an LR-overshoot artifact (lift then holds =
+first retention win) or intrinsic (still collapses = stronger negative). NOT launched yet — the user
+asked to run the real-time agent app, which needs the GPU, so #34 is held until the GPU frees.

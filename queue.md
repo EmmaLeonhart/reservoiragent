@@ -10,6 +10,17 @@
 
 ## Current work
 
+- **#34 stabilization probe — cosine LR decay (STAGED, not launched — GPU held for the real-time app demo).** #33 showed the reservoir solution
+  *oscillates* (lift peaks epoch 1 at recall 1.00, then collapses/rebounds) with the stateless control
+  pinned at 0. `train_large` uses a **flat LR** (no scheduler), and `train_battery.py` already found a
+  flat LR "overshoots and degrades past its peak" — so the instability is plausibly an LR-overshoot
+  artifact, not intrinsic. Added an env-gated cosine decay (`RESERVOIR_COSINE`, default off) to
+  `train_large`. #34 = #33's config (`lora_r=4` attn, aux 3.0/margin 2.0, content-only, 2048/16,
+  inscale 0.1, vocab 16, 4×1500) **+ `RESERVOIR_COSINE=1`**. Hypothesis: smooth decay to 0 lets the
+  solution settle → the lift *holds* (first retention win). If it still collapses, the instability is
+  intrinsic (stronger negative). Run: `results/_w34_cosine.log`. Fold the verdict into FINDINGS + site;
+  claim retention only if the lift survives the control across epochs.
+
 ## Grok's reception — addressed (record)
 
 Grok's arXiv-polish suggestions are folded in; full text in git history (this commit's parent of

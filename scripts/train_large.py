@@ -112,6 +112,17 @@ def main() -> int:
 
     eval_set = make_eval_set(np.random.default_rng(123), n_per_task=eval_n, weights=weights)
     opt = torch.optim.AdamW(lm.trainable_parameters(), lr=lr)
+    # Optional cosine LR decay over the FULL run. train_large defaults to a flat LR; the battery
+    # loop (train_battery.py) found a flat lr overshoots and "degraded past its peak", which matches
+    # the #33 oscillation (lift peaks at epoch 1, then bounces). Gated behind RESERVOIR_COSINE so the
+    # default (flat) behaviour is unchanged; when on (epoch-count mode), decay smoothly to 0 across
+    # all steps so the solution can settle at its optimum instead of overshooting it each epoch.
+    cosine = _env("RESERVOIR_COSINE", "0", int)
+    sched = None
+    if cosine and epochs_target > 0:
+        total_steps = max(1, epochs_target * steps_per_epoch)
+        sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=total_steps)
+        print(f"[train_large] cosine LR decay ON over {total_steps} steps (lr {lr} -> 0)", flush=True)
     rng = np.random.default_rng(0)
 
     api = HfApi()
@@ -177,6 +188,8 @@ def main() -> int:
         opt.zero_grad()
         loss.backward()
         opt.step()
+        if sched is not None:
+            sched.step()
         step += 1
         running += float(loss.item())
 
