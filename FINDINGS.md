@@ -149,6 +149,8 @@ by reservoir size (linear memory capacity ≤ N). So the classical recipes are a
 not an answer* for our regime, which is exactly what our dynamics sweep measures, and
 reservoir size and leak rate are the knobs for how much cross-pass state is carried.
 
+![Reservoir computing in the classical form: an input is projected by a fixed random W_in into a fixed random recurrent pool (the reservoir, spectral radius ρ ≈ 1), and only a linear readout W_out is trained. The RAN relocates this paradigm — the reservoir reads and writes a pretrained transformer's mid-layer attention instead of a scalar input, and attention is the readout surface.](docs/diagram-reservoir-computing.svg)
+
 **The stateless-transformer ceiling.** A fixed-depth, finite-precision transformer is,
 per forward pass, confined to a low complexity class: saturated/float transformers are in
 TC⁰ (Merrill, Sabharwal & Smith, 2022), and log-precision transformers are captured by
@@ -313,8 +315,8 @@ Establishing that needs a **controlled** experiment: seed the trainable init too
 deterministic CUDA, and **average several runs per seed**. (see figure)
 
 **The controlled experiment — run, and it confirms: at 250 steps selection is noise, not
-signal.** We then ran exactly that experiment (see figure). Root cause of the noise was first removed: `kv_live` had a `train_seed`
-parameter that was never used, so the trainable `W_res` + LoRA init was uncontrolled; it now
+signal.** We then ran exactly that experiment (see figure). Root cause of the noise was first removed: the
+trainable-init seed was not being applied, so the readout `W_res` + LoRA init was uncontrolled; it now
 seeds the init, and a `set_deterministic` helper (RNGs + `CUBLAS_WORKSPACE_CONFIG` + cudnn
 flags + the deterministic math SDP kernel) makes two runs of the same reservoir with the same
 `train_seed` **bit-identical** (verified on CPU and CUDA). With that, we trained **6 reservoir
@@ -425,7 +427,7 @@ finding.**
 the model uses it — **provided the reservoir is injected content-addressably (attended
 to), not as an additive bias.** The negative-then-positive arc is the contribution: it
 isolates the injection design as the decisive factor, ruling out the naive variant and
-validating the attention-based one. (Demonstrated on GPT-2; the same `kv_live` path is
+validating the attention-based one. (Demonstrated on GPT-2; the same injection path is
 architecture-agnostic and runs on Hermes via the generalized injection.)
 
 **The result is not a 6-word artifact: it holds to ~24 secret words, with a collapse beyond.**
@@ -987,9 +989,10 @@ unproven extension — flagged as future work in the Safety-by-Design section an
 - Two injection variants now exist: the **residual-stream** write (wired
  into live GPT-2, H1-verified) and the richer **KV-append** mechanism (
  reservoir nodes as extra attention keys/values) — the latter is implemented and
- unit-tested in isolation with a clean H1 *masking* property, but **wiring it into HF
- GPT-2 (transformers 5.4) is a documented blocker** (`GPT2_INTEGRATION_BLOCKER`), left
- for a focused future item rather than a fragile patch of attention internals. This is a
+ unit-tested in isolation with a clean H1 *masking* property, but **wiring it into the stock
+ HuggingFace attention path is a documented integration blocker** (their `generate` exposes no
+ hook to append external key/value entries), left for a focused future item rather than a fragile
+ patch of attention internals. This is a
  **reproducibility limitation** (flagged in review): the variant that delivers the 100%
  recall result runs through a bespoke path, not stock HF attention, so
  reproducing it requires that path rather than a standard `transformers` model.
@@ -1159,15 +1162,15 @@ input. Each silent tick still appends to the KV cache, so a continuously-running
 burns its context window *faster* than a turn-based model that only runs when prompted.
 Left unmanaged the cache grows linearly with the number of ticks and the agent eventually
 hits its context limit on idle activity alone. This is the operational challenge raised in
-an architecture design discussion (transcript in `data_lake/transcripts/`):
-*"context explodes on a reservoir agent because a reservoir agent gets an input of blank."*
+an architecture design discussion: *"context explodes on a reservoir agent because a reservoir
+agent gets an input of blank."*
 
 The standard remedy is StreamingLLM-style eviction — keep a few **attention-sink** tokens
 plus a **recent window**, drop the middle — with one project-specific twist: the
 reservoir's K/V entries are **pinned** so the persistent time-axis is never the thing
 evicted. *"A really long time of no activity is signal,"* and that signal must survive.
-`reservoir.kv_evict.ReservoirEvictionPolicy` implements this as a pure, torch-free policy
-over per-position tags `{sink, reservoir, normal}`; with no reservoir tags it degrades to
+We implement this as a pure eviction policy over per-position tags `{sink, reservoir, normal}`;
+with no reservoir tags it degrades to
 vanilla StreamingLLM. Because the reservoir is re-prepended each pass (a *fixed* number of
 pseudo-tokens, not accumulated), pinning it costs only a constant. The policy also accepts
 per-position importance scores, switching the ordinary-token choice from recency to H2O-style

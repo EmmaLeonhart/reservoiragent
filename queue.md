@@ -10,21 +10,9 @@
 
 ## Current work
 
-- **Reservoir-computing reference diagrams (open).** Emma added reference images (under a
-  git-ignored `reference images/` folder, image-rights reasons) and wants original SVG diagrams
-  generated from them showing what reservoir computing looks like, to enrich the paper/site beyond
-  the current architecture diagrams. Author original SVGs (don't copy the references), place inline,
-  bundle into the PDF/arXiv build like the existing diagrams.
-
-  Remove all of the file paths referenced in the paper. Like why the fuck did this go through?
-
-  "An always-alive Reservoir Agent runs blank ticks — autonomous passes with no user input. Each
-silent tick still appends to the KV cache, so a continuously-running agent burns its context window
-faster than a turn-based model that only runs when prompted. Left unmanaged the cache grows
-linearly with the number of ticks and the agent eventually hits its context limit on idle activity
-alone. This is the operational challenge raised in an architecture design discussion (transcript in
-data_lake/transcripts/): "context explodes on a reservoir agent because a reservoir agent
-gets an input of blank.""
+- **More reservoir-computing diagrams (optional follow-up).** One original RC schematic SVG
+  (`docs/diagram-reservoir-computing.svg`) is now in the paper + site. Could add a second (e.g. the
+  echo-state-property / fading-memory picture) from the reference set if more illustration is wanted.
 
 
 ## Grok's reception (address the negatives and lean into the positives if possible)
