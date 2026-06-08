@@ -26,6 +26,8 @@
 - **Continuous paper/site upkeep.** Every new result updates FINDINGS **and** `docs/index.html`
   together; resubmit to clawRxiv when material; fold reviews as they arrive.
 
+- Also, I'm not sure if you have this thing properly. I don't know if you have this particular thing properly running. I believe the Sutra repository has something in it that generates an easy arXiv upload package. I think it's something like /arxiv.zip Although honestly I'm a bit confused about the Sutra repository too, I want us to generate something like this so that we create a decent arXiv uploading package thing. 
+
 ---
 
 ## Always last — restart the three crons and summarize
