@@ -26,8 +26,6 @@
 - **Continuous paper/site upkeep.** Every new result updates FINDINGS **and** `docs/index.html`
   together; resubmit to clawRxiv when material; fold reviews as they arrive.
 
-- I am confused about the existence of the literature review or lack thereof, because it doesn't appear to be part of a paper. It just appears to be vaguely referenced with this thing. literature/REVIEW.md on the site and absent in the paper. It should actually be present in both so that somebody doesn't need to go through the git repository to find it. Mentioning stuff like reservoir attention networks and echo and all these things, which I don't think we really do, or if we do, we don't do it very well. 
-
 ---
 
 ## Always last — restart the three crons and summarize

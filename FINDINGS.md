@@ -101,17 +101,60 @@ persists across genuinely independent forward passes, including unprompted ticks
 
 ## Related Work
 
-The fixed-reservoir / trained-readout core is a faithful instantiation of classical
-reservoir computing (Jaeger's echo state networks; Maass's liquid state machines). The
-motivation is made precise by the expressivity literature: a finite-precision
-transformer is bounded to TC⁰ / FO(M) **per forward pass** (Merrill & Sabharwal; Hahn),
-while state carried **across** passes is the documented lever past that ceiling — though
-the known Turing-completeness results require arbitrary precision, so whether a
-finite-precision reservoir lifts the bound is posed as an open question, not asserted.
-Crucially, every prior recurrence-augmented transformer (Transformer-XL, RMT,
-Block-Recurrent, Mamba, Titans, …) uses *trained* recurrence carrying state *within* a
-sequence; none uses a *fixed-random* reservoir with state across *independent* passes.
-Full citations are given in the References.
+This section is the project's literature review, grounding the work in three bodies of
+prior art. Full citations are in the References.
+
+**Reservoir computing.** The defining move — fix the recurrent weights (W_r, W_in) at
+random and train only a readout — is the echo-state-network (Jaeger, 2001) /
+liquid-state-machine (Maass, 2002) paradigm, surveyed by Lukoševičius and Jaeger (2009).
+Usable behaviour is governed by the *echo state property* (the influence of past state
+and input must fade); scaling the recurrent matrix to spectral radius ρ < 1 *almost
+always* secures it, but ρ < 1 is neither exactly necessary nor sufficient, and the
+"operate at the edge of chaos" heuristic is disputed — short-term memory capacity can
+peak away from the edge. Reservoir memory is fading transient memory, capacity-bounded
+by reservoir size (linear memory capacity ≤ N). So the classical recipes are a *prior,
+not an answer* for our regime, which is exactly what our dynamics sweep measures, and
+reservoir size and leak rate are the knobs for how much cross-pass state is carried.
+
+**The stateless-transformer ceiling.** A fixed-depth, finite-precision transformer is,
+per forward pass, confined to a low complexity class: saturated/float transformers are in
+TC⁰ (Merrill, Sabharwal & Smith, 2022), and log-precision transformers are captured by
+first-order logic with majority quantifiers, FO(M) (Merrill & Sabharwal, 2023); fixed-size
+attention cannot model unbounded hierarchical structure without growing depth (Hahn,
+2020). Cross-pass state is the documented lever past this ceiling — the upper-bound proof
+explicitly breaks under input feedback — but the known escapes (Pérez et al., 2019;
+Siegelmann & Sontag, 1995) require *arbitrary precision*. We therefore pose whether a
+finite-precision reservoir state lifts the bound as an open question, not a result.
+
+**Recurrence-augmented transformers — the closest prior art, and the gap.** A decade of
+work adds recurrence, state, or memory to transformers. Classified on the two axes that
+matter here — is the recurrence *trained* or *fixed-random*, and does state persist
+*within a sequence* or *across independent passes*:
+
+| System | Recurrence | State persistence |
+|---|---|---|
+| Transformer-XL, Compressive Transformer | trained | within sequence (cached segment) |
+| Universal Transformer | trained | intra-pass depth (not temporal) |
+| Block-Recurrent Transformer | trained (gates) | within sequence |
+| Memorizing Transformers | trained retrieval | within document (stored kNN) |
+| Recurrent Memory Transformer | trained (memory tokens) | across segments of one sequence |
+| RWKV, RetNet, S4 / Mamba | trained | within sequence (RNN/SSM form) |
+| Titans | trained (test-time updates) | within a stream |
+| **RAN (this work)** | **fixed-random** | **across independent forward passes** |
+
+Every prior system uses *trained* recurrence carrying state *within* a sequence or
+segment chain. The RAN occupies the empty cell: a *fixed-random* reservoir whose state
+persists across genuinely independent passes (including unprompted, no-input ticks),
+injected into a *pretrained, frozen* backbone and trained only through a readout plus
+light LoRA. Block-Recurrent Transformer independently documents the failure mode we
+observe directly (§ "the model learns to ignore the recurrent state"): tasks must
+structurally require the carried state or it is ignored. The nearest recent items —
+Reservoir Transformers (Shen et al., 2021), Echo State Transformer (2025), Echo Flow
+Networks (2025), FreezeTST (2025) — each differ on at least one load-bearing axis (none
+injects into a *pretrained* LLM's attention with a *fixed-random* reservoir carrying
+state across *independent* passes); they are trained-from-scratch and within-sequence.
+This places the combination as novel against the verified prior art, with the caveat that
+the 2024–2026 landscape moves quickly and a verified absence is not a proof of absence.
 
 ## Motivation: Complexity-Theoretic Framing
 

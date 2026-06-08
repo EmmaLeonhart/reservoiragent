@@ -2089,3 +2089,13 @@ peppered through the paper (Emma's objection) — replaced with "References" pro
 caps-shouting already gone except legit acronyms.
 (4) Cleared queue.md of all Done-Phase records (they live in devlog + git log) down to current work
 + the pinned cron tail.
+
+## 2026-06-08 — literature review now IN the paper + site (Emma instruction)
+
+The survey existed only in literature/REVIEW.md, vaguely referenced. Folded it into the paper as a
+substantive Related Work section (three bodies of work: reservoir computing + echo state property;
+the TC0/FO(M) stateless ceiling; recurrence-augmented transformers) WITH the prior-art gap table
+(trained-vs-fixed x within-sequence-vs-across-passes) and the novelty verdict. Added the same
+Related-work section + gap table to the site (docs/index.html, #related-work), and replaced the
+"Full survey: literature/REVIEW.md" code pointer with an in-page link. Readers no longer need the
+git repo to find the review. Also published report.pdf is now the NeurIPS LaTeX build (pages.yml).
