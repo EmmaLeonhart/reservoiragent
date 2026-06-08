@@ -2370,3 +2370,16 @@ n_reservoir/input_scaling, what is NOT claimed), and expected_results/ with the 
 replication/ -> docs/reservoir-replication.zip on every build; added a "Replication package" download
 button to the site. reproduce.py verified to parse + --help OK (CPU). This is the linkable replication
 deliverable the user asked for.
+
+## 2026-06-08 — data audit: fixed the 12-key capacity claim contradiction
+
+Audited the headline figures against their source runs (crosspass ✓ GPT-2 1.00 vs 0.17; crossmodel ✓;
+battery_lift ✓; capacity). Found the data issue the user flagged: the capacity figure's 12-key point
+(0.167) sits BELOW the 24-key point (0.417) — non-monotonic. The site figure ALT-TEXT said this was
+"due to undertraining", but that contradicts both the FINDINGS body and our own data: the w25 re-run
+at 2000 steps (vs 800) gives the IDENTICAL 0.167 (w24-k12=0.167, w25-k12-st2000=0.167, both 2/12), so
+it is NOT undertraining — it is a single-run convergence/seed artifact, stuck at both step budgets.
+Fixed the alt-text to match the (already-correct) figcaption + body. The underlying capacity trend
+(1.00@6 → ~0.42@24 → chance@48) is sound; only the 12-key point is a single-seed artifact, and a
+cleaner figure would average several seeds at that point (a possible pre-6:30 experiment, but the GPU
+is on #34 and the text already frames it correctly).
