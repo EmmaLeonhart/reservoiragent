@@ -2252,3 +2252,16 @@ logs, stateful recall 0.83) and noted --n-reservoir / --input-scaling as the dec
 levers. Verified every documented flag exists via `run.py crosspass --help` (exit 0). Addresses
 Grok's "polish the code release with repro commands" suggestion; keeps README consistent with the
 paper. (No queue item deleted — this came from the Grok-reception backlog in queue.md.)
+
+## 2026-06-08 — #33 launched: harder battery retention (deny shortcut capacity + strong aux)
+
+Follow-up to the #32 negative (user: "harder retention attempt", then "barrel through the queue").
+#32 gave the stateless shortcut maximum adapter capacity (lora_target=all, r=8) and the shortcut won
+even against the aux penalty. #33 instead DENIES the capacity — lora_target=attn, lora_r=4, the same
+adapter regime in which the clean cross-pass recall task succeeds — AND cranks the counterfactual
+"use-the-state" penalty (aux_weight=3.0, aux_margin=2.0). Content-only tasks (recall, accumulate,
+sequence, deferred), recall regime (reservoir 2048/16, input_scaling 0.1, vocab 16), 4 epochs x 1500
+(~3h), Qwen2.5-1.5B. Run results/_w33_retain_hard.log; out artifacts/w33-retain-hard; HF
+reservoir-agent-qwen-content-retain-hard. Monitored per-epoch (lift vs stateless control). Verdict
+folds into FINDINGS + site; retention claimed only if the lift survives the control across epochs.
+Also set a one-shot cron (16:34 local today, +4h) for a comprehensive pre-arXiv citation audit.
