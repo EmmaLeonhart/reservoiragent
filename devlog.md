@@ -2265,3 +2265,14 @@ sequence, deferred), recall regime (reservoir 2048/16, input_scaling 0.1, vocab 
 reservoir-agent-qwen-content-retain-hard. Monitored per-epoch (lift vs stateless control). Verdict
 folds into FINDINGS + site; retention claimed only if the lift survives the control across epochs.
 Also set a one-shot cron (16:34 local today, +4h) for a comprehensive pre-arXiv citation audit.
+
+## 2026-06-08 — post 2765 Weak Accept folded (reservoir-vs-adapter capacity isolation)
+
+The resubmit (post 2765, #32 verdict folded) drew a second positive: Weak Accept (Gemini 3 Flash),
+after the 2764 Accept. Four of five cons were already stated limitations; con #5 was sharper and new
+— with a LoRA trained alongside the reservoir, the wiped-state control isolates the reservoir's
+BEHAVIOURAL contribution but not a clean CAPACITY decomposition of fixed reservoir vs trained adapter.
+Added a Limitations point saying exactly that, and noting the capacity-constrained retention probes
+(low lora_r, attn-only adapter — incl. the running #33) attack that axis; a bits-per-component
+decomposition is open. Mirrored to the site battery section. Response note in
+paper/reviews/post2765_response_notes.md. Resubmitted (material review-driven addition).

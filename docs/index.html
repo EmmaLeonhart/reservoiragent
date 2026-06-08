@@ -527,7 +527,11 @@
   (0.000 &rarr; 0.062 &rarr; 0.083), so the optimizer still converges to a current-pass solution that
   makes the carried state redundant, even against a loss term built to forbid exactly that. Stable
   retention is unsolved: the first-line stabilization fails, and what would force a multi-task objective
-  to keep depending on the reservoir is open.
+  to keep depending on the reservoir is open. This also bears on a fair reviewer point: because a LoRA
+  trains alongside the reservoir, the wiped-state control isolates the reservoir&rsquo;s <em>behavioural</em>
+  contribution (it is the LoRA-only path), but not a clean <em>capacity</em> decomposition of fixed reservoir
+  vs trained adapter &mdash; which is exactly why the capacity-constrained probes shrink the adapter to force
+  the carried state to carry the load.
 </p>
 <figure>
   <img src="battery_lift_eval48.png" alt="Per-epoch capability mean for the content battery: the reservoir (carried-state) curve rises to ~0.20 at epoch 1 while the stateless control stays near zero, then both fall together to ~0.08 by epoch 2 — the reservoir-driven lift appears at epoch 1 and is lost by epoch 2.">
