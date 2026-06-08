@@ -2184,3 +2184,11 @@ docs/crosspass_gpt2-medium.png — both bars at chance (0.17) — while the pape
 GPT-2-small headline result (reservoir 1.00 vs baseline 0.17). Regenerated docs/crosspass.png from the
 real gpt2-small data (results/crosspass.json: stateful 1.00, baseline 0.17) via plot_recall_bars. The
 figure now matches the caption. (Caught by Emma.)
+
+## 2026-06-08 — redesigned RC diagram on the better reference (W_in/W_res/W_out labeled)
+
+Emma pointed at reservoir.jpg + 41598_2020_78725_Fig1 as the good references; the second labels
+W_in(fixed)/W_res(fixed)/W_out(trained) — the teaching point. Redesigned docs/diagram-reservoir-
+computing.svg (hand-authored original SVG, not a converter) into the three-layer Input/Reservoir/
+Readout style with those fixed-vs-trained weight labels + the y = sum w_i x_i readout, in the site
+palette. Replaces my earlier generic version.
