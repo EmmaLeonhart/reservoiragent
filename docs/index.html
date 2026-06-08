@@ -193,9 +193,11 @@
   at <strong>Qwen-1.5B: 0.83&ndash;1.00 stateful vs 0.17 wiped-control, reproduced across two seeds</strong>,
   with reservoir size isolated as the lever. A capacity ceiling persists (recall degrades past ~6
   items, as at GPT-2-small), and the separate 8-task battery's temporal scores are <em>not</em>
-  reservoir-driven (a stateless ablation matches them). The contribution is the injection-design
-  result plus the scaling result: content recall transfers to a modern 1.5B model once the reservoir
-  is sized to its activations.
+  reservoir-driven (a stateless ablation matches them). The recovery is <em>model-specific</em>, not
+  a size law: GPT-2-medium (355M) does <strong>not</strong> recover with the same fix (chance at two
+  input scalings) &mdash; recall works at GPT-2-small and Qwen-1.5B, where the backbone can read the
+  content-addressable prefix, but not the deeper GPT-2-medium. The contribution is the injection-design
+  result plus this scaling result.
 </p>
 
 <div class="question">
@@ -454,8 +456,16 @@
   seeds, and the control at chance rules out memorization. A <strong>capacity ceiling</strong> persists:
   at 12 keys recall is 0.25 vs a 0.08 control &mdash; a real lift, but the same drop-off GPT-2-small shows
   past six keys. The reservoir scales the <em>model</em> it works in, not yet the <em>number of items</em>
-  it carries. (Whether the same fix recovers GPT-2-medium/3B, which also used the 512-node default, is the
-  obvious next test.)
+  it carries.
+</p>
+<p>
+  <strong>But it is model-specific, not a size law.</strong> The same 2048-node fix on
+  <strong>GPT-2-medium (355M)</strong> leaves recall at chance (0.17 = control) at <em>both</em> input
+  scalings tried (0.1 and 0.5) &mdash; sizing the reservoir up does not rescue it. So the pattern across
+  models is not "bigger &rarr; works": recall works at GPT-2-<strong>small</strong> (124M) and
+  <strong>Qwen-1.5B</strong>, but not GPT-2-<strong>medium</strong> (355M). What the larger reservoir buys
+  appears usable only when the backbone can read a content-addressable prefix well &mdash; a capable modern
+  model like Qwen-1.5B can; the deeper GPT-2-family medium, on this budget, cannot. (A 3B check is running.)
 </p>
 <p>
   <strong>First result (synthetic-input dynamics sweep).</strong> Driving a 200-unit

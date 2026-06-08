@@ -1923,3 +1923,12 @@ scaling/prefix alone do nothing; full effect is interaction. Capacity ceiling pe
 preliminary->confirmed section, the carried-state-scope summary, and the site lede + decomposition
 + cause paragraphs. Headline changed from "clearly-bounded scaling negative" to "recall scales with
 an adequately-sized reservoir (capacity-ceilinged)". Next: retest GPT-2-medium/3B at 2048 nodes.
+
+## 2026-06-07 — recovery is model-specific: GPT-2-medium does NOT recover
+
+#21: gpt2-medium (355M) with the 2048-node reservoir stays at chance (0.17=control) at BOTH input
+scalings (0.1 and 0.5). So the 1.5B recall recovery is model-specific, not a monotonic size law:
+recall works at GPT-2-small (124M) and Qwen-1.5B, but NOT GPT-2-medium (355M). Likely the larger
+reservoir is usable only when the backbone reads a content-addressable prefix well (Qwen can; deeper
+GPT-2-family medium cannot on this budget). Qualified the abstract + scaling section + site lede +
+confirmed section. Hermes-3B config still running.
