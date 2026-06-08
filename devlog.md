@@ -2117,3 +2117,11 @@ Moved the Safety section down to just before Limitations and retitled it "Safety
 list right after the abstract (Grok: stronger contributions early), leading with the injection
 success + the 1.5B scaling recovery. Figures are already proper matplotlib plots (Grok thought they
 were screenshots — outdated).
+
+## 2026-06-08 — appendix restructure + remove "honest" (Emma + Grok)
+
+Moved the exploratory/secondary sections to Appendix A-F (Exploratory results, Always-alive runtime,
+LoRA fine-tuning, 3B port, silence policy, context growth) after Limitations, so the main flow reads
+Abstract->Contributions->...->Results->Cross-pass recall->Battery->Safety->Limitations->Appendix->
+Figures->References. Removed "honest"/"honest read"/"honest conclusion" from FINDINGS (2) + site (1)
+per Emma + the writing-style rule.
