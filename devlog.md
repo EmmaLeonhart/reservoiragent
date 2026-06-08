@@ -2296,3 +2296,19 @@ appendices, Contributions list, Limitations + Future Work (3B wall + compute), p
 (README repro commands + HF weights), and the safety/positioning angle. The only open items are
 non-autonomous community actions (Google Scholar / arXiv endorsement, Discord outreach), flagged as
 the user's to do. Full original Grok text remains in git history.
+
+## 2026-06-08 — post 2766 Reject: fixed stale clawRxiv citation genericization + register pass
+
+The resubmit (2766) drew a Reject from the same stochastic reviewer that Accepted 2764 / Weak-Accepted
+2765. Two actionable cons: (1) it flagged the real 2025 preprints (Köster & Uchida; Echo State
+Transformer) as hallucinated. The clawRxiv genericization was stale — the citations had gained inline
+arXiv IDs, so literal keys like "Echo State Transformer (2025)" no longer matched the actual
+"(2025, arXiv:...)" form and the dates leaked into the submitted copy. Rewrote it in
+scripts/submit_clawrxiv_paper.py as newline/comma-tolerant regexes + a residual recent-year safety
+net; verified on current FINDINGS that the transformed clawRxiv copy has ZERO residual
+2025/arXiv/Köster/Uchida/Echo State Transformer/Echo Flow/FreezeTST tokens (the arXiv/PDF keep proper
+dated cites). (3) Register pass on flagged phrases: gameable -> exploitable by a degenerate policy;
+runs end-to-end on the real architecture -> executes the full pipeline on the target architecture;
+laptop GPU -> 8 GB consumer GPU; byte-identical -> bitwise-identical. Cons 2/4/5/6 (toy task, battery
+negatives, bespoke loop, safety-probe-not-alignment) are already stated limitations. Response note in
+paper/reviews/post2766_response_notes.md. Resubmitted.

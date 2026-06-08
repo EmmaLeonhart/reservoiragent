@@ -630,7 +630,7 @@ evidence of usable statefulness at scale. The battery's temporal/agency metrics 
 matched (or exceeded) by a stateless control, so they do not establish that statefulness scales;
 the demonstration of usable carried state rests on the controlled tasks below, not the battery.
 
-**Why the temporal metrics were gameable (the mechanism, and a loss-design bug).** The battery's
+**Why the temporal metrics were exploitable by a degenerate policy (the mechanism, and a loss-design bug).** The battery's
 temporal tasks (`timed`, `selfinit`) are scored per supervised step, and most steps are SILENCE
 steps whose "correct" answer is to **stay quiet**; only the *final* step requires emitting the
 right word at the right time — the part that actually needs carried state. A model that simply
@@ -1103,7 +1103,7 @@ substrate fine-tuning will later plug into (the released code). It has the four 
 - an **output confidence gate** (normalized top-k logit entropy) deciding emit vs.
  silence.
 
-A fixed evaluation session runs end-to-end: across five interleaved prompted/unprompted passes
+A fixed evaluation session executes the full pipeline: across five interleaved prompted/unprompted passes
 the reservoir state |r| evolves continuously (state carried, including through the
 idle ticks). On the untrained model the gate keys off the *base
 model's* next-token entropy, so its emit/silence decisions and the generated text
@@ -1118,7 +1118,7 @@ GPT-2 with the *differentiable* reservoir injection. Across **3 reservoir seeds 
 decisively (≈ **6.3 → 0.85–1.1**) with **491,520 trainable parameters** (LoRA on the
 attention projections + the reservoir readout W_out), and the best seed is selected by
 trained loss. So the full pipeline — inject, freeze the backbone, train W_out + LoRA,
-select across seeds — **runs end-to-end on the real architecture**, on the GPU. With
+select across seeds — **executes the full pipeline on the target architecture**, on the GPU. With
 W_out zero-initialised the fine-tune starts exactly at the base model (H1 preserved).
 
 **The boundary:** the injection hook fires *once per forward pass*
@@ -1138,9 +1138,9 @@ wants, already agent-fine-tuned).
 - **(A) Injection generalized to the Llama architecture.** The injection was GPT-2-only
  (`transformer.h`); the architecture-adaptation layer now locates decoder blocks across families
  (`model.model.layers` for Llama), and H1 is verified on a tiny Llama as well as GPT-2.
-- **(B) Hermes 3B loads and H1 holds, on the laptop GPU.** Loaded in 4-bit (bitsandbytes
+- **(B) Hermes 3B loads and H1 holds, on the 8 GB consumer GPU.** Loaded in 4-bit (bitsandbytes
  nf4) with the reservoir injected at layer 14 of 28 (d_model 3072): with the readout
- zeroed, the injected model's logits are **byte-identical** to the un-injected Hermes
+ zeroed, the injected model's logits are **bitwise-identical** to the un-injected Hermes
  (`max|diff| = 0.00`), at a peak of **2.35 GB VRAM** — leaving ample room for LoRA +
  training on the RTX 4070. So the architecture transplant is non-destructive on the real
  model.
