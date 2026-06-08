@@ -2200,3 +2200,10 @@ boxes). Switched to clean descriptive labels (input/recurrent/readout weights, f
 trained), verified by rendering locally with cairosvg — clean now. Also fixed the paper footer URL
 emmaleonhart.github.io/reservoiragent -> reservoir.emmaleonhart.com (2 instances) per Emma; the site
 already used the right domain.
+
+## 2026-06-08 — fix figures cut off / overflowing the page (Emma)
+
+The paper.tex \pandocbounded shim was a no-op passthrough, so wide figures (diagrams, bar charts)
+ran off the page edge / looked oddly centered. Replaced it with pandoc's real default-template
+\pandocbounded that scales an over-wide/over-tall image DOWN to fit the text block. Fixes the
+Figure-2 cutoff and the general inline-figure overflow.
