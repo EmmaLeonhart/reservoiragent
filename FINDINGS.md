@@ -208,7 +208,7 @@ clean **negative answer for this proxy**: the untrained participation ratio has 
 rank correlation** with trained memory capacity (**Spearman ρ = 0.08, p = 0.80**, n=12).
 So seeds cannot be pre-filtered by participation ratio — the N-seed *training* does real
 work this dynamics proxy can't shortcut. (figure on the report site) **The cost implication,
-stated plainly (per review):** because this proxy fails, selecting a good fixed reservoir
+stated plainly:** because this proxy fails, selecting a good fixed reservoir
 currently requires training each seed's readout — i.e. genuine trial-and-error, not a
 cheap pre-filter. Finding an untrained proxy that *does* correlate is open work; until
 then the selection cost scales with the number of seeds tried.
@@ -389,7 +389,7 @@ on pass 2 from the carried reservoir state alone. The multi-pass differentiable 
 passes, training the injection (+ LoRA), and is compared against a **stateless baseline**
 (the reservoir is reset between the two passes, destroying the carried state).
 
-**On the choice of baseline (in response to review).** The reset-reservoir baseline is not
+**On the choice of baseline.** The reset-reservoir baseline is not
 meant as a competitive memory model — it is an **ablation** that holds the architecture, the
 trained parameters, and the optimizer fixed and toggles *only* whether the reservoir state
 survives between passes. Its purpose is to attribute any cross-pass recall specifically to the
@@ -560,18 +560,18 @@ was **too strong**: at least one single-machine lever — sizing the reservoir u
 input — does move the 1.5B recall wall. The headline framing will be revised once the isolation +
 reproduction land.
 
-**Scope of the wall — and a stateless ablation that corrects an earlier over-reading.** The
-content-recall wall concerns recalling *which specific token* was carried (high-dimensional). We
-initially read the battery's temporal/agency metrics on Qwen-1.5B (silence 1.00, timed 0.64,
-self-init 0.65) as evidence that low-dimensional statefulness *scales* where content does not. **A
-stateless ablation refutes that reading.** Re-running the battery with the reservoir reset before
+**Scope of the wall — a stateless ablation localizes what the battery metrics measure.** The
+content-recall wall concerns recalling *which specific token* was carried (high-dimensional). The
+battery's temporal/agency metrics on Qwen-1.5B (silence 1.00, timed 0.64, self-init 0.65) might
+appear to show that low-dimensional statefulness *scales* where content does not. **A stateless
+ablation rules that out.** Re-running the battery with the reservoir reset before
 every pass (`stateless=True`, no cross-pass carry; `results/battery_ablation.json`) leaves the
 temporal metrics **unchanged** — silence 1.00, timed 0.64, self-init 0.65 — with a slightly
 *higher* overall mean (0.415 vs 0.345). So the battery's temporal success comes from the LoRA
 adapters and current-pass features, **not** from carried reservoir state; those numbers are not
-evidence of usable statefulness at scale, and the reviewer's con on this point (con #6) is
-correct for the battery. The "statefulness scales to Qwen-1.5B" framing was an over-reading of
-metrics a stateless control matches, and is withdrawn.
+evidence of usable statefulness at scale. The battery's temporal/agency metrics on Qwen-1.5B are
+matched (or exceeded) by a stateless control, so they do not establish that statefulness scales;
+the demonstration of usable carried state rests on the controlled tasks below, not the battery.
 
 **Why the temporal metrics were gameable (the mechanism, and a loss-design bug).** The battery's
 temporal tasks (`timed`, `selfinit`) are scored per supervised step, and most steps are SILENCE
@@ -657,10 +657,13 @@ reservoir is wiped between passes**, on a task that cannot be done without memor
 dedicated unresolved-thread gate (D), where a readout on the reservoir state reaches F1 ≈ 0.96 vs
 ≈ 0.34 on the current input. Both are GPT-2-scale, and both have controls that *do* swing with the
 carried state (unlike the battery). At 1.5B the same KV-prefix mechanism on the controlled
-cross-pass task stays at **chance**. So the
-honest scope is narrower than the withdrawn reframe: **usable cross-pass reservoir state is
-demonstrated at GPT-2-small and does not, in this study, scale to 1.5B** — neither as content
-recall (chance) nor as genuinely reservoir-driven temporal behaviour (the battery temporal is
+cross-pass task stayed at **chance** in the small-reservoir (512-node, input-scaling-0.5)
+configuration this summary was written around — **but see the preliminary update above**: a
+2048-node reservoir at input scaling 0.1 lifts the *same* 1.5B cross-pass recall to 0.83 vs a
+0.17 control, so the scope below is being revised. As written, the established scope is:
+**usable cross-pass reservoir state is demonstrated at GPT-2-small, and at 1.5B is preliminary
+(strong, control-verified, pending reproduction)** — content recall lifts off chance with the
+larger reservoir, while genuinely reservoir-driven temporal behaviour does not (the battery temporal is
 LoRA, per the ablation). The lesson is methodological too: a metric that does not move under a
 stateless control is not evidence of statefulness, and the battery's temporal tasks are not, as
 constructed, a clean test of carried state.
@@ -770,11 +773,11 @@ continuously integrating input — registers an interruption sooner, and retains
 measured both halves on CPU
 (figure on the report site).
 
-**Polling latency (structural) — and what is *not* reservoir-specific (per review).** A poller
+**Polling latency (structural) — and what is *not* reservoir-specific.** A poller
 that only reads input every `period` passes registers an arrival at the next boundary: latency
 is uniform on `0..period-1` (mean `(period-1)/2`). At period 8 the turn-based agent's mean
 latency is **3.57 passes** (max 7); a **per-tick agent's latency is 0** — it reads on the pass
-the input arrives. We grant the reviewer's point that this latency half is a consequence of
+the input arrives. This latency half is a consequence of
 **sampling frequency** (per-tick vs per-turn), not of the reservoir as such — any per-tick agent
 gets it. The reservoir-specific half is the *next* point.
 

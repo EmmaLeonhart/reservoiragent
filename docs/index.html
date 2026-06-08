@@ -738,8 +738,8 @@
   <strong>Interruptibility &mdash; a faster, more durable response to &ldquo;STOP&rdquo;
   (a safety property).</strong> A turn-based harness agent only reads input at turn
   boundaries, so an urgent override waits: at a poll period of 8 passes its mean latency is
-  3.57 passes, while a per-tick Reservoir Agent&rsquo;s is <strong>0</strong>. We grant that
-  this latency half is a consequence of <em>sampling frequency</em> (per-tick vs per-turn), not
+  3.57 passes, while a per-tick Reservoir Agent&rsquo;s is <strong>0</strong>. This latency half
+  is a consequence of <em>sampling frequency</em> (per-tick vs per-turn), not
   of the reservoir as such &mdash; any per-tick agent gets it. The reservoir-specific, sharper
   point is a <em>one-shot</em> burst (the user yells STOP once, then goes quiet): a
   matched-filter monitor on the reservoir state stays detectable for <strong>3 passes
