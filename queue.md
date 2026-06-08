@@ -19,6 +19,8 @@ Secondly wtf is going on with the inaccessible literature/REVIEW.md. peppered ar
 
 Please fix this objection "The writing style is informal and reads more like a technical lab notebook or a blog post than a peer-reviewed academic paper, using non-standard terminology and formatting (e.g., 'FEASIBILITY + DYNAMICS study', 'well-diagnosed NEGATIVE')." I asked you to change this earlier, and I am not sure why it is that you didn't do this thing. 
 
+Generally speaking, I'm not really sure what you've been doing. I feel like you may have been not updating the paper enough, or you've been at least updating the paper primarily just based off the technical stuff and not based off of the other things. 
+
 ---
 
 ## Done — Phase J: the recall scaling result (complete 2026-06-07)
