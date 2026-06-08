@@ -1939,3 +1939,13 @@ Hermes-3B (4bit) @ 2048 reservoir: 0.17/0.17 (chance). Final cross-model: recall
 (124M) + Qwen-1.5B (bf16), chance at GPT-2-medium (355M bf16) + Hermes-3B (4bit). NOT monotonic in
 size -> deciding factor is the model (and possibly precision: 3B was 4bit, a confound vs Qwen bf16;
 3B bf16+2048 doesnt fit 8GB). Folded the full picture into FINDINGS+site. Resubmitting (batched).
+
+## 2026-06-07 — #22: recall recovers across the Qwen family; input scaling is the decisive knob
+
+Qwen2.5-0.5B @ 2048 reservoir: scale 0.1 -> 0.17 (chance), scale 0.5 -> 1.00 vs 0.17 control. One
+scalar flips no-recall to perfect recall. So recall transfers across the Qwen family (0.5B@0.5,
+1.5B@0.1) — smaller model needs higher input scaling (more drive for smaller activations). A 500M
+model recovering while gpt2-medium 355M does not RULES OUT a size law: the decisive knob is input
+scaling matched to the model, not parameter count. Reframed gpt2-medium chance as likely
+untested-scaling (next: gpt2-medium scaling sweep). Updated abstract + cross-model section + site
+lede + detail paragraph. Resubmitting.

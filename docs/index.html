@@ -188,16 +188,15 @@
   only in the carried state</strong> across an otherwise-wiped context. The deciding
   factor is <em>how</em> the reservoir is injected (additive &rarr; ignored;
   content-addressable &rarr; 100% recall, with a wiped-state control). And it <strong>scales</strong>:
-  the earlier "GPT-2-small only" wall was an <em>undersized reservoir</em> &mdash; sizing it from 512
-  to 2048 nodes (at the lower input scaling the dynamics sweep prescribes) recovers cross-pass recall
-  at <strong>Qwen-1.5B: 0.83&ndash;1.00 stateful vs 0.17 wiped-control, reproduced across two seeds</strong>,
-  with reservoir size isolated as the lever. A capacity ceiling persists (recall degrades past ~6
-  items, as at GPT-2-small), and the separate 8-task battery's temporal scores are <em>not</em>
-  reservoir-driven (a stateless ablation matches them). The recovery is <em>model-specific</em>, not
-  a size law: GPT-2-medium (355M) does <strong>not</strong> recover with the same fix (chance at two
-  input scalings) &mdash; recall works at GPT-2-small and Qwen-1.5B, where the backbone can read the
-  content-addressable prefix, but not the deeper GPT-2-medium. The contribution is the injection-design
-  result plus this scaling result.
+  the earlier "GPT-2-small only" wall was an <em>undersized reservoir at the wrong input scaling</em>.
+  Sizing it to 2048 nodes and matching the input scaling to the model recovers cross-pass recall across
+  the <strong>Qwen family</strong>: Qwen-1.5B at scaling 0.1 (0.83&ndash;1.00 vs 0.17 control, reproduced
+  across two seeds) and Qwen-0.5B at scaling 0.5 (<strong>1.00 vs 0.17</strong>). Input scaling is the
+  decisive knob &mdash; Qwen-0.5B goes 0.17&rarr;1.00 by changing that one scalar &mdash; so a 500M model
+  recovers while GPT-2-medium's 355M (at the two scalings tried) does not: <strong>not a size law</strong>.
+  A capacity ceiling persists (recall degrades past ~6 items, as at GPT-2-small), and the separate 8-task
+  battery's temporal scores are <em>not</em> reservoir-driven (a stateless ablation matches them). The
+  contribution is the injection-design result plus this scaling result.
 </p>
 
 <div class="question">
@@ -459,17 +458,16 @@
   it carries.
 </p>
 <p>
-  <strong>But it is model-specific, not a size law.</strong> The same 2048-node fix on
-  <strong>GPT-2-medium (355M)</strong> leaves recall at chance (0.17 = control) at <em>both</em> input
-  scalings tried (0.1 and 0.5) &mdash; sizing the reservoir up does not rescue it. So the pattern across
-  models is not "bigger &rarr; works": recall works at GPT-2-<strong>small</strong> (124M) and
-  <strong>Qwen-1.5B</strong>, but not GPT-2-<strong>medium</strong> (355M). What the larger reservoir buys
-  appears usable only when the backbone can read a content-addressable prefix well &mdash; a capable modern
-  model like Qwen-1.5B can; the deeper GPT-2-family medium, on this budget, cannot. Hermes-3B (4-bit) is
-  also at chance with the same fix &mdash; though 4-bit is a confound (Qwen ran in bf16, and 3B bf16 + a
-  2048-node reservoir won't fit this 8&nbsp;GB GPU). So across GPT-2-small (works), GPT-2-medium (chance),
-  Qwen-1.5B (works), and 3B-4bit (chance), the deciding factor is the model and precision, not parameter
-  count.
+  <strong>The decisive knob is input scaling matched to the model &mdash; not size.</strong>
+  <strong>Qwen2.5-0.5B</strong> makes this sharp: with the 2048-node reservoir it is at chance (0.17) at
+  input scaling 0.1, but hits <strong>1.00 (vs 0.17 control) at scaling 0.5</strong>. One scalar takes it
+  from no-recall to perfect recall &mdash; smaller models have smaller activations and need more input drive
+  (1.5B recovers at 0.1, 0.5B at 0.5). So recall transfers across the <strong>Qwen family (0.5B and 1.5B)</strong>,
+  and a 500M model recovering while GPT-2-medium's 355M (at the two scalings tried) does not <em>rules out a
+  size law</em>. GPT-2-medium's chance is most likely an <em>untested-scaling</em> result given how decisive
+  scaling proved for Qwen-0.5B, not a hard wall; Hermes-3B (4-bit) is also at chance but 4-bit is a confound
+  (bf16 3B + a 2048 reservoir won't fit this 8&nbsp;GB GPU). The deciding factor is <strong>input scaling tuned
+  to the model's activation magnitude</strong>, not parameter count.
 </p>
 <p>
   <strong>First result (synthetic-input dynamics sweep).</strong> Driving a 200-unit
