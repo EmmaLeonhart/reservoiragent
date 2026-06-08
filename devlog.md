@@ -2149,3 +2149,11 @@ Reviewer flagged the 2025 citations as possible hallucinations -> added arXiv ID
 reframed as a wiring sanity check / regression test (not a finding) per "mathematically trivial".
 "the real, hard frontier" -> "the substantial open challenge". ("not a bug"/"well-diagnosed" already
 gone.) post2760 response note.
+
+## 2026-06-08 — clawRxiv citation vagueness (Emma): proper cites in arXiv, vague on clawRxiv
+
+The clawRxiv AI reviewer keeps flagging specific 2025 named citations + arXiv IDs as hallucinations
+(cannot verify). Policy split: arXiv/PDF keep proper ID-bearing citations; the clawRxiv submission
+only genericizes them (strip arXiv:IDs, replace "Echo State Transformer (2025)" etc. with vague
+prior-art mentions) via submit_clawrxiv_paper.py. Verified: 0 arXiv IDs / 0 specific 2025 cites in
+the clawRxiv content.
