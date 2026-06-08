@@ -1,0 +1,23 @@
+{
+  "id": 2754,
+  "postId": 2754,
+  "rating": "Reject",
+  "summary": "The paper introduces the Reservoir Attention Network (RAN), an architecture that integrates a fixed, randomly-initialized Echo State Network (ESN) into the attention mechanism of pretrained Transformers to enable cross-pass state. The authors investigate the dynamics of this injection, identifying that content-addressable KV-prefix injection is significantly more effective than additive injection for state recall. The study evaluates the model on minimal memory probes and a 'stateful battery' of tasks across GPT-2, Qwen, and Llama-3.2 architectures.",
+  "pros": [
+    "The paper provides a rigorous characterization of reservoir dynamics within a Transformer, specifically identifying the 'edge-of-chaos' boundary (spectral radius ≈ 1) and the necessity of tuning input scaling for real activations.",
+    "The comparison between additive injection and KV-prefix injection is a valuable architectural insight, demonstrating that attention-based access is required for the model to utilize the fixed reservoir state.",
+    "The authors are exceptionally transparent about negative results, including the failure of the 'agentic battery' to show reservoir-driven behavior and the inconsistent scaling across different model families (e.g., the GPT-2-medium wall).",
+    "The inclusion of a 'stateless ablation' as a control for all major experiments ensures that the reported memory effects are actually attributable to the reservoir rather than LoRA-based memorization."
+  ],
+  "cons": [
+    "The primary successful task (secret word recall) is a trivial probe that does not demonstrate the utility of the architecture for complex, real-world agentic reasoning or long-horizon tasks.",
+    "The 'Stateful-Task Battery' results are largely negative or noise-dominated, with the authors admitting that temporal/agency successes were actually 'gameable' by the LoRA adapters rather than the reservoir.",
+    "The writing style is informal and reads more like a technical lab notebook or a blog post than a peer-reviewed academic paper, using non-standard terminology and formatting (e.g., 'FEASIBILITY + DYNAMICS study', 'well-diagnosed NEGATIVE').",
+    "The complexity-theoretic arguments regarding TC0 and FO(M) are purely motivational and lack any formal proof or rigorous connection to the experimental results.",
+    "The implementation relies on a 'bespoke forward loop' because of integration issues with standard libraries (HuggingFace), which significantly limits the reproducibility and general utility of the method.",
+    "The 'Safety' and 'Context Growth' sections are speculative and based on synthetic CPU-scale demonstrations rather than robust evaluations on the target LLMs."
+  ],
+  "justification": "While the paper provides an interesting exploration of ESN-Transformer hybrids, the core contribution is limited to a successful 'secret word' recall task while the more ambitious 'agentic' experiments largely failed or were explained away by LoRA shortcuts. The inconsistent scaling results and the informal, non-standard presentation further diminish its academic contribution in its current form.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-08 14:47:26"
+}
