@@ -1959,3 +1959,10 @@ guess: it is a genuine exception. Final cross-model: recall recovers at GPT-2-sm
 model-specific in a way size/depth/scaling alone dont explain (GPT-2-small works, GPT-2-medium
 doesnt; deep modern Qwen works). Matched input scaling is necessary (Qwen-0.5B) but not sufficient
 (gpt2-medium). Updated abstract + cross-model section + site. Resubmitting.
+
+## 2026-06-07 — recall-bars plotter (cross-model / capacity figures)
+
+Added scripts/plot_recall_bars.py: grouped stateful-vs-control recall bar chart from a set of
+crosspass result JSONs, with per-config 1/n_keys chance lines and flexible labelling (model /
+n_keys / input_scaling / auto). For the cross-model panel and the #24 capacity curve. 5 tests
+(tests/test_plot_recall_bars.py), all pass. Will wire the figures into the site once #24 completes.
