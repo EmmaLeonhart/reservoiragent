@@ -31,6 +31,8 @@
 
 - Please move the safety section down to the bottom, right before the limitations, because I do treat it as something I'm not sure where to put. The safety section is basically like an ethics disclosure or something like that. I feel like, in terms of whatever, that's it
 
+- The figures are not really all present there, and also the architectural diagrams aren't present. I think we probably need architectural diagrams in this. Maybe more of the figure is actually in line as opposed to at the bottom. 
+
 
 ## Grok's reception (address the negatives and lean into the positives if possible)
 
