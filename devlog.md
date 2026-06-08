@@ -1888,3 +1888,16 @@ silence_weight only moves the gate between stuck-open and stuck-shut; the blocke
 content/recall half, not the gate weight. Folded the completed both-ways result into FINDINGS+site
 (replacing the open-ended "sw=0.3 is the natural next setting" note). Pivoting to #19 (proj/n_prefix
 ablation: is the recall wall partly the down-projection bottleneck?).
+
+## 2026-06-07 — BREAKTHROUGH (preliminary): cross-pass recall lifts off chance at Qwen-1.5B
+
+#19 ablation (bwupxzgfi): Qwen-1.5B cross-pass recall, n_keys 6, 800 steps, input_scaling 0.1, bf16.
+CONFIG 1 (n_res 2048, proj None, np16): stateful 0.83 vs wiped-control 0.17. CONFIG 2 (n_res 2048,
+proj 256, np16): stateful 0.83 vs control 0.17. Both control-verified, both 0.83 -> down-projection
+is NOT the bottleneck. The lift over prior chance-at-1.5B runs comes from reservoir size (512->2048)
+and/or input_scaling (0.5->0.1, the dynamics-sweep regime for large models) and/or n_prefix (8->16).
+Control at chance rules out memorization. The earlier "five interventions, resists every fix short of
+much greater scale" reading was too strong — it held reservoir size + input scaling at GPT-2 defaults.
+Folded as a clearly-marked PRELIMINARY update into FINDINGS+site (NOT yet rewriting the headline).
+Verification (#20): different-seed reproduction, knob-isolation, n_keys 12/24. Config 3 (8192/proj1024/np32)
+still running.
