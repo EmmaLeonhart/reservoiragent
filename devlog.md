@@ -1949,3 +1949,13 @@ model recovering while gpt2-medium 355M does not RULES OUT a size law: the decis
 scaling matched to the model, not parameter count. Reframed gpt2-medium chance as likely
 untested-scaling (next: gpt2-medium scaling sweep). Updated abstract + cross-model section + site
 lede + detail paragraph. Resubmitting.
+
+## 2026-06-07 — #23: gpt2-medium is a genuine exception (7-scaling sweep all chance)
+
+gpt2-medium @ 2048 reservoir swept over input scaling 0.05/0.1/0.2/0.3/0.5/0.7/1.0 — ALL chance
+(stateful 0.17 = control), loss never converges. Corrects last cycles "likely untested-scaling"
+guess: it is a genuine exception. Final cross-model: recall recovers at GPT-2-small + Qwen-0.5B(@0.5)
++ Qwen-1.5B(@0.1); robust chance at gpt2-medium (swept) + Hermes-3B(4bit, confounded). Boundary is
+model-specific in a way size/depth/scaling alone dont explain (GPT-2-small works, GPT-2-medium
+doesnt; deep modern Qwen works). Matched input scaling is necessary (Qwen-0.5B) but not sufficient
+(gpt2-medium). Updated abstract + cross-model section + site. Resubmitting.

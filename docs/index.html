@@ -463,11 +463,15 @@
   input scaling 0.1, but hits <strong>1.00 (vs 0.17 control) at scaling 0.5</strong>. One scalar takes it
   from no-recall to perfect recall &mdash; smaller models have smaller activations and need more input drive
   (1.5B recovers at 0.1, 0.5B at 0.5). So recall transfers across the <strong>Qwen family (0.5B and 1.5B)</strong>,
-  and a 500M model recovering while GPT-2-medium's 355M (at the two scalings tried) does not <em>rules out a
-  size law</em>. GPT-2-medium's chance is most likely an <em>untested-scaling</em> result given how decisive
-  scaling proved for Qwen-0.5B, not a hard wall; Hermes-3B (4-bit) is also at chance but 4-bit is a confound
-  (bf16 3B + a 2048 reservoir won't fit this 8&nbsp;GB GPU). The deciding factor is <strong>input scaling tuned
-  to the model's activation magnitude</strong>, not parameter count.
+  and a 500M model recovering while GPT-2-medium's 355M does not <em>rules out a size law</em>. But scaling
+  isn't a universal rescue: GPT-2-medium was swept across <strong>seven scalings (0.05&ndash;1.0)</strong> and
+  stayed at chance at every one &mdash; a <em>genuine exception</em>, not untested scaling (an earlier draft
+  guessed the latter; the sweep disproves it). Hermes-3B (4-bit) is also at chance, but 4-bit is a confound
+  (bf16 3B + a 2048 reservoir won't fit this 8&nbsp;GB GPU). So recall recovers at GPT-2-small and the Qwen
+  family but not GPT-2-medium &mdash; and since GPT-2-<em>small</em> works while GPT-2-<em>medium</em> doesn't,
+  and deep modern Qwen does, the boundary is <strong>model-specific in a way size, depth, and scaling alone
+  don't explain</strong>. Matched input scaling is necessary (Qwen-0.5B proves it) but not sufficient
+  (GPT-2-medium has no working scaling) &mdash; what lets a backbone read the prefix at all is the open question.
 </p>
 <p>
   <strong>First result (synthetic-input dynamics sweep).</strong> Driving a 200-unit
