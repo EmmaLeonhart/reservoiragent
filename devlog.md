@@ -2063,3 +2063,14 @@ into a tight ~280-word declarative four-results abstract; (c) renamed 16 diary-s
 Phase H/Ambitious reach/decides everything/...) to formal section names; (d) demoted safety to a
 Secondary section with proper subsections. Site left as-is (web report, different register). Prose-
 level de-diary-ing continues in later passes.
+
+## 2026-06-08 — #31 fails to retain (lora_r=2) + implemented the aux "use-the-state" loss (#30)
+
+#31 (lora_r=2): lift +0.135 (e0) -> -0.021 (e1) — collapses like #29, so constraining LoRA does NOT
+retain the reservoir solution. Per plan, implemented #30: counterfactual aux term in episode_loss —
+on each emit step, relu(aux_margin - (stateless_CE - stateful_CE)) via a wiped-reservoir probe forward
+with state save/restore. Pushes the wiped path to be >= margin worse, forcing reliance on carried
+state (directly targets the "learns to ignore the recurrent state" drift). Gated behind aux_weight=0
+(default off; existing behaviour provably unchanged). Wired RESERVOIR_AUX_WEIGHT/MARGIN into
+train_large. 3 wiring tests (no-op when off, finite loss, state restored) pass. Next: run the content
+battery with aux_weight>0 — does the lift now HOLD across epochs?

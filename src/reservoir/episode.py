@@ -58,13 +58,21 @@ def _target_ids(lm, step):
 
 
 def episode_loss(lm, episode: Episode, *, gate_weight: float = 1.0, stateless: bool = False,
-                 emit_weight: float = 1.0, silence_weight: float = 1.0):
+                 emit_weight: float = 1.0, silence_weight: float = 1.0,
+                 aux_weight: float = 0.0, aux_margin: float = 1.0):
     """Run ``episode`` and return the mean loss as a torch scalar whose graph spans every
     pass (so ``.backward()`` trains through the carried state).
 
     Each supervised pass supervises the **gate head** (speak vs silent, BCE) and — only on
     *emit* passes — the **content** (teacher-forced cross-entropy on the LM output). Silence
     is the gate head's job, not "predict eos", so it no longer competes with content.
+
+    ``aux_weight`` > 0 adds a **counterfactual "use-the-state" term** on each emit step's first
+    target token: a margin ``relu(aux_margin - (stateless_CE - stateful_CE))`` that pushes the
+    *wiped-reservoir* prediction to be at least ``aux_margin`` nats worse than the carried-state
+    one. This penalises the stateless / current-pass shortcut the optimizer otherwise drifts
+    to (the "model learns to ignore the recurrent state" failure), forcing the answer to come
+    from the carried state. It costs one extra forward per emit step; default 0 (off).
     Requires a model exposing ``gate_logit()`` (``TorchReservoirPrefixInjectedLM``)."""
     import torch
     import torch.nn.functional as F
@@ -99,8 +107,22 @@ def episode_loss(lm, episode: Episode, *, gate_weight: float = 1.0, stateless: b
         # emit step: the part that actually needs carried state. Up-weight it (emit_weight) so
         # training selects for "say the right token at the right time" rather than free silence.
         add(emit_weight * gate_weight * F.binary_cross_entropy_with_logits(g, torch.ones_like(g)))
+        tgt_ids = _target_ids(lm, step)
+        if aux_weight > 0 and not stateless and tgt_ids:
+            # Counterfactual: how well would the SAME forward predict the first target token with
+            # the reservoir wiped? Push that to be >= aux_margin worse than the carried-state one,
+            # so the answer must come from the state, not a current-pass shortcut. Save/restore the
+            # (already-advanced) state so the episode continues unperturbed.
+            t0 = torch.tensor([tgt_ids[0]], device=lm.device)
+            sf_ce = F.cross_entropy(logits[0, -1].unsqueeze(0), t0)
+            s_after = lm._state
+            lm._state = torch.zeros_like(s_after)
+            sl_logits = lm.forward_logits(ids, mask)
+            sl_ce = F.cross_entropy(sl_logits[0, -1].unsqueeze(0), t0)
+            lm._state = s_after
+            add(aux_weight * F.relu(aux_margin - (sl_ce - sf_ce)))
         cur_ids, cur_mask = ids, mask
-        for t in _target_ids(lm, step):                # teacher-forced content
+        for t in tgt_ids:                              # teacher-forced content
             add(emit_weight * F.cross_entropy(logits[0, -1].unsqueeze(0),
                                 torch.tensor([t], device=lm.device)))
             cur_ids = torch.cat([cur_ids, torch.tensor([[t]], device=lm.device)], dim=1)
