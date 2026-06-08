@@ -1878,3 +1878,13 @@ lowsw continue (gate-open + emit_weight=4 is the most favorable config for emit 
 Fix: train_large.py out_root now derives from the HF repo name (RESERVOIR_OUT override) so distinct
 runs no longer clobber each others local artifacts/index.json — caused stale-index confusion when
 the lowsw run reused artifacts/qwen-large/ from the killed sw=2 run.
+
+## 2026-06-07 — lowsw run complete (4 epochs): content wall confirmed, gate weight only flips stuck state
+
+lowsw run (#18, sw=0.3/emit_weight=4) ran 4 epochs then stopped: gate flips to always-OPEN
+(silence ~0.00, complement of sw=2 always-shut) but emit stays 0.00 with +0.00 lift across all 4
+epochs — even though this is the most emit-favorable config (open gate + up-weighted emit). So
+silence_weight only moves the gate between stuck-open and stuck-shut; the blocker is the
+content/recall half, not the gate weight. Folded the completed both-ways result into FINDINGS+site
+(replacing the open-ended "sw=0.3 is the natural next setting" note). Pivoting to #19 (proj/n_prefix
+ablation: is the recall wall partly the down-projection bottleneck?).

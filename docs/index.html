@@ -406,10 +406,13 @@
   right step (1.00) but over-fires on ~half the silent steps (silence-shut 0.53), and up-weighting
   the silence supervision to fix that (silence-shut &rarr; 1.00) instead collapses the emit to 0.00
   &mdash; the two failure modes trade off, the signature of a capacity limit rather than a tuning miss.
-  The same tension dominates the full 8-task battery run progressively at 1.5B: the gate falls into
-  the silent attractor (silence accuracy oscillating across epochs), every emit task stays at 0.00,
-  and the lift over the stateless control stays +0.00 &mdash; the reservoir contributes nothing
-  measurable on the battery at this scale.
+  The same tension dominates the full 8-task battery run progressively at 1.5B. Up-weighting silence
+  (weight 2) makes the gate fall into the always-shut attractor; down-weighting it (weight 0.3, with
+  up-weighted emit) flips it to always-open &mdash; but across four epochs <em>either way</em> every
+  emit task stays at 0.00 with +0.00 lift over the stateless control. The gate weight only moves the
+  gate between stuck-open and stuck-shut; the blocker is the content/recall half &mdash; with a
+  healthy open gate the model still cannot learn what to emit, and the reservoir contributes nothing
+  measurable at this scale.
 </p>
 <p>
   <strong>The cause is geometric: the reservoir compresses where it should expand.</strong>
