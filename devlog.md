@@ -2207,3 +2207,22 @@ The paper.tex \pandocbounded shim was a no-op passthrough, so wide figures (diag
 ran off the page edge / looked oddly centered. Replaced it with pandoc's real default-template
 \pandocbounded that scales an over-wide/over-tall image DOWN to fit the text block. Fixes the
 Figure-2 cutoff and the general inline-figure overflow.
+
+## 2026-06-08 — node-level transformer + RAN diagrams added to paper + site (Emma)
+
+Emma loved the redesigned RC node-diagram and asked for a matching pair: a traditional
+transformer diagram (the stateless baseline) and a visual RAN diagram in the same node style
+showing "the orientation of the neurons." Authored two original SVGs in the site palette:
+`docs/diagram-transformer.svg` (all-to-all self-attention -> FFN -> output; "no state survives
+between forward passes") and `docs/diagram-ran.svg` (tokens + reservoir prefix nodes at a
+mid-depth injection layer; fixed reservoir read via W_in / written via W_out; recurrent state
+r(t)->r(t+1) carried across the context wipe). Verified both render cleanly via cairosvg
+(fixed an injection-label clip). Placed as a baseline->RAN pair at the top of the Architecture
+section in FINDINGS.md and as matching <figure> blocks in docs/index.html. Paper-PDF build green
+(both SVGs auto-convert to PDF; the live \pandocbounded fix scales them to text width). Pushed to
+origin/main (40c4d63..e31e685); ci/pages/paper-pdf all green.
+
+Recovery note: an accidental `git pull --rebase origin feat` run while on the wrong branch
+scrambled local branch pointers (no remote was ever touched — both pushes were correctly rejected).
+Untangled via reflog: restored `main` to origin/main + the diagram commit (fast-forward) and `feat`
+to its real tip; verified origin intact throughout.
