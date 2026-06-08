@@ -44,7 +44,9 @@ not carried state. We release weights and code. The contributions are the inject
 (additive ignored vs content-addressable 100% recall, with a wiped-state control), the
 reservoir-dynamics characterization, and the **scaling result**: cross-pass recall transfers from
 GPT-2-small to Qwen-1.5B once the reservoir is sized to the larger activations — with a capacity
-ceiling, and not a claim that the *battery's* agentic metrics are reservoir-driven (the stateless
+ceiling, *model-specifically* (GPT-2-medium 355M does **not** recover with the same fix, so the
+gain is not a monotonic size law — it works where the backbone can read a content-addressable
+prefix), and not a claim that the *battery's* agentic metrics are reservoir-driven (the stateless
 ablation rules that out).
 
 ## Question
@@ -569,8 +571,17 @@ control at chance rules out memorization. The down-projection is irrelevant (no 
 the 6-key result, the same degradation GPT-2-small shows past six keys. So the reservoir scales the
 *model* it works in, not yet the *number of items* it can carry. The earlier "resists every fix
 short of much greater scale" reading was wrong because it never sized the reservoir up: the
-single-machine lever that moves the 1.5B wall is reservoir size. (Whether the same fix recovers
-GPT-2-medium/3B — which also used the 512-node default — is the obvious next test, not yet run.)
+single-machine lever that moves the 1.5B wall is reservoir size.
+
+**But the recovery is model-specific, not a monotonic size law.** Re-running the same
+2048-node fix on **GPT-2-medium (355M)** leaves recall at **chance (0.17 = control)** at *both*
+input scalings tried (0.1 and 0.5) — sizing the reservoir up does **not** rescue it. So the
+pattern across models is not "bigger model → works": it recalls at GPT-2-**small** (124M) and at
+**Qwen-1.5B**, but not at GPT-2-**medium** (355M). The likeliest reading is that what the
+larger reservoir buys is usable only when the backbone can read a content-addressable prefix
+well — Qwen-1.5B (a capable modern instruction-tuned model) can; the deeper GPT-2-family medium,
+on this budget, cannot. Reservoir size is the lever *within* a model that can use the prefix; it
+is not a universal key to every scale. (A 3B check is running.)
 
 **Scope of the wall — a stateless ablation localizes what the battery metrics measure.** The
 content-recall wall concerns recalling *which specific token* was carried (high-dimensional). The
