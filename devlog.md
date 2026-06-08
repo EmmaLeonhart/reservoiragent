@@ -2125,3 +2125,11 @@ LoRA fine-tuning, 3B port, silence policy, context growth) after Limitations, so
 Abstract->Contributions->...->Results->Cross-pass recall->Battery->Safety->Limitations->Appendix->
 Figures->References. Removed "honest"/"honest read"/"honest conclusion" from FINDINGS (2) + site (1)
 per Emma + the writing-style rule.
+
+## 2026-06-08 — architectural diagrams in the paper (inline) + SVG->PDF build (Emma)
+
+Added two architectural diagrams INLINE in the Architecture section (docs/diagram-architecture.svg,
+docs/diagram-residual-reservoir.svg). pdflatex can't read SVG, so the build (pages.yml + paper-pdf.yml)
+installs librsvg2-bin, converts docs/*.svg -> figures/*.pdf (stays vector), and the preprocess rewrites
+.svg)-> .pdf). clawRxiv strip already removes all image lines incl. the diagrams. Addresses "the
+architectural diagrams aren't present" + "more figures inline".

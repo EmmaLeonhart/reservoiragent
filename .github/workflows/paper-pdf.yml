@@ -41,7 +41,8 @@ jobs:
             texlive-xetex \
             lmodern \
             latexmk \
-            pandoc
+            pandoc \
+            librsvg2-bin
 
       - name: Generate paper.tex.body from FINDINGS.md
         working-directory: paper
@@ -63,11 +64,17 @@ jobs:
             -e 's|^## References$|## References {-}|' \
             -e 's|^## Limitations$|## Limitations {-}|' \
             -e 's|](docs/|](figures/|g' \
+            -e 's|\.svg)|.pdf)|g' \
             ../FINDINGS.md > paper-pre.md
           # Bundle the figures next to the .tex so both latexmk (here) and arXiv's
-          # flat extraction find them.
+          # flat extraction find them. PNGs as-is; SVG diagrams -> PDF (pdflatex
+          # can't read SVG) so they stay vector in the paper.
           mkdir -p figures
           cp ../docs/*.png figures/ 2>/dev/null || true
+          for f in ../docs/*.svg; do
+            [ -e "$f" ] || continue
+            rsvg-convert -f pdf "$f" -o "figures/$(basename "${f%.svg}").pdf"
+          done
           # --from=markdown-smart (not gfm) keeps raw_tex; --shift-heading-level-by=-1
           # promotes ## -> \section (1, 1.1, 2, ...) now that the H1 is stripped.
           pandoc paper-pre.md \
