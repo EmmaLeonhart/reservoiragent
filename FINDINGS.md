@@ -48,7 +48,9 @@ input scaling is matched to the model — Qwen-1.5B recovers at input scaling 0.
 (smaller activations need more input drive), each 0.83–1.00 vs a 0.17 control, with a capacity
 ceiling at ~6 items. **Input scaling, not parameter count, is the decisive knob** (Qwen-0.5B goes
 0.17→1.00 by changing scaling alone; and a 500M model recovering while GPT-2-medium's 355M does
-not — at the two scalings tried — rules out a monotonic size law). We do not claim the *battery's*
+not — across a seven-point scaling sweep — rules out a monotonic size law). Matched input scaling
+is necessary but not sufficient: GPT-2-medium has no working scaling in [0.05, 1.0], so what makes
+a backbone able to read the prefix at all remains open. We do not claim the *battery's*
 agentic metrics are reservoir-driven (the stateless ablation rules that out).
 
 ## Question
@@ -583,15 +585,21 @@ it is at **chance (0.17) at input scaling 0.1** but hits **1.00 (vs 0.17 control
 models have smaller activations, so they need *more* input drive (higher scaling); Qwen-1.5B
 recovers at 0.1, Qwen-0.5B at 0.5. So the recall capability transfers across the **Qwen family**
 (0.5B *and* 1.5B), and a 500M model (Qwen-0.5B) recovering while GPT-2-medium's 355M does not
-**rules out a monotonic size law**. **GPT-2-medium (355M)** stayed at chance at the two scalings we
-tried (0.1, 0.5) — but given how decisive scaling proved for Qwen-0.5B, that is most likely an
-*untested-scaling* result, not a hard wall; its sweet spot, if any, is the next sweep.
+**rules out a monotonic size law**. But input scaling is not a universal rescue either:
+**GPT-2-medium (355M)** was swept across **seven input scalings (0.05, 0.1, 0.2, 0.3, 0.5, 0.7,
+1.0)** at the 2048-node reservoir and stayed at **chance (0.17 = control) at every one**, its
+training loss never converging — so it is a **genuine exception**, not an untested-scaling
+artifact (an earlier draft guessed the latter; the sweep disproves it).
 **Hermes-3-Llama-3.2-3B (4-bit)** is also at chance with the 2048 reservoir, but 4-bit is a
-confound (Qwen ran bf16; a bf16 3B + 2048-node reservoir does not fit this 8 GB GPU). The
-cross-model picture, then: cross-pass recall recovers on the **Qwen family (0.5B, 1.5B)** and
-**GPT-2-small** with model-matched input scaling; GPT-2-medium and 4-bit 3B have not (yet) been
-made to recover, scaling sweeps for them being incomplete. The deciding factor is **input scaling
-tuned to the model's activation magnitude**, not parameter count.
+confound (Qwen ran bf16; a bf16 3B + 2048-node reservoir does not fit this 8 GB GPU), so it is
+not a clean test. The cross-model picture, then: cross-pass recall recovers on **GPT-2-small** and
+the **Qwen family (0.5B at scaling 0.5, 1.5B at 0.1)** with model-matched input scaling, but
+**not on GPT-2-medium** (robustly, across a wide scaling sweep) or on 4-bit 3B (confounded).
+Strikingly, GPT-2-**small** recovers while GPT-2-**medium** does not, and the deeper modern Qwen
+models do — so the boundary is **model-specific in a way that size, depth, and input scaling
+alone do not explain**. Input scaling tuned to the model is *necessary* (Qwen-0.5B proves it) but
+not *sufficient* (GPT-2-medium has no working scaling in this range); what makes a given backbone
+able to learn to read the content-addressable prefix at all is the open question this raises.
 
 **Scope of the wall — a stateless ablation localizes what the battery metrics measure.** The
 content-recall wall concerns recalling *which specific token* was carried (high-dimensional). The
