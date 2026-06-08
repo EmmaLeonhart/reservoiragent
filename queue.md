@@ -33,6 +33,8 @@
 
 - The figures are not really all present there, and also the architectural diagrams aren't present. I think we probably need architectural diagrams in this. Maybe more of the figure is actually in line as opposed to at the bottom. 
 
+- Remove the usage of the word "honest" And I would say also just remove any kind of really AI-ish phrases like that that are kind of unnatural. 
+
 
 ## Grok's reception (address the negatives and lean into the positives if possible)
 
