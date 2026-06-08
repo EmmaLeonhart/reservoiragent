@@ -61,12 +61,25 @@ The trained GPT-2 cross-pass reservoir is published on Hugging Face:
 with `python scripts/run.py crosspass --mode kv --save <dir>`, then publish with
 `python scripts/publish_hf.py --artifact-dir <dir> --repo-id <user>/<name>`.
 
+The cross-pass recall result is **not GPT-2-specific** — it scales across the Qwen family once
+the reservoir is sized up and the input scaling is matched to the model. To reproduce the
+Qwen2.5-1.5B run (recall 0.83–1.00 vs 0.17 control):
+
+```
+python scripts/run.py crosspass --model Qwen/Qwen2.5-1.5B-Instruct --mode kv \
+    --n-reservoir 2048 --n-prefix 16 --input-scaling 0.1 --n-keys 6 --steps 800
+```
+
+The defaults (`--model gpt2 --n-reservoir 512 --input-scaling 0.5`) reproduce the GPT-2 result;
+the decisive levers for transfer are `--n-reservoir` and `--input-scaling` (see FINDINGS).
+
 ## Experiments
 
 All run via `python scripts/run.py <cmd>` (metrics → `results/`, figures → `docs/`):
 
 - `sweep` / `sweep-real` / `sweep-scaling` — reservoir dynamics vs spectral radius / input scaling.
-- `crosspass` — cross-pass recall: stateful vs stateless (the headline GPT-2 result).
+- `crosspass` — cross-pass recall: stateful vs stateless (the headline result; GPT-2 at defaults,
+  scales to the Qwen family with `--n-reservoir 2048 --input-scaling 0.1`).
 - `silence` — a trained reservoir-state silence gate vs a stateless gate.
 - `blankcycle` — blank-tick KV-cache growth: vanilla (linear) vs reservoir-protected (bounded).
 - `interrupt` — interruptibility: STOP latency + reservoir signal persistence.

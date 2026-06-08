@@ -2240,3 +2240,15 @@ exactly that. Folded the resolved negative into FINDINGS Limitations (battery bu
 battery section; no retention claim. Stable retention is unsolved open work; the first-line
 stabilizer fails. The clean retained result remains the strict-wipe cross-pass recall task
 (0.83–1.00 vs 0.17 control), unchanged. Run log: results/_w32_aux.log.
+
+## 2026-06-08 — README: document the Qwen-family scaling reproduction (code-release polish)
+
+The README still framed cross-pass recall as "the headline GPT-2 result" and only gave a
+GPT-2-default repro line, predating the central positive that recall *scales across the Qwen
+family* once the reservoir is sized up (2048) and input scaling matched (0.1). Added the exact,
+verified Qwen2.5-1.5B reproduction command (--model Qwen/Qwen2.5-1.5B-Instruct --mode kv
+--n-reservoir 2048 --n-prefix 16 --input-scaling 0.1 --n-keys 6 --steps 800; from results/_w19/_w24
+logs, stateful recall 0.83) and noted --n-reservoir / --input-scaling as the decisive transfer
+levers. Verified every documented flag exists via `run.py crosspass --help` (exit 0). Addresses
+Grok's "polish the code release with repro commands" suggestion; keeps README consistent with the
+paper. (No queue item deleted — this came from the Grok-reception backlog in queue.md.)
