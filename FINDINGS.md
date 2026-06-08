@@ -348,89 +348,9 @@ Sweeping spectral radius ρ ∈ [0.1, 2.0] (see figures):
  activations should be fed at roughly **¼–⅒ of unit scale**, not 1.0 — a concrete
  injection setting this study contributes.
 
-## Exploratory Results Beyond the Core Scope
 
-Pushed past the feasibility scope to see how far local compute reaches, reported as
-measured:
 
-- **The time axis is real and behavioural.** Running the *same* prompt after different
- prior history, with the reservoir state carried across the (otherwise independent)
- forward passes and a small random readout, shifts the next-token logits by an L2
- distance of ≈ 22 (GPT-2). The same input produces a different
- output distribution depending on what the model processed before — something a
- stateless transformer structurally cannot do.
-- **The seed-selection mechanism works; the pre-training signal is weak.** A dynamics
- pre-selection proxy ranks N fixed-random reservoir seeds by responsiveness,
- dimensionality, and (penalised) saturation on real GPT-2 activations, before any
- training. Across 8 seeds at ρ = 0.95 the spread is small
- (~0.02), i.e. *untrained* dynamics vary only modestly between seeds — so the real
- selection signal the plan relies on most likely emerges only after fine-tuning. The
- mechanism is in place; the verdict on its usefulness is compute-limited.
 
-**Not done (compute-limited):**
-
-- The full **N-seed LoRA fine-tuning + benchmark selection** — there is no training
- pipeline or benchmark suite here; only the *dynamics* proxy was run.
-- A productionized **always-alive runtime** (pass scheduler, idle timer, output
- confidence gate) — only the two-pass state-carry was demonstrated.
-- The **KV-append** injection (reservoir nodes as extra keys/values the upper layers
- attend to) and **agent-scale (Hermes)** models — beyond local compute here.
-
-## The Always-Alive Runtime (Secondary)
-
-Built and exercised the stateful-agent loop on the *untrained* injected model — the
-substrate fine-tuning will later plug into (the released code). It has the four pieces the architecture requires:
-
-- a **context buffer** owned by the runtime, never wiped between passes;
-- a **reservoir state store** that persists across passes and checkpoints/restores to
- disk (round-trip tested);
-- a **pass scheduler** with both *prompted* passes (new input) and *unprompted* passes
- (idle ticks that run over context + reservoir only) — and a unit test confirms an
- unprompted pass updates the reservoir state with **no new input**;
-- an **output confidence gate** (normalized top-k logit entropy) deciding emit vs.
- silence.
-
-A fixed evaluation session runs end-to-end: across five interleaved prompted/unprompted passes
-the reservoir state |r| evolves continuously (state carried, including through the
-idle ticks). On the untrained model the gate keys off the *base
-model's* next-token entropy, so its emit/silence decisions and the generated text
-(incoherent base-model output) are not yet meaningful — the harness is the mechanism, and a meaningful
-self-initiation policy needs the trained readout/LoRA. The point of this step is that
-the whole loop is now testable before spending compute on training.
-
-## LoRA Fine-Tuning on GPU
-
-The culminating run, on local CUDA (RTX 4070): a genuine **LoRA + W_out fine-tune** of
-GPT-2 with the *differentiable* reservoir injection. Across **3 reservoir seeds × 60 steps**, training loss falls
-decisively (≈ **6.3 → 0.85–1.1**) with **491,520 trainable parameters** (LoRA on the
-attention projections + the reservoir readout W_out), and the best seed is selected by
-trained loss. So the full pipeline — inject, freeze the backbone, train W_out + LoRA,
-select across seeds — **runs end-to-end on the real architecture**, on the GPU. With
-W_out zero-initialised the fine-tune starts exactly at the base model (H1 preserved).
-
-**The boundary:** the injection hook fires *once per forward pass*
-(a transformer processes the whole sequence through each layer once), so this
-single-forward fine-tune exercises the *training machinery on the real model*, not the
-reservoir's distinctive **cross-pass** value. Exercising that requires the multi-pass
-differentiable harness — backprop through passes on a reservoir-requiring (cross-context)
-task — which is the next compute step, now unblocked by everything above (working
-injection, the always-alive harness, the trained readout, and this fine-tune pipeline).
-
-## Porting to a 3B Model
-
-The GPT-2 work validated the mechanisms; this phase moves to the smallest Hermes —
-**NousResearch/Hermes-3-Llama-3.2-3B** (Llama-3.2, the architecture the project actually
-wants, already agent-fine-tuned).
-
-- **(A) Injection generalized to the Llama architecture.** The injection was GPT-2-only
- (`transformer.h`); the architecture-adaptation layer now locates decoder blocks across families
- (`model.model.layers` for Llama), and H1 is verified on a tiny Llama as well as GPT-2.
-- **(B) Hermes 3B loads and H1 holds, on the laptop GPU.** Loaded in 4-bit (bitsandbytes
- nf4) with the reservoir injected at layer 14 of 28 (d_model 3072): with the readout
- zeroed, the injected model's logits are **byte-identical** to the un-injected Hermes
- (`max|diff| = 0.00`), at a peak of **2.35 GB VRAM** — leaving ample room for LoRA +
- training on the RTX 4070. So the architecture transplant is non-destructive on the real
- model.
 
 ## Cross-Pass Recall: The Injection Design
 
@@ -691,7 +611,7 @@ improving capability**: the timed curve oscillates `0.0 / 0.12 / 0.0 / 0.12 / 0.
 …`, averaging ≈0.08 with frequent zeros and one 0.25 spike (immediately followed by 0.0), and it
 **does not climb with more steps**. So the joint battery does dilute the signal (focused beats
 joint's flat 0), but focusing only buys a noisy ≈0–0.25 band centered near 0.08 — above the
-~1/vocab chance of the exact word, yet unstable and non-converging. The honest read: at 1.5B,
+~1/vocab chance of the exact word, yet unstable and non-converging. At 1.5B,
 temporal emission is **weak and noise-dominated** (like content recall at this budget), not a
 reliably trainable capability; more steps do not help. It is a soft wall (a faint, unstable signal
 rather than a hard zero), and a *stable* capability would need either much more compute or a
@@ -797,83 +717,7 @@ stream of events where a rare trigger opens a thread that should be addressed (l
  preserves the history of the trigger, allowing it to make a meaningful decision to
  keep speaking after the input has returned to baseline.
 
-## A Trained Silence Policy
 
-A real agent must sometimes **stay silent** and sometimes **speak on its own**. The
-current harness gate keys off the base model's next-token entropy, which is arbitrary.
-So we trained a gate on the **reservoir state** for a task the reservoir is suited to —
-an *unresolved thread*: a rare trigger event opens a thread the agent should address for
-the next few passes, then it should fall silent. The "speak" passes are *strictly after*
-the trigger, so the cue is in the **past** — invisible to the current input.
-
-A linear gate on the reservoir state reaches **F1 ≈ 0.96** (precision 0.93, recall 1.00);
-the **stateless gate** — the same gate on the current input — collapses to F1 ≈ 0.34
-because it cannot see the past trigger, so it can only *always speak* (recall ≈ 1,
-precision ≈ the base rate). The point is not the exact number: a stateless model **cannot
-implement a selective silence policy at all**, while a reservoir-state gate can.
-(see figure).
-
-**The harder conceptual point (the intended behaviour, and why it is difficult).** This
-experiment trains a gate to read silence off the reservoir, but the *intended* behaviour
-of the real agent is subtler and worth stating plainly:
-
-- **The default should be to respond, not to be silent.** With no prompt and a *decayed,
- near-empty* reservoir, the base model's prior is to produce a response. Absent any
- internal activity, an automatic, context-driven response is the natural default — the
- reservoir does not need to *cause* speech.
-- **Silence should attach to an *active, novel* reservoir state.** A reservoir carrying
- strong state is a genuinely new internal condition the base model never saw in
- training. That novelty is precisely what makes it the natural handle to fine-tune a new
- behaviour onto — "I am still processing, stay silent" — because a fresh state is far
- easier to attach a new response to than the model's well-worn defaults. So, perhaps
- counter-intuitively, **reservoir activity is more naturally associated with silence**,
- and its *absence* with the model's historical responding.
-- **The echo state property makes the agent revert to baseline over time.** Because the
- reservoir empties (its state decays toward zero), the agent eventually reaches a state
- close to what the base model was historically trained on — so it naturally *stops* and
- drifts back to default, context-driven responding once the internal activity subsides.
-- **This is an aggressive modification of an already-trained model, and it is genuinely hard.**
- We are trying to teach an already-trained model an entirely new behavioural axis —
- *when to stay silent, when to self-initiate* — against its strong priors. The fact that
- the Hermes cross-pass recall would not bootstrap (above) is the same difficulty showing
- up: rewiring a pretrained model's behaviour through an injected reservoir is a hard
- optimization problem even when the mechanism is verified as correctly wired. The clean GPT-2 results
- show the mechanism *can* carry and use state; making a large pretrained agent
- *behave* differently is the real, hard frontier this project is pushing on.
-
-## Context Growth Under Blank Ticks
-
-An always-alive Reservoir Agent runs **blank ticks** — autonomous passes with no user
-input. Each silent tick still appends to the KV cache, so a continuously-running agent
-burns its context window *faster* than a turn-based model that only runs when prompted.
-Left unmanaged the cache grows linearly with the number of ticks and the agent eventually
-hits its context limit on idle activity alone. This is the operational challenge raised in
-an architecture design discussion (transcript in `data_lake/transcripts/`):
-*"context explodes on a reservoir agent because a reservoir agent gets an input of blank."*
-
-The standard remedy is StreamingLLM-style eviction — keep a few **attention-sink** tokens
-plus a **recent window**, drop the middle — with one project-specific twist: the
-reservoir's K/V entries are **pinned** so the persistent time-axis is never the thing
-evicted. *"A really long time of no activity is signal,"* and that signal must survive.
-`reservoir.kv_evict.ReservoirEvictionPolicy` implements this as a pure, torch-free policy
-over per-position tags `{sink, reservoir, normal}`; with no reservoir tags it degrades to
-vanilla StreamingLLM. Because the reservoir is re-prepended each pass (a *fixed* number of
-pseudo-tokens, not accumulated), pinning it costs only a constant. The policy also accepts
-per-position importance scores, switching the ordinary-token choice from recency to H2O-style
-heavy-hitter retention while still pinning the reservoir — position-based and importance-based
-eviction under one interface.
-
-Simulating 512 blank ticks (see figure): the
-**vanilla** cache grows linearly to **524 positions**, while the **reservoir-protected**
-policy stays bounded at the **budget (128)** from tick ~116 onward — and **all 8 reservoir
-entries are retained on every single tick**, even under heavy eviction. So the cache-burn
-from autonomous idling is bounded by a constant the operator chooses, and the time-axis the
-whole architecture depends on is exactly the part the policy refuses to drop. (The bound is
-the point, not the specific numbers — they scale with the budget/window settings.)
-
-This is the cheap, base-agnostic half of the cache story. The expensive half — a base model
-whose attention is *natively* KV-efficient so the headroom is far larger (DeepSeek's MLA /
-the V4 CSA+HCA compression noted in the design discussion) — is recorded as project direction for future work; it is not runnable on this hardware (see Limitations).
 
 ## The Stateful-Task Battery
 
@@ -977,7 +821,7 @@ runs of the same or near-identical configuration, with **no reliable lift**: the
 improvement is within run-to-run training noise, consistent with the controlled-selection finding
 above that training at this budget is noise-dominated.
 
-**The honest conclusion for the content channel:** at 1.5B on this budget, symbolic content stays
+**The conclusion for the content channel:** at 1.5B on this budget, symbolic content stays
 effectively at the floor — it occasionally flickers to ~0.2 on a lucky run, but a matched re-run
 gives 0.00 — so we **do not** claim that broad readout adaptation lifts content. Establishing any
 genuine lift would need multi-seed averaging (as the controlled experiment required for
@@ -1135,6 +979,171 @@ unproven extension — flagged as future work in the Safety-by-Design section an
  TC⁰/FO(M) bound is an open theoretical question, not a result of this work.
 
 ---
+
+## Appendix
+
+### Appendix A. Exploratory Results Beyond the Core Scope
+
+Pushed past the feasibility scope to see how far local compute reaches, reported as
+measured:
+
+- **The time axis is real and behavioural.** Running the *same* prompt after different
+ prior history, with the reservoir state carried across the (otherwise independent)
+ forward passes and a small random readout, shifts the next-token logits by an L2
+ distance of ≈ 22 (GPT-2). The same input produces a different
+ output distribution depending on what the model processed before — something a
+ stateless transformer structurally cannot do.
+- **The seed-selection mechanism works; the pre-training signal is weak.** A dynamics
+ pre-selection proxy ranks N fixed-random reservoir seeds by responsiveness,
+ dimensionality, and (penalised) saturation on real GPT-2 activations, before any
+ training. Across 8 seeds at ρ = 0.95 the spread is small
+ (~0.02), i.e. *untrained* dynamics vary only modestly between seeds — so the real
+ selection signal the plan relies on most likely emerges only after fine-tuning. The
+ mechanism is in place; the verdict on its usefulness is compute-limited.
+
+**Not done (compute-limited):**
+
+- The full **N-seed LoRA fine-tuning + benchmark selection** — there is no training
+ pipeline or benchmark suite here; only the *dynamics* proxy was run.
+- A productionized **always-alive runtime** (pass scheduler, idle timer, output
+ confidence gate) — only the two-pass state-carry was demonstrated.
+- The **KV-append** injection (reservoir nodes as extra keys/values the upper layers
+ attend to) and **agent-scale (Hermes)** models — beyond local compute here.
+
+### Appendix B. The Always-Alive Runtime
+
+Built and exercised the stateful-agent loop on the *untrained* injected model — the
+substrate fine-tuning will later plug into (the released code). It has the four pieces the architecture requires:
+
+- a **context buffer** owned by the runtime, never wiped between passes;
+- a **reservoir state store** that persists across passes and checkpoints/restores to
+ disk (round-trip tested);
+- a **pass scheduler** with both *prompted* passes (new input) and *unprompted* passes
+ (idle ticks that run over context + reservoir only) — and a unit test confirms an
+ unprompted pass updates the reservoir state with **no new input**;
+- an **output confidence gate** (normalized top-k logit entropy) deciding emit vs.
+ silence.
+
+A fixed evaluation session runs end-to-end: across five interleaved prompted/unprompted passes
+the reservoir state |r| evolves continuously (state carried, including through the
+idle ticks). On the untrained model the gate keys off the *base
+model's* next-token entropy, so its emit/silence decisions and the generated text
+(incoherent base-model output) are not yet meaningful — the harness is the mechanism, and a meaningful
+self-initiation policy needs the trained readout/LoRA. The point of this step is that
+the whole loop is now testable before spending compute on training.
+
+### Appendix C. LoRA Fine-Tuning on GPU
+
+The culminating run, on local CUDA (RTX 4070): a genuine **LoRA + W_out fine-tune** of
+GPT-2 with the *differentiable* reservoir injection. Across **3 reservoir seeds × 60 steps**, training loss falls
+decisively (≈ **6.3 → 0.85–1.1**) with **491,520 trainable parameters** (LoRA on the
+attention projections + the reservoir readout W_out), and the best seed is selected by
+trained loss. So the full pipeline — inject, freeze the backbone, train W_out + LoRA,
+select across seeds — **runs end-to-end on the real architecture**, on the GPU. With
+W_out zero-initialised the fine-tune starts exactly at the base model (H1 preserved).
+
+**The boundary:** the injection hook fires *once per forward pass*
+(a transformer processes the whole sequence through each layer once), so this
+single-forward fine-tune exercises the *training machinery on the real model*, not the
+reservoir's distinctive **cross-pass** value. Exercising that requires the multi-pass
+differentiable harness — backprop through passes on a reservoir-requiring (cross-context)
+task — which is the next compute step, now unblocked by everything above (working
+injection, the always-alive harness, the trained readout, and this fine-tune pipeline).
+
+### Appendix D. Porting to a 3B Model
+
+The GPT-2 work validated the mechanisms; this phase moves to the smallest Hermes —
+**NousResearch/Hermes-3-Llama-3.2-3B** (Llama-3.2, the architecture the project actually
+wants, already agent-fine-tuned).
+
+- **(A) Injection generalized to the Llama architecture.** The injection was GPT-2-only
+ (`transformer.h`); the architecture-adaptation layer now locates decoder blocks across families
+ (`model.model.layers` for Llama), and H1 is verified on a tiny Llama as well as GPT-2.
+- **(B) Hermes 3B loads and H1 holds, on the laptop GPU.** Loaded in 4-bit (bitsandbytes
+ nf4) with the reservoir injected at layer 14 of 28 (d_model 3072): with the readout
+ zeroed, the injected model's logits are **byte-identical** to the un-injected Hermes
+ (`max|diff| = 0.00`), at a peak of **2.35 GB VRAM** — leaving ample room for LoRA +
+ training on the RTX 4070. So the architecture transplant is non-destructive on the real
+ model.
+
+### Appendix E. A Trained Silence Policy
+
+A real agent must sometimes **stay silent** and sometimes **speak on its own**. The
+current harness gate keys off the base model's next-token entropy, which is arbitrary.
+So we trained a gate on the **reservoir state** for a task the reservoir is suited to —
+an *unresolved thread*: a rare trigger event opens a thread the agent should address for
+the next few passes, then it should fall silent. The "speak" passes are *strictly after*
+the trigger, so the cue is in the **past** — invisible to the current input.
+
+A linear gate on the reservoir state reaches **F1 ≈ 0.96** (precision 0.93, recall 1.00);
+the **stateless gate** — the same gate on the current input — collapses to F1 ≈ 0.34
+because it cannot see the past trigger, so it can only *always speak* (recall ≈ 1,
+precision ≈ the base rate). The point is not the exact number: a stateless model **cannot
+implement a selective silence policy at all**, while a reservoir-state gate can.
+(see figure).
+
+**The harder conceptual point (the intended behaviour, and why it is difficult).** This
+experiment trains a gate to read silence off the reservoir, but the *intended* behaviour
+of the real agent is subtler and worth stating plainly:
+
+- **The default should be to respond, not to be silent.** With no prompt and a *decayed,
+ near-empty* reservoir, the base model's prior is to produce a response. Absent any
+ internal activity, an automatic, context-driven response is the natural default — the
+ reservoir does not need to *cause* speech.
+- **Silence should attach to an *active, novel* reservoir state.** A reservoir carrying
+ strong state is a genuinely new internal condition the base model never saw in
+ training. That novelty is precisely what makes it the natural handle to fine-tune a new
+ behaviour onto — "I am still processing, stay silent" — because a fresh state is far
+ easier to attach a new response to than the model's well-worn defaults. So, perhaps
+ counter-intuitively, **reservoir activity is more naturally associated with silence**,
+ and its *absence* with the model's historical responding.
+- **The echo state property makes the agent revert to baseline over time.** Because the
+ reservoir empties (its state decays toward zero), the agent eventually reaches a state
+ close to what the base model was historically trained on — so it naturally *stops* and
+ drifts back to default, context-driven responding once the internal activity subsides.
+- **This is an aggressive modification of an already-trained model, and it is genuinely hard.**
+ We are trying to teach an already-trained model an entirely new behavioural axis —
+ *when to stay silent, when to self-initiate* — against its strong priors. The fact that
+ the Hermes cross-pass recall would not bootstrap (above) is the same difficulty showing
+ up: rewiring a pretrained model's behaviour through an injected reservoir is a hard
+ optimization problem even when the mechanism is verified as correctly wired. The clean GPT-2 results
+ show the mechanism *can* carry and use state; making a large pretrained agent
+ *behave* differently is the real, hard frontier this project is pushing on.
+
+### Appendix F. Context Growth Under Blank Ticks
+
+An always-alive Reservoir Agent runs **blank ticks** — autonomous passes with no user
+input. Each silent tick still appends to the KV cache, so a continuously-running agent
+burns its context window *faster* than a turn-based model that only runs when prompted.
+Left unmanaged the cache grows linearly with the number of ticks and the agent eventually
+hits its context limit on idle activity alone. This is the operational challenge raised in
+an architecture design discussion (transcript in `data_lake/transcripts/`):
+*"context explodes on a reservoir agent because a reservoir agent gets an input of blank."*
+
+The standard remedy is StreamingLLM-style eviction — keep a few **attention-sink** tokens
+plus a **recent window**, drop the middle — with one project-specific twist: the
+reservoir's K/V entries are **pinned** so the persistent time-axis is never the thing
+evicted. *"A really long time of no activity is signal,"* and that signal must survive.
+`reservoir.kv_evict.ReservoirEvictionPolicy` implements this as a pure, torch-free policy
+over per-position tags `{sink, reservoir, normal}`; with no reservoir tags it degrades to
+vanilla StreamingLLM. Because the reservoir is re-prepended each pass (a *fixed* number of
+pseudo-tokens, not accumulated), pinning it costs only a constant. The policy also accepts
+per-position importance scores, switching the ordinary-token choice from recency to H2O-style
+heavy-hitter retention while still pinning the reservoir — position-based and importance-based
+eviction under one interface.
+
+Simulating 512 blank ticks (see figure): the
+**vanilla** cache grows linearly to **524 positions**, while the **reservoir-protected**
+policy stays bounded at the **budget (128)** from tick ~116 onward — and **all 8 reservoir
+entries are retained on every single tick**, even under heavy eviction. So the cache-burn
+from autonomous idling is bounded by a constant the operator chooses, and the time-axis the
+whole architecture depends on is exactly the part the policy refuses to drop. (The bound is
+the point, not the specific numbers — they scale with the budget/window settings.)
+
+This is the cheap, base-agnostic half of the cache story. The expensive half — a base model
+whose attention is *natively* KV-efficient so the headroom is far larger (DeepSeek's MLA /
+the V4 CSA+HCA compression noted in the design discussion) — is recorded as project direction for future work; it is not runnable on this hardware (see Limitations).
+
 
 ## Figures
 
