@@ -2226,3 +2226,17 @@ Recovery note: an accidental `git pull --rebase origin feat` run while on the wr
 scrambled local branch pointers (no remote was ever touched — both pushes were correctly rejected).
 Untangled via reflog: restored `main` to origin/main + the diagram commit (fast-forward) and `feat`
 to its real tip; verified origin intact throughout.
+
+## 2026-06-08 — #32 verdict: the "use-the-state" aux loss does NOT make battery retention hold
+
+The counterfactual aux loss (#30) — penalize the model when a wiped-reservoir probe matches the
+intact forward, so the objective rewards relying on carried state — was run on the content battery
+for 4 epochs (3.1h, Qwen2.5-1.5B + 8192-node reservoir). It did not prevent the drift-to-stateless
+collapse: mean reservoir lift over the wiped-state control decayed +0.302 (ep0, recall 0.44) ->
++0.094 (ep1) -> +0.000 (ep2) -> +0.000 (ep3). The collapse is not the stateful model degrading —
+the stateless control rises to match it (0.000 -> 0.062 -> 0.083), i.e. the optimizer converges to a
+current-pass solution that makes the carried state redundant even against a loss term built to forbid
+exactly that. Folded the resolved negative into FINDINGS Limitations (battery bullet) and the site's
+battery section; no retention claim. Stable retention is unsolved open work; the first-line
+stabilizer fails. The clean retained result remains the strict-wipe cross-pass recall task
+(0.83–1.00 vs 0.17 control), unchanged. Run log: results/_w32_aux.log.

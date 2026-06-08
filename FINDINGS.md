@@ -989,13 +989,21 @@ unproven extension — flagged as future work in the Safety-by-Design section an
  recovery is **model-specific, not a size law** (GPT-2-medium fails across a 7-point scaling sweep;
  4-bit 3B is confounded), and what makes a backbone able to read the content-addressable prefix at
  all is open.
-- **The agentic battery's reservoir-driven content is found but not retained.** Its temporal/agency
- metrics (timed, self-init, silence) are matched by a stateless ablation (LoRA / current-pass, not
- carried state). Its *content* recall, at resolving eval (eval_n=48), shows a large reservoir lift
- transiently — recall 0.35 vs 0.02 control at epoch 1 — but the training drifts to a stateless
- solution by epoch 2 (a within-run "learns to ignore the recurrent state"). So the battery can use
- the reservoir but does not stably retain it; a stabilization/regularization fix is open work. The
- always-alive app runs the untrained substrate — harness + live dynamics, not a trained policy.
+- **The agentic battery's reservoir-driven content is found but not retained, and the counterfactual
+ fix did not hold it.** Its temporal/agency metrics (timed, self-init, silence) are matched by a
+ stateless ablation (LoRA / current-pass, not carried state). Its *content* recall, at resolving eval
+ (eval_n=48), shows a large reservoir lift early — mean +0.302 over the wiped-state control at epoch 0
+ (recall 0.44) — but the training drifts to a stateless solution within two epochs. We tested the
+ obvious stabilizer: a counterfactual "use-the-state" auxiliary loss that penalizes the model when a
+ wiped-reservoir probe does as well as the intact one (it explicitly rewards relying on carried
+ state). Run for 4 epochs (3.1 h, Qwen2.5-1.5B + 8192-node reservoir), it did **not** prevent the
+ collapse: the mean lift decayed +0.302 → +0.094 → +0.000 → +0.000 across epochs 0–3. The collapse is
+ not the stateful model degrading — the stateless control *rises to match* it (0.000 → 0.062 → 0.083),
+ i.e. the model converges to a current-pass solution that makes the carried state redundant, even
+ against a loss term built to forbid exactly that. So the battery can use the reservoir but does not
+ stably retain it, and the first-line stabilization does not fix it; stable retention is unsolved open
+ work. The always-alive app runs the untrained substrate — harness + live dynamics, not a trained
+ policy.
 - **The recall demonstration is a minimal probe** (flagged in review): a single secret token from a
  small vocabulary (6 words at 100%, degrading by ~a few dozen). It cleanly proves *that* usable
  cross-pass state exists, but not its utility for multi-token, large-vocabulary, or long-horizon
