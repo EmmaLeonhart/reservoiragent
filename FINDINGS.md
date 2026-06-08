@@ -1265,6 +1265,23 @@ the V4 CSA+HCA compression noted in the design discussion) — is recorded as pr
 
 ---
 
+## Declaration of AI use
+
+This work was produced with substantial use of a large language model coding agent (Claude,
+Anthropic) operating under human direction. The agent implemented the reservoir-injection code and
+experiment harness, executed the experiments, analysed the results, generated the figures, and drafted
+and revised this manuscript. The division of labour is the relevant disclosure: every quantitative
+result reported here is the output of **executed code and measured model behaviour**, not text produced
+by the language model — each capability number comes from a logged run, and every cross-pass claim is
+reported against an explicit stateless / wiped-reservoir control computed in the same run. The human
+author set the research direction and hypotheses, reviewed the code, results, and claims, decided what
+to assert and what to leave open, and is responsible for the content. The agent's autonomy was
+procedural (running the queue of experiments and edits) rather than evidentiary; no result was accepted
+on the model's say-so without a measured run behind it. The project's tooling, prompts, and commit
+history are public in the repository, so the process is auditable end to end.
+
+---
+
 ## References
 
 The works the claims above rest on:

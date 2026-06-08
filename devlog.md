@@ -2347,3 +2347,15 @@ bits-per-component split. (6) capacity vs RMT/Memorizing Transformers — added 
 gap is by-design (they train memory; the RAN is fixed-random, fading, ≤ N), contribution is the
 fixed-substrate cross-pass question, not capacity competition. Mirrored to site. Cons 1/2/4/5 already
 stated. Response note post2768_response_notes.md. Resubmitted.
+
+## 2026-06-08 — pivot to arXiv prep: 6:30 PM experiment hard-stop + AI-use declaration
+
+User directive: #34 is the last experiment; at 6:30 PM local all experimental work ends (one-shot cron
+e0311518 enforces it). From now the focus is shipping to arXiv quickly: organize/verify the data, build
+a replication script + downloadable package (zip), add the Declaration of AI use, make the citations
+perfect (the 16:34 audit cron + repeated passes), and a general coherence/organization pass. Refilled
+queue.md with this plan. Started: added the Declaration of AI use (arXiv requirement) to FINDINGS (->
+PDF) and the site — honest disclosure that this is an AI-agent-driven project, with the key point that
+every quantitative result is from executed code + measured behaviour against a stateless control, not
+LLM-generated text, human-reviewed. User also flagged "a weird mistake with the data worth replacing" —
+added a data-audit item to hunt for it.
