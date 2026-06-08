@@ -1019,6 +1019,13 @@ unproven extension — flagged as future work in the Safety-by-Design section an
  small vocabulary (6 words at 100%, degrading by ~a few dozen). It cleanly proves *that* usable
  cross-pass state exists, but not its utility for multi-token, large-vocabulary, or long-horizon
  memory — that scaling of the *task* (not the model) is untested and open.
+- **Capacity is small relative to trained-memory architectures, by design** (flagged in review). The
+ tens-of-items ceiling is far below what trained-memory transformers reach (Recurrent Memory
+ Transformer, Memorizing Transformers store and retrieve over far longer spans). That gap is expected:
+ those architectures *train* their memory, whereas the RAN's memory is a *fixed-random* reservoir with
+ a fading, size-bounded capacity (≤ N). The contribution here is not capacity competition — it is
+ whether a *fixed, untrained* substrate carries usable state across *independent* passes at all; raising
+ the capacity (larger/structured reservoirs, or learned recurrence) is separate future work.
 - Small-scale only in this study; the agentic claims (H3/H4) and the full runtime are
  out of scope and compute-limited.
 - Two injection variants now exist: the **residual-stream** write (wired
@@ -1041,10 +1048,15 @@ unproven extension — flagged as future work in the Safety-by-Design section an
  Because a light LoRA is trained alongside the reservoir, the design isolates the reservoir's
  *behavioural* contribution — the wiped-reservoir control is the LoRA-only path, so the
  stateful-minus-control lift is what the carried state adds — but it does **not** decompose the
- stored *information capacity* of the fixed reservoir from that of the trained adapter. The
- capacity-constrained retention probes attack exactly this axis (shrinking `lora_r` / restricting the
- adapter to attention so the carried state must carry the load), but a clean bits-per-component
- decomposition of reservoir vs adapter is open.
+ stored *information capacity* of the fixed reservoir from that of the trained adapter. One reading to
+ rule out, though, is that the reservoir is *merely a bank of fixed random features for the LoRA to
+ read within the current pass*: the cross-pass recall task **wipes the context**, so on the recall
+ pass there is no current-pass signal for the adapter to exploit — the secret survives only through
+ carried reservoir state, which is why the wiped-reservoir control sits at chance (0.17) while the
+ stateful model reaches 1.00. The capacity-constrained probe reinforces this: shrinking the adapter to
+ `lora_r = 4` on attention only (#33) still reaches recall 1.00 with the control pinned at 0.000, so
+ the carried state — not adapter capacity — is doing the work. What remains open is the finer
+ *bits-per-component* decomposition (how much each stores), not whether the reservoir contributes.
 - Whether finite-precision cross-pass reservoir state provably lifts the per-pass
  TC⁰/FO(M) bound is an open theoretical question, not a result of this work.
 

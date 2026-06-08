@@ -2334,3 +2334,16 @@ in epoch-count mode it decays lr->0 over all steps). Compile-checked. Staged #34
 RESERVOIR_COSINE=1) to test whether the instability is an LR-overshoot artifact (lift then holds =
 first retention win) or intrinsic (still collapses = stronger negative). NOT launched yet — the user
 asked to run the real-time agent app, which needs the GPU, so #34 is held until the GPU frees.
+
+## 2026-06-08 — post 2768 Reject folded (citation con GONE; reservoir-vs-features rebuttal + capacity positioning)
+
+2768 review (stochastic Reject) had NO citation-hallucination con — confirms the genericization fix
+held. Folded two substantive cons: (3, sharpest) "is the reservoir a unique substrate or merely fixed
+random features for the LoRA?" — strengthened the capacity-isolation limitation to rule it out: the
+strict-wipe recall task removes the current-pass signal, so the secret survives only via carried state
+(control 0.17 vs stateful 1.00), and #33's capacity-denied run (lora_r=4 attn) still hits recall 1.00
+with control at 0.000 — carried state, not adapter capacity, does the work; open part is the
+bits-per-component split. (6) capacity vs RMT/Memorizing Transformers — added a limitation noting the
+gap is by-design (they train memory; the RAN is fixed-random, fading, ≤ N), contribution is the
+fixed-substrate cross-pass question, not capacity competition. Mirrored to site. Cons 1/2/4/5 already
+stated. Response note post2768_response_notes.md. Resubmitted.
