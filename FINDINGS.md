@@ -702,6 +702,18 @@ the right token), not the gate weight: with a healthy open gate the model still 
 to emit at 1.5B on this budget, and the reservoir adds nothing over the stateless control. (Per-epoch
 models + optimizer states are preserved on the Hub for analysis.)
 
+**Does the recall fix transfer into the battery? Not stably, yet.** Since cross-pass recall
+recovers at 1.5B with the right reservoir config, and the battery's content was failing partly
+because it recalls over a 1200-word pool (far past the capacity ceiling), we re-ran the battery
+with the **recall-winning config** (2048 nodes, no projection, input scaling 0.1) and a **16-word
+pool within capacity**. This *does* make battery content learnable — recall climbs off zero to
+~0.12 — but the reservoir lift is **unstable**: the mean-over-control lift flickers **+0.000 → +0.058
+→ −0.013** across three epochs (recall reaches 0.12 then collapses back to 0.00). So the integrated
+battery — gate head, silence supervision, and eight interleaved tasks — does **not** stably inherit
+the large, stable lift the *isolated* cross-pass recall task shows (0.83–1.00 vs 0.17). There is a
+real gap between the clean single-task demonstration and the multi-task agent loop; closing it
+(stabilizing a reservoir-driven content signal inside the full battery) is open work, not yet done.
+
 **What the carried-state demonstration actually rests on.** The valid evidence that the reservoir
 carries *usable* state is the controlled, memory-requiring tasks, not the battery metrics:
 (i) GPT-2-small cross-pass recall — 100% with the carried state vs **chance (0.17) when the
