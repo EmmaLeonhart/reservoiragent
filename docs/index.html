@@ -424,20 +424,31 @@
   measurable at this scale.
 </p>
 <p>
-  <strong>Does the recall fix transfer into the battery? Unresolved at this eval budget.</strong> Since
-  cross-pass recall recovers at 1.5B with the right config &mdash; and the battery recalls over a 1200-word
-  pool, far past the capacity ceiling &mdash; we re-ran the battery with the recall-winning config (2048 nodes,
-  no projection, scaling 0.1) and a 16-word pool <em>within</em> capacity (full mix and a content-only
-  isolation). Content does become learnable (recall climbs off zero to ~0.12) and the stateful side is steady,
-  but the lift over the stateless control swings sign across epochs (+0.094 / &minus;0.031 / 0.000 / +0.094 /
-  +0.031, mean &approx; +0.04). That swing is <strong>eval noise</strong>, not signal: per-task accuracy
-  quantizes to 1/eval_n (1/16 &approx; 0.06), so a ~0.04 lift sits at the noise floor and flips as one or two
-  eval episodes flip (the stateful side is steady; the control bounces). The recall task genuinely wipes
-  context, so this is a <em>resolution</em> problem, not evidence of no lift &mdash; we can't yet tell a small
-  real reservoir lift from zero in the battery. We raised the eval set to 48; a cleaner re-measure is next. The
-  large, <em>resolved</em> reservoir advantage remains the strict-wipe cross-pass task (0.83&ndash;1.00 vs 0.17);
-  whether the integrated battery inherits a smaller version is honestly <strong>undetermined</strong>, open work.
+  <strong>Does the recall fix transfer into the battery? Transiently &mdash; found, then abandoned.</strong>
+  We re-ran the battery with the recall-winning config (2048 nodes, no projection, scaling 0.1) and a 16-word
+  pool <em>within</em> capacity, content-only, at an eval resolution (eval_n=48) fine enough to separate a real
+  lift from noise. The per-epoch lift over the stateless control is then <strong>&minus;0.000 &rarr; +0.177 &rarr;
+  +0.000</strong>: at epoch 1 the model genuinely learns a reservoir-driven battery recall &mdash; <strong>recall
+  0.35 with the carried state vs 0.02 (chance) for the wiped-reservoir control</strong>, a large resolved lift,
+  not noise &mdash; but by epoch 2 it <strong>drifts back to a stateless solution</strong> (recall 0.08, control
+  rises to 0.08 to match). So the integrated battery <em>can</em> use the reservoir for content (epoch 1 proves
+  the capacity is there), but the multi-task training does not <em>retain</em> it: the optimizer finds a
+  current-pass / LoRA shortcut and the reservoir solution decays &mdash; a live instance of the
+  &ldquo;model learns to ignore the recurrent state&rdquo; failure that motivated content-addressable injection,
+  caught within one run. The clean, <em>retained</em> advantage remains the strict-wipe cross-pass task
+  (0.83&ndash;1.00 vs 0.17); making the battery <em>hold</em> a reservoir-driven content solution
+  (a stability/regularization problem) is concrete open work.
 </p>
+<figure>
+  <img src="battery_lift_eval48.png" alt="Per-epoch capability mean for the content battery: the reservoir (carried-state) curve rises to ~0.20 at epoch 1 while the stateless control stays near zero, then both fall together to ~0.08 by epoch 2 — the reservoir-driven lift appears at epoch 1 and is lost by epoch 2.">
+  <figcaption>
+    <strong>Battery content lift, found then abandoned</strong> (Qwen-1.5B, content-only, eval_n=48). The
+    carried-state mean (blue) jumps above the wiped-reservoir control (red, dashed) at epoch 1 &mdash; a +0.177
+    reservoir-driven lift &mdash; then collapses back to the control by epoch 2 as training drifts to a stateless
+    solution. Regenerate with <code>python scripts/plot_epoch_curve.py</code> over the run's index.json.
+  </figcaption>
+</figure>
+<p>
 <p>
   <strong>The cause is geometric: the reservoir compresses where it should expand.</strong>
   Qwen-1.5B is 28 layers of 1536 neurons; the reservoir reads a 1536-dimensional layer, yet
