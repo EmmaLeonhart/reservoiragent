@@ -16,7 +16,7 @@ Config via env vars (with defaults):
     RESERVOIR_NRES    1024         reservoir size
     RESERVOIR_NPREFIX 16           prefix tokens
     RESERVOIR_LR      5e-4
-    RESERVOIR_EVALN   16
+    RESERVOIR_EVALN   48            eval episodes per task (16 was too coarse to resolve the lift)
     RESERVOIR_EMIT_WEIGHT    3.0   up-weight the emit step
     RESERVOIR_SILENCE_WEIGHT 1.0   up-weight "stay shut" (fights gate over-firing)
     RESERVOIR_OUT     <repo name>  local artifact dir under artifacts/ (default: HF repo segment)
@@ -65,7 +65,10 @@ def main() -> int:
     n_prefix = _env("RESERVOIR_NPREFIX", "16", int)
     inscale = _env("RESERVOIR_INSCALE", "0.5", float)   # detune (lower) to avoid saturation
     lr = _env("RESERVOIR_LR", "5e-4", float)
-    eval_n = _env("RESERVOIR_EVALN", "16", int)
+    # 16 was too coarse to resolve the reservoir lift: per-task accuracy quantizes to 1/eval_n,
+    # so a ~0.05 stateful-vs-control lift sat at the eval-noise floor and flickered sign across
+    # epochs (#28). 48 gives ~1/48 resolution — enough to tell a real lift from eval noise.
+    eval_n = _env("RESERVOIR_EVALN", "48", int)
     emit_weight = _env("RESERVOIR_EMIT_WEIGHT", "3.0", float)  # up-weight the emit step (not silence)
     silence_weight = _env("RESERVOIR_SILENCE_WEIGHT", "1.0", float)  # up-weight "stay shut" to fight gate over-firing
     proj_dim = _env("RESERVOIR_PROJ", "0", int) or None        # fixed down-projection for huge reservoirs
