@@ -1975,3 +1975,10 @@ loss 2.33), 24 keys 0.42/0.04 (converged, ~10x chance), 48 keys 0.02/0.02 (chanc
 Curve noisy from single 800-step runs (12-key dip = convergence artifact; clean curve needs
 multi-seed). Rendered docs/capacity_qwen15b.png (plot_recall_bars), embedded in site, corrected
 abstract + cross-model section + lede. Resubmitting.
+
+## 2026-06-07 — cross-model summary figure embedded
+
+Rendered docs/crossmodel_recall.png (plot_recall_bars over per-model best-config JSONs): recall by
+model in size order — GPT-2-small 1.0, GPT-2-medium chance, Qwen-0.5B 1.0, Qwen-1.5B 1.0, Hermes-3B
+(4bit) chance. Visualizes the non-monotonic, model-specific boundary. Embedded in the site after the
+cross-model paragraph.
