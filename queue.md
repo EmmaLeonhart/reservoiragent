@@ -10,21 +10,7 @@
 
 ## Current work
 
-- **Battery reservoir-retention (in flight).** The clean cross-pass recall task scales to the Qwen
-  family (signal); the integrated battery learns a reservoir-driven recall then drifts to a
-  stateless shortcut (#29), and neither low `lora_r` (#31) nor noise alone explains it. The
-  counterfactual "use-the-state" aux loss is implemented + tested (#30) and running on the content
-  battery (#32) to test whether it makes the lift *hold* across epochs. Fold the resolved verdict
-  into FINDINGS + site; only claim retention if it survives the control across epochs.
 
-- **Paper formalization (ongoing).** The paper now builds in the **NeurIPS-2026 LaTeX format**
-  adopted from the Sutra repo (`paper/paper.tex` + `neurips_2026.sty` + `paper-pdf.yml`, source =
-  `FINDINGS.md`). Title/abstract/section headers formalized; inaccessible internal file-path refs
-  removed. Remaining: continue replacing any lab-notebook prose / bold-shouting with formal
-  register as it surfaces in reviews.
-
-- **Continuous paper/site upkeep.** Every new result updates FINDINGS **and** `docs/index.html`
-  together; resubmit to clawRxiv when material; fold reviews as they arrive.
 
 - Also, I'm not sure if you have this thing properly. I don't know if you have this particular thing properly running. I believe the Sutra repository has something in it that generates an easy arXiv upload package. I think it's something like /arxiv.zip Although honestly I'm a bit confused about the Sutra repository too, I want us to generate something like this so that we create a decent arXiv uploading package thing. 
 
@@ -78,6 +64,24 @@ Google Scholar/arXiv endorsement path you already hacked—lean on Discord/commu
 
 Safety/positioning angle (optional but fits your brand):
 Emphasize how verifiable/persistent state via fixed substrate aids interpretability, decompilation safety, or controllable agency—ties directly to your broader Sutra/Yantra/Reservoir vision without overclaiming.
+
+## Current ongoing work
+
+- **Battery reservoir-retention (in flight).** The clean cross-pass recall task scales to the Qwen
+  family (signal); the integrated battery learns a reservoir-driven recall then drifts to a
+  stateless shortcut (#29), and neither low `lora_r` (#31) nor noise alone explains it. The
+  counterfactual "use-the-state" aux loss is implemented + tested (#30) and running on the content
+  battery (#32) to test whether it makes the lift *hold* across epochs. Fold the resolved verdict
+  into FINDINGS + site; only claim retention if it survives the control across epochs.
+
+- **Paper formalization (ongoing).** The paper now builds in the **NeurIPS-2026 LaTeX format**
+  adopted from the Sutra repo (`paper/paper.tex` + `neurips_2026.sty` + `paper-pdf.yml`, source =
+  `FINDINGS.md`). Title/abstract/section headers formalized; inaccessible internal file-path refs
+  removed. Remaining: continue replacing any lab-notebook prose / bold-shouting with formal
+  register as it surfaces in reviews.
+
+- **Continuous paper/site upkeep.** Every new result updates FINDINGS **and** `docs/index.html`
+  together; resubmit to clawRxiv when material; fold reviews as they arrive.
 
 ---
 
