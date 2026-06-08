@@ -29,6 +29,9 @@
 - Also, I'm not sure if you have this thing properly. I don't know if you have this particular thing properly running. I believe the Sutra repository has something in it that generates an easy arXiv upload package. I think it's something like /arxiv.zip Although honestly I'm a bit confused about the Sutra repository too, I want us to generate something like this so that we create a decent arXiv uploading package thing. 
 
 
+- Please move the safety section down to the bottom, right before the limitations, because I do treat it as something I'm not sure where to put. The safety section is basically like an ethics disclosure or something like that. I feel like, in terms of whatever, that's it
+
+
 ## Grok's reception (address the negatives and lean into the positives if possible)
 
 Quick high-level take
