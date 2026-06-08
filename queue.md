@@ -12,6 +12,22 @@ See `CLAUDE.md` § "Workflow Rules" and § "Research workflow" for how this file
 
 ---
 
+## Done — Phase J: the recall scaling result (complete 2026-06-07)
+
+_Turned the project's central negative around. The "content recall is GPT-2-small-only" wall was
+an **undersized reservoir at the wrong input scaling**. Sizing to 2048 nodes and matching input
+scaling to the model recovers cross-pass recall across the **Qwen family**: Qwen-1.5B at scaling
+0.1 (0.83/1.00 vs 0.17 control, reproduced two seeds), Qwen-0.5B at 0.5 (1.00 vs 0.17). Isolation:
+reservoir size is the only solo lever; input scaling matched to the model is decisive (not size).
+Model-specific: GPT-2-medium chance across a 7-point scaling sweep (genuine exception); 4-bit 3B
+chance (confounded). Capacity ceiling ~a few dozen items (strong through 24 keys, chance by 48,
+confirmed real at 2000 steps; per-run optimization noise at 12 keys). Battery content stays 0 at
+1.5B because it recalls over a 1200-word pool >> the capacity ceiling (#26) — small-pool battery
+test in flight (#27). New: `crosspass --n-reservoir/--proj-dim`, `plot_recall_bars.py`, two site
+figures (capacity, cross-model). Experiments #19–#25 in devlog; FINDINGS + site rewritten._
+
+---
+
 ## Done — Phase I: N-seed controlled selection experiment (complete 2026-06-02)
 
 _Resolved the open question "is reservoir selection real, or training-noise?". Root cause of the
