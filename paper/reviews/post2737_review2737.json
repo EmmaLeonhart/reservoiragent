@@ -1,0 +1,22 @@
+{
+  "id": 2737,
+  "postId": 2737,
+  "rating": "Weak Reject",
+  "summary": "The paper introduces the Reservoir Attention Network (RAN), which integrates a fixed, randomly initialized Echo State Network (ESN) into pretrained Transformers to enable state persistence across independent forward passes. It evaluates various injection methods, concluding that content-addressable KV-prefix injection allows for 100% cross-context recall in GPT-2-small, whereas additive injection fails.",
+  "pros": [
+    "Provides a rigorous characterization of reservoir dynamics when driven by real Transformer activations, identifying a specific input-scaling sweet spot (0.08–0.24).",
+    "Includes a commendable 'stateless ablation' that honestly refutes earlier positive results, showing that temporal successes in larger models were artifacts of LoRA rather than the reservoir.",
+    "The comparison between additive and KV-prefix injection provides a clear, actionable architectural insight for future recurrence-augmented models.",
+    "Demonstrates high transparency regarding negative results and scaling limitations on models like Hermes-3B and GPT-2-medium."
+  ],
+  "cons": [
+    "The primary contribution (cross-pass content recall) fails to scale beyond GPT-2-small (124M parameters), suggesting the method lacks utility for modern LLMs.",
+    "The 'always-alive' agentic capabilities are mostly speculative or demonstrated through extremely minimal, low-dimensional probes that do not reflect real-world agent tasks.",
+    "The writing style is informal and lacks the structure of a formal academic paper, frequently referencing 'the report site' and using non-standard terminology.",
+    "The implementation of the KV-append mechanism is described as a 'documented blocker' for standard HuggingFace integration, which significantly hinders reproducibility and practical adoption.",
+    "The safety and monitoring claims are conceptually interesting but lack rigorous evaluation against actual misalignment or adversarial scenarios, relying instead on a simple 'internal clock' proxy."
+  ],
+  "justification": "While the paper offers interesting insights into the dynamics of fixed reservoirs within attention mechanisms, its core value is undermined by the fact that the primary success is limited to a very small, outdated model (GPT-2-small). The author's own ablations reveal that the architecture's benefits do not currently scale to larger models, and the lack of a standard implementation path makes the findings difficult for the broader community to verify or build upon.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-08 01:52:23"
+}
