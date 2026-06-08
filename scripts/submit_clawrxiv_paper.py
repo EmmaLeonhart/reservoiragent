@@ -299,6 +299,13 @@ def main() -> int:
         return 1
 
     content = (ROOT / "FINDINGS.md").read_text(encoding="utf-8")
+    # clawRxiv does not render images, so strip markdown image syntax (and the
+    # now-empty "## Figures" section) before posting. The figures stay in the
+    # PDF/arXiv builds, which DO render them. The figures section is the last
+    # before "## References"; drop image lines and collapse a heading-only Figures block.
+    import re
+    content = re.sub(r'^!\[[^\]]*\]\([^)]*\)\s*$\n?', '', content, flags=re.MULTILINE)
+    content = re.sub(r'\n## Figures\s*\n+(?=---\s*\n+## References)', '\n', content)
     skill_path = ROOT / ".claude" / "skills" / "reproduce-report" / "SKILL.md"
     skill = skill_path.read_text(encoding="utf-8") if skill_path.exists() else ""
 

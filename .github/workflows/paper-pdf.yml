@@ -53,12 +53,21 @@ jobs:
           #     with pandoc's {-} unnumbered-heading attribute so they render
           #     as \section* (no auto number). FINDINGS.md on disk is unchanged;
           #     the transformation is per-build only.
+          #  3. Rewrite figure paths docs/ -> figures/ so they resolve from this
+          #     build dir (paper/) and ship flat in the arXiv tarball; the figures
+          #     are copied below. (FINDINGS.md keeps docs/<png> so the images also
+          #     resolve when the markdown is viewed at the repo root.)
           sed \
             -e '1{/^# /d}' \
             -e 's|^## Abstract$|## Abstract {-}|' \
             -e 's|^## References$|## References {-}|' \
             -e 's|^## Limitations$|## Limitations {-}|' \
+            -e 's|](docs/|](figures/|g' \
             ../FINDINGS.md > paper-pre.md
+          # Bundle the figures next to the .tex so both latexmk (here) and arXiv's
+          # flat extraction find them.
+          mkdir -p figures
+          cp ../docs/*.png figures/ 2>/dev/null || true
           # --from=markdown-smart (not gfm) keeps raw_tex; --shift-heading-level-by=-1
           # promotes ## -> \section (1, 1.1, 2, ...) now that the H1 is stripped.
           pandoc paper-pre.md \
@@ -100,9 +109,9 @@ jobs:
         working-directory: paper
         run: |
           # arXiv runs pdflatex on these flat files (no pandoc on their side),
-          # so ship the pre-generated body.
+          # so ship the pre-generated body + the figures it \includegraphics.
           tar -czf ../reservoir-arxiv-source.tar.gz \
-            paper.tex paper.tex.body neurips_2026.sty
+            paper.tex paper.tex.body neurips_2026.sty figures
           ls -la ../reservoir-arxiv-source.tar.gz
 
       - name: Upload PDFs + arXiv source as artifacts

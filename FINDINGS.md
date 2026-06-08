@@ -1119,6 +1119,26 @@ GPT-2-small-only cross-pass result.
 
 ---
 
+## Figures
+
+![Cross-pass recall on GPT-2-small. With the carried reservoir state the model recalls a secret word after the context is wiped (stateful), while a state-reset baseline stays at chance — the injection-design result.](docs/crosspass.png)
+
+![Reservoir dynamics versus spectral radius on synthetic input. The echo state property (init-forgetting) holds cleanly below ρ ≈ 1 and breaks above it.](docs/sweep_synthetic.png)
+
+![Reservoir dynamics under real transformer activations. Saturation and effective dimensionality versus spectral radius — the regime that the unit-scaled reservoir over-drives.](docs/sweep_real.png)
+
+![Input-scaling sweep on real activations. The healthy band (low saturation, high usable dimensionality) sits at input scaling ≈ 0.08–0.24.](docs/sweep_scaling.png)
+
+![Cross-model cross-pass recall (carried state vs wiped-reservoir control), best input scaling per model. Recall recovers at GPT-2-small and across the Qwen family (0.5B, 1.5B), but is at chance for GPT-2-medium and 4-bit Hermes-3B — not monotonic in size.](docs/crossmodel_recall.png)
+
+![Recall capacity at Qwen-1.5B versus the number of items carried. Perfect at six keys, strong (~0.42, ≈10× chance) at 24, and at chance by 48 — graceful degradation into the tens of items.](docs/capacity_qwen15b.png)
+
+![Battery content lift versus epoch (Qwen-1.5B, content-only, eval_n=48). The carried-state recall lift appears at epoch 1 then collapses as training drifts to a stateless solution — a within-run instance of "the model learns to ignore the recurrent state".](docs/battery_lift_eval48.png)
+
+![H3 delay-memory readout. A linear readout on the reservoir state recovers delayed history that a stateless baseline provably cannot.](docs/h3_memory.png)
+
+---
+
 ## References
 
 The works the claims above rest on:
