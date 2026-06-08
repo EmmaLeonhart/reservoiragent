@@ -1,0 +1,41 @@
+{
+  "params": {
+    "model": "Qwen/Qwen2.5-1.5B-Instruct",
+    "n_keys": 6,
+    "steps": 800,
+    "mode": "kv",
+    "input_scaling": 0.1
+  },
+  "results": {
+    "stateful": {
+      "model": "Qwen/Qwen2.5-1.5B-Instruct",
+      "stateful": true,
+      "n_keys": 6,
+      "steps": 800,
+      "loss_start": 11.9375,
+      "loss_end": 0.00171661376953125,
+      "curriculum": 0.0,
+      "lora_r": 8,
+      "lora_target": "attn",
+      "unfreeze_from": null,
+      "recall_accuracy": 0.8333333333333334,
+      "device": "cuda",
+      "mode": "kv-prefix"
+    },
+    "baseline": {
+      "model": "Qwen/Qwen2.5-1.5B-Instruct",
+      "stateful": false,
+      "n_keys": 6,
+      "steps": 800,
+      "loss_start": 11.0625,
+      "loss_end": 2.046875,
+      "curriculum": 0.0,
+      "lora_r": 8,
+      "lora_target": "attn",
+      "unfreeze_from": null,
+      "recall_accuracy": 0.16666666666666666,
+      "device": "cuda",
+      "mode": "kv-prefix"
+    }
+  }
+}

@@ -2359,3 +2359,14 @@ PDF) and the site — honest disclosure that this is an AI-agent-driven project,
 every quantitative result is from executed code + measured behaviour against a stateless control, not
 LLM-generated text, human-reviewed. User also flagged "a weird mistake with the data worth replacing" —
 added a data-audit item to hunt for it.
+
+## 2026-06-08 — replication package (downloadable zip) built + linked
+
+Built replication/ : reproduce.py (orchestrator that runs the two headline cross-pass recall
+experiments — GPT-2 1.00 vs ~0.17, Qwen2.5-1.5B 0.83-1.00 — and checks recall vs the paper's values),
+a thorough README (setup via pip install -e .[models], exact commands, the decisive levers
+n_reservoir/input_scaling, what is NOT claimed), and expected_results/ with the bundled logged JSONs
+(results/ is gitignored, so the headline + capacity-sweep JSONs are copied in). pages.yml now zips
+replication/ -> docs/reservoir-replication.zip on every build; added a "Replication package" download
+button to the site. reproduce.py verified to parse + --help OK (CPU). This is the linkable replication
+deliverable the user asked for.
