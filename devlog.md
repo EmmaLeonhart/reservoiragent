@@ -2099,3 +2099,13 @@ the TC0/FO(M) stateless ceiling; recurrence-augmented transformers) WITH the pri
 Related-work section + gap table to the site (docs/index.html, #related-work), and replaced the
 "Full survey: literature/REVIEW.md" code pointer with an in-page link. Readers no longer need the
 git repo to find the review. Also published report.pdf is now the NeurIPS LaTeX build (pages.yml).
+
+## 2026-06-08 — figures in the PDF + arXiv bundle published (Emma asks)
+
+FINDINGS gains a ## Figures section (8 key figures: crosspass, dynamics sweeps, cross-model, capacity,
+battery-lift, h3-memory). Build plumbing: pages.yml + paper-pdf.yml rewrite docs/->figures/, copy the
+PNGs next to paper.tex, and the arXiv tarball now bundles figures/. The figures render in the PDF
+(\includegraphics) but are STRIPPED from the clawRxiv submission (submit_clawrxiv_paper.py removes
+image markdown + the now-empty Figures heading) since clawRxiv has no image support. pages.yml now
+publishes docs/reservoir-arxiv-source.tar.gz and the site links it. Also fixed the pages PDF build
+(--no-highlight) so report.pdf is the NeurIPS PDF, not the stale weasyprint one.

@@ -53,12 +53,17 @@ jobs:
           mkdir -p docs
           if [ -f FINDINGS.md ]; then
             cd paper
+            # docs/<png> -> figures/<png> so figures resolve from paper/ and ship
+            # flat in the arXiv tarball; copy the figures next to the .tex.
             sed \
               -e '1{/^# /d}' \
               -e 's|^## Abstract$|## Abstract {-}|' \
               -e 's|^## References$|## References {-}|' \
               -e 's|^## Limitations$|## Limitations {-}|' \
+              -e 's|](docs/|](figures/|g' \
               ../FINDINGS.md > paper-pre.md
+            mkdir -p figures
+            cp ../docs/*.png figures/ 2>/dev/null || true
             pandoc paper-pre.md --from=markdown-smart --to=latex \
               --output=paper.tex.body --wrap=preserve \
               --no-highlight --shift-heading-level-by=-1
@@ -67,8 +72,12 @@ jobs:
               echo "::error::LaTeX Error(s) in paper.log — report PDF build failed."; exit 1
             fi
             cp paper.pdf ../docs/report.pdf
+            # Publish the arXiv source bundle (paper.tex + body + sty + figures) for
+            # download from the site, like the Sutra repo does.
+            tar -czf ../docs/reservoir-arxiv-source.tar.gz \
+              paper.tex paper.tex.body neurips_2026.sty figures
             cd ..
-            echo "Built docs/report.pdf ($(du -h docs/report.pdf | cut -f1)) from the NeurIPS LaTeX source"
+            echo "Built docs/report.pdf ($(du -h docs/report.pdf | cut -f1)) + docs/reservoir-arxiv-source.tar.gz"
           else
             echo "No FINDINGS.md yet; skipping PDF build"
           fi
