@@ -2043,3 +2043,13 @@ reservoir-driven per ablation; battery content lift undetermined at this eval bu
 (recall task is a minimal single-token small-vocab probe; task-scaling untested). Tightened the site
 battery "did not recover" to "in that battery setup". con #1 (informal/log-like) still needs the
 structural consolidation pass.
+
+## 2026-06-08 — #29 resolved: battery reservoir-recall is found then abandoned (training instability)
+
+Content-only battery at eval_n=48: lift -0.000 -> +0.177 (e1: recall 0.35 vs 0.02 control) -> +0.000
+(e2: recall 0.08 = control 0.08). RESOLVED (not noise): the model learns a reservoir-driven battery
+recall at e1 then DRIFTS to a stateless solution by e2 — a live "learns to ignore the recurrent state"
+instance within one run. Resolves #28 "undetermined" -> "transient, found-then-abandoned". The retained
+advantage stays the strict crosspass (0.83-1.00 vs 0.17); making the battery RETAIN a reservoir solution
+(stability/regularization, e.g. aux use-the-state loss) is open work. Rendered docs/battery_lift_eval48.png
+(plot_epoch_curve). Folded into FINDINGS+site+Limitations. Resubmitting.

@@ -702,23 +702,25 @@ the right token), not the gate weight: with a healthy open gate the model still 
 to emit at 1.5B on this budget, and the reservoir adds nothing over the stateless control. (Per-epoch
 models + optimizer states are preserved on the Hub for analysis.)
 
-**Does the recall fix transfer into the battery? Unresolved at the current eval resolution.** Since
-cross-pass recall recovers at 1.5B with the right reservoir config, and the battery's content was
-failing partly because it recalls over a 1200-word pool (far past the capacity ceiling), we re-ran
-the battery with the **recall-winning config** (2048 nodes, no projection, input scaling 0.1) and a
-**16-word pool within capacity** — both the full 8-task mix and a content-only (recall + deferred)
-isolation. This *does* make battery content learnable — recall climbs off zero to ~0.12 — and the
-stateful side is stable across epochs. But the *lift over the stateless control* swings sign across
-epochs (e.g. +0.094 / −0.031 / 0.000 / +0.094 / +0.031, mean ≈ +0.04). That swing is **eval noise,
-not signal**: per-task accuracy quantizes to 1/`eval_n` (= 1/16 ≈ 0.06 at the budget we ran), so a
-~0.04 lift sits *at the noise floor* and flips sign as one or two eval episodes flip — the stateful
-side is steady while the control bounces. The battery recall task does genuinely wipe the context
-(it is memory-requiring), so this is a **resolution problem, not evidence of no lift**: we cannot
-yet tell a small real reservoir lift from zero in the battery. We raised the default eval set to 48
-and a cleaner re-measure is the next step. So: the large, *resolved* reservoir advantage is the
-strict-wipe cross-pass task (0.83–1.00 vs 0.17); whether the integrated battery inherits a smaller
-version of it is, at this eval budget, **undetermined** — open work, honestly unresolved rather
-than positive or negative.
+**Does the recall fix transfer into the battery? Transiently — the reservoir solution is found,
+then abandoned.** Since cross-pass recall recovers at 1.5B with the right reservoir config, and the
+battery's content was failing partly because it recalls over a 1200-word pool (far past the
+capacity ceiling), we re-ran the battery with the **recall-winning config** (2048 nodes, no
+projection, input scaling 0.1) and a **16-word pool within capacity**, content-only (recall +
+deferred), at an eval resolution (`eval_n=48`) fine enough to separate a real lift from noise (an
+earlier `eval_n=16` pass put any lift at the 1/16 quantization floor). The per-epoch lift over the
+stateless control is then **−0.000 → +0.177 → +0.000**: at epoch 1 the model genuinely learns a
+reservoir-driven battery recall — **recall 0.35 with the carried state vs 0.02 (chance) for the
+wiped-reservoir control**, a large, *resolved* lift, not noise — but by epoch 2 it **drifts back to
+a stateless solution** (recall 0.08, and the control rises to 0.08 to match). So the integrated
+battery *can* use the reservoir for content (epoch 1 proves the capacity is there), but the
+multi-task training does not **retain** it: the optimizer finds a current-pass / LoRA shortcut and
+the reservoir-driven solution decays. This is a live instance of the **"model learns to ignore the
+recurrent state"** failure that motivated the content-addressable injection in the first place —
+here observed *within* a single run as the solution is found and then lost (see the lift-vs-epoch
+figure). The clean, *retained* reservoir advantage remains the strict-wipe cross-pass task
+(0.83–1.00 vs 0.17); making the integrated battery hold a reservoir-driven content solution
+(a stability/regularization problem, e.g. an auxiliary "use the state" loss) is concrete open work.
 
 **What the carried-state demonstration actually rests on.** The valid evidence that the reservoir
 carries *usable* state is the controlled, memory-requiring tasks, not the battery metrics:
@@ -1061,12 +1063,13 @@ GPT-2-small-only cross-pass result. (`results/battery_qwen_newlevers.json`, `_un
  recovery is **model-specific, not a size law** (GPT-2-medium fails across a 7-point scaling sweep;
  4-bit 3B is confounded), and what makes a backbone able to read the content-addressable prefix at
  all is open.
-- **The agentic battery does not demonstrate reservoir-driven behaviour.** Its temporal/agency
- metrics (timed, self-init, silence) are matched by a stateless ablation, so they are LoRA /
- current-pass, not carried state. Whether the battery's *content* tasks inherit the clean task's
- reservoir lift is **undetermined at the current eval budget** (the apparent ~0.04 lift was eval
- noise at 1/16 quantization; a re-measure at eval_n=48 resolves it toward ~0). The always-alive app
- runs the untrained substrate — harness + live dynamics, not a trained policy.
+- **The agentic battery's reservoir-driven content is found but not retained.** Its temporal/agency
+ metrics (timed, self-init, silence) are matched by a stateless ablation (LoRA / current-pass, not
+ carried state). Its *content* recall, at resolving eval (eval_n=48), shows a large reservoir lift
+ transiently — recall 0.35 vs 0.02 control at epoch 1 — but the training drifts to a stateless
+ solution by epoch 2 (a within-run "learns to ignore the recurrent state"). So the battery can use
+ the reservoir but does not stably retain it; a stabilization/regularization fix is open work. The
+ always-alive app runs the untrained substrate — harness + live dynamics, not a trained policy.
 - **The recall demonstration is a minimal probe** (flagged in review): a single secret token from a
  small vocabulary (6 words at 100%, degrading by ~a few dozen). It cleanly proves *that* usable
  cross-pass state exists, but not its utility for multi-token, large-vocabulary, or long-horizon
