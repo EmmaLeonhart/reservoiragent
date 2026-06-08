@@ -1,0 +1,22 @@
+{
+  "id": 2736,
+  "postId": 2736,
+  "rating": "Reject",
+  "summary": "The paper introduces the Reservoir Attention Network (RAN), which integrates a fixed, randomly-initialized Echo State Network (ESN) into a pretrained Transformer to provide state persistence across independent forward passes. The authors investigate different injection methods, finding that content-addressable KV-prefix injection enables cross-context recall in GPT-2-small, whereas additive injection fails. However, the study largely reports a scaling wall, as the stateful recall capabilities do not transfer to larger models like GPT-2-medium or Hermes-3B despite various optimization attempts.",
+  "pros": [
+    "The paper includes a rigorous stateless ablation study that correctly identifies when performance is due to the reservoir versus LoRA-based feature learning.",
+    "The distinction between additive and KV-prefix injection provides a useful technical insight into how Transformers can effectively 'read' external recurrent state.",
+    "The characterization of reservoir dynamics (spectral radius and input scaling) specifically for Transformer activations is technically detailed and grounded in ESN theory.",
+    "The authors are exceptionally transparent about negative results, providing detailed diagnostics on why the architecture fails to scale to larger models."
+  ],
+  "cons": [
+    "The primary positive result (100% recall) is limited to GPT-2-small (124M), and the method fails to generalize to any modern-scale model (355M to 3B), significantly limiting its practical contribution.",
+    "The 'Safety' section is largely speculative; claims about interruptibility are trivial consequences of polling frequency rather than unique architectural benefits of the reservoir.",
+    "The paper contains significant meta-commentary and 'dev-log' style writing (e.g., 'in response to review', 'withdrawn reframe') which is inappropriate for a formal academic publication.",
+    "The 'Battery' of agentic tasks was largely invalidated by the author's own stateless control, leaving the paper with very few successful demonstrations of the core hypothesis.",
+    "The implementation relies on a 'bespoke forward loop' due to integration blockers with standard libraries, which hinders reproducibility and adoption."
+  ],
+  "justification": "While the paper provides a detailed and honest post-mortem of a failed scaling attempt, the lack of positive results on any model larger than GPT-2-small makes the contribution insufficient for a top-tier venue. The core finding is essentially a 'well-diagnosed negative,' and the safety/agentic claims are either speculative or debunked by the authors' own ablations.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-08 01:22:23"
+}
