@@ -51,12 +51,15 @@ Emphasize how verifiable/persistent state via fixed substrate aids interpretabil
 
 ## Current ongoing work
 
-- **Battery reservoir-retention (in flight).** The clean cross-pass recall task scales to the Qwen
-  family (signal); the integrated battery learns a reservoir-driven recall then drifts to a
-  stateless shortcut (#29), and neither low `lora_r` (#31) nor noise alone explains it. The
-  counterfactual "use-the-state" aux loss is implemented + tested (#30) and running on the content
-  battery (#32) to test whether it makes the lift *hold* across epochs. Fold the resolved verdict
-  into FINDINGS + site; only claim retention if it survives the control across epochs.
+- **Battery reservoir-retention — resolved negative (folded).** The clean cross-pass recall task
+  scales to the Qwen family (signal); the integrated battery learns a reservoir-driven recall then
+  drifts to a stateless shortcut (#29), and neither low `lora_r` (#31) nor noise alone explains it.
+  The counterfactual "use-the-state" aux loss (#30) was run on the content battery for 4 epochs
+  (#32): it did **not** make the lift hold — mean lift decayed +0.302 → +0.094 → +0.000 → +0.000 as
+  the stateless control rose to match. Verdict folded into FINDINGS Limitations + site (no retention
+  claim). Stable retention remains open; the first-line stabilizer fails. Any further attempt is new
+  todo.md work (e.g. a harder state-dependence regularizer, or a task design where the current pass
+  *cannot* shortcut), not an open queue item.
 
 - **Paper formalization (ongoing).** The paper now builds in the **NeurIPS-2026 LaTeX format**
   adopted from the Sutra repo (`paper/paper.tex` + `neurips_2026.sty` + `paper-pdf.yml`, source =

@@ -516,6 +516,19 @@
   (0.83&ndash;1.00 vs 0.17); making the battery <em>hold</em> a reservoir-driven content solution
   (a stability/regularization problem) is concrete open work.
 </p>
+<p>
+  <strong>We tested the obvious fix, and it did not hold.</strong> The natural stabilizer is a
+  counterfactual &ldquo;use-the-state&rdquo; auxiliary loss: penalize the model whenever a
+  <em>wiped-reservoir</em> probe forward does as well as the intact one, so the objective explicitly
+  rewards relying on carried state. Run for 4 epochs (3.1&nbsp;h, Qwen2.5-1.5B + an 8192-node
+  reservoir), it did <strong>not</strong> prevent the collapse: the mean reservoir lift decayed
+  <strong>+0.302 &rarr; +0.094 &rarr; +0.000 &rarr; +0.000</strong> across epochs 0&ndash;3. As before,
+  the stateful model does not get worse &mdash; the stateless control <em>rises to match</em> it
+  (0.000 &rarr; 0.062 &rarr; 0.083), so the optimizer still converges to a current-pass solution that
+  makes the carried state redundant, even against a loss term built to forbid exactly that. Stable
+  retention is unsolved: the first-line stabilization fails, and what would force a multi-task objective
+  to keep depending on the reservoir is open.
+</p>
 <figure>
   <img src="battery_lift_eval48.png" alt="Per-epoch capability mean for the content battery: the reservoir (carried-state) curve rises to ~0.20 at epoch 1 while the stateless control stays near zero, then both fall together to ~0.08 by epoch 2 — the reservoir-driven lift appears at epoch 1 and is lost by epoch 2.">
   <figcaption>
