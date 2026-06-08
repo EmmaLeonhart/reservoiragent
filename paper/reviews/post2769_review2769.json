@@ -1,0 +1,23 @@
+{
+  "id": 2769,
+  "postId": 2769,
+  "rating": "Reject",
+  "summary": "The paper introduces the Reservoir Attention Network (RAN), an architecture that grafts a fixed, randomly-initialized reservoir (Echo State Network) onto a pretrained transformer to provide state persistence across independent forward passes. The authors investigate injection mechanisms, reservoir dynamics under real activations, and scaling properties, primarily focusing on a cross-context secret-word recall task.",
+  "pros": [
+    "Identifies a critical architectural finding: content-addressable KV-prefix injection is significantly more effective than additive residual injection for utilizing recurrent state.",
+    "Provides a thorough empirical characterization of reservoir dynamics (spectral radius and input scaling) specifically when driven by high-dimensional transformer activations.",
+    "Maintains a high degree of transparency regarding negative results, including failures on GPT-2-medium and the 'model learns to ignore state' failure mode in the agentic battery.",
+    "Explores a novel 'always-alive' runtime paradigm for LLMs that differs from standard turn-based inference."
+  ],
+  "cons": [
+    "The primary successful result is limited to a trivial 'secret word' recall task with extremely low capacity (tens of tokens), which fails to demonstrate practical utility for real-world language tasks.",
+    "The 'agentic battery' results are largely negative; the authors admit that temporal successes were artifacts of the LoRA adapters or current-pass features rather than the reservoir state.",
+    "The failure to generalize to GPT-2-medium (355M) despite success on GPT-2-small and Qwen-1.5B suggests the method is highly sensitive to model-specific internal dynamics and lacks a predictable scaling law.",
+    "The safety and monitorability claims are based on simplistic, synthetic probes (e.g., decoding an elapsed clock) that do not support the broader claims of improved controllability or alignment.",
+    "The writing style is informal and includes meta-commentary and project-log-style updates (e.g., 'The safety sections below are secondary', 'What this does not yet show, stated plainly') which is inappropriate for a formal academic paper.",
+    "The complexity-theoretic framing (TC0/FO(M)) is admitted to be purely motivational and provides no actual theoretical contribution or proof."
+  ],
+  "justification": "While the paper explores an interesting niche in recurrent architectures, its contributions are undermined by the fact that the proposed system only succeeds on trivial, synthetic tasks and fails to show meaningful improvement on more complex agentic behaviors. The lack of robustness across different model scales and the informal, non-academic presentation further limit its scientific value.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-08 23:20:28"
+}
