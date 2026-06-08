@@ -168,7 +168,7 @@ regardless of its capability level.
 
 ## Results
 
-*All figures referenced below are rendered on the report site:
+*All figures referenced below are in the accompanying report:
 <https://emmaleonhart.github.io/reservoiragent/>.*
 
 ### H1 — the reservoir injects without breaking the base model
@@ -193,7 +193,7 @@ the same readout trained on the *current* input u(t) — scores **exactly 0** at
 delay ≥ 1, because i.i.d. inputs carry no information about their own past. So the
 information needed to answer is provably *in the carried state, not the input*: a light
 trained readout makes the reservoir's history usable, and a stateless model structurally
-cannot match it. (figure on the report site) This is the H3
+cannot match it. (see figure) This is the H3
 mechanism on a clean synthetic task; doing it on a *semantic* agent task (unresolved
 thread, elapsed time) is future work that needs the readout trained through the LM.
 
@@ -207,7 +207,7 @@ selection is worth doing. But the open "seed pre-selection proxy" question (can 
 clean **negative answer for this proxy**: the untrained participation ratio has **no
 rank correlation** with trained memory capacity (**Spearman ρ = 0.08, p = 0.80**, n=12).
 So seeds cannot be pre-filtered by participation ratio — the N-seed *training* does real
-work this dynamics proxy can't shortcut. (figure on the report site) **The cost implication,
+work this dynamics proxy can't shortcut. (see figure) **The cost implication,
 stated plainly:** because this proxy fails, selecting a good fixed reservoir
 currently requires training each seed's readout — i.e. genuine trial-and-error, not a
 cheap pre-filter. Finding an untrained proxy that *does* correlate is open work; until
@@ -235,10 +235,10 @@ population* (cheap metrics don't let you pre-filter, so you train and measure) a
 fact that reservoirs scaled to a fixed ρ have near-identical bulk dynamics; it does **not**
 yet demonstrate that some fixed reservoirs are durably better than others on this task.
 Establishing that needs a **controlled** experiment: seed the trainable init too, enable
-deterministic CUDA, and **average several runs per seed**. (figure on the report site)
+deterministic CUDA, and **average several runs per seed**. (see figure)
 
 **The controlled experiment — run, and it confirms: at 250 steps selection is noise, not
-signal.** We then ran exactly that experiment (figure on the report site). Root cause of the noise was first removed: `kv_live` had a `train_seed`
+signal.** We then ran exactly that experiment (see figure). Root cause of the noise was first removed: `kv_live` had a `train_seed`
 parameter that was never used, so the trainable `W_res` + LoRA init was uncontrolled; it now
 seeds the init, and a `set_deterministic` helper (RNGs + `CUBLAS_WORKSPACE_CONFIG` + cudnn
 flags + the deterministic math SDP kernel) makes two runs of the same reservoir with the same
@@ -269,7 +269,7 @@ not point that way.)
 
 ### H2 — the reservoir-dynamics regime
 
-Sweeping spectral radius ρ ∈ [0.1, 2.0] (figures on the report site):
+Sweeping spectral radius ρ ∈ [0.1, 2.0] (see figures):
 
 - **The echo state property breaks sharply at ρ ≈ 1.** Using an autonomous
  (zero-input) probe — two random initial states under no input — the reservoir forgets
@@ -288,7 +288,7 @@ Sweeping spectral radius ρ ∈ [0.1, 2.0] (figures on the report site):
  activations: the input scaling has to be tuned down for injection at transformer
  scale — the precise concern the plan anticipated ("feeding a large attention tensor
  may require different scaling").
-- **Tuning the input scaling fixes it (figure on the report site).** Sweeping the
+- **Tuning the input scaling fixes it (see figure).** Sweeping the
  input scaling at ρ = 0.95, saturation is a clean sigmoid in the scaling: it crosses
  0.5 at scaling ≈ 0.24 and is near zero below ≈ 0.05, while input separation and
  effective dimensionality stay high. There is a sweet spot around **input scaling
@@ -423,7 +423,7 @@ finding.**
  (the KV-prefix path), the stateful model reaches **100% cross-context recall
  (loss → 0.02)** while the stateless baseline stays at **chance (0.17)**. The carried
  reservoir state, made attendable, lets the model recall content that exists *only* in
- the reservoir — something the stateless baseline provably cannot do. (figure on the report site)
+ the reservoir — something the stateless baseline provably cannot do. (see figure)
 
 **This is the project's core claim, demonstrated:** the Reservoir Agent's statefulness
 *does the desired thing* — it carries information across independent forward passes and
@@ -444,7 +444,7 @@ training-noisy at this 600-step budget** (the 12-word run underperforms the 24-w
 run-to-run optimization artifact, not a capacity law), and by **48 words the run no longer
 converges** within 600 steps (loss plateaus ~5.0). So the working regime is robust at small-to-
 moderate vocabularies and becomes budget-limited as the vocabulary grows — a characterization,
-not a clean capacity ceiling. (figure on the report site)
+not a clean capacity ceiling. (see figure)
 
 **Transfer to Hermes 3B — not yet, and well diagnosed.** The same
 content-addressable experiment was run on the real target, Hermes-3-Llama-3.2-3B, across
@@ -471,8 +471,7 @@ the remaining plausible routes (left open, not faked) are structural: a curricul
 with the key in-context, anneal it out) / a stronger multi-layer prefix coupling / unfreezing
 more of the model. **The result holds decisively on GPT-2; on Hermes the mechanism is
 verified as correctly wired but the recall has not yet been trained to converge, and it is not a
-step-count problem.** (`results/crosspass_hermes-3-llama-3-2-3b.json`,
-the report site.)
+step-count problem.** (`results/crosspass_hermes-3-llama-3-2-3b.json`; see figure.)
 
 **The transfer wall starts well below 3B.** A 10-seed **GPT-2-medium (355M)** batch and a
 follow-up single-seed probe at lower input scaling (0.1, 1000 steps) both stayed at
@@ -486,8 +485,7 @@ preserved as signal at `EmmaLeonhart/reservoir-agent-gpt2-medium-batch`.
 **The curriculum route, tested — it does not break the 355M wall alone, and the loss
 trajectory says why.** We implemented the documented curriculum (show the secret in pass-2
 context, anneal that hint to zero over the first half of training, weaning the model onto the
-reservoir,
-the report site) and ran it on GPT-2-medium for 800 steps. Final recall stays
+reservoir; see figure) and ran it on GPT-2-medium for 800 steps. Final recall stays
 at **chance (0.17)**, equal to the wiped-state baseline — but the *stateful training loss starts
 at 0.89 and rises to 2.05* as the hint anneals out. That rise is the diagnosis: while the key is
 visible in context the model solves the task easily (low loss), and the moment it must recall
@@ -698,7 +696,7 @@ the **stateless gate** — the same gate on the current input — collapses to F
 because it cannot see the past trigger, so it can only *always speak* (recall ≈ 1,
 precision ≈ the base rate). The point is not the exact number: a stateless model **cannot
 implement a selective silence policy at all**, while a reservoir-state gate can.
-(figure on the report site).
+(see figure).
 
 **The harder conceptual point (the intended behaviour, and why it is difficult).** This
 experiment trains a gate to read silence off the reservoir, but the *intended* behaviour
@@ -771,7 +769,7 @@ input at turn boundaries can take many passes to register an urgent interruption
 mid-action. The hypothesis is that a Reservoir Agent — running every tick, with the reservoir
 continuously integrating input — registers an interruption sooner, and retains it once seen. We
 measured both halves on CPU
-(figure on the report site).
+(see figure).
 
 **Polling latency (structural) — and what is *not* reservoir-specific.** A poller
 that only reads input every `period` passes registers an arrival at the next boundary: latency
@@ -802,7 +800,7 @@ A design-motivation argument for the reservoir as a *monitoring surface*: "I
 don't think you'd need a sparse autoencoder for the reservoir state … it's much more simple to
 have a learned representation of what is happening," and, because the reservoir weights never
 change, the mapping from state to behaviour is stable — "relatively resilient to fine-tuning."
-We tested the falsifiable parts (figure on the report site).
+We tested the falsifiable parts (see figure).
 
 **Linearly decodable, no SAE.** We defined a temporal *process property* a stateless pass
 cannot see — *elapsed passes since the last trigger*, an internal clock — and fit a plain
@@ -850,7 +848,7 @@ per-position importance scores, switching the ordinary-token choice from recency
 heavy-hitter retention while still pinning the reservoir — position-based and importance-based
 eviction under one interface.
 
-Simulating 512 blank ticks (figure on the report site): the
+Simulating 512 blank ticks (see figure): the
 **vanilla** cache grows linearly to **524 positions**, while the **reservoir-protected**
 policy stays bounded at the **budget (128)** from tick ~116 onward — and **all 8 reservoir
 entries are retained on every single tick**, even under heavy eviction. So the cache-burn
