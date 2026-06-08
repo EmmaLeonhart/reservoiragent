@@ -2383,3 +2383,20 @@ Fixed the alt-text to match the (already-correct) figcaption + body. The underly
 (1.00@6 → ~0.42@24 → chance@48) is sound; only the 12-key point is a single-seed artifact, and a
 cleaner figure would average several seeds at that point (a possible pre-6:30 experiment, but the GPU
 is on #34 and the text already frames it correctly).
+
+## 2026-06-08 — comprehensive pre-arXiv citation audit (4 parallel agents): no hallucinations, 8 fixes
+
+Ran the scheduled citation audit via 4 parallel web-enabled verification agents (each fetched the
+arXiv abstract pages / primary sources). Result: ALL 24 cited works are real — no hallucinations,
+including every flagged 2025 preprint. Fixed 8 metadata issues in FINDINGS: added the missing
+arXiv:2207.00729 (Merrill & Sabharwal, Parallelism Tradeoff); corrected Pérez et al. (1901.03429 is
+"On the Turing Completeness of Modern Neural Network Architectures", ICLR 2019 — "Attention is
+Turing-Complete" is the JMLR 2021 version; fixed Marinković spelling/order); renamed "FreezeTST" to
+its real title "Frozen in Time" (Singh et al., 2025); added verified authors to Echo State Transformer
+(Bendi-Ouis & Hinaut) and Echo Flow Networks (Liu & Xu); added 4 References entries (Shen et al.,
+Bendi-Ouis & Hinaut, Liu & Xu, Singh et al.); cleaned the Merrill-Smith title; clarified
+Siegelmann-Sontag (On the Computational Power of Neural Nets, JCSS 1995); softened the DeepSeek-V4
+"CSA+HCA" label to the source-grounded "DeepSeek Sparse Attention (DSA, V3.2 -> V4)". DeepSeek-V4-Flash
++ DSA both confirmed real via live primary sources. Updated the clawRxiv genericization regexes for the
+new author-prefixed citation forms + re-verified zero residue. Full per-citation verdicts in
+paper/reviews/citation_audit_2026-06-08.md. No clawRxiv resubmit for citation fixes alone (per directive).

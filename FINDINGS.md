@@ -203,8 +203,9 @@ light LoRA. Block-Recurrent Transformer independently documents the failure mode
 observe directly (§ "the model learns to ignore the recurrent state"): tasks must
 structurally require the carried state or it is ignored. The nearest recent items —
 Reservoir Transformers (Shen et al., 2021, arXiv:2012.15045), Echo State Transformer
-(2025, arXiv:2507.02917), Echo Flow Networks (2025, arXiv:2509.24122), and FreezeTST
-(2025, arXiv:2508.18130) — each differ on at least one load-bearing axis (none
+(Bendi-Ouis & Hinaut, 2025, arXiv:2507.02917), Echo Flow Networks (Liu & Xu, 2025,
+arXiv:2509.24122), and Frozen-in-Time (Singh et al., 2025, arXiv:2508.18130) — each differ on at
+least one load-bearing axis (none
 injects into a *pretrained* LLM's attention with a *fixed-random* reservoir carrying
 state across *independent* passes); they are trained-from-scratch and within-sequence.
 A concurrent line compares reservoir computing *directly against* transformers as language models
@@ -1242,7 +1243,8 @@ the point, not the specific numbers — they scale with the budget/window settin
 
 This is the cheap, base-agnostic half of the cache story. The expensive half — a base model
 whose attention is *natively* KV-efficient so the headroom is far larger (DeepSeek's MLA /
-the V4 CSA+HCA compression noted in the design discussion) — is recorded as project direction for future work; it is not runnable on this hardware (see Limitations).
+its learned sparse attention — DeepSeek Sparse Attention, introduced in V3.2 and carried into the
+V4 line) — is recorded as project direction for future work; it is not runnable on this hardware (see Limitations).
 
 
 ## Figures
@@ -1291,13 +1293,17 @@ Jaeger, H. (2001). *The "echo state" approach to analysing and training recurren
 Maass, W., Natschläger, T., & Markram, H. (2002). *Real-time computing without stable states (liquid state machines).* Neural Computation 14(11):2531–2560.
 Lukoševičius, M., & Jaeger, H. (2009). *Reservoir computing approaches to recurrent neural network training.* Computer Science Review.
 Köster, F., & Uchida, A. (2025). *Reservoir Computing as a Language Model.* arXiv:2507.15779.
+Shen, S., Baevski, A., Morcos, A. S., Keutzer, K., Auli, M., & Kiela, D. (2021). *Reservoir Transformers.* ACL. arXiv:2012.15045.
+Bendi-Ouis, Y., & Hinaut, X. (2025). *Echo State Transformer: Attention Over Finite Memories.* arXiv:2507.02917.
+Liu, H., & Xu, J. (2025). *Echo Flow Networks.* arXiv:2509.24122.
+Singh, P., Sharma, M., Dey, A., & Raman, B. (2025). *Frozen in Time: Parameter-Efficient Time Series Transformers via Reservoir-Induced Feature Expansion and Fixed Random Dynamics.* arXiv:2508.18130.
 
 **Transformer expressivity (motivation, not a result here).**
 Hahn, M. (2020). *Theoretical Limitations of Self-Attention in Neural Sequence Models.* TACL. arXiv:1906.06755.
-Merrill, W., Sabharwal, A., & Smith, N. A. (2022). *Saturated transformers are constant-depth threshold circuits (⊆ TC⁰).* arXiv:2106.16213.
-Merrill, W., & Sabharwal, A. (2023). *The Parallelism Tradeoff: Limitations of Log-Precision Transformers.*
-Pérez, J., Barceló, P., & Marinkovic, J. (2019/2021). *Attention is Turing-Complete* (arbitrary-precision). arXiv:1901.03429.
-Siegelmann, H. T., & Sontag, E. D. (1991/1995). *Turing-completeness of finite recurrent neural networks.*
+Merrill, W., Sabharwal, A., & Smith, N. A. (2022). *Saturated Transformers are Constant-Depth Threshold Circuits.* TACL. arXiv:2106.16213.
+Merrill, W., & Sabharwal, A. (2023). *The Parallelism Tradeoff: Limitations of Log-Precision Transformers.* TACL. arXiv:2207.00729.
+Pérez, J., Marinković, J., & Barceló, P. (2019). *On the Turing Completeness of Modern Neural Network Architectures.* ICLR. arXiv:1901.03429. (The 2021 JMLR version is titled *Attention is Turing-Complete*; both assume arbitrary precision.)
+Siegelmann, H. T., & Sontag, E. D. (1995). *On the Computational Power of Neural Nets.* Journal of Computer and System Sciences 50(1):132–150 (COLT 1992 precursor).
 Weiss, G., Goldberg, Y., & Yahav, E. (2021). *Thinking Like Transformers (RASP).* ICML. arXiv:2106.06981.
 
 **Recurrence-augmented transformers (all carry state *within* a sequence via *trained* recurrence).**
