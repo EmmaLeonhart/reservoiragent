@@ -1,0 +1,39 @@
+{
+  "params": {
+    "model": "gpt2",
+    "n_keys": 12,
+    "steps": 600,
+    "mode": "kv",
+    "input_scaling": 0.5
+  },
+  "results": {
+    "stateful": {
+      "model": "gpt2",
+      "stateful": true,
+      "n_keys": 12,
+      "steps": 600,
+      "loss_start": 12.944660186767578,
+      "loss_end": 2.112123489379883,
+      "curriculum": 0.0,
+      "lora_r": 8,
+      "lora_target": "attn",
+      "recall_accuracy": 0.5833333333333334,
+      "device": "cuda",
+      "mode": "kv-prefix"
+    },
+    "baseline": {
+      "model": "gpt2",
+      "stateful": false,
+      "n_keys": 12,
+      "steps": 600,
+      "loss_start": 14.606660842895508,
+      "loss_end": 3.063814640045166,
+      "curriculum": 0.0,
+      "lora_r": 8,
+      "lora_target": "attn",
+      "recall_accuracy": 0.08333333333333333,
+      "device": "cuda",
+      "mode": "kv-prefix"
+    }
+  }
+}
