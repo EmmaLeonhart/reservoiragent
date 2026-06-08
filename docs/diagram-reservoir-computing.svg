@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 340" font-family="Georgia, 'Times New Roman', serif">
+  <defs>
+    <marker id="rc-fix" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#7a8a99"/>
+    </marker>
+    <marker id="rc-train" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#c0392b"/>
+    </marker>
+    <marker id="rc-rec" markerWidth="8" markerHeight="8" refX="6" refY="2.6" orient="auto">
+      <path d="M0,0 L6,2.6 L0,5.2 Z" fill="#3f7a52"/>
+    </marker>
+  </defs>
+
+  <!-- title -->
+  <text x="380" y="26" text-anchor="middle" font-size="17" fill="#2b2b2b">Reservoir computing: a fixed random recurrent pool with a trained readout</text>
+
+  <!-- input nodes -->
+  <text x="70" y="80" text-anchor="middle" font-size="13" fill="#555">input u(t)</text>
+  <rect x="50" y="95"  width="34" height="34" rx="4" fill="#2f6f8f"/>
+  <rect x="50" y="158" width="34" height="34" rx="4" fill="#2f6f8f"/>
+  <rect x="50" y="221" width="34" height="34" rx="4" fill="#2f6f8f"/>
+
+  <!-- input -> reservoir (fixed W_in) -->
+  <g stroke="#7a8a99" stroke-width="2.2" fill="none" marker-end="url(#rc-fix)">
+    <path d="M86,112 C150,120 200,135 250,140"/>
+    <path d="M86,175 C150,170 210,168 250,170"/>
+    <path d="M86,238 C150,235 210,215 250,205"/>
+    <path d="M86,112 C160,160 200,210 252,230"/>
+  </g>
+  <text x="150" y="150" font-size="12" fill="#7a8a99" font-style="italic">W_in (fixed)</text>
+
+  <!-- reservoir ellipse -->
+  <ellipse cx="400" cy="185" rx="160" ry="110" fill="#f4efe6" stroke="#2b2b2b" stroke-width="2"/>
+  <text x="400" y="305" text-anchor="middle" font-size="13" fill="#555">fixed random reservoir (W, &#961; &#8776; 1)</text>
+
+  <!-- reservoir recurrent edges (fixed random) -->
+  <g stroke="#3f7a52" stroke-width="1.8" fill="none" marker-end="url(#rc-rec)">
+    <path d="M320,140 C360,120 410,120 452,135"/>
+    <path d="M452,150 C480,180 470,215 430,240"/>
+    <path d="M410,245 C360,260 330,235 330,200"/>
+    <path d="M345,165 C380,185 410,180 440,165"/>
+    <path d="M470,150 C500,185 495,210 470,228"/>
+    <path d="M335,205 C370,235 415,235 455,225"/>
+  </g>
+
+  <!-- reservoir nodes -->
+  <g fill="#3f7a52">
+    <circle cx="320" cy="140" r="16"/>
+    <circle cx="400" cy="125" r="16"/>
+    <circle cx="468" cy="142" r="16"/>
+    <circle cx="345" cy="205" r="16"/>
+    <circle cx="430" cy="245" r="16"/>
+    <circle cx="478" cy="220" r="16"/>
+  </g>
+
+  <!-- reservoir -> output (trained W_out) -->
+  <g stroke="#c0392b" stroke-width="2.4" fill="none" marker-end="url(#rc-train)">
+    <path d="M484,142 C560,135 620,130 672,135"/>
+    <path d="M494,220 C570,215 620,210 672,210"/>
+    <path d="M484,142 C580,170 620,195 672,206"/>
+  </g>
+  <text x="600" y="120" font-size="12" fill="#c0392b" font-style="italic">W_out (trained)</text>
+
+  <!-- output nodes -->
+  <text x="700" y="80" text-anchor="middle" font-size="13" fill="#555">output</text>
+  <rect x="676" y="118" width="34" height="34" rx="4" fill="#c0392b"/>
+  <rect x="676" y="193" width="34" height="34" rx="4" fill="#c0392b"/>
+</svg>

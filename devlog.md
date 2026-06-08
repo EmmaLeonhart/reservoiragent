@@ -2167,3 +2167,12 @@ work now flags context-growth risk + context-management importance in an always-
 DeepSeek-V4-Flash learned-context-management direction (compute-gated). (26) Acknowledged Koster &
 Uchida 2025 "Reservoir Computing as a Language Model" (arXiv:2507.15779) in Related Work + References
 (genericized for clawRxiv). Cleared resolved queue items; only the RC reference-diagrams item remains.
+
+## 2026-06-08 — RC schematic diagram + removed ALL remaining file paths from the paper (Emma)
+
+Authored an ORIGINAL reservoir-computing schematic (docs/diagram-reservoir-computing.svg: input ->
+fixed W_in -> fixed random recurrent pool -> trained W_out -> output) based on the canonical RC
+picture (not copied from the rights-restricted reference images); placed inline in Related Work +
+site. Removed ALL remaining non-figure file/code paths from FINDINGS (data_lake/transcripts/,
+GPT2_INTEGRATION_BLOCKER, reservoir.kv_evict..., kv_live x2) — reworded to plain prose. Final sweep:
+only docs/*.png|svg figure refs remain.

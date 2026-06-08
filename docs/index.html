@@ -308,6 +308,14 @@
 </div>
 
 <h2 id="related-work">Related work</h2>
+<figure>
+  <img src="diagram-reservoir-computing.svg" alt="Reservoir computing schematic: a fixed random input matrix projects the input into a fixed random recurrent pool (the reservoir, spectral radius near 1), and only a linear readout is trained.">
+  <figcaption>
+    <strong>Reservoir computing.</strong> A fixed random W_in projects the input into a fixed random
+    recurrent pool (the reservoir, ρ ≈ 1); only the readout W_out is trained. The RAN relocates this —
+    the reservoir reads/writes a pretrained transformer's mid-layer attention instead of a scalar input.
+  </figcaption>
+</figure>
 <p>
   Three bodies of prior work ground this study. <strong>Reservoir computing</strong>: fixing the
   recurrent weights at random and training only a readout is the echo-state-network (Jaeger, 2001)
