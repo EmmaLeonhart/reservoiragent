@@ -194,7 +194,7 @@
   across two seeds) and Qwen-0.5B at scaling 0.5 (<strong>1.00 vs 0.17</strong>). Input scaling is the
   decisive knob &mdash; Qwen-0.5B goes 0.17&rarr;1.00 by changing that one scalar &mdash; so a 500M model
   recovers while GPT-2-medium's 355M (at the two scalings tried) does not: <strong>not a size law</strong>.
-  A capacity ceiling persists (recall degrades past ~6 items, as at GPT-2-small), and the separate 8-task
+  A capacity ceiling persists but in the tens of items (recall 1.00 at 6 keys, ~0.42 at 24, chance by 48), and the separate 8-task
   battery's temporal scores are <em>not</em> reservoir-driven (a stateless ablation matches them). The
   contribution is the injection-design result plus this scaling result.
 </p>
@@ -409,8 +409,8 @@
   so the battery's emit metric is dominated by recall, the high-dimensional component. (On the
   clean cross-pass recall task, recall does recover at 1.5B with a 2048-node reservoir &mdash; 0.83&ndash;1.00
   vs 0.17 control, above; the near-zero here is the battery's smaller down-projected setup plus the
-  gate.) Recall hit 100% at six single-token words and degrades by twelve at both GPT-2-small and
-  1.5B &mdash; a capacity ceiling that travels with the method. Even the
+  gate.) Recall is perfect at six single-token words and degrades gracefully with more (a capacity
+  ceiling in the tens of items at 1.5B; see the capacity figure below). Even the
   low-dimensional timing gate is not <em>cleanly</em> solved: at balanced weighting it emits at the
   right step (1.00) but over-fires on ~half the silent steps (silence-shut 0.53), and up-weighting
   the silence supervision to fix that (silence-shut &rarr; 1.00) instead collapses the emit to 0.00
@@ -452,11 +452,23 @@
   flipping input scaling or prefix count alone leaves it at chance; flipping <em>reservoir size</em> alone
   lifts it to <strong>0.33</strong>; the full config reaches <strong>0.83 (seed 0) and 1.00 (seed 1)</strong>,
   control <strong>0.17</strong> throughout. So reservoir size is the lever, the result reproduces across
-  seeds, and the control at chance rules out memorization. A <strong>capacity ceiling</strong> persists:
-  at 12 keys recall is 0.25 vs a 0.08 control &mdash; a real lift, but the same drop-off GPT-2-small shows
-  past six keys. The reservoir scales the <em>model</em> it works in, not yet the <em>number of items</em>
-  it carries.
+  seeds, and the control at chance rules out memorization. A <strong>capacity ceiling</strong> persists, but
+  in the <em>tens</em> of items, not at six: sweeping items carried gives recall <strong>1.00 at 6 keys,
+  ~0.42 at 24 keys</strong> (≈10× the 1/24 chance, control 0.04), and <strong>chance by 48</strong>. The curve
+  is noisy from single 800-step runs (the 12-key point underperforms 24 &mdash; its loss stalled &mdash; so a
+  clean curve would need several seeds per point), but recall degrades <em>gracefully</em> into the tens of items
+  rather than collapsing past six. So the reservoir scales both the <em>model</em> it works in and a non-trivial
+  <em>number of items</em>, the latter with a real upper bound.
 </p>
+<figure>
+  <img src="capacity_qwen15b.png" alt="Bar chart of Qwen-1.5B cross-pass recall (stateful vs wiped-reservoir control) at 6, 12, 24, and 48 keys: stateful 1.00 at 6 keys far above its 0.17 control, ~0.42 at 24 keys above a 0.04 control, and at chance (~0.02) by 48 keys, with the 12-key point lower than 24 due to undertraining.">
+  <figcaption>
+    <strong>Recall capacity at Qwen-1.5B</strong> (2048-node reservoir, input scaling 0.1). Carried-state recall
+    (blue) stays well above its wiped-reservoir control (red) and the 1/n_keys chance line through 24 items, and
+    reaches chance by 48. The 12-key dip is a single-run convergence artifact. Regenerate with
+    <code>python scripts/plot_recall_bars.py</code> over the capacity-sweep result JSONs.
+  </figcaption>
+</figure>
 <p>
   <strong>The decisive knob is input scaling matched to the model &mdash; not size.</strong>
   <strong>Qwen2.5-0.5B</strong> makes this sharp: with the 2048-node reservoir it is at chance (0.17) at

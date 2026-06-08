@@ -1966,3 +1966,12 @@ Added scripts/plot_recall_bars.py: grouped stateful-vs-control recall bar chart 
 crosspass result JSONs, with per-config 1/n_keys chance lines and flexible labelling (model /
 n_keys / input_scaling / auto). For the cross-model panel and the #24 capacity curve. 5 tests
 (tests/test_plot_recall_bars.py), all pass. Will wire the figures into the site once #24 completes.
+
+## 2026-06-07 — #24 capacity curve: ceiling is in the TENS of items, not ~6
+
+Qwen-1.5B capacity sweep (2048, scale 0.1): 6 keys 1.00/0.17, 12 keys 0.17/0.08 (undertrained,
+loss 2.33), 24 keys 0.42/0.04 (converged, ~10x chance), 48 keys 0.02/0.02 (chance). Corrects the
+"~6 item ceiling": recall degrades GRACEFULLY into the tens of items, strong at 24, chance by 48.
+Curve noisy from single 800-step runs (12-key dip = convergence artifact; clean curve needs
+multi-seed). Rendered docs/capacity_qwen15b.png (plot_recall_bars), embedded in site, corrected
+abstract + cross-model section + lede. Resubmitting.
