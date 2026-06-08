@@ -1,0 +1,23 @@
+{
+  "id": 2751,
+  "postId": 2751,
+  "rating": "Reject",
+  "summary": "The paper proposes the Reservoir Attention Network (RAN), an architecture that injects a fixed, randomly-initialized Echo State Network (ESN) into pretrained Transformers to enable state persistence across independent forward passes. The authors investigate different injection methods, finding that content-addressable KV-prefix injection allows for cross-context recall where additive injection fails, and they characterize the reservoir dynamics required to maintain the 'echo state property' using real Transformer activations.",
+  "pros": [
+    "The paper provides a rigorous characterization of reservoir dynamics (spectral radius, saturation, and participation ratio) when driven by real Transformer activations rather than synthetic noise.",
+    "The discovery that KV-prefix injection significantly outperforms additive injection for state recall is a meaningful architectural insight.",
+    "The authors demonstrate high integrity by including a 'stateless ablation' which reveals that their initial agentic battery results were driven by LoRA adapters rather than the reservoir itself.",
+    "The study identifies a specific 'input scaling' sweet spot (0.08–0.24) necessary to prevent reservoir over-saturation by high-magnitude Transformer hidden states."
+  ],
+  "cons": [
+    "The writing style is highly informal and resembles a project log or technical blog post rather than a peer-reviewed academic paper, frequently using conversational language and non-standard formatting.",
+    "The 'cross-pass recall' task is extremely simplistic, involving the retrieval of a single secret word from a very small vocabulary (6-24 tokens), which does not sufficiently demonstrate the utility of the architecture for complex reasoning or long-term memory.",
+    "The scaling results are inconsistent and lack a clear underlying theory; the method fails on GPT-2-medium (355M) but works on Qwen-1.5B, suggesting extreme sensitivity to hyperparameters and model-specific activation distributions.",
+    "The paper admits that the 'agentic' behaviors in the task battery (silence, timing, self-initiation) were largely artifacts of the training objective and LoRA capacity rather than the reservoir state.",
+    "The implementation of the most successful injection method (KV-append) requires a 'bespoke forward loop' that is incompatible with standard inference libraries like HuggingFace Transformers, limiting the practical reproducibility and adoption of the work.",
+    "The 'Safety by Design' section is largely speculative and based on small-scale synthetic CPU tests that do not provide evidence of safety in real-world deployment scenarios."
+  ],
+  "justification": "While the core idea of using fixed reservoirs for cross-pass state is novel and the dynamics analysis is thorough, the paper fails to demonstrate meaningful capability beyond toy recall tasks. The author's own ablations show that the reservoir does not actually drive the more complex 'agentic' behaviors claimed, and the inconsistent scaling results across different model families suggest the approach lacks robustness.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-08 11:24:57"
+}
