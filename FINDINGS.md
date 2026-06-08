@@ -1,61 +1,43 @@
-# Reservoir Attention Network (RAN) — Findings
+# The Reservoir Attention Network: Cross-Pass State in Pretrained Transformers via Content-Addressable Reservoir Injection
 
-**Architecture:** Reservoir Attention Network (RAN) 
-**Implementation:** Reservoir Agent (GPT-2, Hermes 3B) 
-This is a **feasibility and dynamics study, not an agentic-capability demonstration.**
-The results below establish the core architecture and dynamics, demonstrate
-cross-context recall on GPT-2-small, and characterize the scaling boundary above it.
-The tasks are deliberately minimal probes, each chosen to isolate one mechanism, and
-the broader agentic vision is named throughout as future, compute-limited work.
+A feasibility and dynamics study of the Reservoir Attention Network (RAN), an architecture that
+injects a fixed, randomly-initialized reservoir into the mid-layer attention of a pretrained
+transformer to carry state across forward passes. Experiments span GPT-2 (124M, 355M) to
+Qwen2.5 (0.5B, 1.5B) on a single consumer GPU. The tasks are minimal probes chosen to isolate
+individual mechanisms; the broader always-alive agent vision is treated throughout as
+compute-limited future work, not a claim of this paper.
 
 ## Abstract
 
-A standard transformer is stateless across forward passes: it has no endogenous variable
-that evolves between calls, only position within a context window. We ask whether a fixed,
-randomly-initialized reservoir (in the sense of echo-state networks) injected into a
-pretrained transformer's mid-layer attention can give it genuine state *between* passes — a
-real time axis — without retraining the backbone, and under what reservoir-dynamics regime
-that injected state becomes usable signal rather than noise. This is a feasibility and
-dynamics study at GPT-2 scale on a single consumer GPU. Our central finding is that **how** the
-reservoir is injected is the deciding factor. Writing the reservoir state additively into the
-residual stream reproduces the known "learns to ignore the recurrent state" failure:
-cross-context recall stays at chance and the stateful model is indistinguishable from a
-state-reset baseline. Re-injecting the same state as content-addressable prefix pseudo-tokens
-that the upper layers can attend to instead yields 100% cross-context recall — a secret shown
-on pass 1, the context wiped, recalled on pass 2 from carried state alone — while the reset
-baseline stays at chance (verified reproducible: 1.00 vs 0.17). We characterize the dynamics:
-the edge-of-chaos boundary at spectral radius ≈ 1 survives the move to real transformer
-activations, which over-drive a unit-scaled reservoir and must be fed at roughly ¼–⅒ scale.
-We then probe scale. Earlier runs found the recall win did not transfer past GPT-2-small —
-GPT-2-medium (355M) and larger models stayed at chance — **but those runs held the reservoir at
-its GPT-2 default of 512 nodes.** Sizing the reservoir up to **2048 nodes** (fed at the lower
-input scaling the dynamics sweep prescribes for large activations) **recovers cross-pass recall
-at Qwen2.5-1.5B: stateful 0.83–1.00 vs a wiped-reservoir control at 0.17 (chance), reproduced
-across two seeds.** An isolation pins the lever: flipping reservoir size alone lifts recall off
-chance (0.17→0.33) while flipping input scaling or prefix count alone does nothing — the full
-effect is reservoir size in combination with those. So the earlier "scaling wall" for content
-recall was substantially an **undersized reservoir**, not a fundamental optimization barrier. A
-capacity ceiling does persist, but higher than first thought: a sweep over items carried gives
-1.00 at 6 keys, ~0.42 (≈10× chance) still at 24 keys, and chance by 48 — graceful degradation into
-the tens of items, not a hard ~6-item wall (the dip at 12 keys is a single-run convergence
-artifact; per-point runs are noisy at this budget). Separately, the eight-task stateful battery does
-**not** show this: a **stateless ablation** (reset the reservoir every pass) leaves its
-temporal/agency metrics unchanged, so those scores are learned from current-pass features + LoRA,
-not carried state. We release weights and code. The contributions are the injection-design result
-(additive ignored vs content-addressable 100% recall, with a wiped-state control), the
-reservoir-dynamics characterization, and the **scaling result**: cross-pass recall transfers from
-GPT-2-small to the **Qwen family** (both 0.5B and 1.5B) once the reservoir is sized up *and* its
-input scaling is matched to the model — Qwen-1.5B recovers at input scaling 0.1, Qwen-0.5B at 0.5
-(smaller activations need more input drive), each 0.83–1.00 vs a 0.17 control, with a capacity
-ceiling in the **tens of items** (strong recall through 24 keys, chance by 48). **Input scaling,
-not parameter count, is the decisive knob** (Qwen-0.5B goes
-0.17→1.00 by changing scaling alone; and a 500M model recovering while GPT-2-medium's 355M does
-not — across a seven-point scaling sweep — rules out a monotonic size law). Matched input scaling
-is necessary but not sufficient: GPT-2-medium has no working scaling in [0.05, 1.0], so what makes
-a backbone able to read the prefix at all remains open. We do not claim the *battery's*
-agentic metrics are reservoir-driven (the stateless ablation rules that out).
+Standard transformers are stateless across forward passes: no endogenous variable evolves
+between calls, only position within the context window. We study whether a fixed,
+randomly-initialized reservoir (in the echo-state-network sense), injected into the mid-layer
+attention of a pretrained transformer and carried across passes, can endow the model with usable
+state between calls without retraining the backbone, and identify the conditions under which the
+injected state becomes usable signal. The study is conducted at GPT-2 to 1.5B scale on a single
+consumer GPU.
 
-## Question
+We report four results. First, the *injection mechanism* is decisive: writing the reservoir state
+additively into the residual stream reproduces the known failure in which the model learns to
+ignore the recurrent state (cross-context recall at chance, indistinguishable from a state-reset
+baseline), whereas re-injecting the same state as content-addressable prefix pseudo-tokens that
+upper layers attend to yields 100% cross-context recall (1.00 versus a 0.17 reset-baseline,
+reproducible). Second, the reservoir's edge-of-chaos regime at spectral radius ≈ 1 persists under
+real transformer activations, which over-drive a unit-scaled reservoir and require an input scaling
+of approximately one-quarter to one-tenth. Third, cross-pass recall *scales*: the apparent
+"GPT-2-small-only" boundary reported by prior single-machine attempts was an undersized reservoir
+at an unmatched input scaling. Enlarging the reservoir to 2048 nodes and matching its input scaling
+to the model recovers recall across the Qwen family (Qwen2.5-0.5B and 1.5B; stateful 0.83–1.00
+versus a 0.17 control, reproduced across seeds), with input scaling rather than parameter count as
+the decisive lever and a capacity ceiling of order tens of items. The recovery is model-specific:
+GPT-2-medium (355M) fails across a seven-point scaling sweep, so matched scaling is necessary but
+not sufficient. Fourth, an eight-task stateful "battery" does *not* demonstrate reservoir-driven
+agentic behaviour: a stateless ablation matches its temporal metrics, and its content recall, when
+learned, is not retained under multi-task training. We release weights and code. The contribution
+is the injection-design finding, the dynamics characterization, and the scaling result, together
+with controlled negative results that bound them.
+
+## Research Question
 
 Can a fixed, randomly-initialized reservoir injected into a pretrained transformer's
 mid-layer attention give the model genuine state **between** forward passes — a real
@@ -72,7 +54,7 @@ We scope the question as a **feasibility + dynamics study** at small scale
 always-alive runtime and N-seed LoRA selection at agent scale — is the long-horizon
 target, outside the scope of this study.
 
-## Scope, and what this study does and does not claim
+## Scope and Claims
 
 To be explicit about the boundary of the claims:
 
@@ -117,7 +99,7 @@ random, and W_out (plus light upper-layer LoRA) the only trained parameters. The
 layers are frozen. Because the reservoir state is decoupled from the context window, it
 persists across genuinely independent forward passes, including unprompted ticks.
 
-## Grounding in the literature
+## Related Work
 
 The fixed-reservoir / trained-readout core is a faithful instantiation of classical
 reservoir computing (Jaeger's echo state networks; Maass's liquid state machines). The
@@ -131,7 +113,7 @@ Block-Recurrent, Mamba, Titans, …) uses *trained* recurrence carrying state *w
 sequence; none uses a *fixed-random* reservoir with state across *independent* passes.
 The full survey with citations is in [`literature/REVIEW.md`](literature/REVIEW.md).
 
-## Motivation and framing (not formal results)
+## Motivation: Complexity-Theoretic Framing
 
 Three framing points, stated at the level of *kind* of capability, not level of capability —
 motivation for the design, not results. Grounding and citations are in
@@ -307,7 +289,7 @@ Sweeping spectral radius ρ ∈ [0.1, 2.0] (see figures):
  activations should be fed at roughly **¼–⅒ of unit scale**, not 1.0 — a concrete
  injection setting this study contributes.
 
-## Ambitious reach (proof-of-concept)
+## Exploratory Results Beyond the Core Scope
 
 Pushed past the feasibility scope to see how far local compute reaches, reported as
 measured:
@@ -335,7 +317,7 @@ measured:
 - The **KV-append** injection (reservoir nodes as extra keys/values the upper layers
  attend to) and **agent-scale (Hermes)** models — beyond local compute here.
 
-## The always-alive runtime (harness)
+## The Always-Alive Runtime (Secondary)
 
 Built and exercised the stateful-agent loop on the *untrained* injected model — the
 substrate fine-tuning will later plug into (the released code). It has the four pieces the architecture requires:
@@ -357,7 +339,7 @@ model's* next-token entropy, so its emit/silence decisions and the generated tex
 self-initiation policy needs the trained readout/LoRA. The point of this step is that
 the whole loop is now testable before spending compute on training.
 
-## Compute-gated: a real LoRA fine-tune on GPU
+## LoRA Fine-Tuning on GPU
 
 The culminating run, on local CUDA (RTX 4070): a genuine **LoRA + W_out fine-tune** of
 GPT-2 with the *differentiable* reservoir injection. Across **3 reservoir seeds × 60 steps**, training loss falls
@@ -375,7 +357,7 @@ differentiable harness — backprop through passes on a reservoir-requiring (cro
 task — which is the next compute step, now unblocked by everything above (working
 injection, the always-alive harness, the trained readout, and this fine-tune pipeline).
 
-## Porting to the real target: Hermes (Phase H)
+## Porting to a 3B Model
 
 The GPT-2 work validated the mechanisms; this phase moves to the smallest Hermes —
 **NousResearch/Hermes-3-Llama-3.2-3B** (Llama-3.2, the architecture the project actually
@@ -391,7 +373,7 @@ wants, already agent-fine-tuned).
  training on the RTX 4070. So the architecture transplant is non-destructive on the real
  model. (`scripts/hermes_h1.py`; `results/hermes_h1.json`.)
 
-## C: cross-pass recall — the injection design decides everything
+## Cross-Pass Recall: The Injection Design
 
 The central experiment. The task is one a stateless model
 **structurally cannot** do: show a secret word on pass 1, **wipe the context**, recall it
@@ -756,7 +738,7 @@ stream of events where a rare trigger opens a thread that should be addressed (l
  preserves the history of the trigger, allowing it to make a meaningful decision to
  keep speaking after the input has returned to baseline.
 
-## D: a trained silence policy — and why it is difficult
+## A Trained Silence Policy
 
 A real agent must sometimes **stay silent** and sometimes **speak on its own**. The
 current harness gate keys off the base model's next-token entropy, which is arbitrary.
@@ -800,7 +782,7 @@ of the real agent is subtler and worth stating plainly:
  show the mechanism *can* carry and use state; making a large pretrained agent
  *behave* differently is the real, hard frontier this project is pushing on.
 
-## Safety by design (the rule, and what backs it)
+## Safety Considerations (Secondary)
 
 > *The safety sections below are secondary — motivation and small synthetic proof-of-concepts that
 > fall out of the same statefulness, not core results. The core contributions are the
@@ -842,7 +824,7 @@ safety case. The project's release plan — open weights, the training/harness c
 reservoir monitors included rather than bolted on — is the mechanism for others to test and
 extend them.
 
-## Safety: interruptibility — a Reservoir Agent registers an urgent STOP faster, and remembers it
+### Interruptibility
 
 A recurring controllability concern motivates this section: a turn-based agent that only reads
 input at turn boundaries can take many passes to register an urgent interruption while it is
@@ -874,7 +856,7 @@ capability: lower-latency, more durable response to human override. It is a meas
 illustration, not a guarantee — the reservoir/leak settings set the window length, and a real
 harness adds its own latencies; see the Safety-by-Design section and Limitations.
 
-## Safety: a reservoir-state probe reads an internal clock — linearly, no SAE, and drift-tolerant
+### Monitorability via Linear State Probes
 
 A design-motivation argument for the reservoir as a *monitoring surface*: "I
 don't think you'd need a sparse autoencoder for the reservoir state … it's much more simple to
@@ -906,7 +888,7 @@ operator a cheap, stable place to watch what the agent is doing. (Reading an *el
 is the decodability demonstration; reading genuine *misalignment* signatures is a much harder,
 unproven extension — flagged as future work in the Safety-by-Design section and Limitations.)
 
-## KV: blank-cycle context growth (an always-on agent burns context, unless the reservoir is pinned)
+## Context Growth Under Blank Ticks
 
 An always-alive Reservoir Agent runs **blank ticks** — autonomous passes with no user
 input. Each silent tick still appends to the KV cache, so a continuously-running agent
@@ -940,7 +922,7 @@ This is the cheap, base-agnostic half of the cache story. The expensive half —
 whose attention is *natively* KV-efficient so the headroom is far larger (DeepSeek's MLA /
 the V4 CSA+HCA compression noted in the design discussion) — is recorded as project direction for future work; it is not runnable on this hardware (see Limitations).
 
-## The stateful-task battery, the gate head, and the reservoir-expansion finding
+## The Stateful-Task Battery
 
 We built the agentic layer the earlier scope deferred and ran it at scale. The
 outcome is a clear split — temporal/agency behaviour learns, symbolic content does not — and
@@ -1054,7 +1036,7 @@ missing piece; the path to content at this scale is budget/scale, consistent wit
 GPT-2-small-only cross-pass result. (`results/battery_qwen_newlevers.json`, `_unfreeze.json`,
 `_r32.json`, `_broadlora_saved.json`.)
 
-## Limitations (current)
+## Limitations
 
 - **Reservoir sizing + input scaling matter, and were the missing levers at scale.** The earlier
  "content recall is GPT-2-small-only" wall was substantially an *undersized reservoir at the wrong
