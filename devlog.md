@@ -2023,3 +2023,12 @@ the flicker is not "stateless-solvable" — it is EVAL NOISE: per-task accuracy 
 (=1/16=0.0625), so a ~0.05 lift sits at the noise floor and flips sign. Bumped train_large default
 RESERVOIR_EVALN 16 -> 48 so future battery runs resolve a real lift from noise. Will re-measure #28-
 style with the larger eval before claiming whether battery content is reservoir-driven.
+
+## 2026-06-08 — #28 complete: battery lift is eval-noise-limited (corrects #27 "unstable")
+
+Content-only battery (5 epochs, eval_n=16): lift +0.094/-0.031/+0.000/+0.094/+0.031 (mean ~+0.04).
+Stateful side steady (recall ~0.12), control bounces -> the swing is EVAL NOISE at 1/16 quantization,
+not instability. Corrected the #27 "unstable/not transferring" framing to the accurate "unresolved at
+this eval budget": the recall task genuinely wipes context, so a small real lift could be hiding under
+the 1/16 floor. Reframed FINDINGS + site to "undetermined, open work" (not positive nor negative).
+eval_n default now 48. Next (#29): re-measure at eval_n=48. Resubmitting.
