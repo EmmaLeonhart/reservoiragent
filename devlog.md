@@ -1932,3 +1932,10 @@ recall works at GPT-2-small (124M) and Qwen-1.5B, but NOT GPT-2-medium (355M). L
 reservoir is usable only when the backbone reads a content-addressable prefix well (Qwen can; deeper
 GPT-2-family medium cannot on this budget). Qualified the abstract + scaling section + site lede +
 confirmed section. Hermes-3B config still running.
+
+## 2026-06-07 — #21 complete: cross-model recall picture (not a size law)
+
+Hermes-3B (4bit) @ 2048 reservoir: 0.17/0.17 (chance). Final cross-model: recall works at GPT-2-small
+(124M) + Qwen-1.5B (bf16), chance at GPT-2-medium (355M bf16) + Hermes-3B (4bit). NOT monotonic in
+size -> deciding factor is the model (and possibly precision: 3B was 4bit, a confound vs Qwen bf16;
+3B bf16+2048 doesnt fit 8GB). Folded the full picture into FINDINGS+site. Resubmitting (batched).

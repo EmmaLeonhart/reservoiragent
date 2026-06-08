@@ -581,7 +581,13 @@ pattern across models is not "bigger model → works": it recalls at GPT-2-**sma
 larger reservoir buys is usable only when the backbone can read a content-addressable prefix
 well — Qwen-1.5B (a capable modern instruction-tuned model) can; the deeper GPT-2-family medium,
 on this budget, cannot. Reservoir size is the lever *within* a model that can use the prefix; it
-is not a universal key to every scale. (A 3B check is running.)
+is not a universal key to every scale. The same check on **Hermes-3-Llama-3.2-3B (4-bit)** also
+stays at **chance (0.17 = control)** with the 2048-node reservoir — though 4-bit quantization is a
+confound there (Qwen-1.5B ran in bf16, and a 3B model in bf16 with a 2048-node reservoir does not
+fit this 8 GB GPU, so a clean bf16 3B test is out of reach on this hardware). The full cross-model
+picture: recall recovers at **GPT-2-small (124M)** and **Qwen-1.5B (bf16)**, and is at chance for
+**GPT-2-medium (355M, bf16)** and **Hermes-3B (4-bit)** — which is *not* monotonic in size, so the
+deciding factor is the model (and possibly precision), not parameter count.
 
 **Scope of the wall — a stateless ablation localizes what the battery metrics measure.** The
 content-recall wall concerns recalling *which specific token* was carried (high-dimensional). The
