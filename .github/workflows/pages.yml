@@ -61,7 +61,7 @@ jobs:
               ../FINDINGS.md > paper-pre.md
             pandoc paper-pre.md --from=markdown-smart --to=latex \
               --output=paper.tex.body --wrap=preserve \
-              --syntax-highlighting=none --shift-heading-level-by=-1
+              --no-highlight --shift-heading-level-by=-1
             latexmk -pdf -interaction=nonstopmode -e '$max_repeat=8' paper.tex
             if grep -E '^! LaTeX Error:' paper.log; then
               echo "::error::LaTeX Error(s) in paper.log — report PDF build failed."; exit 1
