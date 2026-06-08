@@ -10,7 +10,7 @@
 
 ## Current work
 
-- **#34 stabilization probe — cosine LR decay (STAGED, not launched — GPU held for the real-time app demo).** #33 showed the reservoir solution
+- **#34 stabilization probe — cosine LR decay (in flight, ~2h; launched after the app demo).** #33 showed the reservoir solution
   *oscillates* (lift peaks epoch 1 at recall 1.00, then collapses/rebounds) with the stateless control
   pinned at 0. `train_large` uses a **flat LR** (no scheduler), and `train_battery.py` already found a
   flat LR "overshoots and degrades past its peak" — so the instability is plausibly an LR-overshoot
