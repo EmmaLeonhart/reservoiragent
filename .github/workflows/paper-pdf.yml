@@ -1,0 +1,116 @@
+name: Paper PDF — NeurIPS named + anonymized builds
+
+# Builds two NeurIPS-2026-format PDFs from the canonical paper source
+# (FINDINGS.md at the repo root) via paper/paper.tex and the \ifanon switch.
+# Format adopted from the Sutra repo's paper-pdf.yml: single markdown source,
+# pandoc -> paper.tex.body, latexmk -pdf paper.tex (named/preprint) and an
+# anonymized submission build, plus an arXiv source tarball. PDFs are uploaded
+# as workflow artifacts. FINDINGS.md stays the single source (the Pages report
+# and the clawRxiv submission read it too); this workflow only consumes it.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'FINDINGS.md'
+      - 'paper/paper.tex'
+      - 'paper/neurips_2026.sty'
+      - '.github/workflows/paper-pdf.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-pdfs:
+    name: Build named + anonymized NeurIPS PDFs
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install TeX Live + pandoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            texlive-latex-base \
+            texlive-latex-recommended \
+            texlive-latex-extra \
+            texlive-fonts-recommended \
+            texlive-luatex \
+            texlive-xetex \
+            lmodern \
+            latexmk \
+            pandoc
+
+      - name: Generate paper.tex.body from FINDINGS.md
+        working-directory: paper
+        run: |
+          # Preprocess the canonical source (../FINDINGS.md):
+          #  1. Strip the first H1 (the title is rendered by paper.tex's
+          #     \maketitle; emitting the H1 as a section duplicates it).
+          #  2. Tag the meta-sections (Abstract / References / Limitations)
+          #     with pandoc's {-} unnumbered-heading attribute so they render
+          #     as \section* (no auto number). FINDINGS.md on disk is unchanged;
+          #     the transformation is per-build only.
+          sed \
+            -e '1{/^# /d}' \
+            -e 's|^## Abstract$|## Abstract {-}|' \
+            -e 's|^## References$|## References {-}|' \
+            -e 's|^## Limitations$|## Limitations {-}|' \
+            ../FINDINGS.md > paper-pre.md
+          # --from=markdown-smart (not gfm) keeps raw_tex; --shift-heading-level-by=-1
+          # promotes ## -> \section (1, 1.1, 2, ...) now that the H1 is stripped.
+          pandoc paper-pre.md \
+            --from=markdown-smart \
+            --to=latex \
+            --output=paper.tex.body \
+            --wrap=preserve \
+            --no-highlight \
+            --shift-heading-level-by=-1
+
+      - name: Build named PDF
+        working-directory: paper
+        run: |
+          latexmk -pdf -interaction=nonstopmode -e '$max_repeat=8' paper.tex
+          mv paper.pdf reservoir-paper-named.pdf
+          # arXiv-blocking-error gate: nonstopmode still emits a PDF past hard
+          # errors, so a green check does NOT mean strict pdflatex accepts it.
+          if grep -E '^! LaTeX Error:' paper.log; then
+            echo "::error::LaTeX Error(s) in paper.log — arXiv would reject this source. Fix and re-push."
+            exit 1
+          fi
+
+      - name: Clean intermediate
+        working-directory: paper
+        run: latexmk -c paper.tex || true
+
+      - name: Build anonymized PDF
+        working-directory: paper
+        run: |
+          latexmk -pdf -interaction=nonstopmode -e '$max_repeat=8' \
+            -usepretex='\newif\ifanon\anontrue' paper.tex
+          mv paper.pdf reservoir-paper-anonymized.pdf
+          if grep -E '^! LaTeX Error:' paper.log; then
+            echo "::error::LaTeX Error(s) in anonymized build's paper.log — fix and re-push."
+            exit 1
+          fi
+
+      - name: Build arXiv source tarball
+        working-directory: paper
+        run: |
+          # arXiv runs pdflatex on these flat files (no pandoc on their side),
+          # so ship the pre-generated body.
+          tar -czf ../reservoir-arxiv-source.tar.gz \
+            paper.tex paper.tex.body neurips_2026.sty
+          ls -la ../reservoir-arxiv-source.tar.gz
+
+      - name: Upload PDFs + arXiv source as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: reservoir-paper-pdfs
+          path: |
+            paper/reservoir-paper-named.pdf
+            paper/reservoir-paper-anonymized.pdf
+            reservoir-arxiv-source.tar.gz
+          retention-days: 90

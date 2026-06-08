@@ -10,6 +10,15 @@ See `CLAUDE.md` § "Workflow Rules" and § "Research workflow" for how this file
 
 **Three-cron playbook.** Research IS extensive work, so it runs under three local `CronCreate` jobs — **work-loop at :03** (the engine that drains `queue.md` and refills it from `todo.md`), **auto-flush at :15** (commit/push backstop), and **status-report at :42** (heartbeat). On a fresh session they are **started** as the opening step (bootstrap step 1 below); on a mid-session **large-scale re-fill** of this queue the FIRST item worked is instead to **kill** the already-running crons. Either way the **last two items are always pinned at the tail** (see `## Always last`). Entering planning mode also disables the crons; their restart lives at the end of the queue. (See `CLAUDE.md` § "Autonomous productivity loop — the three-cron playbook".)
 
+
+## EMMA's INSTRUCTIONS
+
+Firstly, please actually clear out the queue. The fact that you are not clearing this out just makes it a bunch of junk. 
+
+Secondly wtf is going on with the inaccessible literature/REVIEW.md. peppered around the paper?
+
+Please fix this objection "The writing style is informal and reads more like a technical lab notebook or a blog post than a peer-reviewed academic paper, using non-standard terminology and formatting (e.g., 'FEASIBILITY + DYNAMICS study', 'well-diagnosed NEGATIVE')." I asked you to change this earlier, and I am not sure why it is that you didn't do this thing. 
+
 ---
 
 ## Done — Phase J: the recall scaling result (complete 2026-06-07)
