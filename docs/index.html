@@ -620,7 +620,8 @@
   the latter with a real upper bound.
 </p>
 <figure>
-  <img src="capacity_qwen15b.png" alt="Bar chart of Qwen-1.5B cross-pass recall (stateful vs wiped-reservoir control) at 6, 12, 24, and 48 keys: stateful 1.00 at 6 keys far above its 0.17 control, ~0.42 at 24 keys above a 0.04 control, and at chance (~0.02) by 48 keys, with the 12-key point lower than 24 due to undertraining.">
+  <img src="capacity_qwen15b.png" alt="Bar chart of Qwen-1.5B cross-pass recall (stateful vs wiped-reservoir control) at 6, 12, 24, and 48 keys: stateful 1.00 at 6 keys far above its 0.17 control, ~0.42 at 24 keys above a 0.04 control, and at chance (~0.02) by 48 keys, with the 12-key point lower than 24 as a single-run convergence artifact (it stays stuck at 0.17 even at 2000 steps), not undertraining.">
+
   <figcaption>
     <strong>Recall capacity at Qwen-1.5B</strong> (2048-node reservoir, input scaling 0.1). Carried-state recall
     (blue) stays well above its wiped-reservoir control (red) and the 1/n_keys chance line through 24 items, and
