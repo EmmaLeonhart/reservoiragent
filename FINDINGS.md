@@ -170,10 +170,12 @@ injected into a *pretrained, frozen* backbone and trained only through a readout
 light LoRA. Block-Recurrent Transformer independently documents the failure mode we
 observe directly (§ "the model learns to ignore the recurrent state"): tasks must
 structurally require the carried state or it is ignored. The nearest recent items —
-Reservoir Transformers (Shen et al., 2021), Echo State Transformer (2025), Echo Flow
-Networks (2025), FreezeTST (2025) — each differ on at least one load-bearing axis (none
+Reservoir Transformers (Shen et al., 2021, arXiv:2012.15045), Echo State Transformer
+(2025, arXiv:2507.02917), Echo Flow Networks (2025, arXiv:2509.24122), and FreezeTST
+(2025, arXiv:2508.18130) — each differ on at least one load-bearing axis (none
 injects into a *pretrained* LLM's attention with a *fixed-random* reservoir carrying
 state across *independent* passes); they are trained-from-scratch and within-sequence.
+(The 2025 items are recent preprints; arXiv identifiers are given so they can be verified.)
 This places the combination as novel against the verified prior art, with the caveat that
 the 2024–2026 landscape moves quickly and a verified absence is not a proof of absence.
 
@@ -231,9 +233,11 @@ regardless of its capability level.
 Hooking a mid-depth block of pretrained GPT-2 so the block's hidden states drive the
 reservoir and its state is written back into the residual stream (`h' = h + W_out·r(t)`):
 
-- **Non-destruction holds.** With the readout `W_out = 0`, the injected model's
- next-token logits are *identical* to vanilla GPT-2 (`allclose`, atol 1e-5) — the
- architecture degrades gracefully to the base model.
+- **Non-destruction (a wiring sanity check, not a finding).** With the readout `W_out = 0`
+ the injected model's next-token logits are *identical* to vanilla GPT-2 (`allclose`,
+ atol 1e-5). This is trivially true by construction; we report it only as a regression test
+ confirming the hook is correctly placed and the graph is intact (it has caught misplacement
+ bugs in practice).
 - **The injection is live.** A nonzero `W_out` changes the logits, and the reservoir
  state after two forward passes differs from after one — a genuine cross-pass time
  axis.
@@ -1120,7 +1124,7 @@ of the real agent is subtler and worth stating plainly:
  up: rewiring a pretrained model's behaviour through an injected reservoir is a hard
  optimization problem even when the mechanism is verified as correctly wired. The clean GPT-2 results
  show the mechanism *can* carry and use state; making a large pretrained agent
- *behave* differently is the real, hard frontier this project is pushing on.
+ *behave* differently is the substantial open challenge this project targets.
 
 ### Appendix F. Context Growth Under Blank Ticks
 
