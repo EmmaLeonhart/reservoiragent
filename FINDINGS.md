@@ -116,6 +116,22 @@ random, and W_out (plus light upper-layer LoRA) the only trained parameters. The
 layers are frozen. Because the reservoir state is decoupled from the context window, it
 persists across genuinely independent forward passes, including unprompted ticks.
 
+The contrast with a standard transformer is the whole point. In a standard transformer
+(below), every token attends to every other token within a single forward pass, and
+nothing endogenous survives once that pass ends — the only memory is position inside the
+context window, which the architecture is free to wipe.
+
+![A standard transformer: within one forward pass every token attends to every token, then the pass ends. No endogenous state survives between passes — the only memory is position inside the context window.](docs/diagram-transformer.svg)
+
+The RAN keeps that backbone intact and grafts a single memory channel onto one mid-depth
+attention layer. The reservoir sits beside the model as a fixed recurrent pool; it reads
+the layer's attention activations through the fixed projection W_in, updates its own state
+r(t), and writes that state back as attendable key/value prefix nodes through the trained
+readout W_out. The recurrent state r(t) → r(t+1) is the part that survives a context wipe
+— the genuine time axis the standard diagram lacks.
+
+![The Reservoir Attention Network: at a mid-depth injection layer the attention runs jointly over the token nodes and reservoir prefix nodes. A fixed random reservoir reads the layer activations through W_in, evolves its state, and writes back as a learned prefix (W_out); its state r(t) is carried to the next forward pass, surviving the context wipe.](docs/diagram-ran.svg)
+
 ![Architecture: a fixed random reservoir reads the attention output at a mid-depth layer through W_in, updates its state r(t), and writes back through the learned readout W_out, so the reservoir carries a history of the model's own attention dynamics across forward passes.](docs/diagram-architecture.svg)
 
 ![The two injection variants. Additive: the readout is added as a single bias into the residual stream (the model learns to ignore it). Content-addressable (KV-prefix): the reservoir state becomes attendable key/value pseudo-tokens the upper layers query — the variant that yields cross-pass recall.](docs/diagram-residual-reservoir.svg)

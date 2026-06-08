@@ -209,6 +209,28 @@
 </div>
 
 <figure>
+  <img src="diagram-transformer.svg" alt="A standard transformer: within one forward pass, every token attends to every other token through self-attention, then a feed-forward and residual step produces the output. No endogenous state survives between forward passes — the only memory is position within the context window.">
+  <figcaption>
+    <strong>The baseline: a standard transformer.</strong> Within one forward pass every
+    token attends to every token, then the pass ends. Nothing endogenous survives between
+    passes &mdash; the only memory is position inside the context window, which the
+    architecture is free to wipe. This is the statelessness the RAN sets out to break.
+  </figcaption>
+</figure>
+<figure>
+  <img src="diagram-ran.svg" alt="The Reservoir Attention Network: tokens flow through lower transformer layers into a mid-depth injection layer where attention runs jointly over token nodes and reservoir prefix nodes. A fixed random reservoir reads the layer activations through W_in, evolves its recurrent state, and writes back as a learned prefix through W_out; the state r(t) is carried to the next forward pass and survives the context wipe.">
+  <figcaption>
+    <strong>The Reservoir Attention Network, at the neuron level.</strong> The same
+    backbone with one memory channel grafted on. At a mid-depth injection layer the
+    attention runs jointly over the token nodes <em>and</em> the reservoir prefix nodes. A
+    fixed random reservoir reads the layer activations (<code>W_in</code>, fixed), evolves
+    its state, and writes back as an attendable prefix (<code>W_out</code>, trained). The
+    recurrent state <em>r(t) &rarr; r(t+1)</em> is carried to the next forward pass &mdash;
+    surviving the context wipe. That carried state is the genuine time axis the standard
+    diagram lacks.
+  </figcaption>
+</figure>
+<figure>
   <img src="diagram-architecture.svg" alt="Reservoir Agent architecture: input tokens flow through frozen lower layers into a mid-depth injection layer Lk where attention runs jointly over tokens and reservoir nodes; the reservoir reads the attention matrix (fixed W_in) and writes its state back (learned readout) each forward pass, with state persisting across passes; upper layers are fine-tuned; reservoir weights are random and fixed, and the best of N seeds is kept.">
   <figcaption>
     <strong>The architecture.</strong> Every forward pass is one reservoir tick: at the
