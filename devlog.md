@@ -2014,3 +2014,12 @@ epochs (recall reaches 0.12 then collapses to 0.00). The epoch-1 +0.058 was a tr
 So the integrated battery (gate+silence+8 tasks) does NOT stably inherit the clean cross-pass recall
 lift (0.83-1.00 vs 0.17). Honest: recall->battery link not cleanly established on this budget; a real
 gap between the isolated task and the agent loop, open work. Folded into FINDINGS+site. Resubmitting.
+
+## 2026-06-08 — #28 emerging: battery lift is eval-noise-limited (eval_n=16 too coarse)
+
+#28 content-only battery lift oscillates +0.094 -> -0.031 -> +0.000 across epochs. Diagnosis: the
+battery recall task DOES wipe context (gen_recall step 2 wipe=True, genuinely memory-requiring), so
+the flicker is not "stateless-solvable" — it is EVAL NOISE: per-task accuracy quantizes to 1/eval_n
+(=1/16=0.0625), so a ~0.05 lift sits at the noise floor and flips sign. Bumped train_large default
+RESERVOIR_EVALN 16 -> 48 so future battery runs resolve a real lift from noise. Will re-measure #28-
+style with the larger eval before claiming whether battery content is reservoir-driven.
