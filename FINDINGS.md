@@ -87,10 +87,11 @@ boundary of the claims:
  framing explains *why* cross-pass state is the interesting lever; we state plainly that
  there is **no proof** a finite-precision reservoir lifts the per-pass bound, and we
  treat it as the project's central open theoretical question, not an established finding.
-- **The Hermes-3B negative and the KV-append integration constraint are limitations, stated
- as such.** The cross-pass recall result holds on GPT-2-small only; on Hermes-3B the
- injection is verified as correctly wired but does not converge — consistent with a
- bootstrapping/scale wall, plausibly signal dilution through depth. The most effective
+- **The GPT-2-medium / 4-bit-3B negatives and the KV-append integration constraint are
+ limitations, stated as such.** The cross-pass recall result holds at GPT-2-small and across the
+ Qwen family (0.5B, 1.5B) with model-matched input scaling, but **not** at GPT-2-medium (chance
+ across a seven-point scaling sweep) or 4-bit Hermes-3B (injection verified as correctly wired but
+ non-converging; 4-bit is a confound and a clean bf16 3B test does not fit this GPU). The most effective
  injection variant (KV-append) is a standard key/value prefix, but HuggingFace's
  `generate` does not expose a hook for appending external KV entries, so our results use a
  bespoke forward loop; this is an integration constraint, not a difference in method, and
