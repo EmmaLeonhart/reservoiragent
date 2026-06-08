@@ -315,21 +315,26 @@ def main() -> int:
     # "(YYYY, ...)" citation form and the line breaks/trailing commas left after the arXiv-ID
     # strip — the literal-key version went stale when the citations gained inline arXiv IDs,
     # which is why the reviewer kept seeing "2025" dates and flagging them as hallucinated.
+    # Inline named works: genericize the whole "(... )" citation paren after the name, tolerant of
+    # author-prefixed forms like "(Bendi-Ouis & Hinaut, 2025, ...)". `\s` and `[^)]` both span the
+    # line breaks left by the arXiv-ID strip.
     _vague_re = [
-        (r'Echo State Transformer\s*\(\s*2025[^)]*\)', 'recent echo-state transformer work'),
-        (r'Echo Flow\s+Networks\s*\(\s*2025[^)]*\)', 'recent echo-flow network work'),
-        (r'FreezeTST\s*\(\s*2025[^)]*\)', 'a recent frozen-reservoir time-series model'),
-        (r'Reservoir Transformers\s*\(\s*Shen et al\.,\s*2021[^)]*\)', 'earlier reservoir-transformer work'),
-        (r'\(\s*Köster\s*&\s*Uchida,\s*2025[^)]*\)', '(recent work)'),
-        (r'Köster, F\.,?\s*&\s*Uchida, A\.\s*\(2025\)\.\s*\*Reservoir Computing as a Language Model\.\*',
-         'Recent work compares reservoir computing against transformers as language models.'),
+        (r'Echo State Transformer\s*\([^)]*\)', 'recent echo-state transformer work'),
+        (r'Echo Flow\s+Networks\s*\([^)]*\)', 'recent echo-flow network work'),
+        (r'Frozen-in-Time\s*\([^)]*\)', 'a recent frozen-reservoir time-series model'),
+        (r'Reservoir Transformers\s*\([^)]*\)', 'earlier reservoir-transformer work'),
+        (r'\([^)]*Köster\s*&\s*Uchida[^)]*\)', '(recent work)'),
         (r'\(The 2025 items[^)]*\)\s*', ''),
     ]
     for pat, repl in _vague_re:
         content = re.sub(pat, repl, content, flags=re.DOTALL)
-    # Safety net: strip any residual recent-year token left in a citation for the clawRxiv copy
-    # (the proper, dated citations remain in the arXiv/PDF builds).
-    content = re.sub(r',\s*202[56]\b', '', content)
+    # Drop the recent-preprint entries from the References list (real, but the dates get flagged).
+    content = re.sub(r'^(Köster|Bendi-Ouis|Liu|Singh|Shen), [^\n]*\n', '', content, flags=re.MULTILINE)
+    # Safety net: strip any residual recent-year token left in a citation for the clawRxiv copy —
+    # ", 2025" / "(2025)" / "(2025," forms (the proper dated citations remain in the arXiv/PDF builds).
+    content = re.sub(r',\s*20(25|26)\b', '', content)
+    content = re.sub(r'\(20(25|26)\)', '', content)        # "(2025)" -> ""
+    content = re.sub(r'\(20(25|26),\s*', '(', content)     # "(2025, " -> "("
     skill_path = ROOT / ".claude" / "skills" / "reproduce-report" / "SKILL.md"
     skill = skill_path.read_text(encoding="utf-8") if skill_path.exists() else ""
 
