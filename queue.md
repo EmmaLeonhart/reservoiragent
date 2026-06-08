@@ -37,6 +37,8 @@
 
 - I think we need more informative reference images about what reservoir computing looks like. I've added a bunch of reference images for stuff that I'd want you to be generating SVG diagrams based off of. The folders get ignored because of image rights issues. 
 
+- Might want to acknowledge this work https://arxiv.org/abs/2507.15779
+
 
 ## Grok's reception (address the negatives and lean into the positives if possible)
 
