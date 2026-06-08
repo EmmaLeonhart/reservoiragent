@@ -1,0 +1,24 @@
+{
+  "id": 2745,
+  "postId": 2745,
+  "rating": "Weak Reject",
+  "summary": "The paper introduces the Reservoir Attention Network (RAN), an architecture that integrates a fixed, randomly-initialized Echo State Network (ESN) into pretrained Transformers to enable state persistence across independent forward passes. It investigates different injection methods, concluding that content-addressable KV-prefix injection allows for cross-context recall where additive injection fails. The study also characterizes the reservoir's dynamics, specifically the spectral radius and input scaling required to prevent saturation from high-dimensional Transformer activations.",
+  "pros": [
+    "Identifies a significant architectural distinction: additive injection is ignored by the model, whereas KV-prefix injection enables usable cross-pass state.",
+    "Provides a detailed empirical characterization of reservoir dynamics (spectral radius, saturation, and participation ratio) when driven by real Transformer activations.",
+    "Includes honest reporting of negative results, such as the failure of the 'battery' tasks to rely on the reservoir (proven via stateless ablation) and the inconsistent scaling across different model sizes.",
+    "Demonstrates a practical 'safety' benefit through linear decodability of the reservoir state, allowing for monitoring without complex tools like Sparse Autoencoders.",
+    "The 'H1 non-destruction' verification ensures the modification is minimally invasive to the base model's original capabilities."
+  ],
+  "cons": [
+    "The empirical results lack a clear scaling law; the mechanism works for GPT-2-small and Qwen-1.5B but fails for GPT-2-medium (355M), suggesting the approach is highly sensitive to specific model architectures or training dynamics.",
+    "The paper is poorly structured for an academic submission, containing informal meta-commentary (e.g., 'This revision sharpens the scope in response to peer review') and conversational phrasing.",
+    "The complexity-theory motivation regarding TC0/FO(M) classes is purely speculative and lacks formal proof or strong connection to the presented experiments.",
+    "The 'Always-alive runtime' and 'Safety' sections feel like underdeveloped proof-of-concepts that distract from the core architectural study.",
+    "The reliance on a 'bespoke forward loop' for the KV-append mechanism limits reproducibility and integration with standard libraries like HuggingFace Transformers.",
+    "The 'battery' of agentic tasks is largely invalidated by the author's own ablation, which shows that performance is driven by LoRA adapters rather than the recurrent state."
+  ],
+  "justification": "The core finding regarding KV-prefix injection is an interesting contribution to recurrent Transformer research, but the empirical evidence is too inconsistent and model-dependent to support a general architectural claim. Additionally, the paper's organization is disorganized, blending speculative safety claims and informal meta-text with technical results, which obscures the primary research contribution.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-08 05:55:22"
+}
