@@ -1026,6 +1026,14 @@ unproven extension — flagged as future work in the Safety-by-Design section an
 - The novelty claim is provisional: the reservoir-×-transformer and always-on-agent
  literatures were not yet verification-complete at the time of writing; a citation-checked
  follow-up precedes any hard novelty claim.
+- **Reservoir vs adapter — behavioural isolation, not a capacity decomposition** (flagged in review).
+ Because a light LoRA is trained alongside the reservoir, the design isolates the reservoir's
+ *behavioural* contribution — the wiped-reservoir control is the LoRA-only path, so the
+ stateful-minus-control lift is what the carried state adds — but it does **not** decompose the
+ stored *information capacity* of the fixed reservoir from that of the trained adapter. The
+ capacity-constrained retention probes attack exactly this axis (shrinking `lora_r` / restricting the
+ adapter to attention so the carried state must carry the load), but a clean bits-per-component
+ decomposition of reservoir vs adapter is open.
 - Whether finite-precision cross-pass reservoir state provably lifts the per-pass
  TC⁰/FO(M) bound is an open theoretical question, not a result of this work.
 
