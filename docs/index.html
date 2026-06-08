@@ -541,7 +541,12 @@
   trains alongside the reservoir, the wiped-state control isolates the reservoir&rsquo;s <em>behavioural</em>
   contribution (it is the LoRA-only path), but not a clean <em>capacity</em> decomposition of fixed reservoir
   vs trained adapter &mdash; which is exactly why the capacity-constrained probes shrink the adapter to force
-  the carried state to carry the load.
+  the carried state to carry the load. One reading is worth ruling out: that the reservoir is <em>merely a
+  bank of fixed random features the LoRA reads within the current pass</em>. The strict-wipe recall task
+  refutes that &mdash; the context is wiped, so on the recall pass there is no current-pass signal for the
+  adapter to exploit; the secret survives only through carried reservoir state (control at chance 0.17 vs
+  stateful 1.00), and the capacity-denied run reaches recall 1.00 with the control pinned at 0.000. So the
+  carried state, not adapter capacity, does the work; what stays open is the finer bits-per-component split.
 </p>
 <p>
   <strong>Denying the shortcut its capacity trades one failure mode for another.</strong> The follow-up
