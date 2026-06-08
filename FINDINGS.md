@@ -1004,8 +1004,17 @@ unproven extension — flagged as future work in the Safety-by-Design section an
  i.e. the model converges to a current-pass solution that makes the carried state redundant, even
  against a loss term built to forbid exactly that. So the battery can use the reservoir but does not
  stably retain it, and the first-line stabilization does not fix it; stable retention is unsolved open
- work. The always-alive app runs the untrained substrate — harness + live dynamics, not a trained
- policy.
+ work. A second probe sharpens the diagnosis rather than resolving it: *denying the stateless shortcut
+ its capacity* — shrinking the trained adapter to `lora_r = 4` on attention only (the regime in which
+ the clean cross-pass recall task succeeds) while keeping the counterfactual penalty (4 epochs, 2.1 h,
+ Qwen2.5-1.5B + 2048-node reservoir) — does eliminate the shortcut: the stateless control stays pinned
+ at **0.000 across all four epochs** (it never rises to match, unlike the aux-only run), so the
+ reservoir is strictly necessary throughout. But the reservoir-driven solution is then *unstable*: the
+ lift peaks at epoch 1 (recall 1.00, mean lift +0.339) and oscillates rather than settling (+0.255 →
+ +0.339 → +0.062 → +0.135 over epochs 0–3), so the epoch-1 peak is not held. Capacity denial therefore
+ trades one failure mode (drift to a stateless shortcut) for another (training instability of the
+ reservoir solution); retention requires fixing both, and remains open. The always-alive app runs the
+ untrained substrate — harness + live dynamics, not a trained policy.
 - **The recall demonstration is a minimal probe** (flagged in review): a single secret token from a
  small vocabulary (6 words at 100%, degrading by ~a few dozen). It cleanly proves *that* usable
  cross-pass state exists, but not its utility for multi-token, large-vocabulary, or long-horizon

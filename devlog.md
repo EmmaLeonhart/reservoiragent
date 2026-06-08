@@ -2312,3 +2312,15 @@ runs end-to-end on the real architecture -> executes the full pipeline on the ta
 laptop GPU -> 8 GB consumer GPU; byte-identical -> bitwise-identical. Cons 2/4/5/6 (toy task, battery
 negatives, bespoke loop, safety-probe-not-alignment) are already stated limitations. Response note in
 paper/reviews/post2766_response_notes.md. Resubmitted.
+
+## 2026-06-08 — #33 verdict: capacity denial prevents the shortcut but the reservoir solution is unstable
+
+The harder-retention run (deny adapter capacity: lora_r=4, attn-only — the recall-winning regime —
+plus aux_weight=3.0/margin=2.0, content-only, 2048-node reservoir, 4 epochs, 2.1h) finished. Result is
+a sharper diagnosis, not a retention win. The stateless control stayed pinned at 0.000 across ALL four
+epochs (vs #32, where it rose 0.000->0.062->0.083): capacity denial DID eliminate the stateless
+shortcut, so the reservoir is strictly necessary throughout. But the reservoir-driven solution is
+unstable — lift +0.255 -> +0.339 (recall 1.00, peak) -> +0.062 -> +0.135 over epochs 0-3, oscillating,
+peak not held. So the two failure modes are distinct: capacity denial trades shortcut-drift (#32) for
+training-instability (#33); retention needs both fixed and stays open. Folded into FINDINGS
+(battery limitation) + site battery section. Task #33 done. Run log results/_w33_retain_hard.log.

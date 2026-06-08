@@ -543,6 +543,19 @@
   vs trained adapter &mdash; which is exactly why the capacity-constrained probes shrink the adapter to force
   the carried state to carry the load.
 </p>
+<p>
+  <strong>Denying the shortcut its capacity trades one failure mode for another.</strong> The follow-up
+  ran that probe in earnest: shrink the trained adapter to <code>lora_r&nbsp;=&nbsp;4</code> on attention only
+  (the regime where the clean cross-pass recall task succeeds), keep the counterfactual penalty, content-only
+  (4 epochs, 2.1&nbsp;h, Qwen2.5-1.5B + a 2048-node reservoir). It <em>works</em> at preventing the shortcut:
+  the stateless control stays <strong>pinned at 0.000 across all four epochs</strong> &mdash; it never rises to
+  match, so the reservoir is strictly necessary throughout (unlike the aux-only run, where the control caught
+  up). But the reservoir solution is then <em>unstable</em>: the lift peaks at epoch&nbsp;1 (recall 1.00, mean
+  lift <strong>+0.339</strong>) and oscillates rather than settling &mdash; <strong>+0.255 &rarr; +0.339 &rarr;
+  +0.062 &rarr; +0.135</strong> over epochs 0&ndash;3 &mdash; so the peak is not held. So the two failure modes
+  are distinct: capacity denial removes the stateless-shortcut drift but exposes a training-instability of the
+  reservoir solution. Retention needs both fixed, and stays open.
+</p>
 <figure>
   <img src="battery_lift_eval48.png" alt="Per-epoch capability mean for the content battery: the reservoir (carried-state) curve rises to ~0.20 at epoch 1 while the stateless control stays near zero, then both fall together to ~0.08 by epoch 2 — the reservoir-driven lift appears at epoch 1 and is lost by epoch 2.">
   <figcaption>
