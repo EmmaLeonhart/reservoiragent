@@ -2053,3 +2053,13 @@ instance within one run. Resolves #28 "undetermined" -> "transient, found-then-a
 advantage stays the strict crosspass (0.83-1.00 vs 0.17); making the battery RETAIN a reservoir solution
 (stability/regularization, e.g. aux use-the-state loss) is open work. Rendered docs/battery_lift_eval48.png
 (plot_epoch_curve). Folded into FINDINGS+site+Limitations. Resubmitting.
+
+## 2026-06-08 — formalization pass 1: title, abstract, section headers (address the universal style con)
+
+16/17 reviews flagged "informal/diary, not a paper" — the one universal, fixable con. Pass 1:
+(a) formal title "The Reservoir Attention Network: Cross-Pass State in Pretrained Transformers via
+Content-Addressable Reservoir Injection"; (b) rewrote the abstract from a ~600-word run-on narrative
+into a tight ~280-word declarative four-results abstract; (c) renamed 16 diary-style headers (C:/D:/
+Phase H/Ambitious reach/decides everything/...) to formal section names; (d) demoted safety to a
+Secondary section with proper subsections. Site left as-is (web report, different register). Prose-
+level de-diary-ing continues in later passes.
