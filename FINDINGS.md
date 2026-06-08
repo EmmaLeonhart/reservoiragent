@@ -543,6 +543,23 @@ recorded as future work. This study establishes the boundary rigorously, not a w
 (Reminder of scope: this is the high-dimensional *content*-recall boundary; the low-dimensional
 temporal/agency behaviours do scale to Qwen-1.5B, as above.)
 
+**Preliminary update — the wall is not absolute: a larger reservoir at lower input scaling
+recalls at Qwen-1.5B.** The five interventions above all held two parameters at their GPT-2
+defaults: the **reservoir size** (512 nodes) and the **input scaling** (0.5). Flipping exactly
+those — a **2048-node** reservoir fed at **input scaling 0.1** (the ¼–⅒ regime the dynamics sweep
+identified for large-activation models), with 16 prefix tokens — **cross-pass recall lifts off
+chance at Qwen-1.5B: stateful 0.83 vs a wiped-reservoir control at 0.17 (chance)**, reproduced
+across two down-projection settings (no projection and a 256-dim projection both give 0.83 vs
+0.17, so the down-projection is *not* the bottleneck). The control being at chance rules out
+plain memorization — the carried reservoir state is doing the work. This is **preliminary**: it
+is two configs at `n_keys=6`, and we have not yet (a) reproduced it under a different seed, (b)
+isolated which of {reservoir size, input scaling, prefix count} is responsible, or (c) confirmed
+it holds at more keys (12/24, to rule out 6-way memorization). Those checks are running. But the
+control-verified gap means the earlier "resists every fix short of much greater scale" reading
+was **too strong**: at least one single-machine lever — sizing the reservoir up and detuning its
+input — does move the 1.5B recall wall. The headline framing will be revised once the isolation +
+reproduction land.
+
 **Scope of the wall — and a stateless ablation that corrects an earlier over-reading.** The
 content-recall wall concerns recalling *which specific token* was carried (high-dimensional). We
 initially read the battery's temporal/agency metrics on Qwen-1.5B (silence 1.00, timed 0.64,

@@ -436,6 +436,20 @@
   scale/compute, not another local knob.
 </p>
 <p>
+  <strong>Preliminary update &mdash; the recall wall is not absolute.</strong> Those expansion runs
+  held the reservoir <em>input scaling</em> at the GPT-2 default (0.5). Re-running the clean
+  cross-pass recall task on Qwen-1.5B with a <strong>2048-node reservoir fed at input scaling 0.1</strong>
+  (the &frac14;&ndash;&frac11;0 regime the dynamics sweep flagged for large-activation models) and 16
+  prefix tokens, recall <strong>lifts off chance: 0.83 stateful vs 0.17 wiped-reservoir control</strong>,
+  reproduced across two down-projection settings (so the projection is not the cause), with the control
+  at chance ruling out plain memorization. This is <em>preliminary</em> &mdash; two configs at six keys,
+  not yet reproduced under a new seed, the responsible knob (reservoir size vs input scaling vs prefix
+  count) not yet isolated, and not yet checked at more keys. But the control-verified gap means the
+  &ldquo;needs much greater scale, not a local knob&rdquo; reading was too strong: sizing the reservoir
+  up and detuning its input does move the 1.5B recall wall. The headline will be revised once the
+  isolation + reproduction land.
+</p>
+<p>
   <strong>First result (synthetic-input dynamics sweep).</strong> Driving a 200-unit
   reservoir across spectral radius ρ ∈ [0.1, 2.0], the echo state property &mdash; the
   reservoir forgetting its initial condition &mdash; holds cleanly for ρ &lt; 1 and breaks
