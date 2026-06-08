@@ -4,249 +4,36 @@
 
 **This is a `cleanvibe research` project** — your own investigation, not a replication. Its distinctive move is an up-front **literature review** (agentic RAG) before any building, and a published, themed GitHub Pages **report** under `docs/`.
 
-**Why this file exists:** when a planning step produces a plan, that plan is written here BEFORE execution starts, so an interrupted session can pick up from the queue rather than from chat context that may be gone.
-
-See `CLAUDE.md` § "Workflow Rules" and § "Research workflow" for how this file, planning mode, and the task tool stay in sync.
-
-**Three-cron playbook.** Research IS extensive work, so it runs under three local `CronCreate` jobs — **work-loop at :03** (the engine that drains `queue.md` and refills it from `todo.md`), **auto-flush at :15** (commit/push backstop), and **status-report at :42** (heartbeat). On a fresh session they are **started** as the opening step (bootstrap step 1 below); on a mid-session **large-scale re-fill** of this queue the FIRST item worked is instead to **kill** the already-running crons. Either way the **last two items are always pinned at the tail** (see `## Always last`). Entering planning mode also disables the crons; their restart lives at the end of the queue. (See `CLAUDE.md` § "Autonomous productivity loop — the three-cron playbook".)
-
-
-## EMMA's INSTRUCTIONS
-
-Firstly, please actually clear out the queue. The fact that you are not clearing this out just makes it a bunch of junk. 
-
-Secondly wtf is going on with the inaccessible literature/REVIEW.md. peppered around the paper?
-
-Please fix this objection "The writing style is informal and reads more like a technical lab notebook or a blog post than a peer-reviewed academic paper, using non-standard terminology and formatting (e.g., 'FEASIBILITY + DYNAMICS study', 'well-diagnosed NEGATIVE')." I asked you to change this earlier, and I am not sure why it is that you didn't do this thing. 
-
-Generally speaking, I'm not really sure what you've been doing. I feel like you may have been not updating the paper enough, or you've been at least updating the paper primarily just based off the technical stuff and not based off of the other things. 
-
-Are you going to specifically mention that this is a practical limitation that reservoir attention networks are basically a completely new kind of architecture, and so this is a significant limitation? We should be more explicitly declaring that this limitation is a real thing. 
-
-
+**Three-cron playbook.** Research runs under three local `CronCreate` jobs — **work-loop at :03** (drains this queue, refills from `todo.md`), **auto-flush at :15** (commit/push backstop), and **status-report at :42** (heartbeat). The **last two items are always pinned at the tail** (see `## Always last`). (See `CLAUDE.md` § "Autonomous productivity loop".)
 
 ---
 
-## Done — Phase J: the recall scaling result (complete 2026-06-07)
+## Current work
 
-_Turned the project's central negative around. The "content recall is GPT-2-small-only" wall was
-an **undersized reservoir at the wrong input scaling**. Sizing to 2048 nodes and matching input
-scaling to the model recovers cross-pass recall across the **Qwen family**: Qwen-1.5B at scaling
-0.1 (0.83/1.00 vs 0.17 control, reproduced two seeds), Qwen-0.5B at 0.5 (1.00 vs 0.17). Isolation:
-reservoir size is the only solo lever; input scaling matched to the model is decisive (not size).
-Model-specific: GPT-2-medium chance across a 7-point scaling sweep (genuine exception); 4-bit 3B
-chance (confounded). Capacity ceiling ~a few dozen items (strong through 24 keys, chance by 48,
-confirmed real at 2000 steps; per-run optimization noise at 12 keys). Battery content stays 0 at
-1.5B because it recalls over a 1200-word pool >> the capacity ceiling (#26) — small-pool battery
-test in flight (#27). New: `crosspass --n-reservoir/--proj-dim`, `plot_recall_bars.py`, two site
-figures (capacity, cross-model). Experiments #19–#25 in devlog; FINDINGS + site rewritten._
+- **Battery reservoir-retention (in flight).** The clean cross-pass recall task scales to the Qwen
+  family (signal); the integrated battery learns a reservoir-driven recall then drifts to a
+  stateless shortcut (#29), and neither low `lora_r` (#31) nor noise alone explains it. The
+  counterfactual "use-the-state" aux loss is implemented + tested (#30) and running on the content
+  battery (#32) to test whether it makes the lift *hold* across epochs. Fold the resolved verdict
+  into FINDINGS + site; only claim retention if it survives the control across epochs.
 
----
+- **Paper formalization (ongoing).** The paper now builds in the **NeurIPS-2026 LaTeX format**
+  adopted from the Sutra repo (`paper/paper.tex` + `neurips_2026.sty` + `paper-pdf.yml`, source =
+  `FINDINGS.md`). Title/abstract/section headers formalized; inaccessible internal file-path refs
+  removed. Remaining: continue replacing any lab-notebook prose / bold-shouting with formal
+  register as it surfaces in reviews.
 
-## Done — Phase I: N-seed controlled selection experiment (complete 2026-06-02)
-
-_Resolved the open question "is reservoir selection real, or training-noise?". Root cause of the
-noise was a dead `train_seed` param in `kv_live` (trainable init unseeded) + no deterministic
-CUDA; both fixed (runs now bit-identical for fixed seed+train_seed, CPU and CUDA). Controlled
-run (6 reservoir seeds × 4 runs × 250 steps) + one-way ANOVA: **F = 1.30 (df 5,18), p = 0.31 →
-selection NOT significant** — within-seed (init) spread is as wide as between-seed (seed 0 spans
-0.33→1.00). At 250 steps, selection is noise, not signal — select over runs, not reservoir seeds.
-A far-longer-budget run (where init noise should shrink) is the natural follow-up, noted in
-`todo.md`. FINDINGS + `docs/controlled.png` updated. New: `controlled.py`, `determinism.py`,
-`run.py controlled`; tests test_train_seed/test_determinism/test_controlled._
-
----
-
-_**Done — longer-budget controlled run (2026-06-06).** `controlled --steps 1500` (6 seeds × 4
-runs): F=1.43 (df 5,18), p=0.26 → selection still NOT real; within-seed spread as wide as
-between-seed. 6× budget strengthens the controlled negative — select over runs, not reservoir
-seeds. Separate files (controlled_1500.json/png); published 250-step result untouched. FINDINGS
-N-seed section + devlog updated._
-
----
-
-## Done — Phase G: apply the Grok-chat insights (complete 2026-06-01)
-
-User imported a strategic Grok conversation (`data_lake/transcripts/attention-reservoir-architecture-grok.md`)
-and asked to apply its insights, wanting **DeepSeek-V4-Flash** as the base. **Feasibility
-resolved this session:** V4-Flash is real (284B-total/13B-active MoE, 1M ctx, MIT, released
-2026-04-24) but **not fine-tunable or loadable on this RTX 4070 (8.6 GB)** — reservoir
-injection requires fine-tuning, so a hosted API can't help either. The cache-efficiency
-architecture the chat hinges on (MLA / compressed KV) exists in a smaller form,
-**DeepSeek-V2-Lite (16B/2.4B-active, MLA, 27 layers)** — still hard on 8.6 GB but probeable.
-**User chose (AskUserQuestion): do the base-agnostic insight work first, then attempt a
-V2-Lite feasibility spike.** Work top to bottom; TDD where there is logic; **delete each
-item in the same commit that completes it + append a dated `devlog.md` entry**; push; CI green.
-
-The chat's actionable insights (all base-agnostic, buildable on the existing small-model harness):
-KV burnout from blank-cycle ticks → a *reservoir-protected* eviction policy (StreamingLLM-style
-sink + recent window, but reservoir K/V is pinned); "a long time of no activity is signal";
-safety framing the user wants in the paper (fixed reservoir = stable monitoring surface
-resilient to fine-tune drift; faster interruptibility / lower "STOP" latency than turn-based
-harnesses; learned thought-representation via a *linear probe*, no SAE needed); rule:
-"never do capabilities work without meaningfully taking safety into account".
-
-_**DeepSeek-V2-Lite — DROPPED (user, 2026-06-01).** V2-Lite has MLA (fixed low-rank KV
-compression, ~9× vs MHA) but **not** the *learned, fine-tunable* compression (DeepSeek Sparse
-Attention / V4 CSA+HCA). The user's point: the fundamental lever is being able to **fine-tune
-the cache management** so it learns to lean on the reservoir for idle signal — fixed MLA alone
-isn't worth the port. Landscape (verified): learned/trainable compression starts at **V3.2
-(671B, DSA)** and **V4-Flash (284B, CSA+HCA)** — there is **no runnable-size open model with
-it**; it's frontier-scale-only. **RESOLVED (user, 2026-06-01): drop the learned-compression
-angle locally.** The local cache story is the reservoir-pinned eviction (`kv_evict.py`); the
-learned-compression × reservoir hypothesis is deferred to a cloud/future experiment (rent GPUs
-for V4-Flash/V3.2). Phase G (the buildable Grok insights) is **complete**; recorded in `todo.md`._
-
----
-
-## Done — Phase H: port to Hermes + make the behaviour real (A–E) [complete; notes below]
-
-Rounds 1–3 validated the *mechanisms on GPT-2*. This phase moves to the real target —
-the smallest Hermes (**NousResearch/Hermes-3-Llama-3.2-3B**, Llama-3.2 arch) — and builds
-the conditions for the desired behaviour (statefulness that *does* something; meaningful
-silence; responding without a system prompt over time). The user asked for A–E **in
-order**. Preconditions confirmed: RTX 4070 (8.6 GB VRAM), bitsandbytes 0.49.2 (4-bit
-works on Windows), peft, accelerate, 768 GB free. Work top to bottom; **delete each item
-in the same commit that completes it and append a dated entry to `devlog.md`**; push; let
-CI run. Hard rails: TDD where there is logic; never fake/weaken a test; a real defect →
-strict `xfail` / documented blocker; verify CI green, not just local; name hard/unbuilt
-things plainly; the model-download/GPU steps are local-only (torch-gated tests skip in CI).
-
-**Crons:** the three (work-loop :03, auto-flush :15, status-report :42) are running and
-kept running through this re-fill (atomic edit). The pinned `## Always last` keeps them alive.
-
-_**(C) resolved — and it's the core claim, demonstrated.** The additive injection failed
-(reservoir ignored, chance recall), but the user-chosen **content-addressable KV-append
-fix** (reservoir → attendable prefix tokens, `kv_live.py`) gives **100% cross-context
-recall** vs **chance (0.17)** for the stateless baseline. The Reservoir Agent's
-statefulness *does* the desired thing when the reservoir is **attended to, not added**.
-See `FINDINGS.md` "## C: cross-pass recall" + `docs/crosspass.png`._
-
-_**(D) resolved.** A trained gate on reservoir state implements a real silence policy on
-an unresolved-thread task (F1 ≈ 0.96) while a stateless gate degenerates to always-speak
-(F1 ≈ 0.34). FINDINGS "## D" also documents the user's conceptual framing (default =
-respond; silence ↔ an active/novel reservoir state; ESP decay → revert to baseline) and
-the honest difficulty of this "brain surgery" on a pretrained model. (Fixed the red CI
-left by a premature commit of the unverified test + a flaky finetune smoke test.)_
-
-_**(E) core built; full fork documented as remaining.** `src/reservoir/hermes_harness.py`
-provides the Hermes-format layer — ChatML rendering, the function-calling system prompt,
-`<tool_call>`/`<tool_response>` parse/format — and a `HermesHarness` that drives the
-reservoir-injected model through the agentic tool loop (parse → execute → respond). Pure
-logic is CI-tested (5 tests); the model integration is torch-gated. **NOT a full Nous
-fork** (named in `HERMES_HARNESS_REMAINING` + `todo.md`): streaming + exact Nous
-scaffolding, fusing the unprompted/idle pass + trained silence gate into the loop, and the
-regression-vs-vanilla-Hermes generation check (a Hermes GPU run) remain._
-
-**Phase H status:** A ✓ B ✓ C ✓ (GPT-2; Hermes transfer open) D ✓ E core ✓. The remaining
-threads (Hermes recall transfer; the full Hermes-harness fork) are in `todo.md` and need
-real GPU work / a dedicated session.
-
-## Done — N-seed batch training + installer (complete; notes below)
-
-User priority (explicit): **get the training running first; the .exe installer comes
-after.** We literally made a new kind of AI model — the first reservoir agents — so
-**preserve EVERYTHING**: every model in a batch (good AND bad), because the optimal-vs-
-suboptimal reservoir-structure patterns are only findable if the suboptimal ones are kept.
-The bad models are signal. Barrel through; limited time.
-
-1. **Run batches of increasing size** — consecutive runs, publishing each population to HF
-   as `reservoir-agent-<model>-batch` (publisher done: `publish_hf.py --batch-dir`).
-   Done: 4-seed GPT-2 batch → `reservoir-agent-gpt2-batch`. GPT-2-medium N=10 → published
-   `reservoir-agent-gpt2-medium-batch`, but **all 10 seeds at chance (0.17)**. Probe at
-   lower `input_scaling=0.1`/1000 steps ALSO chance (loss plateau ~2.1) — so it's a real
-   **scale wall starting at 355M** (same as Hermes), not a tweak; the fix is the documented
-   curriculum/stronger-coupling routes (substantial — `todo.md` Hermes-transfer thread), not
-   blind setting sweeps. Recorded in FINDINGS. PRODUCTIVE PATH (done): **GPT-2-small N=12
-   @250 steps → `reservoir-agent-gpt2-batch-n12`**, a REAL selection spread (recall 1.00 for
-   seeds 1/7/10 down to chance 0.17 for 8/11) — the good/bad signal the project accumulates.
-   Fixed a real `train_batch` GPU-memory-accumulation drag (now frees per seed) — **verified
-   at N=20** (ran clean, GPU released to 0). Also published **N=20 @250 →
-   `reservoir-agent-gpt2-batch-n20`** (4 seeds at 1.00 → 5 at chance 0.17, full spread). Now
-   a 32-seed selection dataset (N=12+N=20). SIGNAL: `pr_frac` ≈ 0.11 for every seed and
-   final loss doesn't cleanly track recall — so neither the dynamics proxy nor loss predicts
-   a good seed. ENRICHED METRICS DONE (`reservoir.seed_metrics`, 6 tests): ρ, eigenvalue
-   spread, Henrici non-normality, PR, memory capacity — NONE correlate with recall
-   (|Spearman|<0.36, p>0.14, n=20). **But a confound surfaced (corrected in FINDINGS+docs):**
-   the two runs share seed indices and the SAME seed lands at very different recall across
-   runs (mean |Δ|≈0.47 over 12 shared seeds — seed 0: 0.33 vs 1.00). So at 250 steps the
-   spread is **training-noise-dominated** (CUDA non-determinism + under-training + unseeded
-   trainable init), NOT clean reservoir quality. NEXT (the proper, controlled experiment):
-   seed the trainable init + enable deterministic CUDA + **average several runs per seed**
-   (or train far longer) to actually test whether some fixed reservoirs are durably better.
-
-Installer COMPLETE + verified — registry + console + menu + bootstrap (21 tests) +
-`installer/build_exe.py` + `build-installer` workflow (GREEN @ 2b3b976: the exe actually
-builds) + docs "Run a reservoir agent locally" section. Optional follow-up: cut a `v*` tag
-so the exe attaches to a Release the docs link can point at directly.
-
-_Hermes 3B many-more-steps attempt RESOLVED (negative, recorded): 4-bit, 2000 steps still
-chance (0.17), loss plateau 2.49 — so more steps does NOT break the wall. The transfer
-bottleneck is structural (prefix bootstrapping through 28 layers), not under-training. The
-real routes (curriculum / stronger multi-layer coupling / unfreeze more) are substantial —
-`todo.md` Hermes thread. The chance-level saved artifact is kept LOCAL (not published — a
-non-working single model would mislead installer users; it is not a selection batch)._
-
-_**Done — scaling-wall experiment thread (2026-06-06).** Built `crosspass` levers
-(`--curriculum`, `--n-prefix`, `--lora-r`, `--lora-target all`, `--tag`) and ran four
-interventions on the 355M+ cross-pass wall: curriculum (chance), wider coupling n_prefix32
-(chance, worse loss), Qwen2.5-0.5B architecture (chance), broad-LoRA unfreeze r32 (chance,
-stateful==baseline). Recall does NOT transfer beyond GPT-2-small under any moderate fix —
-a robust, mapped boundary now in FINDINGS (addresses review con #2). Published to main +
-resubmitted. Heavier routes (train real backbone weights / much larger budget) → `todo.md`._
-
-_**Done — trained GRU baseline (2026-06-06).** GRU on the cross-pass task: stateful 1.00 (loss->0.00), stateless 0.17 (chance). Task is trivial for trained recurrence — situates the contribution (fixed reservoir in a frozen LM; scaling is the open problem). Answers post-2692 review con #2 with evidence. In FINDINGS; published + resubmitted._
-
-_**Done — capacity sweep (2026-06-06).** GPT-2-small cross-pass recall over n_keys 6/12/24/48: stateful 1.00/0.58/0.92/0.02 vs chance baseline. NOT a 6-word artifact (0.92 at 24), but training-noisy and non-convergent by 48 at 600 steps. Pool expanded 10->50. In FINDINGS; addresses post-2694 review. Published + resubmitted._
-
-_**Done — same-model split (2026-06-06).** Dedicated cross-pass content recall on Qwen-1.5B = chance (0.17), = baseline, while the battery on the same model trains silence to 1.00. The temporal-vs-content split holds within one model at one scale — airtight. In FINDINGS scope paragraph; published + resubmitted._
-
-_**Done — capacity follow-up (2026-06-07).** Broad LoRA + full unfreeze (top 4 Qwen-1.5B layers): recall 0.19->0.25 (capacity helps) but unstable — peaks step 200, mean drops 0.392->0.321, accumulate collapses. Broad LoRA alone is the balanced sweet spot; corrective is more capacity applied carefully, not unfreeze-everything. In FINDINGS; published._
-
-_**Done — capacity thread closed (2026-06-07).** r32 broad LoRA: no gain (mean 0.317, recall 0.19, accum 0). Sweep: r8 broad LoRA best balanced (0.392, recall/accum 0.19/0.19); full unfreeze recall 0.25 but unstable; r32 no gain. Content lifts off floor with broad readout adaptation (~0.19) but capacity past that doesn't climb locally — path past the plateau is scale. In FINDINGS; published._
-
-_**Done/moot — preserve+publish (2026-06-07).** Re-ran broad-LoRA-r8 WITH save_dir; it did NOT reproduce the content lift (recall/accum 0.00 vs 0.19, mean 0.337). So the 0.19 was run noise; HELD the HF publish (a content-0.00 model isn't the claimed success). Model saved locally at artifacts/qwen-battery-broadlora. FINDINGS corrected: no content-lift claim, only the robust temporal/content split._
-
-_**Done — emit-focused temporal training (2026-06-07).** Fixed the loss-design bug (emit_weight
-up-weights the emit step; eval scores emit-only, not free silence). GPT-2-small: timed 0.00->~0.25
-(noisy). Qwen-1.5B big run (16384 res via down-projection, broad LoRA, 5 epochs/15000 steps,
-model+optimizer per epoch to HF): joint timed collapses to 0. Built: emit loss, down-projection
-(huge reservoirs), per-epoch optimizer-to-HF, capability-mean fix. In FINDINGS._
-
-_**Done — focused single-task timed (2026-06-07).** Dilution hypothesis: GPT-2-small focused
-timed = 0.25 = diluted (no help at small scale). Qwen-1.5B focused timed = **stable 0.12**
-(above chance) vs joint 0 — so the joint battery DILUTES temporal at 1.5B; focusing recovers a
-weak nonzero. Soft scale wall (weak, dilution-sensitive), not a hard zero. In FINDINGS._
-
-_**Done — timing-vs-recall decomposition (2026-06-07).** 1-word-vocab timed on Qwen (verified full-timing eval): emit 1.00, pre-emit silence-shut 0.53 (>> always-open's 0) vs recall-bundled ~0.08. Recall (high-dim) is the dominant temporal blocker; low-dim timing trains much better but the gate over-fires. In FINDINGS._
-
-_**Done — temporal investigation concluded (2026-06-07).** Timing-vs-recall decomposition +
-longer focused + gate-balance: pure pass-counting (1-word vocab) at Qwen-1.5B reaches emit-step
-1.00 with gate-shut 0.53 on pre-emit steps (robust at emit_weight 1 and 2) — recall (high-dim) is
-the dominant blocker; low-dim timing partially trains, gate over-fires. Longer focused (4000 steps)
-is noise-dominated (doesn't climb). Caught the emit-only 1.00 as gate-gaming by scoring both
-halves. All in FINDINGS; site updated to the honest reading. Local temporal exploration exhausted;
-content/recall at scale needs cloud-scale._
-
-## Other notes (not sure if they should be in the queue)
-
-**Reality note (kept honest):** each item landed as real, tested, committed work or a
-precise documented blocker — never a faked "it works".
-
-**Refill rule (per the user):** keep this queue topped up from `todo.md` as items drain
-— when the list runs low, pull and decompose the next `todo.md` destination here rather
-than stopping. **Stop / hand back** only when the actionable, unblocked `todo.md` items
-are exhausted, `FINDINGS.md` + the published report reflect the work, and CI/Pages are
-green.
+- **Continuous paper/site upkeep.** Every new result updates FINDINGS **and** `docs/index.html`
+  together; resubmit to clawRxiv when material; fold reviews as they arrive.
 
 ---
 
 ## Always last — restart the three crons and summarize
 
-**These two items stay pinned to the tail of the queue at all times** — below every bootstrap step and below every real work item. They are the closing half of the three-cron lifecycle in `CLAUDE.md` § "Autonomous productivity loop":
+**These two items stay pinned to the tail of the queue at all times.** They are the closing half of the three-cron lifecycle in `CLAUDE.md` § "Autonomous productivity loop":
 
-A. **Ensure the three crons are running** — start them if this session never did, restart them if a planning burst / queue re-fill killed them: work-loop (`3 * * * *`), auto-flush (`15 * * * *`), status-report (`42 * * * *`).
-B. **Run the status-report action once more, independently** — an end-of-session summary of everything that happened this session.
+A. **Ensure the three crons are running** — work-loop (`3 * * * *`), auto-flush (`15 * * * *`), status-report (`42 * * * *`); start/restart as needed.
+B. **Run the status-report action once more, independently** — an end-of-session summary.
 
 ---
 

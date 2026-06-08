@@ -49,7 +49,7 @@ The Reservoir Attention Network (RAN) architecture introduces a fixed-random
 recurrent substrate into the transformer's attention mechanism. We refer to a
 specific instantiation of this architecture as a **Reservoir Agent**.
 
-We scope the question as a **feasibility + dynamics study** at small scale
+We scope the question as a feasibility and dynamics study at small scale
 (GPT-2-scale base, single machine). The full vision — forking an agent harness into an
 always-alive runtime and N-seed LoRA selection at agent scale — is the long-horizon
 target, outside the scope of this study.
@@ -111,13 +111,12 @@ finite-precision reservoir lifts the bound is posed as an open question, not ass
 Crucially, every prior recurrence-augmented transformer (Transformer-XL, RMT,
 Block-Recurrent, Mamba, Titans, …) uses *trained* recurrence carrying state *within* a
 sequence; none uses a *fixed-random* reservoir with state across *independent* passes.
-The full survey with citations is in [`literature/REVIEW.md`](literature/REVIEW.md).
+Full citations are given in the References.
 
 ## Motivation: Complexity-Theoretic Framing
 
 Three framing points, stated at the level of *kind* of capability, not level of capability —
-motivation for the design, not results. Grounding and citations are in
-[`literature/REVIEW.md`](literature/REVIEW.md).
+motivation for the design, not results. Grounding and citations are given in the References.
 
 **1 · A genuine time dimension.** A standard transformer represents time as token
 *position* — an index into a sequence, not a dimension the model evolves along. With
@@ -132,8 +131,8 @@ input sequence.
 **2 · The expressivity motivation (one sentence; no result claimed).** A finite-precision
 transformer is bounded per forward pass to a low complexity class (TC⁰/FO(M)) and cross-pass
 state is the standard lever past it — this only motivates *why* cross-pass state is interesting;
-we prove no separation and nothing below depends on it (full discussion + citations in
-[`literature/REVIEW.md`](literature/REVIEW.md)).
+we prove no separation and nothing below depends on it (full discussion and citations in the
+References).
 
 **3 · The organism analogy (one paragraph, bounded).** The reservoir introduces
 endogenous state that evolves independently of external input — a property shared with
@@ -371,7 +370,7 @@ wants, already agent-fine-tuned).
  zeroed, the injected model's logits are **byte-identical** to the un-injected Hermes
  (`max|diff| = 0.00`), at a peak of **2.35 GB VRAM** — leaving ample room for LoRA +
  training on the RTX 4070. So the architecture transplant is non-destructive on the real
- model. (`scripts/hermes_h1.py`; `results/hermes_h1.json`.)
+ model.
 
 ## Cross-Pass Recall: The Injection Design
 
@@ -463,7 +462,7 @@ the remaining plausible routes (left open, not faked) are structural: a curricul
 with the key in-context, anneal it out) / a stronger multi-layer prefix coupling / unfreezing
 more of the model. **The result holds decisively on GPT-2; on Hermes the mechanism is
 verified as correctly wired but the recall has not yet been trained to converge, and it is not a
-step-count problem.** (`results/crosspass_hermes-3-llama-3-2-3b.json`; see figure.)
+step-count problem.** (See figure.)
 
 **The transfer wall starts well below 3B.** A 10-seed **GPT-2-medium (355M)** batch and a
 follow-up single-seed probe at lower input scaling (0.1, 1000 steps) both stayed at
@@ -599,7 +598,7 @@ content-recall wall concerns recalling *which specific token* was carried (high-
 battery's temporal/agency metrics on Qwen-1.5B (silence 1.00, timed 0.64, self-init 0.65) might
 appear to show that low-dimensional statefulness *scales* where content does not. **A stateless
 ablation rules that out.** Re-running the battery with the reservoir reset before
-every pass (`stateless=True`, no cross-pass carry; `results/battery_ablation.json`) leaves the
+every pass (no cross-pass carry) leaves the
 temporal metrics **unchanged** — silence 1.00, timed 0.64, self-init 0.65 — with a slightly
 *higher* overall mean (0.415 vs 0.345). So the battery's temporal success comes from the LoRA
 adapters and current-pass features, **not** from carried reservoir state; those numbers are not
@@ -1033,8 +1032,7 @@ runs is that **temporal/agency holds (silence ≈ 1.0) while content does not** 
 temporal/content split, not a content gain. Full unfreeze additionally destabilizes (peaks at
 step 200, mean drops to 0.321) and higher rank gives nothing, so more readout capacity is not the
 missing piece; the path to content at this scale is budget/scale, consistent with the
-GPT-2-small-only cross-pass result. (`results/battery_qwen_newlevers.json`, `_unfreeze.json`,
-`_r32.json`, `_broadlora_saved.json`.)
+GPT-2-small-only cross-pass result.
 
 ## Limitations
 
@@ -1071,8 +1069,8 @@ GPT-2-small-only cross-pass result. (`results/battery_qwen_newlevers.json`, `_un
  spot ≈ 0.08–0.24 at ρ = 0.95); it has not yet been wired as the default in the
  injection hook, and the optimum's dependence on layer/model/ρ is not yet mapped.
 - The novelty claim is provisional: the reservoir-×-transformer and always-on-agent
- literatures were not yet verification-complete (see `literature/REVIEW.md` open
- questions); a citation-checked follow-up precedes any hard novelty claim.
+ literatures were not yet verification-complete at the time of writing; a citation-checked
+ follow-up precedes any hard novelty claim.
 - Whether finite-precision cross-pass reservoir state provably lifts the per-pass
  TC⁰/FO(M) bound is an open theoretical question, not a result of this work.
 
@@ -1080,8 +1078,6 @@ GPT-2-small-only cross-pass result. (`results/battery_qwen_newlevers.json`, `_un
 
 ## References
 
-The full annotated survey, including verification notes and excluded/refuted claims, is in
-[`literature/sources.md`](literature/sources.md) and [`literature/REVIEW.md`](literature/REVIEW.md).
 The works the claims above rest on:
 
 **Reservoir computing.**
