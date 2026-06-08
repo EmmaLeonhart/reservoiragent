@@ -74,8 +74,7 @@ target, outside the scope of this study.
 
 ## Scope, and what this study does and does not claim
 
-This revision sharpens the scope in response to peer review. To be explicit about the
-boundary of the claims:
+To be explicit about the boundary of the claims:
 
 - **The tasks are minimal mechanism-isolating probes, not agentic demonstrations.**
  Secret-word recall and the trigger-based silence policy are intentionally the
@@ -600,8 +599,8 @@ recovers at 0.1, Qwen-0.5B at 0.5. So the recall capability transfers across the
 **rules out a monotonic size law**. But input scaling is not a universal rescue either:
 **GPT-2-medium (355M)** was swept across **seven input scalings (0.05, 0.1, 0.2, 0.3, 0.5, 0.7,
 1.0)** at the 2048-node reservoir and stayed at **chance (0.17 = control) at every one**, its
-training loss never converging — so it is a **genuine exception**, not an untested-scaling
-artifact (an earlier draft guessed the latter; the sweep disproves it).
+training loss never converging — so it is a **genuine exception**, not merely an untested-scaling
+artifact: the wide sweep rules that out.
 **Hermes-3-Llama-3.2-3B (4-bit)** is also at chance with the 2048 reservoir, but 4-bit is a
 confound (Qwen ran bf16; a bf16 3B + 2048-node reservoir does not fit this 8 GB GPU), so it is
 not a clean test. The cross-model picture, then: cross-pass recall recovers on **GPT-2-small** and

@@ -480,8 +480,8 @@
   (1.5B recovers at 0.1, 0.5B at 0.5). So recall transfers across the <strong>Qwen family (0.5B and 1.5B)</strong>,
   and a 500M model recovering while GPT-2-medium's 355M does not <em>rules out a size law</em>. But scaling
   isn't a universal rescue: GPT-2-medium was swept across <strong>seven scalings (0.05&ndash;1.0)</strong> and
-  stayed at chance at every one &mdash; a <em>genuine exception</em>, not untested scaling (an earlier draft
-  guessed the latter; the sweep disproves it). Hermes-3B (4-bit) is also at chance, but 4-bit is a confound
+  stayed at chance at every one &mdash; a <em>genuine exception</em>, not merely untested scaling (the wide
+  sweep rules that out). Hermes-3B (4-bit) is also at chance, but 4-bit is a confound
   (bf16 3B + a 2048 reservoir won't fit this 8&nbsp;GB GPU). So recall recovers at GPT-2-small and the Qwen
   family but not GPT-2-medium &mdash; and since GPT-2-<em>small</em> works while GPT-2-<em>medium</em> doesn't,
   and deep modern Qwen does, the boundary is <strong>model-specific in a way size, depth, and scaling alone
