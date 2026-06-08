@@ -2286,3 +2286,13 @@ state and distant past vanishes; memory fading and finite, capacity grows with r
 Hand-authored, ASCII-safe labels, verified via cairosvg (fixed a clipped caption + a duplicate input
 arrow). Placed in FINDINGS Related Work after the RC schematic and in the site's related-work
 section. Clears the optional second-RC-diagram queue item.
+
+## 2026-06-08 — Grok-reception block cleared (all actionable points addressed)
+
+Collapsed the verbose Grok-reception checklist in queue.md to a concise resolved record. Every
+actionable arXiv-polish suggestion is folded in: NeurIPS LaTeX build, vector figures with captions
+(+ pandocbounded scale-to-fit), abstract leading with the positive result, exploratory material in
+appendices, Contributions list, Limitations + Future Work (3B wall + compute), polished code release
+(README repro commands + HF weights), and the safety/positioning angle. The only open items are
+non-autonomous community actions (Google Scholar / arXiv endorsement, Discord outreach), flagged as
+the user's to do. Full original Grok text remains in git history.
