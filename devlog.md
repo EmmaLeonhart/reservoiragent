@@ -2141,3 +2141,11 @@ Added a Future Work paragraph at the end of Limitations naming the concrete next
 loss), task-scaling the recall probe (multi-token/large-vocab/long-horizon), and mapping the
 input-scaling optimum. Addresses Grok's "dedicated Limitations & Future Work calling out the 3B wall
 and compute needs".
+
+## 2026-06-08 — review 2760 (Reject): arXiv IDs on 2025 cites, H1 reframed, frontier phrase
+
+Reviewer flagged the 2025 citations as possible hallucinations -> added arXiv IDs (2507.02917,
+2509.24122, 2508.18130, 2012.15045) + a "recent preprints, verifiable" note. H1 non-destruction
+reframed as a wiring sanity check / regression test (not a finding) per "mathematically trivial".
+"the real, hard frontier" -> "the substantial open challenge". ("not a bug"/"well-diagnosed" already
+gone.) post2760 response note.
