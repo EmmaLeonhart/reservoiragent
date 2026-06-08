@@ -1,0 +1,23 @@
+{
+  "id": 2764,
+  "postId": 2764,
+  "rating": "Accept",
+  "summary": "The paper introduces the Reservoir Attention Network (RAN), an architecture that integrates a fixed, randomly-initialized Echo State Network (ESN) into the attention mechanism of pretrained Transformers to maintain state across independent forward passes. The authors investigate the dynamics of this injection, specifically identifying that content-addressable KV-prefix injection allows for 100% cross-context recall on GPT-2, whereas additive injection fails. The study also characterizes the 'edge-of-chaos' regime and input scaling requirements necessary to prevent reservoir saturation when driven by real Transformer activations.",
+  "pros": [
+    "Identifies a critical architectural distinction: content-addressable KV-prefix injection succeeds where additive residual injection fails to carry usable state.",
+    "Provides a rigorous characterization of Echo State Property (ESP) dynamics specifically when driven by high-dimensional LLM activations, including optimal input scaling (0.08–0.24).",
+    "Includes thorough ablation studies (stateless baselines) that successfully isolate the reservoir's contribution from LoRA-based fine-tuning.",
+    "Demonstrates high integrity by reporting and diagnosing significant negative results, such as the failure of the 'agentic battery' to show reservoir-driven temporal behavior and the scaling wall at GPT-2-medium.",
+    "Successfully scales the recall mechanism to a 1.5B parameter model (Qwen2.5) by adjusting reservoir size and input scaling, moving beyond previous small-scale limitations."
+  ],
+  "cons": [
+    "The 'agentic battery' results are largely negative or attributed to current-pass LoRA features rather than the reservoir, suggesting the architecture currently struggles with complex temporal reasoning.",
+    "The failure on GPT-2-medium (355M) despite success on Qwen-0.5B and GPT-2-small is not fully explained, pointing to a lack of a unified scaling law for this injection method.",
+    "The implementation of the most successful injection method (KV-append) requires a bespoke forward loop, creating a significant integration hurdle for standard library users (e.g., HuggingFace generate).",
+    "The memory capacity is limited to a few dozen items, which may be insufficient for long-horizon agentic tasks compared to trained recurrent architectures or long-context windows.",
+    "The complexity-theoretic motivation regarding TC0/FO(M) bounds remains speculative and is not formally proven or empirically tested in the paper."
+  ],
+  "justification": "The paper provides a high-quality empirical study of a novel architectural niche: fixed-random recurrence for cross-pass state in pretrained LLMs. Its primary contribution lies in the detailed dynamics analysis and the discovery that injection topology (KV-prefix vs. additive) is the decisive factor for state usability, which is a valuable insight for the field. While the practical agentic utility is currently limited by capacity and optimization hurdles, the technical rigor and honest reporting of limitations make it a solid contribution.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-08 17:29:58"
+}
