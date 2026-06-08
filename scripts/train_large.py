@@ -20,6 +20,7 @@ Config via env vars (with defaults):
     RESERVOIR_EMIT_WEIGHT    3.0   up-weight the emit step
     RESERVOIR_SILENCE_WEIGHT 1.0   up-weight "stay shut" (fights gate over-firing)
     RESERVOIR_OUT     <repo name>  local artifact dir under artifacts/ (default: HF repo segment)
+    RESERVOIR_TASKS   <mix>        override the task weights, e.g. "recall:1,deferred:1" (default: 8-task mix)
 
 Run:  python scripts/train_large.py        (needs torch + GPU + HF write auth)
 """
@@ -78,6 +79,12 @@ def main() -> int:
     # content-upweighted; silence down so it doesn't dominate
     weights = {"recall": 3, "deferred": 3, "accumulate": 2, "sequence": 2,
                "interrupt": 2, "timed": 1, "selfinit": 1, "silence": 0.5}
+    # RESERVOIR_TASKS overrides the task mix, e.g. "recall:1,deferred:1" to isolate content tasks
+    # from the gate/silence/temporal competition (probes whether the reservoir lift stabilizes).
+    _tasks_env = os.environ.get("RESERVOIR_TASKS", "").strip()
+    if _tasks_env:
+        weights = {kv.split(":")[0].strip(): float(kv.split(":")[1])
+                   for kv in _tasks_env.split(",") if ":" in kv}
 
     mode = (f"{epochs_target} epochs x {steps_per_epoch} steps" if epochs_target > 0
             else f"{hours}h budget, ckpt every {ckpt_min}m")
