@@ -18,40 +18,16 @@
   `results/_w33_retain_hard.log`. Fold the verdict into FINDINGS + site; claim retention only if the
   lift survives the stateless control across epochs.
 
-## Grok's reception (address the negatives and lean into the positives if possible)
+## Grok's reception — addressed (record)
 
-Quick high-level take
-
-Strengths:
-Clear scoping: Minimal probes, not "we built an agent." This builds trust.
-Injection design is the decisive lever—negative-then-positive arc is compelling.
-Dynamics insights (input scaling ¼–⅒ for real activations, edge-of-chaos persistence, reservoir sizing as key for larger models) are actionable.
-Capacity ceiling characterization (tens of items) and model-specific quirks are honest.
-Always-alive runtime + LoRA pipeline demo shows the harness works end-to-end on consumer GPU.
-
-Weaker spots (fixable):
-Formatting/CI issues you mentioned—screenshots instead of proper figures, some repetition, dense blocks. Needs a clean LaTeX pass for arXiv.
-Abstract/intro could punch harder on the positive result while keeping the caveats.
-Some sections (e.g., battery metrics, temporal tasks) have good debugging but could be tightened/streamlined.
-Broader motivation (time axis, organism analogy, complexity framing) is good but keep it clearly labeled as motivation/not claimed result.
-
-
-Concrete suggestions for arXiv polish
-
-Abstract & Intro: Lead with the injection success more prominently. Something like: "We demonstrate that content-addressable injection of a fixed reservoir into mid-layer attention enables reliable cross-pass recall (1.00 vs. 0.17 baseline on GPT-2; 0.83–1.00 on Qwen-1.5B with matched scaling), while additive injection fails. Dynamics characterization identifies input scaling and reservoir size as critical levers."
-Figures: Replace screenshot embeds with proper vector plots (loss curves, recall vs. keys, saturation sweeps, etc.). Caption them clearly and reference consistently.
-Structure tweaks:
-Move some exploratory/negative results to appendix if they bloat the main flow.
-Stronger "Contributions" bullet list early.
-Dedicated "Limitations & Future Work" section that explicitly calls out the 3B transfer wall and compute needs.
-
-Formatting/CI:
-Since your agents are queued, I can help draft cleaned sections here or suggest targeted edits.
-Ensure code release is polished (README with repro commands, weights on HF).
-Google Scholar/arXiv endorsement path you already hacked—lean on Discord/community again if needed.
-
-Safety/positioning angle (optional but fits your brand):
-Emphasize how verifiable/persistent state via fixed substrate aids interpretability, decompilation safety, or controllable agency—ties directly to your broader Sutra/Yantra/Reservoir vision without overclaiming.
+Grok's arXiv-polish suggestions are folded in; full text in git history (this commit's parent of
+queue.md). Disposition: clean LaTeX pass → NeurIPS-2026 build (`paper/paper.tex` + `neurips_2026.sty`);
+vector figures + captions, no screenshots → SVG diagrams + plot PNGs, `\pandocbounded` scale-to-fit;
+abstract leads with the injection/scaling result while keeping caveats → done; exploratory/negative
+material → appendices; stronger Contributions list early → done; dedicated Limitations + Future Work
+calling out the 3B wall + compute → done; code release (README repro commands, weights on HF) → done;
+safety/positioning angle → Safety section. **Not autonomous (the user's to do):** Google Scholar /
+arXiv endorsement and Discord/community outreach.
 
 ## Current ongoing work
 
