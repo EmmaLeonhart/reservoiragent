@@ -485,6 +485,16 @@
   don't explain</strong>. Matched input scaling is necessary (Qwen-0.5B proves it) but not sufficient
   (GPT-2-medium has no working scaling) &mdash; what lets a backbone read the prefix at all is the open question.
 </p>
+<figure>
+  <img src="crossmodel_recall.png" alt="Bar chart of cross-pass recall (stateful vs wiped control) across five models in size order: GPT-2-small ~1.0 above its 0.17 control, GPT-2-medium at chance, Qwen-0.5B ~1.0, Qwen-1.5B ~1.0, and Hermes-3B (4-bit) at chance — non-monotonic in size.">
+  <figcaption>
+    <strong>Cross-pass recall by model</strong> (2048-node reservoir, best input scaling per model, 6 keys).
+    Carried-state recall (blue) clears its wiped-reservoir control (red) at GPT-2-small, Qwen-0.5B, and
+    Qwen-1.5B, but sits at chance for GPT-2-medium and 4-bit Hermes-3B &mdash; <em>not</em> monotonic in
+    size. (Hermes-3B's 4-bit precision is a confound.) Regenerate with
+    <code>python scripts/plot_recall_bars.py</code> over the per-model result JSONs.
+  </figcaption>
+</figure>
 <p>
   <strong>First result (synthetic-input dynamics sweep).</strong> Driving a 200-unit
   reservoir across spectral radius ρ ∈ [0.1, 2.0], the echo state property &mdash; the
