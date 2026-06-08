@@ -1054,18 +1054,23 @@ GPT-2-small-only cross-pass result. (`results/battery_qwen_newlevers.json`, `_un
 
 ## Limitations (current)
 
-- The reservoir was **undersized relative to its input** (0.3–0.7× the 1536-dim layer it
- reads) and saturated (74% of cells pinned); effective dimensionality plateaus at ~150–186,
- which caps symbolic content. **But undersizing is not the whole explanation, and we tested
- that:** a 5.3× *expansion* (an 8192-node reservoir, well above the input dimension, the
- correct ESN regime, with detuned dynamics) was run on the battery and **symbolic content still
- did not recover** (it peaked within one epoch then collapsed; see "The stateful-task battery").
- So a properly high-dimensional reservoir is necessary but, on this hardware/budget, not
- sufficient — the content-recall limit is not simply "they undersized it." A correctly-sized
- reservoir at a *much larger training budget* than fits here remains the open test.
-- Content-memory tasks (recall, accumulate, sequence, deferred) do not learn at scale; only
- temporal/agency tasks (timed, self-initiation, silence) do. The always-alive app runs the
- untrained substrate, so it shows the harness and the live dynamics, not a trained policy.
+- **Reservoir sizing + input scaling matter, and were the missing levers at scale.** The earlier
+ "content recall is GPT-2-small-only" wall was substantially an *undersized reservoir at the wrong
+ input scaling*: sizing to 2048 nodes and matching input scaling to the model recovers cross-pass
+ recall on the strict-wipe task across the Qwen family (0.83–1.00 vs 0.17 control, reproduced). The
+ recovery is **model-specific, not a size law** (GPT-2-medium fails across a 7-point scaling sweep;
+ 4-bit 3B is confounded), and what makes a backbone able to read the content-addressable prefix at
+ all is open.
+- **The agentic battery does not demonstrate reservoir-driven behaviour.** Its temporal/agency
+ metrics (timed, self-init, silence) are matched by a stateless ablation, so they are LoRA /
+ current-pass, not carried state. Whether the battery's *content* tasks inherit the clean task's
+ reservoir lift is **undetermined at the current eval budget** (the apparent ~0.04 lift was eval
+ noise at 1/16 quantization; a re-measure at eval_n=48 resolves it toward ~0). The always-alive app
+ runs the untrained substrate — harness + live dynamics, not a trained policy.
+- **The recall demonstration is a minimal probe** (flagged in review): a single secret token from a
+ small vocabulary (6 words at 100%, degrading by ~a few dozen). It cleanly proves *that* usable
+ cross-pass state exists, but not its utility for multi-token, large-vocabulary, or long-horizon
+ memory — that scaling of the *task* (not the model) is untested and open.
 - Small-scale only in this study; the agentic claims (H3/H4) and the full runtime are
  out of scope and compute-limited.
 - Two injection variants now exist: the **residual-stream** write (wired

@@ -453,7 +453,8 @@
   reservoir (a 5.3× run, then 16384 nodes via a fixed down-projection — the correct ESN regime),
   added broad LoRA and full backbone unfreezing, and trained far longer (15000 steps), with the
   emit-focused loss (after finding the original temporal metric was gameable by staying silent).
-  Symbolic content still did not recover at 1.5B. A clean decomposition then isolated why: strip
+  Symbolic content still did not recover <em>in that battery setup</em> (down-projected, emit-gated) at
+  1.5B &mdash; though the clean cross-pass task does recover with the right config (next). A clean decomposition then isolated why: strip
   the recall component (timing with a fixed word) and the low-dimensional timing signal
   substantially trains — so the battery's emit metric (which bundles gating with recall) is
   dominated by <em>high-dimensional recall</em>. That pointed to the right lever, tested next.

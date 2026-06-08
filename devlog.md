@@ -2032,3 +2032,14 @@ not instability. Corrected the #27 "unstable/not transferring" framing to the ac
 this eval budget": the recall task genuinely wipes context, so a small real lift could be hiding under
 the 1/16 floor. Reframed FINDINGS + site to "undetermined, open work" (not positive nor negative).
 eval_n default now 48. Next (#29): re-measure at eval_n=48. Resubmitting.
+
+## 2026-06-08 — review 2751 (Reject) + Limitations QA (were stale vs the scaling result)
+
+Review 2751: Reject (strong pros: dynamics rigor, injection insight, ablation integrity, input-scaling).
+Fixed stale Limitations bullets that CONTRADICTED the session findings: (1) "content does not learn at
+scale / symbolic content did not recover" -> corrected to "recall scales across the Qwen family with
+sizing+input-scaling, model-specific"; (2) "only temporal tasks learn" -> reversed (temporal is NOT
+reservoir-driven per ablation; battery content lift undetermined at this eval budget). Added con #2
+(recall task is a minimal single-token small-vocab probe; task-scaling untested). Tightened the site
+battery "did not recover" to "in that battery setup". con #1 (informal/log-like) still needs the
+structural consolidation pass.
