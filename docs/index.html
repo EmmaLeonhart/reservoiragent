@@ -465,7 +465,11 @@
   models is not "bigger &rarr; works": recall works at GPT-2-<strong>small</strong> (124M) and
   <strong>Qwen-1.5B</strong>, but not GPT-2-<strong>medium</strong> (355M). What the larger reservoir buys
   appears usable only when the backbone can read a content-addressable prefix well &mdash; a capable modern
-  model like Qwen-1.5B can; the deeper GPT-2-family medium, on this budget, cannot. (A 3B check is running.)
+  model like Qwen-1.5B can; the deeper GPT-2-family medium, on this budget, cannot. Hermes-3B (4-bit) is
+  also at chance with the same fix &mdash; though 4-bit is a confound (Qwen ran in bf16, and 3B bf16 + a
+  2048-node reservoir won't fit this 8&nbsp;GB GPU). So across GPT-2-small (works), GPT-2-medium (chance),
+  Qwen-1.5B (works), and 3B-4bit (chance), the deciding factor is the model and precision, not parameter
+  count.
 </p>
 <p>
   <strong>First result (synthetic-input dynamics sweep).</strong> Driving a 200-unit
