@@ -50,3 +50,8 @@ artifacts/
 
 # Electron app deps (downloaded by npm install)
 app/electron/node_modules/
+
+# Experiment-intermediate crosspass figures (tagged --tag w19/w20/w21/...): auto-generated
+# per-config ablation plots, regenerable from results/ JSONs. Curated/committed figures are
+# untagged (docs/crosspass.png, docs/crosspass_gpt2-medium.png, ...) and stay tracked.
+docs/crosspass_*_w[0-9]*.png
