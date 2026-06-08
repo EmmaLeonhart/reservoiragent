@@ -26,24 +26,26 @@ on pass 1, the context wiped, recalled on pass 2 from carried state alone — wh
 baseline stays at chance (verified reproducible: 1.00 vs 0.17). We characterize the dynamics:
 the edge-of-chaos boundary at spectral radius ≈ 1 survives the move to real transformer
 activations, which over-drive a unit-scaled reservoir and must be fed at roughly ¼–⅒ scale.
-We then bound the result. The recall win holds at GPT-2-small (124M) but does not transfer to
-GPT-2-medium (355M) or a 3B instruction-tuned model: the injection is verified as correctly wired (state
-updates, gradients flow) yet recall does not bootstrap within budget, and 6.7× more steps does
-not break the wall — a structural optimization barrier, not under-training. We initially expected the
-eight-task stateful battery on Qwen2.5-1.5B would show statefulness scaling (its temporal/agency
-metrics train to silence 1.00, timed 0.64, self-init 0.65), but a **stateless ablation refutes
-that reading**: resetting the reservoir every pass leaves those metrics unchanged (or better),
-so the battery's temporal scores are learned from current-pass features + LoRA, *not* from
-carried reservoir state. The genuine demonstration of usable cross-pass state therefore rests on
-the controlled tasks — GPT-2-small cross-pass recall (100% with the carried state vs chance when
-it is wiped, on a task that provably needs memory) and the dedicated unresolved-thread gate — and
-that demonstration remains **GPT-2-small-specific**: at 1.5B neither content recall (stays near
-zero) nor the battery's temporal tasks (not reservoir-dependent) show usable carried state. We
-release weights and code. The contribution is the injection-design result (additive ignored vs
-content-addressable 100% recall at GPT-2-small, with a wiped-state control), the reservoir-
-dynamics characterization, and a clearly-bounded scaling negative — not an agentic-capability
-demonstration, and not a claim that statefulness scales (the stateless ablation rules that out
-on the battery).
+We then probe scale. Earlier runs found the recall win did not transfer past GPT-2-small —
+GPT-2-medium (355M) and larger models stayed at chance — **but those runs held the reservoir at
+its GPT-2 default of 512 nodes.** Sizing the reservoir up to **2048 nodes** (fed at the lower
+input scaling the dynamics sweep prescribes for large activations) **recovers cross-pass recall
+at Qwen2.5-1.5B: stateful 0.83–1.00 vs a wiped-reservoir control at 0.17 (chance), reproduced
+across two seeds.** An isolation pins the lever: flipping reservoir size alone lifts recall off
+chance (0.17→0.33) while flipping input scaling or prefix count alone does nothing — the full
+effect is reservoir size in combination with those. So the earlier "scaling wall" for content
+recall was substantially an **undersized reservoir**, not a fundamental optimization barrier. A
+capacity ceiling does persist: at 12 keys recall falls to 0.25 (vs 0.08 chance), the same
+degradation GPT-2-small shows past six keys — the reservoir scales the *model size* it works in,
+not yet the *number of items* it can carry. Separately, the eight-task stateful battery does
+**not** show this: a **stateless ablation** (reset the reservoir every pass) leaves its
+temporal/agency metrics unchanged, so those scores are learned from current-pass features + LoRA,
+not carried state. We release weights and code. The contributions are the injection-design result
+(additive ignored vs content-addressable 100% recall, with a wiped-state control), the
+reservoir-dynamics characterization, and the **scaling result**: cross-pass recall transfers from
+GPT-2-small to Qwen-1.5B once the reservoir is sized to the larger activations — with a capacity
+ceiling, and not a claim that the *battery's* agentic metrics are reservoir-driven (the stateless
+ablation rules that out).
 
 ## Question
 
@@ -531,32 +533,44 @@ them low-rank (`crosspass --unfreeze-from 12`, GPT-2-medium's upper 12 of 24 lay
 is not a capacity limit of LoRA: even full-rank weight training of half the network does not let
 the model learn to read the carried reservoir state into a recalled token at 355M.
 
-This exhausts every single-machine lever: across **five interventions — a curriculum, wider
-prefix coupling, a modern architecture (Qwen-0.5B), broad-LoRA adaptation, and full backbone
-unfreezing — the cross-pass *content*-recall result does not transfer beyond GPT-2-small.** The
-boundary is therefore well characterized: the 100% recall is real and reproducible at 124M, and
-resists every fix short of much greater scale. The one remaining route is not a technique but a
-budget — far more training steps and/or a substantially larger model than fits this hardware —
-recorded as future work. This study establishes the boundary rigorously, not a way past it.
+Five interventions were tried first and none transferred the result — a curriculum, wider prefix
+coupling, a modern architecture (Qwen-0.5B), broad-LoRA adaptation, and full backbone unfreezing —
+**but every one of them held the reservoir at its GPT-2 default of 512 nodes.** That turned out to
+be the missing lever: sizing the reservoir up recovers recall at 1.5B (next section). So the
+boundary these five interventions traced was an *undersized-reservoir* boundary, not a fundamental
+one — important to state plainly, because the earlier write-up read it as "resists every fix short
+of much greater scale," which sizing the reservoir up disproves.
 (Reminder of scope: this is the high-dimensional *content*-recall boundary; the low-dimensional
 temporal/agency behaviours do scale to Qwen-1.5B, as above.)
 
-**Preliminary update — the wall is not absolute: a larger reservoir at lower input scaling
-recalls at Qwen-1.5B.** The five interventions above all held two parameters at their GPT-2
-defaults: the **reservoir size** (512 nodes) and the **input scaling** (0.5). Flipping exactly
-those — a **2048-node** reservoir fed at **input scaling 0.1** (the ¼–⅒ regime the dynamics sweep
-identified for large-activation models), with 16 prefix tokens — **cross-pass recall lifts off
-chance at Qwen-1.5B: stateful 0.83 vs a wiped-reservoir control at 0.17 (chance)**, reproduced
-across two down-projection settings (no projection and a 256-dim projection both give 0.83 vs
-0.17, so the down-projection is *not* the bottleneck). The control being at chance rules out
-plain memorization — the carried reservoir state is doing the work. This is **preliminary**: it
-is two configs at `n_keys=6`, and we have not yet (a) reproduced it under a different seed, (b)
-isolated which of {reservoir size, input scaling, prefix count} is responsible, or (c) confirmed
-it holds at more keys (12/24, to rule out 6-way memorization). Those checks are running. But the
-control-verified gap means the earlier "resists every fix short of much greater scale" reading
-was **too strong**: at least one single-machine lever — sizing the reservoir up and detuning its
-input — does move the 1.5B recall wall. The headline framing will be revised once the isolation +
-reproduction land.
+**The wall was an undersized reservoir: cross-pass recall scales to Qwen-1.5B (verified).** The
+five interventions above all held two parameters at their GPT-2 defaults: the **reservoir size**
+(512 nodes) and the **input scaling** (0.5). Sizing the reservoir to **2048 nodes** at **input
+scaling 0.1** (the ¼–⅒ regime the dynamics sweep identified for large activations), with 16 prefix
+tokens, **recovers cross-pass recall at Qwen-1.5B**. The full result, all with a wiped-reservoir
+control:
+
+| config (Qwen-1.5B, 6 keys, 800 steps) | stateful | control |
+|---|---|---|
+| prior default — 512 nodes, np8, scaling 0.5 | 0.17 | 0.17 |
+| + input scaling 0.1 only | 0.17 | 0.17 |
+| + 16 prefix tokens only | 0.17 | 0.17 |
+| **+ 2048-node reservoir only** | **0.33** | 0.17 |
+| **full — 2048, np16, scaling 0.1 (seed 0)** | **0.83** | 0.17 |
+| **full — 2048, np16, scaling 0.1 (seed 1, reproduction)** | **1.00** | 0.17 |
+
+Three readings follow. (1) **Reservoir size is the lever.** Flipping it alone lifts recall off
+chance (0.17→0.33); flipping input scaling or prefix count alone does nothing — the full 0.83–1.00
+is reservoir size *in combination* with the lower scaling and wider prefix. (2) **It reproduces**
+— two seeds, 0.83 and 1.00, both against a 0.17 control, so it is not a single-seed fluke; the
+control at chance rules out memorization. The down-projection is irrelevant (no projection and a
+256-dim projection both give 0.83). (3) **A capacity ceiling persists.** At `n_keys=12` recall is
+0.25 vs a 0.08 control — a real lift (≈3× chance, so not 6-way memorization) but a sharp drop from
+the 6-key result, the same degradation GPT-2-small shows past six keys. So the reservoir scales the
+*model* it works in, not yet the *number of items* it can carry. The earlier "resists every fix
+short of much greater scale" reading was wrong because it never sized the reservoir up: the
+single-machine lever that moves the 1.5B wall is reservoir size. (Whether the same fix recovers
+GPT-2-medium/3B — which also used the 512-node default — is the obvious next test, not yet run.)
 
 **Scope of the wall — a stateless ablation localizes what the battery metrics measure.** The
 content-recall wall concerns recalling *which specific token* was carried (high-dimensional). The
@@ -655,13 +669,12 @@ reservoir is wiped between passes**, on a task that cannot be done without memor
 dedicated unresolved-thread gate (D), where a readout on the reservoir state reaches F1 ≈ 0.96 vs
 ≈ 0.34 on the current input. Both are GPT-2-scale, and both have controls that *do* swing with the
 carried state (unlike the battery). At 1.5B the same KV-prefix mechanism on the controlled
-cross-pass task stayed at **chance** in the small-reservoir (512-node, input-scaling-0.5)
-configuration this summary was written around — **but see the preliminary update above**: a
-2048-node reservoir at input scaling 0.1 lifts the *same* 1.5B cross-pass recall to 0.83 vs a
-0.17 control, so the scope below is being revised. As written, the established scope is:
-**usable cross-pass reservoir state is demonstrated at GPT-2-small, and at 1.5B is preliminary
-(strong, control-verified, pending reproduction)** — content recall lifts off chance with the
-larger reservoir, while genuinely reservoir-driven temporal behaviour does not (the battery temporal is
+cross-pass task stayed at chance only in the small-reservoir (512-node) configuration; with a
+2048-node reservoir it recovers — **0.83–1.00 vs a 0.17 control, reproduced across two seeds**
+(the scaling result above). So the established scope is now broader than GPT-2-small:
+**usable cross-pass reservoir state is demonstrated at GPT-2-small and transfers to Qwen-1.5B
+once the reservoir is sized to the larger activations** (with a capacity ceiling at ~6 items),
+while genuinely reservoir-driven *temporal* behaviour does not scale (the battery temporal is
 LoRA, per the ablation). The lesson is methodological too: a metric that does not move under a
 stateless control is not evidence of statefulness, and the battery's temporal tasks are not, as
 constructed, a clean test of carried state.

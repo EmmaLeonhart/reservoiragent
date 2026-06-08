@@ -1911,3 +1911,15 @@ the prior negative (stateful 0.17 = control). Repro (new seed) + n_keys 12 still
 
 Minor: crosspass result JSON now records n_reservoir/n_prefix/proj_dim/seed in params, so ablation
 runs are self-documenting (were only model/n_keys/steps/mode/input_scaling).
+
+## 2026-06-07 — HEADLINE REWRITE: cross-pass recall scales to Qwen-1.5B (verified)
+
+#20 complete + verified. The earlier "GPT-2-small-only scaling wall" for content recall was an
+UNDERSIZED RESERVOIR: the five interventions all held reservoir at the 512-node GPT-2 default.
+Sizing to 2048 nodes (input scaling 0.1, np16) recovers recall at Qwen-1.5B: stateful 0.83 (seed0),
+1.00 (seed1) vs 0.17 wiped-control. Isolation: reservoir size is the only solo mover (0.17->0.33);
+scaling/prefix alone do nothing; full effect is interaction. Capacity ceiling persists (12 keys:
+0.25 vs 0.08, degrades like GPT-2-small). Rewrote the abstract, the scaling section, the
+preliminary->confirmed section, the carried-state-scope summary, and the site lede + decomposition
++ cause paragraphs. Headline changed from "clearly-bounded scaling negative" to "recall scales with
+an adequately-sized reservoir (capacity-ceilinged)". Next: retest GPT-2-medium/3B at 2048 nodes.
