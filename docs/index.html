@@ -424,6 +424,17 @@
   measurable at this scale.
 </p>
 <p>
+  <strong>Does the recall fix transfer into the battery? Not stably, yet.</strong> Since cross-pass recall
+  recovers at 1.5B with the right config &mdash; and the battery recalls over a 1200-word pool, far past the
+  capacity ceiling &mdash; we re-ran the battery with the recall-winning config (2048 nodes, no projection,
+  scaling 0.1) and a 16-word pool <em>within</em> capacity. Content does become learnable (recall climbs off
+  zero to ~0.12), but the reservoir lift is <strong>unstable</strong>: the mean-over-control lift flickers
+  +0.000 &rarr; +0.058 &rarr; &minus;0.013 across three epochs (recall reaches 0.12, then collapses). So the
+  integrated battery &mdash; gate, silence supervision, eight interleaved tasks &mdash; does <em>not</em> stably
+  inherit the large stable lift the isolated cross-pass recall task shows (0.83&ndash;1.00 vs 0.17). There is a
+  real gap between the clean single-task demonstration and the multi-task agent loop; closing it is open work.
+</p>
+<p>
   <strong>The cause is geometric: the reservoir compresses where it should expand.</strong>
   Qwen-1.5B is 28 layers of 1536 neurons; the reservoir reads a 1536-dimensional layer, yet
   the runs used 512–1024 nodes — <strong>0.3–0.7× the input</strong>. A reservoir is meant to

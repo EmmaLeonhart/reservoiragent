@@ -2005,3 +2005,12 @@ Multiple reviews (2736/2737/2745) flagged the safety/always-alive sections as di
 core. Added a clear framing signpost at the Safety section in FINDINGS + site marking them as
 secondary motivation + synthetic proof-of-concepts (not core results; not evaluated safety claims).
 Non-restructuring fix; the core contributions (injection-design, dynamics, recall scaling) stay front.
+
+## 2026-06-08 — #27: recall fix does NOT stably transfer into the battery (yet)
+
+Small 16-word-pool battery @ Qwen-1.5B with the recall-winning config (2048/noproj/scale0.1): content
+becomes learnable (recall ~0.12) but the reservoir lift FLICKERS +0.000 -> +0.058 -> -0.013 across 3
+epochs (recall reaches 0.12 then collapses to 0.00). The epoch-1 +0.058 was a transient, not a trend.
+So the integrated battery (gate+silence+8 tasks) does NOT stably inherit the clean cross-pass recall
+lift (0.83-1.00 vs 0.17). Honest: recall->battery link not cleanly established on this budget; a real
+gap between the isolated task and the agent loop, open work. Folded into FINDINGS+site. Resubmitting.
