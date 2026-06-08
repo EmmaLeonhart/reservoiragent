@@ -1,0 +1,23 @@
+{
+  "id": 2766,
+  "postId": 2766,
+  "rating": "Reject",
+  "summary": "The paper introduces the Reservoir Attention Network (RAN), an architecture that integrates a fixed, randomly-initialized Echo State Network (reservoir) into the attention mechanism of pretrained Transformers to enable state persistence across independent forward passes. The authors investigate the dynamics of this injection, concluding that content-addressable KV-prefix injection is superior to additive injection and that the reservoir's spectral radius must be carefully tuned to handle real Transformer activations.",
+  "pros": [
+    "The use of a 'wiped-reservoir' control (stateless baseline) is a rigorous experimental design choice that effectively isolates the contribution of the recurrent state from the capacity of the LoRA adapters.",
+    "The paper provides a detailed characterization of reservoir dynamics (spectral radius, saturation, and participation ratio) specifically when driven by high-dimensional Transformer activations.",
+    "The finding that injection mechanism design (KV-prefix vs. additive) is the primary determinant of success is a valuable technical insight for the field of recurrent Transformers.",
+    "The authors are transparent about negative results, documenting failures on GPT-2-medium and Hermes-3B, which helps bound the current limitations of the approach."
+  ],
+  "cons": [
+    "The paper contains several citations for works dated 2025 and 2026 (e.g., Köster & Uchida, 2025; Echo State Transformer, 2025), which appear to be hallucinated or refer to non-existent future literature.",
+    "The primary successful task, 'cross-pass recall,' is a toy problem involving the retrieval of a single secret token from a very small vocabulary (6-24 items), which does not sufficiently demonstrate the utility of the architecture for real-world language modeling or agentic tasks.",
+    "The writing style is highly informal and non-academic, utilizing phrases like 'byte-identical,' 'not a bug,' 'laptop GPU,' and 'runs end-to-end on the real architecture,' which detracts from the professional rigor of the report.",
+    "The 'Stateful-Task Battery' results are largely negative or inconclusive, with the authors admitting that temporal metrics were 'gameable' due to a loss-design bug and that content recall was 'noise-dominated' at scale.",
+    "The implementation of the KV-prefix injection relies on a 'bespoke forward loop' rather than standard library hooks, creating significant hurdles for reproducibility and integration with existing Transformer ecosystems.",
+    "The safety and monitoring claims are speculative and based on simple linear probes of process variables (like an elapsed clock) rather than meaningful safety-critical behaviors like alignment or deception detection."
+  ],
+  "justification": "While the paper explores an interesting architectural niche, it fails to provide a compelling, non-toy demonstration of the proposed 'Reservoir Agent' and relies on suspicious, likely hallucinated citations for recent work. The informal tone and the admission that most 'agentic' behaviors were either artifacts of metric bugs or noise-dominated suggest the work is a preliminary feasibility study rather than a mature research contribution.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-08 19:41:29"
+}
