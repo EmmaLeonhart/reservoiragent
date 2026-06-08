@@ -621,12 +621,17 @@ reservoir down-projected to 512, broad LoRA, per-epoch checkpoints with an inlin
 control), the gate falls into the silent attractor rather than learning to emit. At
 `silence_weight=2` the gate's silence accuracy oscillates across epochs (0.71 → 1.00 → 0.00 →
 0.71) while **every emit task stays at 0.00 and the lift over the stateless control stays
-+0.000** through the first several epochs — the reservoir contributes nothing measurable, and
++0.000** through the first three epochs — the reservoir contributes nothing measurable, and
 the gate never settles into reliable emission. Lowering to `silence_weight=0.3` (with
-`emit_weight=4`) to relieve the always-silent pressure is the natural next setting; either way,
-the capability mean on the battery is **0.00 with zero lift** at 1.5B on this budget, consistent
-with the recall wall and the gate tension above. (Per-epoch models + optimizer states are
-preserved on the Hub for analysis.)
+`emit_weight=4`) to relieve the always-silent pressure does change the gate — it flips to
+**always-open** (silence accuracy ≈ 0.00, the complement of the always-shut basin) — but emit
+does **not** follow: across **four** epochs the capability mean stays **0.000 with +0.000 lift**,
+every emit task flat at 0.00, even though this is the most emit-favorable setting we ran (open
+gate + up-weighted emit). So `silence_weight` only moves the gate between stuck-open and
+stuck-shut; it never buys working emission. The blocker is the **content/recall** half (emitting
+the right token), not the gate weight: with a healthy open gate the model still cannot learn what
+to emit at 1.5B on this budget, and the reservoir adds nothing over the stateless control. (Per-epoch
+models + optimizer states are preserved on the Hub for analysis.)
 
 **What the carried-state demonstration actually rests on.** The valid evidence that the reservoir
 carries *usable* state is the controlled, memory-requiring tasks, not the battery metrics:
