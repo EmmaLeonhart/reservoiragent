@@ -46,6 +46,24 @@ Abstract/intro could punch harder on the positive result while keeping the cavea
 Some sections (e.g., battery metrics, temporal tasks) have good debugging but could be tightened/streamlined.
 Broader motivation (time axis, organism analogy, complexity framing) is good but keep it clearly labeled as motivation/not claimed result.
 
+
+Concrete suggestions for arXiv polish
+
+Abstract & Intro: Lead with the injection success more prominently. Something like: "We demonstrate that content-addressable injection of a fixed reservoir into mid-layer attention enables reliable cross-pass recall (1.00 vs. 0.17 baseline on GPT-2; 0.83–1.00 on Qwen-1.5B with matched scaling), while additive injection fails. Dynamics characterization identifies input scaling and reservoir size as critical levers."
+Figures: Replace screenshot embeds with proper vector plots (loss curves, recall vs. keys, saturation sweeps, etc.). Caption them clearly and reference consistently.
+Structure tweaks:
+Move some exploratory/negative results to appendix if they bloat the main flow.
+Stronger "Contributions" bullet list early.
+Dedicated "Limitations & Future Work" section that explicitly calls out the 3B transfer wall and compute needs.
+
+Formatting/CI:
+Since your agents are queued, I can help draft cleaned sections here or suggest targeted edits.
+Ensure code release is polished (README with repro commands, weights on HF).
+Google Scholar/arXiv endorsement path you already hacked—lean on Discord/community again if needed.
+
+Safety/positioning angle (optional but fits your brand):
+Emphasize how verifiable/persistent state via fixed substrate aids interpretability, decompilation safety, or controllable agency—ties directly to your broader Sutra/Yantra/Reservoir vision without overclaiming.
+
 ---
 
 ## Always last — restart the three crons and summarize
