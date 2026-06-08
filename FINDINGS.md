@@ -326,7 +326,7 @@ realized ρ, mean/std |eigenvalue|, Henrici non-normality, participation ratio, 
 delay-memory capacity all give |Spearman ρ| < 0.36 (p > 0.14, n=20) against the recall
 labels  — but with
 noise-dominated labels this cannot distinguish "no cheap predictor" from "labels too noisy
-to correlate". **What this does and does not support:** it supports *keeping the whole
+to correlate". **Scope of this result:** it supports *keeping the whole
 population* (cheap metrics don't let you pre-filter, so you train and measure) and the H2
 fact that reservoirs scaled to a fixed ρ have near-identical bulk dynamics; it does **not**
 yet demonstrate that some fixed reservoirs are durably better than others on this task.
@@ -552,7 +552,7 @@ coupling, a modern architecture (Qwen-0.5B), broad-LoRA adaptation, and full bac
 **but every one of them held the reservoir at its GPT-2 default of 512 nodes.** That turned out to
 be the missing lever: sizing the reservoir up recovers recall at 1.5B (next section). So the
 boundary these five interventions traced was an *undersized-reservoir* boundary, not a fundamental
-one — important to state plainly, because the earlier write-up read it as "resists every fix short
+one — an important distinction, since it would otherwise read as "resists every fix short
 of much greater scale," which sizing the reservoir up disproves.
 (Reminder of scope: this is the high-dimensional *content*-recall boundary; the low-dimensional
 temporal/agency behaviours do scale to Qwen-1.5B, as above.)
@@ -879,11 +879,12 @@ GPT-2-small-only cross-pass result.
 
 ## Safety Considerations (ethics disclosure)
 
-> *The safety sections below are secondary — motivation and small synthetic proof-of-concepts that
-> fall out of the same statefulness, not core results. The core contributions are the
-> injection-design finding, the dynamics characterization, and the recall scaling result above.
-> The interruptibility and monitoring results are CPU-scale synthetic demonstrations, framed as
-> design motivation, not evaluated safety claims.*
+The results in this section are design motivation and small synthetic proof-of-concepts that follow
+from the same cross-pass statefulness, not core results or evaluated safety claims. The core
+contributions remain the injection-design finding, the dynamics characterization, and the
+recall-scaling result above. The interruptibility and monitoring demonstrations are CPU-scale and
+synthetic, and are presented as motivation for why persistent state bears on controllability, not as
+safety evaluations.
 
 This project follows a guiding rule: **never introduce a new capability to an
 AI without meaningfully taking its safety into account** — capability work is acceptable only
@@ -907,7 +908,7 @@ in this report rather than by assertion:
  eviction policy keeps the cache from growing without limit during blank ticks while pinning
  the time-axis, so an always-on agent does not silently exhaust its own context.
 
-**What this does *not* yet show, stated plainly.** The probe decodes an *elapsed clock*, which
+**Limits of this probe.** The probe decodes an *elapsed clock*, which
 is a benign process variable; reading genuine *misalignment* signatures (deception, goal drift)
 off the reservoir is a much harder, unproven extension — the resilience result says only that a
 fixed-reservoir read degrades slowly, not that misalignment is legible there. The

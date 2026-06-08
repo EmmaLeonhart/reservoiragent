@@ -746,7 +746,7 @@
   What it <em>does</em> support: you cannot cheaply pre-filter reservoirs, so you keep the
   whole population and train. Showing some reservoirs are <em>durably</em> better needs a
   controlled rerun (seed the trainable init, deterministic CUDA, average several runs per
-  seed) &mdash; open work, stated plainly.
+  seed) &mdash; open work.
 </p>
 <figure>
   <img src="nseed_trained_spread.png" alt="Bar chart of cross-pass recall across 12 GPT-2 reservoir seeds from a single run, ranked best to worst: three seeds reach 1.0, descending through 0.83, 0.67, 0.5, 0.33 down to two seeds at chance (0.17).">
@@ -917,7 +917,7 @@
   reservoir, not a bolt-on. Three properties, each backed by a measured result below rather
   than asserted: lower-latency, durable human override (interruptibility); a cheap, stable
   monitoring surface (a linear reservoir-state probe); and bounded context under autonomous
-  idling (reservoir-protected eviction). What this does not yet show: the probe decodes a
+  idling (reservoir-protected eviction). Limits of this probe: it decodes a
   benign internal clock, not genuine misalignment signatures; the numbers are small-scale on a
   fixed reservoir, not a live agent at the real base-model scale. It is the design intent and a
   first measured down-payment, not a finished safety case &mdash; which is why the models,

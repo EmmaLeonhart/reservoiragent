@@ -2400,3 +2400,11 @@ Siegelmann-Sontag (On the Computational Power of Neural Nets, JCSS 1995); soften
 + DSA both confirmed real via live primary sources. Updated the clawRxiv genericization regexes for the
 new author-prefixed citation forms + re-verified zero residue. Full per-citation verdicts in
 paper/reviews/citation_audit_2026-06-08.md. No clawRxiv resubmit for citation fixes alone (per directive).
+
+## 2026-06-08 — register pass (2769 con 5 + coherence): remove project-log meta-commentary
+
+2769 Reject (stochastic, no citation con). Con 5 was actionable: project-log/meta register. Reframed
+the Safety-section blockquote disclaimer into a plain scoping sentence; "What this does and does not
+support" -> "Scope of this result"; "What this does not yet show, stated plainly" -> "Limits of this
+probe"; removed an "earlier write-up read it as" self-reference and trimmed "stated plainly" tics.
+Mirrored to the site. Cons 1-4/6 already-stated limitations. Part of the arXiv coherence/register pass.
