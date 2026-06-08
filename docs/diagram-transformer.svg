@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 400" font-family="Georgia, 'Times New Roman', serif">
+  <defs>
+    <marker id="tf-flow" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#6b7a86"/>
+    </marker>
+    <marker id="tf-attn" markerWidth="7" markerHeight="7" refX="5" refY="2.4" orient="auto">
+      <path d="M0,0 L5,2.4 L0,4.8 Z" fill="#2f6f8f"/>
+    </marker>
+  </defs>
+
+  <text x="410" y="30" text-anchor="middle" font-size="17" fill="#2b2b2b">A standard transformer: every token attends to every token, within one forward pass</text>
+
+  <!-- token embeddings (bottom row) -->
+  <text x="410" y="372" text-anchor="middle" font-size="13" fill="#555">input token embeddings (one position each)</text>
+  <g fill="#caa15a" stroke="#9e7a2e" stroke-width="1.4">
+    <circle cx="180" cy="330" r="15"/>
+    <circle cx="300" cy="330" r="15"/>
+    <circle cx="420" cy="330" r="15"/>
+    <circle cx="540" cy="330" r="15"/>
+    <circle cx="640" cy="330" r="15"/>
+  </g>
+
+  <!-- flow up into attention layer -->
+  <g stroke="#6b7a86" stroke-width="2" fill="none" marker-end="url(#tf-flow)">
+    <path d="M180,315 L180,250"/><path d="M300,315 L300,250"/><path d="M420,315 L420,250"/>
+    <path d="M540,315 L540,250"/><path d="M640,315 L640,250"/>
+  </g>
+
+  <!-- self-attention layer: all-to-all among token nodes -->
+  <rect x="120" y="150" width="580" height="95" rx="10" fill="#f6efdc" stroke="#2b2b2b" stroke-width="1.8"/>
+  <text x="410" y="172" text-anchor="middle" font-size="14" fill="#2b2b2b">self-attention (all-to-all)</text>
+  <g fill="#2f6f8f" stroke="#1f4f63" stroke-width="1.3">
+    <circle cx="180" cy="215" r="13"/>
+    <circle cx="300" cy="215" r="13"/>
+    <circle cx="420" cy="215" r="13"/>
+    <circle cx="540" cy="215" r="13"/>
+    <circle cx="640" cy="215" r="13"/>
+  </g>
+  <!-- a sample of all-to-all attention edges -->
+  <g stroke="#2f6f8f" stroke-width="1.1" fill="none" opacity="0.7" marker-end="url(#tf-attn)">
+    <path d="M193,210 C260,188 360,188 407,208"/>
+    <path d="M313,210 C380,190 500,190 527,208"/>
+    <path d="M433,210 C500,190 600,192 627,208"/>
+    <path d="M180,202 C240,150 560,150 638,202"/>
+    <path d="M527,212 C460,196 360,196 313,210"/>
+    <path d="M407,213 C340,198 240,200 193,212"/>
+  </g>
+
+  <!-- up to FFN + output -->
+  <g stroke="#6b7a86" stroke-width="2" fill="none" marker-end="url(#tf-flow)">
+    <path d="M410,150 L410,118"/>
+  </g>
+  <rect x="300" y="78" width="220" height="40" rx="8" fill="#efe7d6" stroke="#b9ac90" stroke-width="1.5"/>
+  <text x="410" y="103" text-anchor="middle" font-size="13" fill="#2b2b2b">feed-forward + residual</text>
+  <g stroke="#6b7a86" stroke-width="2" fill="none" marker-end="url(#tf-flow)"><path d="M410,78 L410,60"/></g>
+  <text x="410" y="52" text-anchor="middle" font-size="13" fill="#2b2b2b">output (next-token logits)</text>
+
+  <!-- "x N layers" + the key point -->
+  <text x="735" y="200" font-size="13" fill="#555" transform="rotate(0)">&#215; N layers</text>
+  <text x="120" y="200" font-size="12" fill="#555" text-anchor="end" transform="rotate(-90 60 200)"></text>
+  <text x="410" y="300" text-anchor="middle" font-size="12" fill="#9e5f12" font-style="italic">no state survives between forward passes — only position within the context window</text>
+</svg>
