@@ -39,6 +39,10 @@
 
 - Might want to acknowledge this work https://arxiv.org/abs/2507.15779
 
+- We might also want to make it a bit more explicit about what is going on, or we might want to make it a bit more explicit in terms of the fact that we are specifically doing the brain surgery thing to address a common issue with reservoir computing, where it is unreliable to get a good reservoir. The process often needs to be repeated. The idea behind this is we're trying to, by primarily using fine-tuning, effectively get the reservoir to, but the idea here is we're specifically trying to counter this so that the main effect of the reservoir is to add memory to an existing, well-proven system. 
+
+- Also, in the future work, I specifically want to mention how there are risks about making the context larger. I specifically want to mention how context management is going to be more important in such a model in the future, and as a result we need to work on it a bit more. I am interested in doing this with deep seek v4 flash due to its learned context management system potentially helping. However, on the available consumer-grade GPU, I am not able to do it. 
+
 
 ## Grok's reception (address the negatives and lean into the positives if possible)
 
