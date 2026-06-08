@@ -21,6 +21,10 @@ Please fix this objection "The writing style is informal and reads more like a t
 
 Generally speaking, I'm not really sure what you've been doing. I feel like you may have been not updating the paper enough, or you've been at least updating the paper primarily just based off the technical stuff and not based off of the other things. 
 
+Are you going to specifically mention that this is a practical limitation that reservoir attention networks are basically a completely new kind of architecture, and so this is a significant limitation? We should be more explicitly declaring that this limitation is a real thing. 
+
+
+
 ---
 
 ## Done — Phase J: the recall scaling result (complete 2026-06-07)
