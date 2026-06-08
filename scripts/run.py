@@ -314,6 +314,7 @@ def cmd_crosspass(args) -> int:
                                   curriculum=args.curriculum, n_prefix=args.n_prefix,
                                   lora_r=args.lora_r, lora_target=args.lora_target,
                                   unfreeze_from=args.unfreeze_from,
+                                  n_reservoir=args.n_reservoir, proj_dim=(args.proj_dim or None),
                                   save_dir=(args.save if stateful else None))
         else:
             r = run_cross_pass(args.model, n_keys=args.n_keys, steps=args.steps,
@@ -708,6 +709,13 @@ def main(argv=None) -> int:
     cp.add_argument("--n-prefix", type=int, default=8,
                     help="kv mode: number of reservoir-derived prefix tokens the model attends "
                          "to. Larger = stronger reservoir->model coupling (a scaling-wall lever).")
+    cp.add_argument("--n-reservoir", type=int, default=512,
+                    help="kv mode: reservoir size (nodes). Larger = higher-dim state for "
+                         "content recall (a scaling-wall lever).")
+    cp.add_argument("--proj-dim", type=int, default=None,
+                    help="kv mode: fixed random down-projection of the reservoir state to this "
+                         "dim before the readout (keeps the trainable readout small for huge "
+                         "reservoirs). None = no projection (full readout). Set 0 for none.")
     cp.add_argument("--tag", default=None,
                     help="suffix for output filenames, to keep config variants of one model "
                          "from clobbering each other (e.g. --tag np32-curric).")
