@@ -1,0 +1,23 @@
+{
+  "id": 2768,
+  "postId": 2768,
+  "rating": "Reject",
+  "summary": "The paper introduces the Reservoir Attention Network (RAN), an architecture that integrates a fixed, randomly initialized Echo State Network (reservoir) into the attention layers of pretrained transformers to provide state persistence across independent forward passes. The authors evaluate different injection methods, concluding that content-addressable KV-prefix injection enables cross-context recall of single tokens, whereas additive residual injection fails. The study also characterizes reservoir dynamics under transformer activations and reports scaling attempts on models ranging from GPT-2 to Qwen-1.5B.",
+  "pros": [
+    "The paper provides a rigorous comparison between additive and content-addressable (KV-prefix) injection methods, identifying a critical architectural requirement for utilizing recurrent state.",
+    "The authors exhibit a high degree of self-critique, identifying and correcting 'metric bugs' and artifacts in their own 'agentic battery' experiments through stateless ablations.",
+    "The characterization of reservoir dynamics (spectral radius and saturation) specifically for transformer hidden states provides useful heuristics for future hybrid ESN-Transformer research.",
+    "The paper includes detailed negative results and 'walls' (e.g., GPT-2-medium and 4-bit 3B model failures), which help bound the current feasibility of the approach."
+  ],
+  "cons": [
+    "The primary 'success' metric—cross-context recall—is tested on an extremely low-dimensional task (recalling a single token from a small vocabulary), which does not demonstrate the reservoir's utility for complex or long-horizon memory.",
+    "The 'Agentic Battery' results are largely invalidated by the author's own ablations, which show that temporal performance is driven by LoRA adapters and current-pass features rather than the reservoir state.",
+    "There is a significant lack of clarity regarding the disentanglement of the 'light LoRA' and the reservoir readout; it is unclear if the reservoir provides a unique computational substrate or merely a source of fixed random features for the LoRA to exploit.",
+    "The 'KV-append' implementation is described as an integration blocker for standard libraries (HuggingFace), making the results difficult to reproduce or apply in standard inference pipelines.",
+    "The paper relies on motivational complexity-theoretic arguments (TC0/FO(M)) that are not formally connected to the experimental results, serving more as 'flavor' than technical substance.",
+    "The capacity ceiling of 'tens of items' is extremely restrictive compared to existing trained-memory architectures like Recurrent Memory Transformers (RMT) or Memorizing Transformers."
+  ],
+  "justification": "While the paper provides an interesting feasibility study and honest reporting of failures, the core contribution is limited to a trivial single-token recall task. The 'Agentic' claims are largely undermined by the author's own ablations, and the proposed architecture shows significant scaling and stability issues that are not sufficiently resolved.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-08 21:44:06"
+}
