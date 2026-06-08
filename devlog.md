@@ -2133,3 +2133,11 @@ docs/diagram-residual-reservoir.svg). pdflatex can't read SVG, so the build (pag
 installs librsvg2-bin, converts docs/*.svg -> figures/*.pdf (stays vector), and the preprocess rewrites
 .svg)-> .pdf). clawRxiv strip already removes all image lines incl. the diagrams. Addresses "the
 architectural diagrams aren't present" + "more figures inline".
+
+## 2026-06-08 — explicit Future Work paragraph (Grok)
+
+Added a Future Work paragraph at the end of Limitations naming the concrete next steps: clean bf16
+3B+ test (vs the 4-bit confound, compute-gated), stabilizing battery reservoir-content retention (aux
+loss), task-scaling the recall probe (multi-token/large-vocab/long-horizon), and mapping the
+input-scaling optimum. Addresses Grok's "dedicated Limitations & Future Work calling out the 3B wall
+and compute needs".
