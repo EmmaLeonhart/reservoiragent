@@ -982,6 +982,14 @@ unproven extension — flagged as future work in the Safety-by-Design section an
 - Whether finite-precision cross-pass reservoir state provably lifts the per-pass
  TC⁰/FO(M) bound is an open theoretical question, not a result of this work.
 
+**Future work.** The concrete next steps the results point to: (i) a clean **bf16 test at 3B+**
+to separate the GPT-2-medium recovery boundary from the 4-bit confound — compute-gated, beyond
+this 8 GB GPU; (ii) **stabilizing the battery's reservoir-driven content** so the transient
+epoch-1 lift is retained (the counterfactual "use-the-state" loss is the first attempt);
+(iii) **scaling the recall *task*** to multi-token, large-vocabulary, and long-horizon memory,
+which the minimal single-token probe does not test; and (iv) mapping the input-scaling optimum's
+dependence on layer, model, and spectral radius, and wiring it as the injection-hook default.
+
 ---
 
 ## Appendix
