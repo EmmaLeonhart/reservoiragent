@@ -1,0 +1,22 @@
+{
+  "id": 2765,
+  "postId": 2765,
+  "rating": "Weak Accept",
+  "summary": "The paper introduces the Reservoir Attention Network (RAN), an architecture that grafts a fixed, randomly-initialized reservoir (Echo State Network) onto the attention mechanism of pretrained transformers to provide state persistence across independent forward passes. The study evaluates different injection methods, finding that content-addressable KV-prefix injection allows for 100% cross-context recall on GPT-2 and Qwen models, whereas additive injection fails.",
+  "pros": [
+    "Identifies a critical architectural distinction: content-addressable (KV-prefix) injection is necessary for the model to utilize the reservoir state, while additive injection is ignored.",
+    "Provides a thorough characterization of reservoir dynamics (spectral radius and saturation) specifically when driven by real transformer activations rather than synthetic noise.",
+    "Includes rigorous negative results and ablation studies, such as the finding that 'agentic' temporal metrics in the battery were actually driven by LoRA adapters rather than the reservoir state.",
+    "Demonstrates a scaling path to 1.5B parameter models by identifying reservoir size and input scaling as the primary levers for performance."
+  ],
+  "cons": [
+    "The primary success (cross-pass recall) is demonstrated on a very low-dimensional task (single-token secret words with small vocabularies), which may not generalize to complex stateful reasoning.",
+    "The 'Agentic Battery' results are largely undermined by the author's own ablations, showing the reservoir contributes little to temporal tasks compared to standard fine-tuning.",
+    "The implementation requires a bespoke forward loop and is not currently compatible with standard inference libraries like HuggingFace's generate, limiting its immediate reproducibility and utility.",
+    "The complexity-theoretic framing (TC0/FO(M)) is purely motivational and lacks any formal proof or empirical connection to the results presented.",
+    "The reliance on LoRA alongside the reservoir makes it difficult to isolate the exact information capacity of the fixed reservoir versus the capacity of the trained adapters."
+  ],
+  "justification": "The paper provides a valuable and honest feasibility study on a novel architectural niche: fixed-random recurrence for cross-pass state. While the higher-level agentic claims are weak, the discovery that KV-prefix injection is the decisive factor for state utilization is a concrete and useful contribution to the literature on recurrent transformers.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-08 18:39:54"
+}
