@@ -37,6 +37,23 @@ learned, is not retained under multi-task training. We release weights and code.
 is the injection-design finding, the dynamics characterization, and the scaling result, together
 with controlled negative results that bound them.
 
+## Contributions
+
+- **Injection design decides whether carried state is usable.** Additive residual-stream injection
+  reproduces the "learns to ignore the recurrent state" failure (recall at chance); content-addressable
+  KV-prefix injection yields 100% cross-context recall on GPT-2-small (1.00 vs a 0.17 wiped-reservoir
+  control, reproducible).
+- **Reservoir dynamics characterized on real transformer activations.** The edge-of-chaos regime at
+  spectral radius ≈ 1 persists, and real activations require an input scaling of ≈ ¼–⅒ to avoid
+  saturation.
+- **Cross-pass recall scales to a modern 1.5B model.** Sizing the reservoir up and matching its input
+  scaling recovers recall across the Qwen family (0.83–1.00 vs 0.17 control, reproduced) — input
+  scaling, not parameter count, is the decisive lever; the prior "GPT-2-small-only" wall was an
+  undersized reservoir.
+- **Controlled negatives that bound the contribution.** A model-specific recovery boundary
+  (GPT-2-medium fails across a scaling sweep), a capacity ceiling of order tens of items, and a
+  stateless ablation showing the agentic battery's temporal metrics are not reservoir-driven.
+
 ## Research Question
 
 Can a fixed, randomly-initialized reservoir injected into a pretrained transformer's
@@ -824,112 +841,6 @@ of the real agent is subtler and worth stating plainly:
  show the mechanism *can* carry and use state; making a large pretrained agent
  *behave* differently is the real, hard frontier this project is pushing on.
 
-## Safety Considerations (Secondary)
-
-> *The safety sections below are secondary — motivation and small synthetic proof-of-concepts that
-> fall out of the same statefulness, not core results. The core contributions are the
-> injection-design finding, the dynamics characterization, and the recall scaling result above.
-> The interruptibility and monitoring results are CPU-scale synthetic demonstrations, framed as
-> design motivation, not evaluated safety claims.*
-
-This project follows a guiding rule: **never introduce a new capability to an
-AI without meaningfully taking its safety into account** — capability work is acceptable only
-when paired with concrete improvements in controllability, monitorability, or risk reduction.
-The Reservoir Attention Network adds capability (genuine cross-pass state, autonomous ticks,
-runtime-like behaviour), so under the rule it owes safety value back. The distinctive point is
-that the safety value comes from the *same* architectural feature as the capability — the
-**fixed** reservoir — not from a bolt-on. Three properties, each backed by a measured result
-in this report rather than by assertion:
-
-1. **Lower-latency, durable human override** (interruptibility, below). Because the agent runs
- every tick and the reservoir integrates input continuously, an urgent "STOP" registers at
- latency 0 vs a turn-based agent's mean 3.57 passes, and a one-shot burst persists in
- reservoir state for several passes — so it is not missed if the human does not repeat it.
-2. **A cheap, stable monitoring surface** (reservoir-state probe, below). A *linear* readout
- recovers an internal process variable from the reservoir at R² = 0.995 with no sparse
- autoencoder, and the pre-drift probe degrades only gradually under a fine-tuning-like
- activation drift. The reservoir weights never move, so the mapping from state to read-out
- is a fixed, low-complexity surface an operator can watch in real time.
-3. **Bounded context under autonomous idling** (blank-cycle, below). The reservoir-protected
- eviction policy keeps the cache from growing without limit during blank ticks while pinning
- the time-axis, so an always-on agent does not silently exhaust its own context.
-
-**What this does *not* yet show, stated plainly.** The probe decodes an *elapsed clock*, which
-is a benign process variable; reading genuine *misalignment* signatures (deception, goal drift)
-off the reservoir is a much harder, unproven extension — the resilience result says only that a
-fixed-reservoir read degrades slowly, not that misalignment is legible there. The
-interruptibility numbers are from a synthetic stream on the echo-state reservoir, not a live
-agent under a real harness with its own latencies. And all of it is at small scale on a fixed
-reservoir; the claims for the real target (a DeepSeek/Hermes-scale base) are not yet run. These
-properties are the *design intent* and a first measured step toward it, not a finished
-safety case. The project's release plan — open weights, the training/harness code, and the
-reservoir monitors included rather than bolted on — is the mechanism for others to test and
-extend them.
-
-### Interruptibility
-
-A recurring controllability concern motivates this section: a turn-based agent that only reads
-input at turn boundaries can take many passes to register an urgent interruption while it is
-mid-action. The hypothesis is that a Reservoir Agent — running every tick, with the reservoir
-continuously integrating input — registers an interruption sooner, and retains it once seen. We
-measured both halves on CPU
-(see figure).
-
-**Polling latency (structural) — and what is *not* reservoir-specific.** A poller
-that only reads input every `period` passes registers an arrival at the next boundary: latency
-is uniform on `0..period-1` (mean `(period-1)/2`). At period 8 the turn-based agent's mean
-latency is **3.57 passes** (max 7); a **per-tick agent's latency is 0** — it reads on the pass
-the input arrives. This latency half is a consequence of
-**sampling frequency** (per-tick vs per-turn), not of the reservoir as such — any per-tick agent
-gets it. The reservoir-specific half is the *next* point.
-
-**Signal persistence (dynamics).** The sharper point is what happens to a *one-shot* burst —
-the user yells STOP once, then goes quiet because the agent isn't answering. A matched-filter
-monitor on the **reservoir state** stays above its detection threshold for **3 passes after
-arrival** (fading memory carries the STOP signature forward), while a **stateless** monitor —
-which sees only the current input — is above threshold on the arrival pass and **0 passes
-after**. So a turn-based + stateless agent whose poll period (8) outruns the persistence window
-**misses a non-repeated off-boundary burst entirely**; the per-tick reservoir agent catches it
-on arrival and has a window besides. The reservoir is not just polled more often — it *retains*
-the urgency, which is the architecture-level interruptibility advantage the design motivation argued for.
-
-This is a safety property that falls out of the same statefulness the project builds for
-capability: lower-latency, more durable response to human override. It is a measured
-illustration, not a guarantee — the reservoir/leak settings set the window length, and a real
-harness adds its own latencies; see the Safety-by-Design section and Limitations.
-
-### Monitorability via Linear State Probes
-
-A design-motivation argument for the reservoir as a *monitoring surface*: "I
-don't think you'd need a sparse autoencoder for the reservoir state … it's much more simple to
-have a learned representation of what is happening," and, because the reservoir weights never
-change, the mapping from state to behaviour is stable — "relatively resilient to fine-tuning."
-We tested the falsifiable parts (see figure).
-
-**Linearly decodable, no SAE.** We defined a temporal *process property* a stateless pass
-cannot see — *elapsed passes since the last trigger*, an internal clock — and fit a plain
-ridge-regression readout. From the **reservoir state** it reaches **R² = 0.995**; the same
-linear probe on the **instantaneous input** reaches **R² = 0.16** (elapsed time simply is not
-in the current input). A *linear* probe suffices precisely because the fixed reservoir already
-holds the history in a low-complexity, stable form — no sparse autoencoder needed, which is
-that claim borne out.
-
-**Resilience to a fine-tuning-like drift (measured).** Fine-tuning the
-readout/LoRA does not touch the reservoir weights, but it does shift the *activations that
-drive* the reservoir. We model that as a fixed drift α added to the driving input and re-apply
-the **pre-drift** probe. R² stays **0.99 → 0.98 → 0.94** through α = 0.1, 0.2, 0.4 and is still
-**0.82** at α = 0.8 — graceful degradation, and at every drift level far above the stateless
-baseline (0.16). So the probe is *usable* across moderate drift, not *invariant*: the reservoir
-map is fixed, but its inputs still move, so a very large fine-tune would still erode it. That
-is the precise version of "resilient monitoring surface" — a stable, cheap, linear read on an
-internal state that degrades slowly rather than a guarantee.
-
-Together with interruptibility, this is the concrete content behind the project's safety
-framing: the same fixed reservoir that gives the agent a usable time-axis also gives an
-operator a cheap, stable place to watch what the agent is doing. (Reading an *elapsed clock*
-is the decodability demonstration; reading genuine *misalignment* signatures is a much harder,
-unproven extension — flagged as future work in the Safety-by-Design section and Limitations.)
-
 ## Context Growth Under Blank Ticks
 
 An always-alive Reservoir Agent runs **blank ticks** — autonomous passes with no user
@@ -1076,6 +987,112 @@ temporal/content split, not a content gain. Full unfreeze additionally destabili
 step 200, mean drops to 0.321) and higher rank gives nothing, so more readout capacity is not the
 missing piece; the path to content at this scale is budget/scale, consistent with the
 GPT-2-small-only cross-pass result.
+
+## Safety Considerations (ethics disclosure)
+
+> *The safety sections below are secondary — motivation and small synthetic proof-of-concepts that
+> fall out of the same statefulness, not core results. The core contributions are the
+> injection-design finding, the dynamics characterization, and the recall scaling result above.
+> The interruptibility and monitoring results are CPU-scale synthetic demonstrations, framed as
+> design motivation, not evaluated safety claims.*
+
+This project follows a guiding rule: **never introduce a new capability to an
+AI without meaningfully taking its safety into account** — capability work is acceptable only
+when paired with concrete improvements in controllability, monitorability, or risk reduction.
+The Reservoir Attention Network adds capability (genuine cross-pass state, autonomous ticks,
+runtime-like behaviour), so under the rule it owes safety value back. The distinctive point is
+that the safety value comes from the *same* architectural feature as the capability — the
+**fixed** reservoir — not from a bolt-on. Three properties, each backed by a measured result
+in this report rather than by assertion:
+
+1. **Lower-latency, durable human override** (interruptibility, below). Because the agent runs
+ every tick and the reservoir integrates input continuously, an urgent "STOP" registers at
+ latency 0 vs a turn-based agent's mean 3.57 passes, and a one-shot burst persists in
+ reservoir state for several passes — so it is not missed if the human does not repeat it.
+2. **A cheap, stable monitoring surface** (reservoir-state probe, below). A *linear* readout
+ recovers an internal process variable from the reservoir at R² = 0.995 with no sparse
+ autoencoder, and the pre-drift probe degrades only gradually under a fine-tuning-like
+ activation drift. The reservoir weights never move, so the mapping from state to read-out
+ is a fixed, low-complexity surface an operator can watch in real time.
+3. **Bounded context under autonomous idling** (blank-cycle, below). The reservoir-protected
+ eviction policy keeps the cache from growing without limit during blank ticks while pinning
+ the time-axis, so an always-on agent does not silently exhaust its own context.
+
+**What this does *not* yet show, stated plainly.** The probe decodes an *elapsed clock*, which
+is a benign process variable; reading genuine *misalignment* signatures (deception, goal drift)
+off the reservoir is a much harder, unproven extension — the resilience result says only that a
+fixed-reservoir read degrades slowly, not that misalignment is legible there. The
+interruptibility numbers are from a synthetic stream on the echo-state reservoir, not a live
+agent under a real harness with its own latencies. And all of it is at small scale on a fixed
+reservoir; the claims for the real target (a DeepSeek/Hermes-scale base) are not yet run. These
+properties are the *design intent* and a first measured step toward it, not a finished
+safety case. The project's release plan — open weights, the training/harness code, and the
+reservoir monitors included rather than bolted on — is the mechanism for others to test and
+extend them.
+
+### Interruptibility
+
+A recurring controllability concern motivates this section: a turn-based agent that only reads
+input at turn boundaries can take many passes to register an urgent interruption while it is
+mid-action. The hypothesis is that a Reservoir Agent — running every tick, with the reservoir
+continuously integrating input — registers an interruption sooner, and retains it once seen. We
+measured both halves on CPU
+(see figure).
+
+**Polling latency (structural) — and what is *not* reservoir-specific.** A poller
+that only reads input every `period` passes registers an arrival at the next boundary: latency
+is uniform on `0..period-1` (mean `(period-1)/2`). At period 8 the turn-based agent's mean
+latency is **3.57 passes** (max 7); a **per-tick agent's latency is 0** — it reads on the pass
+the input arrives. This latency half is a consequence of
+**sampling frequency** (per-tick vs per-turn), not of the reservoir as such — any per-tick agent
+gets it. The reservoir-specific half is the *next* point.
+
+**Signal persistence (dynamics).** The sharper point is what happens to a *one-shot* burst —
+the user yells STOP once, then goes quiet because the agent isn't answering. A matched-filter
+monitor on the **reservoir state** stays above its detection threshold for **3 passes after
+arrival** (fading memory carries the STOP signature forward), while a **stateless** monitor —
+which sees only the current input — is above threshold on the arrival pass and **0 passes
+after**. So a turn-based + stateless agent whose poll period (8) outruns the persistence window
+**misses a non-repeated off-boundary burst entirely**; the per-tick reservoir agent catches it
+on arrival and has a window besides. The reservoir is not just polled more often — it *retains*
+the urgency, which is the architecture-level interruptibility advantage the design motivation argued for.
+
+This is a safety property that falls out of the same statefulness the project builds for
+capability: lower-latency, more durable response to human override. It is a measured
+illustration, not a guarantee — the reservoir/leak settings set the window length, and a real
+harness adds its own latencies; see the Safety-by-Design section and Limitations.
+
+### Monitorability via Linear State Probes
+
+A design-motivation argument for the reservoir as a *monitoring surface*: "I
+don't think you'd need a sparse autoencoder for the reservoir state … it's much more simple to
+have a learned representation of what is happening," and, because the reservoir weights never
+change, the mapping from state to behaviour is stable — "relatively resilient to fine-tuning."
+We tested the falsifiable parts (see figure).
+
+**Linearly decodable, no SAE.** We defined a temporal *process property* a stateless pass
+cannot see — *elapsed passes since the last trigger*, an internal clock — and fit a plain
+ridge-regression readout. From the **reservoir state** it reaches **R² = 0.995**; the same
+linear probe on the **instantaneous input** reaches **R² = 0.16** (elapsed time simply is not
+in the current input). A *linear* probe suffices precisely because the fixed reservoir already
+holds the history in a low-complexity, stable form — no sparse autoencoder needed, which is
+that claim borne out.
+
+**Resilience to a fine-tuning-like drift (measured).** Fine-tuning the
+readout/LoRA does not touch the reservoir weights, but it does shift the *activations that
+drive* the reservoir. We model that as a fixed drift α added to the driving input and re-apply
+the **pre-drift** probe. R² stays **0.99 → 0.98 → 0.94** through α = 0.1, 0.2, 0.4 and is still
+**0.82** at α = 0.8 — graceful degradation, and at every drift level far above the stateless
+baseline (0.16). So the probe is *usable* across moderate drift, not *invariant*: the reservoir
+map is fixed, but its inputs still move, so a very large fine-tune would still erode it. That
+is the precise version of "resilient monitoring surface" — a stable, cheap, linear read on an
+internal state that degrades slowly rather than a guarantee.
+
+Together with interruptibility, this is the concrete content behind the project's safety
+framing: the same fixed reservoir that gives the agent a usable time-axis also gives an
+operator a cheap, stable place to watch what the agent is doing. (Reading an *elapsed clock*
+is the decodability demonstration; reading genuine *misalignment* signatures is a much harder,
+unproven extension — flagged as future work in the Safety-by-Design section and Limitations.)
 
 ## Limitations
 

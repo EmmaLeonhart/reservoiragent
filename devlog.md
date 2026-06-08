@@ -2109,3 +2109,11 @@ PNGs next to paper.tex, and the arXiv tarball now bundles figures/. The figures 
 image markdown + the now-empty Figures heading) since clawRxiv has no image support. pages.yml now
 publishes docs/reservoir-arxiv-source.tar.gz and the site links it. Also fixed the pages PDF build
 (--no-highlight) so report.pdf is the NeurIPS PDF, not the stale weasyprint one.
+
+## 2026-06-08 — safety moved to ethics-disclosure position + Contributions list (Emma + Grok)
+
+Moved the Safety section down to just before Limitations and retitled it "Safety Considerations
+(ethics disclosure)" — position conveys its secondary status (Emma). Added a Contributions bullet
+list right after the abstract (Grok: stronger contributions early), leading with the injection
+success + the 1.5B scaling recovery. Figures are already proper matplotlib plots (Grok thought they
+were screenshots — outdated).
