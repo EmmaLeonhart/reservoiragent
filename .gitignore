@@ -55,3 +55,4 @@ app/electron/node_modules/
 # per-config ablation plots, regenerable from results/ JSONs. Curated/committed figures are
 # untagged (docs/crosspass.png, docs/crosspass_gpt2-medium.png, ...) and stay tracked.
 docs/crosspass_*_w[0-9]*.png
+/reference images
