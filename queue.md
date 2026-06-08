@@ -28,6 +28,24 @@
 
 - Also, I'm not sure if you have this thing properly. I don't know if you have this particular thing properly running. I believe the Sutra repository has something in it that generates an easy arXiv upload package. I think it's something like /arxiv.zip Although honestly I'm a bit confused about the Sutra repository too, I want us to generate something like this so that we create a decent arXiv uploading package thing. 
 
+
+## Grok's reception (address the negatives and lean into the positives if possible)
+
+Quick high-level take
+
+Strengths:
+Clear scoping: Minimal probes, not "we built an agent." This builds trust.
+Injection design is the decisive lever—negative-then-positive arc is compelling.
+Dynamics insights (input scaling ¼–⅒ for real activations, edge-of-chaos persistence, reservoir sizing as key for larger models) are actionable.
+Capacity ceiling characterization (tens of items) and model-specific quirks are honest.
+Always-alive runtime + LoRA pipeline demo shows the harness works end-to-end on consumer GPU.
+
+Weaker spots (fixable):
+Formatting/CI issues you mentioned—screenshots instead of proper figures, some repetition, dense blocks. Needs a clean LaTeX pass for arXiv.
+Abstract/intro could punch harder on the positive result while keeping the caveats.
+Some sections (e.g., battery metrics, temporal tasks) have good debugging but could be tightened/streamlined.
+Broader motivation (time axis, organism analogy, complexity framing) is good but keep it clearly labeled as motivation/not claimed result.
+
 ---
 
 ## Always last — restart the three crons and summarize
