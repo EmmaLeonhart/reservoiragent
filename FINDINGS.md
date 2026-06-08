@@ -782,6 +782,12 @@ of the real agent is subtler and worth stating plainly:
 
 ## Safety by design (the rule, and what backs it)
 
+> *The safety sections below are secondary — motivation and small synthetic proof-of-concepts that
+> fall out of the same statefulness, not core results. The core contributions are the
+> injection-design finding, the dynamics characterization, and the recall scaling result above.
+> The interruptibility and monitoring results are CPU-scale synthetic demonstrations, framed as
+> design motivation, not evaluated safety claims.*
+
 This project follows a guiding rule: **never introduce a new capability to an
 AI without meaningfully taking its safety into account** — capability work is acceptable only
 when paired with concrete improvements in controllability, monitorability, or risk reduction.

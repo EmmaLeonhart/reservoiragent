@@ -1998,3 +1998,10 @@ Battery @ Qwen-1.5B with the recall-winning config (2048/noproj/scale0.1): epoch
 battery content — because the battery recalls over a 1200-WORD pool, far beyond the ~dozens capacity
 ceiling (#24/#25). Connects the capacity finding to the battery. Pivoted to #27: battery with a
 16-word pool (within capacity) — does content lift now? Added Phase J record to queue.md.
+
+## 2026-06-08 — address recurring review con: signpost safety sections as secondary
+
+Multiple reviews (2736/2737/2745) flagged the safety/always-alive sections as distracting from the
+core. Added a clear framing signpost at the Safety section in FINDINGS + site marking them as
+secondary motivation + synthetic proof-of-concepts (not core results; not evaluated safety claims).
+Non-restructuring fix; the core contributions (injection-design, dynamics, recall scaling) stay front.
