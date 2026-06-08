@@ -38,22 +38,37 @@ jobs:
         uses: actions/configure-pages@v5
         with:
           enablement: true
-      - name: Install pandoc + weasyprint (PDF engine, isolated venv)
+      - name: Install TeX Live + pandoc (NeurIPS LaTeX PDF engine)
         run: |
           sudo apt-get update
-          sudo apt-get install -y pandoc libpango-1.0-0 libpangoft2-1.0-0 libcairo2 libffi-dev fonts-dejavu
-          python3 -m venv /tmp/wp
-          /tmp/wp/bin/pip install --upgrade pip weasyprint
-      - name: Build report PDF into docs/
+          sudo apt-get install -y --no-install-recommends \
+            texlive-latex-base texlive-latex-recommended texlive-latex-extra \
+            texlive-fonts-recommended texlive-luatex texlive-xetex \
+            lmodern latexmk pandoc
+      - name: Build the NeurIPS report PDF into docs/report.pdf
         run: |
+          # The published report.pdf IS the NeurIPS-2026 LaTeX paper (named/
+          # preprint build) — the same artifact paper-pdf.yml produces — so the
+          # site's "PDF" link is the formal paper, not a weasyprint HTML render.
           mkdir -p docs
           if [ -f FINDINGS.md ]; then
-            pandoc FINDINGS.md -f gfm --standalone \
-              --metadata title="Reservoir Attention Network (RAN) — Findings" \
-              --include-in-header report-print.html \
-              -o docs/report.pdf --pdf-engine=/tmp/wp/bin/weasyprint \
-              || { echo "::error::report.pdf build failed"; exit 1; }
-            echo "Built docs/report.pdf ($(du -h docs/report.pdf | cut -f1))"
+            cd paper
+            sed \
+              -e '1{/^# /d}' \
+              -e 's|^## Abstract$|## Abstract {-}|' \
+              -e 's|^## References$|## References {-}|' \
+              -e 's|^## Limitations$|## Limitations {-}|' \
+              ../FINDINGS.md > paper-pre.md
+            pandoc paper-pre.md --from=markdown-smart --to=latex \
+              --output=paper.tex.body --wrap=preserve \
+              --syntax-highlighting=none --shift-heading-level-by=-1
+            latexmk -pdf -interaction=nonstopmode -e '$max_repeat=8' paper.tex
+            if grep -E '^! LaTeX Error:' paper.log; then
+              echo "::error::LaTeX Error(s) in paper.log — report PDF build failed."; exit 1
+            fi
+            cp paper.pdf ../docs/report.pdf
+            cd ..
+            echo "Built docs/report.pdf ($(du -h docs/report.pdf | cut -f1)) from the NeurIPS LaTeX source"
           else
             echo "No FINDINGS.md yet; skipping PDF build"
           fi
