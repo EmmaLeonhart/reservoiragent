@@ -2176,3 +2176,11 @@ picture (not copied from the rights-restricted reference images); placed inline 
 site. Removed ALL remaining non-figure file/code paths from FINDINGS (data_lake/transcripts/,
 GPT2_INTEGRATION_BLOCKER, reservoir.kv_evict..., kv_live x2) — reworded to plain prose. Final sweep:
 only docs/*.png|svg figure refs remain.
+
+## 2026-06-08 — FIX: crosspass.png was the wrong (gpt2-medium null) figure under a success caption
+
+docs/crosspass.png had been clobbered by a gpt2-medium run (commit e711933) and was byte-identical to
+docs/crosspass_gpt2-medium.png — both bars at chance (0.17) — while the paper caption claimed the
+GPT-2-small headline result (reservoir 1.00 vs baseline 0.17). Regenerated docs/crosspass.png from the
+real gpt2-small data (results/crosspass.json: stateful 1.00, baseline 0.17) via plot_recall_bars. The
+figure now matches the caption. (Caught by Emma.)
