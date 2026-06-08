@@ -702,17 +702,23 @@ the right token), not the gate weight: with a healthy open gate the model still 
 to emit at 1.5B on this budget, and the reservoir adds nothing over the stateless control. (Per-epoch
 models + optimizer states are preserved on the Hub for analysis.)
 
-**Does the recall fix transfer into the battery? Not stably, yet.** Since cross-pass recall
-recovers at 1.5B with the right reservoir config, and the battery's content was failing partly
-because it recalls over a 1200-word pool (far past the capacity ceiling), we re-ran the battery
-with the **recall-winning config** (2048 nodes, no projection, input scaling 0.1) and a **16-word
-pool within capacity**. This *does* make battery content learnable — recall climbs off zero to
-~0.12 — but the reservoir lift is **unstable**: the mean-over-control lift flickers **+0.000 → +0.058
-→ −0.013** across three epochs (recall reaches 0.12 then collapses back to 0.00). So the integrated
-battery — gate head, silence supervision, and eight interleaved tasks — does **not** stably inherit
-the large, stable lift the *isolated* cross-pass recall task shows (0.83–1.00 vs 0.17). There is a
-real gap between the clean single-task demonstration and the multi-task agent loop; closing it
-(stabilizing a reservoir-driven content signal inside the full battery) is open work, not yet done.
+**Does the recall fix transfer into the battery? Unresolved at the current eval resolution.** Since
+cross-pass recall recovers at 1.5B with the right reservoir config, and the battery's content was
+failing partly because it recalls over a 1200-word pool (far past the capacity ceiling), we re-ran
+the battery with the **recall-winning config** (2048 nodes, no projection, input scaling 0.1) and a
+**16-word pool within capacity** — both the full 8-task mix and a content-only (recall + deferred)
+isolation. This *does* make battery content learnable — recall climbs off zero to ~0.12 — and the
+stateful side is stable across epochs. But the *lift over the stateless control* swings sign across
+epochs (e.g. +0.094 / −0.031 / 0.000 / +0.094 / +0.031, mean ≈ +0.04). That swing is **eval noise,
+not signal**: per-task accuracy quantizes to 1/`eval_n` (= 1/16 ≈ 0.06 at the budget we ran), so a
+~0.04 lift sits *at the noise floor* and flips sign as one or two eval episodes flip — the stateful
+side is steady while the control bounces. The battery recall task does genuinely wipe the context
+(it is memory-requiring), so this is a **resolution problem, not evidence of no lift**: we cannot
+yet tell a small real reservoir lift from zero in the battery. We raised the default eval set to 48
+and a cleaner re-measure is the next step. So: the large, *resolved* reservoir advantage is the
+strict-wipe cross-pass task (0.83–1.00 vs 0.17); whether the integrated battery inherits a smaller
+version of it is, at this eval budget, **undetermined** — open work, honestly unresolved rather
+than positive or negative.
 
 **What the carried-state demonstration actually rests on.** The valid evidence that the reservoir
 carries *usable* state is the controlled, memory-requiring tasks, not the battery metrics:
