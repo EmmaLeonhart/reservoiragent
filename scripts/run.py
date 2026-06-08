@@ -334,7 +334,11 @@ def cmd_crosspass(args) -> int:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps({"params": {"model": args.model, "n_keys": args.n_keys,
                                           "steps": args.steps, "mode": args.mode,
-                                          "input_scaling": args.input_scaling},
+                                          "input_scaling": args.input_scaling,
+                                          "n_reservoir": args.n_reservoir,
+                                          "n_prefix": args.n_prefix,
+                                          "proj_dim": (args.proj_dim or None),
+                                          "seed": args.seed},
                                "results": recs}, indent=2))
     print(f"wrote {out.relative_to(ROOT)}")
 

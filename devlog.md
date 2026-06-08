@@ -1901,3 +1901,13 @@ much greater scale" reading was too strong — it held reservoir size + input sc
 Folded as a clearly-marked PRELIMINARY update into FINDINGS+site (NOT yet rewriting the headline).
 Verification (#20): different-seed reproduction, knob-isolation, n_keys 12/24. Config 3 (8192/proj1024/np32)
 still running.
+
+## 2026-06-07 — isolation results + crosspass JSON self-documenting
+
+#20 isolation (single-knob flips from the prior-chance Qwen-1.5B config 512/np8/scale0.5): scale-only
+0.17, prefix-only 0.17, reservoir-only 0.33 (vs 0.17 control) — reservoir SIZE is the only solo mover,
+necessary but not sufficient; the full 2048/np16/0.1 config (0.83) is an interaction. iso-base reproduces
+the prior negative (stateful 0.17 = control). Repro (new seed) + n_keys 12 still running.
+
+Minor: crosspass result JSON now records n_reservoir/n_prefix/proj_dim/seed in params, so ablation
+runs are self-documenting (were only model/n_keys/steps/mode/input_scaling).
