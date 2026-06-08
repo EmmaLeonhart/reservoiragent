@@ -167,6 +167,8 @@ reservoir size and leak rate are the knobs for how much cross-pass state is carr
 
 ![Reservoir computing in the classical form: an input is projected by a fixed random W_in into a fixed random recurrent pool (the reservoir, spectral radius ρ ≈ 1), and only a linear readout W_out is trained. The RAN relocates this paradigm — the reservoir reads and writes a pretrained transformer's mid-layer attention instead of a scalar input, and attention is the readout surface.](docs/diagram-reservoir-computing.svg)
 
+![The echo state property, the condition that makes a reservoir usable: after an input arrives, its influence on the reservoir state decays toward zero over subsequent passes, and the influence of the initial state and the distant past vanishes. Reservoir memory is therefore fading and finite — its linear memory capacity grows with reservoir size (≤ N) — which is why reservoir size and leak rate are the levers for how much cross-pass state is carried.](docs/diagram-echo-state.svg)
+
 **The stateless-transformer ceiling.** A fixed-depth, finite-precision transformer is,
 per forward pass, confined to a low complexity class: saturated/float transformers are in
 TC⁰ (Merrill, Sabharwal & Smith, 2022), and log-precision transformers are captured by

@@ -2276,3 +2276,13 @@ Added a Limitations point saying exactly that, and noting the capacity-constrain
 (low lora_r, attn-only adapter — incl. the running #33) attack that axis; a bits-per-component
 decomposition is open. Mirrored to the site battery section. Response note in
 paper/reviews/post2765_response_notes.md. Resubmitted (material review-driven addition).
+
+## 2026-06-08 — second RC diagram: the echo state property (fading memory)
+
+Added docs/diagram-echo-state.svg — a node-style figure pairing with the RC schematic: an input
+impulse hits the fixed reservoir, and the influence-on-r(t) curve rises then decays toward zero over
+subsequent passes (fading memory); caption gives the echo state property (influence of the initial
+state and distant past vanishes; memory fading and finite, capacity grows with reservoir size).
+Hand-authored, ASCII-safe labels, verified via cairosvg (fixed a clipped caption + a duplicate input
+arrow). Placed in FINDINGS Related Work after the RC schematic and in the site's related-work
+section. Clears the optional second-RC-diagram queue item.
