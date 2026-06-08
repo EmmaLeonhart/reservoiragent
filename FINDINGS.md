@@ -116,6 +116,10 @@ random, and W_out (plus light upper-layer LoRA) the only trained parameters. The
 layers are frozen. Because the reservoir state is decoupled from the context window, it
 persists across genuinely independent forward passes, including unprompted ticks.
 
+![Architecture: a fixed random reservoir reads the attention output at a mid-depth layer through W_in, updates its state r(t), and writes back through the learned readout W_out, so the reservoir carries a history of the model's own attention dynamics across forward passes.](docs/diagram-architecture.svg)
+
+![The two injection variants. Additive: the readout is added as a single bias into the residual stream (the model learns to ignore it). Content-addressable (KV-prefix): the reservoir state becomes attendable key/value pseudo-tokens the upper layers query — the variant that yields cross-pass recall.](docs/diagram-residual-reservoir.svg)
+
 ## Related Work
 
 This section is the project's literature review, grounding the work in three bodies of
