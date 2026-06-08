@@ -1,68 +1,78 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 340" font-family="Georgia, 'Times New Roman', serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 380" font-family="Georgia, 'Times New Roman', serif">
   <defs>
-    <marker id="rc-fix" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
-      <path d="M0,0 L7,3 L0,6 Z" fill="#7a8a99"/>
+    <marker id="rc2-fix" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#6b7a86"/>
     </marker>
-    <marker id="rc-train" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+    <marker id="rc2-rec" markerWidth="8" markerHeight="8" refX="6" refY="2.6" orient="auto">
+      <path d="M0,0 L6,2.6 L0,5.2 Z" fill="#2f6f8f"/>
+    </marker>
+    <marker id="rc2-train" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
       <path d="M0,0 L7,3 L0,6 Z" fill="#c0392b"/>
-    </marker>
-    <marker id="rc-rec" markerWidth="8" markerHeight="8" refX="6" refY="2.6" orient="auto">
-      <path d="M0,0 L6,2.6 L0,5.2 Z" fill="#3f7a52"/>
     </marker>
   </defs>
 
-  <!-- title -->
-  <text x="380" y="26" text-anchor="middle" font-size="17" fill="#2b2b2b">Reservoir computing: a fixed random recurrent pool with a trained readout</text>
+  <!-- layer titles -->
+  <text x="95"  y="34" text-anchor="middle" font-size="16" fill="#2b2b2b">Input layer</text>
+  <text x="410" y="34" text-anchor="middle" font-size="16" fill="#2b2b2b">Reservoir layer</text>
+  <text x="725" y="34" text-anchor="middle" font-size="16" fill="#2b2b2b">Readout layer</text>
 
-  <!-- input nodes -->
-  <text x="70" y="80" text-anchor="middle" font-size="13" fill="#555">input u(t)</text>
-  <rect x="50" y="95"  width="34" height="34" rx="4" fill="#2f6f8f"/>
-  <rect x="50" y="158" width="34" height="34" rx="4" fill="#2f6f8f"/>
-  <rect x="50" y="221" width="34" height="34" rx="4" fill="#2f6f8f"/>
-
-  <!-- input -> reservoir (fixed W_in) -->
-  <g stroke="#7a8a99" stroke-width="2.2" fill="none" marker-end="url(#rc-fix)">
-    <path d="M86,112 C150,120 200,135 250,140"/>
-    <path d="M86,175 C150,170 210,168 250,170"/>
-    <path d="M86,238 C150,235 210,215 250,205"/>
-    <path d="M86,112 C160,160 200,210 252,230"/>
+  <!-- INPUT box + nodes -->
+  <rect x="60" y="70" width="70" height="220" rx="8" fill="#efe7d6" stroke="#b9ac90" stroke-width="1.5"/>
+  <g fill="#2f6f8f" stroke="#1f4f63" stroke-width="1.5">
+    <circle cx="95" cy="120" r="18"/>
+    <circle cx="95" cy="180" r="18"/>
+    <circle cx="95" cy="240" r="18"/>
   </g>
-  <text x="150" y="150" font-size="12" fill="#7a8a99" font-style="italic">W_in (fixed)</text>
 
-  <!-- reservoir ellipse -->
-  <ellipse cx="400" cy="185" rx="160" ry="110" fill="#f4efe6" stroke="#2b2b2b" stroke-width="2"/>
-  <text x="400" y="305" text-anchor="middle" font-size="13" fill="#555">fixed random reservoir (W, &#961; &#8776; 1)</text>
+  <!-- W_in arrows (fixed) -->
+  <g stroke="#6b7a86" stroke-width="2.4" fill="none" marker-end="url(#rc2-fix)">
+    <path d="M132,120 C190,128 215,150 250,160"/>
+    <path d="M132,180 C190,180 215,182 252,184"/>
+    <path d="M132,240 C190,235 215,215 250,208"/>
+  </g>
 
-  <!-- reservoir recurrent edges (fixed random) -->
-  <g stroke="#3f7a52" stroke-width="1.8" fill="none" marker-end="url(#rc-rec)">
-    <path d="M320,140 C360,120 410,120 452,135"/>
-    <path d="M452,150 C480,180 470,215 430,240"/>
-    <path d="M410,245 C360,260 330,235 330,200"/>
-    <path d="M345,165 C380,185 410,180 440,165"/>
-    <path d="M470,150 C500,185 495,210 470,228"/>
-    <path d="M335,205 C370,235 415,235 455,225"/>
+  <!-- RESERVOIR blob -->
+  <circle cx="410" cy="185" r="135" fill="#f6efdc" stroke="#2b2b2b" stroke-width="2.5"/>
+
+  <!-- recurrent edges (fixed random) -->
+  <g stroke="#2f6f8f" stroke-width="1.8" fill="none" marker-end="url(#rc2-rec)">
+    <path d="M330,135 C370,120 420,122 458,140"/>
+    <path d="M470,150 C500,180 488,220 446,242"/>
+    <path d="M420,250 C370,262 338,238 332,200"/>
+    <path d="M352,168 C388,188 420,182 452,166"/>
+    <path d="M345,210 C380,238 420,238 452,228"/>
+    <path d="M455,205 C430,195 405,200 388,215"/>
   </g>
 
   <!-- reservoir nodes -->
-  <g fill="#3f7a52">
-    <circle cx="320" cy="140" r="16"/>
-    <circle cx="400" cy="125" r="16"/>
-    <circle cx="468" cy="142" r="16"/>
-    <circle cx="345" cy="205" r="16"/>
-    <circle cx="430" cy="245" r="16"/>
-    <circle cx="478" cy="220" r="16"/>
+  <g fill="#2f6f8f" stroke="#1f4f63" stroke-width="1.5">
+    <circle cx="335" cy="135" r="17"/>
+    <circle cx="415" cy="120" r="17"/>
+    <circle cx="478" cy="150" r="17"/>
+    <circle cx="350" cy="210" r="17"/>
+    <circle cx="425" cy="250" r="17"/>
+    <circle cx="478" cy="222" r="17"/>
+    <circle cx="408" cy="185" r="17"/>
   </g>
 
-  <!-- reservoir -> output (trained W_out) -->
-  <g stroke="#c0392b" stroke-width="2.4" fill="none" marker-end="url(#rc-train)">
-    <path d="M484,142 C560,135 620,130 672,135"/>
-    <path d="M494,220 C570,215 620,210 672,210"/>
-    <path d="M484,142 C580,170 620,195 672,206"/>
+  <!-- W_out arrows (trained) -->
+  <g stroke="#c0392b" stroke-width="2.6" fill="none" marker-end="url(#rc2-train)">
+    <path d="M494,150 C570,140 630,150 686,168"/>
+    <path d="M494,222 C570,225 630,210 686,196"/>
+    <path d="M495,185 C580,185 630,182 686,182"/>
   </g>
-  <text x="600" y="120" font-size="12" fill="#c0392b" font-style="italic">W_out (trained)</text>
 
-  <!-- output nodes -->
-  <text x="700" y="80" text-anchor="middle" font-size="13" fill="#555">output</text>
-  <rect x="676" y="118" width="34" height="34" rx="4" fill="#c0392b"/>
-  <rect x="676" y="193" width="34" height="34" rx="4" fill="#c0392b"/>
+  <!-- OUTPUT box + node -->
+  <rect x="690" y="120" width="70" height="130" rx="8" fill="#efe7d6" stroke="#b9ac90" stroke-width="1.5"/>
+  <circle cx="725" cy="185" r="20" fill="#d98a2b" stroke="#9e5f12" stroke-width="1.5"/>
+
+  <!-- weight labels: the teaching point -->
+  <g font-size="15">
+    <text x="180" y="305" text-anchor="middle" fill="#2b2b2b">W<tspan baseline-shift="super" font-size="10">in</tspan> <tspan fill="#6b7a86">(fixed)</tspan></text>
+    <text x="410" y="345" text-anchor="middle" fill="#2b2b2b">W<tspan baseline-shift="super" font-size="10">res</tspan> <tspan fill="#2f6f8f">(fixed random, &#961; &#8776; 1)</tspan></text>
+    <text x="640" y="305" text-anchor="middle" fill="#2b2b2b">W<tspan baseline-shift="super" font-size="10">out</tspan> <tspan fill="#c0392b">(trained)</tspan></text>
+  </g>
+
+  <!-- readout equation -->
+  <text x="725" y="290" text-anchor="middle" font-size="15" fill="#2b2b2b" font-style="italic">y = &#931; w&#8338; x&#8338;</text>
 </svg>
