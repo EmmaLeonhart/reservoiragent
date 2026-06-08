@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 380" font-family="Georgia, 'Times New Roman', serif">
+  <defs>
+    <marker id="es-flow" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#6b7a86"/></marker>
+    <marker id="es-in" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2f6f8f"/></marker>
+  </defs>
+
+  <text x="410" y="28" text-anchor="middle" font-size="17" fill="#2b2b2b">The echo state property: the reservoir&#8217;s memory of an input fades with time</text>
+
+  <!-- ===== left: the reservoir taking an input impulse ===== -->
+  <circle cx="150" cy="200" r="78" fill="#f6efdc" stroke="#2b2b2b" stroke-width="2"/>
+  <text x="150" y="298" text-anchor="middle" font-size="12.5" fill="#2b2b2b">fixed random reservoir &#8212; state r(t)</text>
+  <g fill="#2f6f8f" stroke="#1f4f63" stroke-width="1.2">
+    <circle cx="120" cy="172" r="11"/><circle cx="182" cy="170" r="11"/><circle cx="128" cy="226" r="11"/><circle cx="178" cy="228" r="11"/><circle cx="150" cy="200" r="11"/>
+  </g>
+  <g stroke="#2f6f8f" stroke-width="1.4" fill="none" opacity="0.7">
+    <path d="M131,172 C150,182 165,178 172,172"/>
+    <path d="M124,218 C140,205 162,205 170,220"/>
+    <path d="M150,189 L150,160"/>
+  </g>
+
+  <!-- input impulse arriving -->
+  <g fill="#caa15a" stroke="#9e7a2e" stroke-width="1.3"><circle cx="56" cy="200" r="13"/></g>
+  <text x="56" y="234" text-anchor="middle" font-size="12.5" fill="#555">input u(t&#8320;)</text>
+  <path d="M70,200 L86,200" stroke="#2f6f8f" stroke-width="2.4" fill="none" marker-end="url(#es-in)"/>
+
+  <!-- ===== right: impulse-response decay (fading memory) ===== -->
+  <!-- axes -->
+  <g stroke="#9aa6ad" stroke-width="1.4" fill="none">
+    <path d="M330,290 L780,290"/>
+    <path d="M330,290 L330,80"/>
+  </g>
+  <text x="555" y="320" text-anchor="middle" font-size="12.5" fill="#555">time since the input (forward passes)</text>
+  <text x="318" y="150" text-anchor="middle" font-size="12.5" fill="#555" transform="rotate(-90 318 150)">influence on r(t)</text>
+
+  <!-- the decaying response curve: rises at the impulse, then washes out -->
+  <path d="M330,288 L355,110 C420,120 470,210 540,250 C600,278 690,287 778,289"
+        stroke="#2f6f8f" stroke-width="3" fill="none"/>
+  <!-- impulse marker -->
+  <circle cx="355" cy="110" r="4.5" fill="#c0392b"/>
+  <text x="360" y="100" font-size="12" fill="#c0392b">input arrives</text>
+
+  <!-- decay annotation + ESP condition -->
+  <text x="600" y="200" font-size="12.5" fill="#2f6f8f" font-style="italic">memory of u(t&#8320;) decays</text>
+  <text x="600" y="218" font-size="12.5" fill="#2f6f8f" font-style="italic">toward zero</text>
+
+  <!-- baseline note -->
+  <text x="410" y="350" text-anchor="middle" font-size="12" fill="#9e5f12" font-style="italic">echo state property: the influence of the initial state and the distant past vanishes</text>
+  <text x="410" y="368" text-anchor="middle" font-size="12" fill="#9e5f12" font-style="italic">memory is fading and finite &#8212; its capacity grows with reservoir size</text>
+</svg>

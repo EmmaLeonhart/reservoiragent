@@ -18,11 +18,6 @@
   `results/_w33_retain_hard.log`. Fold the verdict into FINDINGS + site; claim retention only if the
   lift survives the stateless control across epochs.
 
-- **Second reservoir-computing diagram — echo-state-property / fading memory.** The RC schematic SVG
-  (`docs/diagram-reservoir-computing.svg`) is in the paper + site. Add a second node-style figure
-  illustrating fading memory / the echo state property (past input influence decaying) from the
-  reference set, to pair with the existing RC schematic.
-
 ## Grok's reception (address the negatives and lean into the positives if possible)
 
 Quick high-level take

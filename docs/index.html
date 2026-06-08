@@ -338,6 +338,16 @@
     the reservoir reads/writes a pretrained transformer's mid-layer attention instead of a scalar input.
   </figcaption>
 </figure>
+<figure>
+  <img src="diagram-echo-state.svg" alt="Echo state property: after an input impulse arrives, its influence on the reservoir state rises then decays toward zero over subsequent forward passes; the influence of the initial state and the distant past vanishes, so reservoir memory is fading and finite, with capacity growing with reservoir size.">
+  <figcaption>
+    <strong>The echo state property &mdash; why a reservoir is usable.</strong> After an input arrives, its
+    influence on the state decays toward zero over the following passes, and the effect of the initial
+    state and the distant past washes out. Reservoir memory is therefore <em>fading</em> and finite &mdash;
+    its linear memory capacity grows with reservoir size (&le; N) &mdash; which is why reservoir size and
+    leak rate are the levers for how much cross-pass state is carried.
+  </figcaption>
+</figure>
 <p>
   Three bodies of prior work ground this study. <strong>Reservoir computing</strong>: fixing the
   recurrent weights at random and training only a readout is the echo-state-network (Jaeger, 2001)
