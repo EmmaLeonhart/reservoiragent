@@ -16,6 +16,16 @@
   the current architecture diagrams. Author original SVGs (don't copy the references), place inline,
   bundle into the PDF/arXiv build like the existing diagrams.
 
+  Remove all of the file paths referenced in the paper. Like why the fuck did this go through?
+
+  "An always-alive Reservoir Agent runs blank ticks — autonomous passes with no user input. Each
+silent tick still appends to the KV cache, so a continuously-running agent burns its context window
+faster than a turn-based model that only runs when prompted. Left unmanaged the cache grows
+linearly with the number of ticks and the agent eventually hits its context limit on idle activity
+alone. This is the operational challenge raised in an architecture design discussion (transcript in
+data_lake/transcripts/): "context explodes on a reservoir agent because a reservoir agent
+gets an input of blank.""
+
 
 ## Grok's reception (address the negatives and lean into the positives if possible)
 
