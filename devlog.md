@@ -1990,3 +1990,11 @@ more training -> upper bound is real, not a step-budget artifact), 12 keys 0.17/
 loss 2.7 -> per-run optimization artifact, not a capacity point). Sharpens the capacity finding:
 ceiling ~a few dozen items is genuine; curve noise = per-run variance. Folded into FINDINGS+site.
 Resubmitting (batched with the earlier QA fix).
+
+## 2026-06-07 — #26: battery content=0 is capacity-limited (1200-word pool >> ceiling)
+
+Battery @ Qwen-1.5B with the recall-winning config (2048/noproj/scale0.1): epoch 0 content ~0
+(recall 0.00, accumulate 0.06, mean 0.009, lift -0.018). The recall-winning config does NOT rescue
+battery content — because the battery recalls over a 1200-WORD pool, far beyond the ~dozens capacity
+ceiling (#24/#25). Connects the capacity finding to the battery. Pivoted to #27: battery with a
+16-word pool (within capacity) — does content lift now? Added Phase J record to queue.md.
