@@ -2074,3 +2074,18 @@ state (directly targets the "learns to ignore the recurrent state" drift). Gated
 (default off; existing behaviour provably unchanged). Wired RESERVOIR_AUX_WEIGHT/MARGIN into
 train_large. 3 wiring tests (no-op when off, finite loss, state restored) pass. Next: run the content
 battery with aux_weight>0 — does the lift now HOLD across epochs?
+
+## 2026-06-08 — adopt Sutra NeurIPS paper format + address Emma queue instructions
+
+(1) Paper format: adopted the Sutra repo's NeurIPS-2026 LaTeX build. Added paper/paper.tex (wrapper
+with \ifanon named/anonymized switch, unicode + pandoc shims), paper/neurips_2026.sty, and
+.github/workflows/paper-pdf.yml (preprocess FINDINGS.md -> pandoc -> paper.tex.body -> latexmk named
++ anonymized PDFs + arXiv tarball). FINDINGS.md stays the single source (Pages report + clawRxiv read
+it too); the LaTeX build consumes it. Verified the pandoc body generates cleanly locally (sections,
+no escaping breakage).
+(2) Removed the inaccessible literature/REVIEW.md + results/*.json + scripts/*.py file-path refs
+peppered through the paper (Emma's objection) — replaced with "References" prose / dropped.
+(3) Style: "feasibility + dynamics study" -> "feasibility and dynamics study" (and another "+");
+caps-shouting already gone except legit acronyms.
+(4) Cleared queue.md of all Done-Phase records (they live in devlog + git log) down to current work
++ the pinned cron tail.
