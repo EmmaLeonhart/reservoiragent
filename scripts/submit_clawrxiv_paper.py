@@ -318,6 +318,8 @@ def main() -> int:
         "FreezeTST\n(2025)": "a recent frozen-reservoir time-series model",
         "FreezeTST (2025)": "a recent frozen-reservoir time-series model",
         "Reservoir Transformers (Shen et al., 2021)": "earlier reservoir-transformer work",
+        "(Köster & Uchida, 2025)": "(recent work)",
+        "Köster, F., & Uchida, A. (2025). *Reservoir Computing as a Language Model.*": "Recent work compares reservoir computing against transformers as language models.",
         "(The 2025 items are recent preprints; arXiv identifiers are given so they can be verified.)": "",
     }
     for k, v in _vague.items():

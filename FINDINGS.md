@@ -120,6 +120,18 @@ persists across genuinely independent forward passes, including unprompted ticks
 
 ![The two injection variants. Additive: the readout is added as a single bias into the residual stream (the model learns to ignore it). Content-addressable (KV-prefix): the reservoir state becomes attendable key/value pseudo-tokens the upper layers query — the variant that yields cross-pass recall.](docs/diagram-residual-reservoir.svg)
 
+**Design rationale: the reservoir adds memory to a proven system, rather than being the system.**
+Classical reservoir computing has a well-known reliability problem — the quality of a fixed random
+reservoir varies, so getting a usable one typically means generating and selecting over many
+candidates, and the readout carries all task performance. This project deliberately sidesteps that:
+the reservoir is injected into a *pretrained, well-proven* transformer and the model is *fine-tuned*
+(readout + light LoRA) to read from it, so the reservoir's only job is to **add a memory channel**
+to a system that already works, not to be the computational substrate. This is consistent with our
+N-seed selection experiment, which finds that *which* fixed reservoir one draws is not a significant
+predictor of performance at our budget (selection is dominated by run-to-run training noise) — so
+relying on reservoir selection would be fragile, and folding the burden onto fine-tuning the readout
+into a capable backbone is the more robust design.
+
 ## Related Work
 
 This section is the project's literature review, grounding the work in three bodies of
@@ -175,6 +187,10 @@ Reservoir Transformers (Shen et al., 2021, arXiv:2012.15045), Echo State Transfo
 (2025, arXiv:2508.18130) — each differ on at least one load-bearing axis (none
 injects into a *pretrained* LLM's attention with a *fixed-random* reservoir carrying
 state across *independent* passes); they are trained-from-scratch and within-sequence.
+A concurrent line compares reservoir computing *directly against* transformers as language models
+(Köster & Uchida, 2025, arXiv:2507.15779), finding reservoirs more compute-efficient but lower in
+prediction quality — orthogonal to our aim, which is to *inject* a reservoir into a pretrained
+transformer to add cross-pass memory, not to replace the transformer with a reservoir.
 (The 2025 items are recent preprints; arXiv identifiers are given so they can be verified.)
 This places the combination as novel against the verified prior art, with the caveat that
 the 2024–2026 landscape moves quickly and a verified absence is not a proof of absence.
@@ -994,6 +1010,16 @@ epoch-1 lift is retained (the counterfactual "use-the-state" loss is the first a
 which the minimal single-token probe does not test; and (iv) mapping the input-scaling optimum's
 dependence on layer, model, and spectral radius, and wiring it as the injection-hook default.
 
+A distinct risk this design raises is **context growth**: an always-alive agent that runs every
+tick — including unprompted, no-input ticks — appends to the KV cache faster than a turn-based
+model, so its context window fills sooner. Context management therefore becomes *more* important in
+a reservoir agent than in a standard one, and is under-developed here (we prototype a
+reservoir-pinned StreamingLLM-style eviction, but do not train against it). A promising direction we
+could not pursue on a consumer GPU is to pair the reservoir with a base model that has a **learned**
+context-management / compressed-attention mechanism — e.g. DeepSeek-V4-Flash — so the model could
+learn to lean on the persistent reservoir for idle-time signal while keeping its token cache small;
+the model is far beyond this hardware, so this remains future work.
+
 ---
 
 ## Appendix
@@ -1189,6 +1215,7 @@ The works the claims above rest on:
 Jaeger, H. (2001). *The "echo state" approach to analysing and training recurrent neural networks.* GMD Report 148.
 Maass, W., Natschläger, T., & Markram, H. (2002). *Real-time computing without stable states (liquid state machines).* Neural Computation 14(11):2531–2560.
 Lukoševičius, M., & Jaeger, H. (2009). *Reservoir computing approaches to recurrent neural network training.* Computer Science Review.
+Köster, F., & Uchida, A. (2025). *Reservoir Computing as a Language Model.* arXiv:2507.15779.
 
 **Transformer expressivity (motivation, not a result here).**
 Hahn, M. (2020). *Theoretical Limitations of Self-Attention in Neural Sequence Models.* TACL. arXiv:1906.06755.

@@ -2157,3 +2157,13 @@ The clawRxiv AI reviewer keeps flagging specific 2025 named citations + arXiv ID
 only genericizes them (strip arXiv:IDs, replace "Echo State Transformer (2025)" etc. with vague
 prior-art mentions) via submit_clawrxiv_paper.py. Verified: 0 arXiv IDs / 0 specific 2025 cites in
 the clawRxiv content.
+
+## 2026-06-08 — barrel through queue: reliability framing, future-work context mgmt, cite 2507.15779
+
+(28) Added a "Design rationale" paragraph to Architecture: the reservoir adds memory to a proven
+(pretrained) system rather than being the substrate, deliberately sidestepping RC's reservoir-
+selection reliability problem (consistent with our N-seed selection-is-noise finding). (30) Future
+work now flags context-growth risk + context-management importance in an always-alive agent, and the
+DeepSeek-V4-Flash learned-context-management direction (compute-gated). (26) Acknowledged Koster &
+Uchida 2025 "Reservoir Computing as a Language Model" (arXiv:2507.15779) in Related Work + References
+(genericized for clawRxiv). Cleared resolved queue items; only the RC reference-diagrams item remains.
