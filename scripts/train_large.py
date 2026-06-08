@@ -21,6 +21,7 @@ Config via env vars (with defaults):
     RESERVOIR_SILENCE_WEIGHT 1.0   up-weight "stay shut" (fights gate over-firing)
     RESERVOIR_OUT     <repo name>  local artifact dir under artifacts/ (default: HF repo segment)
     RESERVOIR_TASKS   <mix>        override the task weights, e.g. "recall:1,deferred:1" (default: 8-task mix)
+    RESERVOIR_LORA_R  8            LoRA rank; lower constrains the stateless shortcut (state-retention probe)
 
 Run:  python scripts/train_large.py        (needs torch + GPU + HF write auth)
 """
@@ -73,6 +74,7 @@ def main() -> int:
     silence_weight = _env("RESERVOIR_SILENCE_WEIGHT", "1.0", float)  # up-weight "stay shut" to fight gate over-firing
     proj_dim = _env("RESERVOIR_PROJ", "0", int) or None        # fixed down-projection for huge reservoirs
     lora_target = _env("RESERVOIR_LORA_TARGET", "all", str)    # adapt MLP too, not just attention
+    lora_r = _env("RESERVOIR_LORA_R", "8", int)                # lower r constrains the stateless shortcut
     # Local artifact dir, derived from the HF repo's last path segment by default so distinct
     # runs (e.g. different silence_weight) don't clobber each other's local index.json /
     # epoch_<n> dirs. Override with RESERVOIR_OUT.
@@ -96,7 +98,7 @@ def main() -> int:
 
     lm = TorchReservoirPrefixInjectedLM(model, n_reservoir=n_res, n_prefix=n_prefix,
                                         input_scaling=inscale, dtype="bfloat16", seed=0,
-                                        lora_target=lora_target, proj_dim=proj_dim)
+                                        lora_target=lora_target, proj_dim=proj_dim, lora_r=lora_r)
     print(f"[train_large] emit_weight {emit_weight} | silence_weight {silence_weight} | "
           f"proj_dim {proj_dim} | lora_target {lora_target}", flush=True)
     pool = B.large_word_pool(lm.tokenizer, vocab)
