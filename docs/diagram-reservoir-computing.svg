@@ -66,13 +66,13 @@
   <rect x="690" y="120" width="70" height="130" rx="8" fill="#efe7d6" stroke="#b9ac90" stroke-width="1.5"/>
   <circle cx="725" cy="185" r="20" fill="#d98a2b" stroke="#9e5f12" stroke-width="1.5"/>
 
-  <!-- weight labels: the teaching point -->
-  <g font-size="15">
-    <text x="180" y="305" text-anchor="middle" fill="#2b2b2b">W<tspan baseline-shift="super" font-size="10">in</tspan> <tspan fill="#6b7a86">(fixed)</tspan></text>
-    <text x="410" y="345" text-anchor="middle" fill="#2b2b2b">W<tspan baseline-shift="super" font-size="10">res</tspan> <tspan fill="#2f6f8f">(fixed random, &#961; &#8776; 1)</tspan></text>
-    <text x="640" y="305" text-anchor="middle" fill="#2b2b2b">W<tspan baseline-shift="super" font-size="10">out</tspan> <tspan fill="#c0392b">(trained)</tspan></text>
+  <!-- weight labels: the teaching point (glyph-safe; superscripts via dy, no sub/superscript unicode) -->
+  <g font-size="15" text-anchor="middle" fill="#2b2b2b">
+    <text x="180" y="307">input weights <tspan fill="#6b7a86">(fixed)</tspan></text>
+    <text x="410" y="352">recurrent weights <tspan fill="#2f6f8f">(fixed random, &#961; &#8776; 1)</tspan></text>
+    <text x="638" y="307">readout <tspan fill="#c0392b">(trained)</tspan></text>
   </g>
 
-  <!-- readout equation -->
-  <text x="725" y="290" text-anchor="middle" font-size="15" fill="#2b2b2b" font-style="italic">y = &#931; w&#8338; x&#8338;</text>
+  <!-- readout equation (ASCII-safe) -->
+  <text x="725" y="288" text-anchor="middle" font-size="15" fill="#2b2b2b" font-style="italic">y = &#931; w&#183;x</text>
 </svg>

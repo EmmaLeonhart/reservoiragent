@@ -10,12 +10,9 @@
 
 ## Current work
 
-- **More reservoir-computing diagrams (optional follow-up).** One original RC schematic SVG
-  (`docs/diagram-reservoir-computing.svg`) is now in the paper + site. Could add a second (e.g. the
+- **More reservoir-computing diagrams (optional follow-up).** The RC schematic SVG
+  (`docs/diagram-reservoir-computing.svg`) is in the paper + site. Could add a second (e.g. the
   echo-state-property / fading-memory picture) from the reference set if more illustration is wanted.
-
-- This Reservoir Agent · research report · report site: https: // emmaleonhart. github. io/
-reservoiragent/ This thing is present on it, but it's just straight up the wrong site. https://reservoir.emmaleonhart.com is where it's at
 
 ## Grok's reception (address the negatives and lean into the positives if possible)
 

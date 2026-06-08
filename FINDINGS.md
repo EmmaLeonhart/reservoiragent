@@ -244,7 +244,7 @@ regardless of its capability level.
 ## Results
 
 *All figures referenced below are in the accompanying report:
-<https://emmaleonhart.github.io/reservoiragent/>.*
+<https://reservoir.emmaleonhart.com>.*
 
 ### H1 — the reservoir injects without breaking the base model
 
@@ -1245,4 +1245,4 @@ DeepSeek-AI (2024). *DeepSeek-V2* (Multi-head Latent Attention). arXiv:2405.0443
 ---
 
 *Reservoir Agent · research report · report site:
-<https://emmaleonhart.github.io/reservoiragent/>*
+<https://reservoir.emmaleonhart.com>*

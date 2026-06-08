@@ -2192,3 +2192,11 @@ W_in(fixed)/W_res(fixed)/W_out(trained) — the teaching point. Redesigned docs/
 computing.svg (hand-authored original SVG, not a converter) into the three-layer Input/Reservoir/
 Readout style with those fixed-vs-trained weight labels + the y = sum w_i x_i readout, in the site
 palette. Replaces my earlier generic version.
+
+## 2026-06-08 — RC diagram labels fixed (verified render) + correct site URL
+
+Redesigned RC SVG had glyph collisions (W^in superscripts overlapping text; subscript-i -> tofu
+boxes). Switched to clean descriptive labels (input/recurrent/readout weights, fixed/fixed-random/
+trained), verified by rendering locally with cairosvg — clean now. Also fixed the paper footer URL
+emmaleonhart.github.io/reservoiragent -> reservoir.emmaleonhart.com (2 instances) per Emma; the site
+already used the right domain.
