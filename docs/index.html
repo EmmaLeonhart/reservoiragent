@@ -274,7 +274,7 @@
       transformer (Transformer-XL, RMT, Block-Recurrent, Mamba, Titans&hellip;) uses
       <em>trained</em> recurrence carrying state <em>within</em> a sequence; none uses a
       <em>fixed-random</em> reservoir with state across <em>independent</em> passes.
-      Full survey: <code>literature/REVIEW.md</code>.
+      The full survey, with the prior-art gap table, is in <a href="#related-work">Related work</a> below.
     </p>
   </div>
   <div class="pillar">
@@ -299,6 +299,46 @@
     </p>
   </div>
 </div>
+
+<h2 id="related-work">Related work</h2>
+<p>
+  Three bodies of prior work ground this study. <strong>Reservoir computing</strong>: fixing the
+  recurrent weights at random and training only a readout is the echo-state-network (Jaeger, 2001)
+  and liquid-state-machine (Maass, 2002) paradigm. Usable behaviour needs the <em>echo state
+  property</em> (past influence must fade); the spectral-radius ρ&nbsp;&lt;&nbsp;1 recipe and the
+  "edge of chaos" heuristic are priors, not answers — disputed in the literature — which is why we
+  measure the regime rather than assume it, and reservoir memory is fading, capacity-bounded by size.
+  <strong>The stateless-transformer ceiling</strong>: a finite-precision transformer is, per forward
+  pass, in TC&#8304;/FO(M) (Merrill &amp; Sabharwal, 2023; Hahn, 2020); cross-pass state is the
+  documented lever past it, though the known escapes need arbitrary precision — so whether a
+  finite-precision reservoir lifts the bound is posed as an open question, not asserted.
+  <strong>Recurrence-augmented transformers</strong> are the closest prior art, classified on two axes:
+</p>
+<figure>
+  <table class="datatable">
+    <thead><tr><th>System</th><th>Recurrence</th><th>State persistence</th></tr></thead>
+    <tbody>
+      <tr><td>Transformer-XL, Compressive</td><td>trained</td><td>within sequence (cached segment)</td></tr>
+      <tr><td>Universal Transformer</td><td>trained</td><td>intra-pass depth (not temporal)</td></tr>
+      <tr><td>Block-Recurrent Transformer</td><td>trained (gates)</td><td>within sequence</td></tr>
+      <tr><td>Memorizing Transformers</td><td>trained retrieval</td><td>within document (stored kNN)</td></tr>
+      <tr><td>Recurrent Memory Transformer</td><td>trained (memory tokens)</td><td>across segments of one sequence</td></tr>
+      <tr><td>RWKV, RetNet, S4 / Mamba</td><td>trained</td><td>within sequence (RNN/SSM form)</td></tr>
+      <tr><td>Titans</td><td>trained (test-time updates)</td><td>within a stream</td></tr>
+      <tr><td><strong>RAN (this work)</strong></td><td><strong>fixed-random</strong></td><td><strong>across independent passes</strong></td></tr>
+    </tbody>
+  </table>
+  <figcaption>
+    Every prior system uses <em>trained</em> recurrence carrying state <em>within</em> a sequence. The RAN
+    occupies the empty cell: a <em>fixed-random</em> reservoir whose state persists across genuinely
+    independent passes (including unprompted ticks), injected into a <em>pretrained, frozen</em> backbone.
+    Block-Recurrent Transformer documents the same "model learns to ignore the recurrent state" failure we
+    observe. The nearest 2021&ndash;2025 items (Reservoir Transformers, Echo State Transformer, Echo Flow
+    Networks, FreezeTST) each differ on at least one of those axes (all trained-from-scratch and
+    within-sequence) — so the combination is novel against the verified prior art, with the caveat that the
+    field moves quickly.
+  </figcaption>
+</figure>
 
 <h2>How the reservoir enters attention</h2>
 <p>
