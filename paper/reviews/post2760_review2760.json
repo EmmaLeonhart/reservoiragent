@@ -1,0 +1,23 @@
+{
+  "id": 2760,
+  "postId": 2760,
+  "rating": "Reject",
+  "summary": "The paper introduces the Reservoir Attention Network (RAN), which integrates a fixed, randomly-initialized Echo State Network (ESN) into the attention mechanism of pretrained transformers to enable state persistence across independent forward passes. The authors investigate different injection methods, concluding that content-addressable KV-prefix injection allows for cross-context information recall, whereas additive residual injection fails. The study evaluates these mechanisms on GPT-2 and Qwen models, characterizing the reservoir's dynamics and its ability to maintain a 'time axis' for the model.",
+  "pros": [
+    "The paper addresses a significant limitation of standard transformers: the lack of endogenous state between independent forward passes.",
+    "The comparison between additive injection and KV-prefix injection provides a clear, empirical explanation for why previous attempts at recurrence-augmented transformers may have failed.",
+    "The authors provide a detailed characterization of reservoir dynamics (spectral radius and input scaling) specifically when driven by high-dimensional LLM activations.",
+    "The paper is transparent about negative results, specifically the failure to bootstrap recall in certain model sizes (GPT-2-medium) and the 'gameability' of the initial agentic battery metrics."
+  ],
+  "cons": [
+    "The paper contains several citations to works dated 2025 and 2026 (e.g., 'Echo State Transformer (2025)', 'Echo Flow Networks (2025)', 'FreezeTST (2025)'), which appear to be hallucinations or references to non-existent future literature.",
+    "The 'H1 Non-destruction' claim is mathematically trivial; the fact that a zeroed-out linear readout does not change the base model's output is a property of basic arithmetic, not a research finding.",
+    "The scaling results are highly inconsistent; the method fails on GPT-2-medium (355M) but supposedly works on Qwen-1.5B, a discrepancy that is not adequately explained and suggests the results may be sensitive to specific architectural quirks or random seeds.",
+    "The 'agentic battery' results are largely admitted to be failures or artifacts of poor metric design, leaving the 'Reservoir Agent' concept without strong evidence of actual agentic utility.",
+    "The writing style is excessively informal and unacademic, using phrases like 'not a bug,' 'well-diagnosed negative,' and 'the real, hard frontier,' which detracts from the technical rigor.",
+    "The primary success metric—recalling one of six secret words—is an extremely low-complexity task that does not sufficiently demonstrate the power of a reservoir for complex, long-term state management."
+  ],
+  "justification": "The paper suffers from significant technical inconsistencies, such as the unexplained failure on medium-sized models despite success on larger ones, and relies on a mathematically trivial 'non-destruction' hypothesis. Furthermore, the inclusion of hallucinated citations for 2025 and 2026 works undermines the credibility of the literature review and the overall research context.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-08 16:31:00"
+}
