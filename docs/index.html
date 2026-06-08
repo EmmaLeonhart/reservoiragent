@@ -457,8 +457,11 @@
   ~0.42 at 24 keys</strong> (≈10× the 1/24 chance, control 0.04), and <strong>chance by 48</strong>. The curve
   is noisy from single 800-step runs (the 12-key point underperforms 24 &mdash; its loss stalled &mdash; so a
   clean curve would need several seeds per point), but recall degrades <em>gracefully</em> into the tens of items
-  rather than collapsing past six. So the reservoir scales both the <em>model</em> it works in and a non-trivial
-  <em>number of items</em>, the latter with a real upper bound.
+  rather than collapsing past six. Re-running the two non-converged points at 2000 steps separates a real
+  ceiling from undertraining: 48 keys stays at chance (0.04 vs 0.02) even with more training &mdash; the bound
+  is real &mdash; while the 12-key point stays stuck at both budgets (a per-run optimization artifact). So the
+  reservoir scales both the <em>model</em> it works in and a non-trivial <em>number of items</em> (a few dozen),
+  the latter with a real upper bound.
 </p>
 <figure>
   <img src="capacity_qwen15b.png" alt="Bar chart of Qwen-1.5B cross-pass recall (stateful vs wiped-reservoir control) at 6, 12, 24, and 48 keys: stateful 1.00 at 6 keys far above its 0.17 control, ~0.42 at 24 keys above a 0.04 control, and at chance (~0.02) by 48 keys, with the 12-key point lower than 24 due to undertraining.">

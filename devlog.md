@@ -1982,3 +1982,11 @@ Rendered docs/crossmodel_recall.png (plot_recall_bars over per-model best-config
 model in size order — GPT-2-small 1.0, GPT-2-medium chance, Qwen-0.5B 1.0, Qwen-1.5B 1.0, Hermes-3B
 (4bit) chance. Visualizes the non-monotonic, model-specific boundary. Embedded in the site after the
 cross-model paragraph.
+
+## 2026-06-07 — #25 budget test: capacity ceiling is real (not undertraining)
+
+2000-step re-run of the two non-converged capacity points: 48 keys 0.04/0.02 (still chance with
+more training -> upper bound is real, not a step-budget artifact), 12 keys 0.17/0.08 (still stuck,
+loss 2.7 -> per-run optimization artifact, not a capacity point). Sharpens the capacity finding:
+ceiling ~a few dozen items is genuine; curve noise = per-run variance. Folded into FINDINGS+site.
+Resubmitting (batched with the earlier QA fix).

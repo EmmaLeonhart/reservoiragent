@@ -579,9 +579,13 @@ gives recall **1.00 at 6 keys, ~0.42 at 24 keys (≈10× the 1/24 chance, contro
 by 48** (0.02 vs 0.02). The curve is noisy from single 800-step runs — the 12-key point underperforms
 24 (0.17, its loss stalled at 2.33 while 24-key converged to 0.46), so a clean curve would need
 several seeds per point — but the trend is clear: recall degrades *gracefully* into the tens of
-items rather than collapsing past six, and only reaches chance around 48. So the reservoir scales
-both the *model* it works in and a non-trivial *number of items* (tens), the latter with a real
-upper bound. The earlier "resists every fix short of much greater scale" reading was wrong because
+items rather than collapsing past six, and only reaches chance around 48. Re-running the two
+non-converged points at **2000 steps** (vs 800) separates a real ceiling from undertraining: the
+48-key point stays at **chance (0.04 vs 0.02)** with more training — so the upper bound is real,
+not a step-budget artifact — while the 12-key point stays **stuck (0.17, loss ~2.7)** at both
+budgets, confirming it is a per-run optimization artifact rather than a capacity point. So the
+reservoir scales both the *model* it works in and a non-trivial *number of items* (tens), the
+latter with a real upper bound around a few dozen items. The earlier "resists every fix short of much greater scale" reading was wrong because
 it never sized the reservoir up: the
 single-machine lever that moves the 1.5B wall is reservoir size.
 
