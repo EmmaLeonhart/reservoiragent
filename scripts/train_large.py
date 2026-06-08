@@ -22,6 +22,8 @@ Config via env vars (with defaults):
     RESERVOIR_OUT     <repo name>  local artifact dir under artifacts/ (default: HF repo segment)
     RESERVOIR_TASKS   <mix>        override the task weights, e.g. "recall:1,deferred:1" (default: 8-task mix)
     RESERVOIR_LORA_R  8            LoRA rank; lower constrains the stateless shortcut (state-retention probe)
+    RESERVOIR_AUX_WEIGHT  0.0      counterfactual "use-the-state" loss weight (penalises the wiped-path shortcut)
+    RESERVOIR_AUX_MARGIN  1.0      nats the wiped-reservoir prediction must be worse by
 
 Run:  python scripts/train_large.py        (needs torch + GPU + HF write auth)
 """
@@ -75,6 +77,8 @@ def main() -> int:
     proj_dim = _env("RESERVOIR_PROJ", "0", int) or None        # fixed down-projection for huge reservoirs
     lora_target = _env("RESERVOIR_LORA_TARGET", "all", str)    # adapt MLP too, not just attention
     lora_r = _env("RESERVOIR_LORA_R", "8", int)                # lower r constrains the stateless shortcut
+    aux_weight = _env("RESERVOIR_AUX_WEIGHT", "0.0", float)    # counterfactual "use-the-state" term (0=off)
+    aux_margin = _env("RESERVOIR_AUX_MARGIN", "1.0", float)    # nats the wiped path must be worse by
     # Local artifact dir, derived from the HF repo's last path segment by default so distinct
     # runs (e.g. different silence_weight) don't clobber each other's local index.json /
     # epoch_<n> dirs. Override with RESERVOIR_OUT.
@@ -168,7 +172,8 @@ def main() -> int:
     def train_step():
         nonlocal step, running
         ep = sample_episode(rng, weights)
-        loss = episode_loss(lm, ep, emit_weight=emit_weight, silence_weight=silence_weight)
+        loss = episode_loss(lm, ep, emit_weight=emit_weight, silence_weight=silence_weight,
+                            aux_weight=aux_weight, aux_margin=aux_margin)
         opt.zero_grad()
         loss.backward()
         opt.step()
