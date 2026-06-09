@@ -566,7 +566,20 @@
   lift <strong>+0.339</strong>) and oscillates rather than settling &mdash; <strong>+0.255 &rarr; +0.339 &rarr;
   +0.062 &rarr; +0.135</strong> over epochs 0&ndash;3 &mdash; so the peak is not held. So the two failure modes
   are distinct: capacity denial removes the stateless-shortcut drift but exposes a training-instability of the
-  reservoir solution. Retention needs both fixed, and stays open.
+  reservoir solution. Retention needs both fixed.
+</p>
+<p>
+  <strong>Fixing both retains the recall &mdash; the first stable retention result.</strong> The instability in
+  the run above is an overshoot of a <em>flat</em> learning rate (the same pathology the battery loop already
+  documents). Adding a <strong>cosine learning-rate decay</strong> to 0 over the run, on top of the capacity
+  denial, removes it: the reservoir-driven recall climbs <strong>monotonically</strong> and holds at the converged
+  endpoint &mdash; mean lift <strong>+0.089 &rarr; +0.089 &rarr; +0.130 &rarr; +0.292</strong>, recall
+  <strong>0.08 &rarr; 0.19 &rarr; 0.35 &rarr; 1.00</strong>, with the stateless control pinned at 0.000 throughout
+  and <strong>no collapse</strong>. So battery retention is achievable, and the recipe is specific: deny the
+  stateless shortcut its adapter capacity (so the carried state is the only route) <em>and</em> decay the learning
+  rate (so the solution settles instead of overshooting). Two caveats keep it honest: it is a single run
+  (seed-robustness untested), and it is <em>recall</em> that retains at 1.00 &mdash; the harder content tasks
+  (accumulate, sequence, deferred) stay low, so this is retention of the recall capability, not the whole battery.
 </p>
 <figure>
   <img src="battery_lift_eval48.png" alt="Per-epoch capability mean for the content battery: the reservoir (carried-state) curve rises to ~0.20 at epoch 1 while the stateless control stays near zero, then both fall together to ~0.08 by epoch 2 — the reservoir-driven lift appears at epoch 1 and is lost by epoch 2.">

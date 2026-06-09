@@ -2425,3 +2425,18 @@ citation audit, data audit, register + file-path cleanup, abstract/contributions
 all done). Remaining: fold #34 at DONE, a light final coherence skim, final arXiv packaging, and two
 open user decisions (12-key re-run? branch/installer cleanup?). Also verified abstract <->
 contributions <-> results are mutually consistent (no stale claims), no edit needed.
+
+## 2026-06-08 — #34 RETENTION WIN: cosine LR + capacity denial retains battery recall
+
+#34 (= #33 config + RESERVOIR_COSINE=1) completed: the reservoir-driven battery recall is RETAINED.
+Trajectory: mean lift +0.089 -> +0.089 -> +0.130 -> +0.292; recall 0.08 -> 0.19 -> 0.35 -> 1.00;
+stateless control pinned at 0.000 all 4 epochs; monotonic climb, NO collapse (unlike #33's flat-LR
+spike-collapse). This closes the #32->#33->#34 arc: #32 aux-loss alone fails (control rises to match);
+#33 capacity denial (lora_r=4 attn) keeps control at 0 but flat LR makes the solution unstable; #34
+adds cosine LR decay -> both failure modes fixed -> recall retains at 1.00 against a 0.000 control.
+The recipe: deny the stateless shortcut its adapter capacity AND decay the LR. First stable retention
+result. Caveats (kept in the paper): single run (seed-robustness untested, no more experiments this
+session per the 6:30 cutoff); RECALL retains at 1.00 while the harder content tasks
+(accumulate/sequence/deferred) stay low (~0.02-0.12) -> retention of recall, not the whole battery.
+Folded into the abstract (4th result), the battery limitation bullet (now a resolved positive), and
+the site battery section. Material positive -> resubmitting to clawRxiv. Run results/_w34_cosine.log.

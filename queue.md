@@ -17,12 +17,11 @@ package, add the AI-use declaration, and get the citations + coherence perfect. 
 
 ## Current work — finish the last experiment, then arXiv prep
 
-- **#34 stabilization probe — cosine LR decay (in flight, ~epoch 3, finishes before 6:30).** #33's
-  reservoir solution oscillated (peak recall 1.00 @ epoch 1, then collapse) under a flat LR; #34 = #33
-  config + `RESERVOIR_COSINE=1`. Trajectory so far diverges from #33: lift climbs monotonically
-  +0.089 → +0.089 → +0.130 (recall 0.08 → 0.19 → 0.35), control pinned at 0, **no collapse**. Fold the
-  full verdict at DONE into FINDINGS + site; claim a stable lift only if epoch 3 holds ≥ epoch 2 against
-  the control. **This is the last experiment — nothing after it.**
+- **#34 — DONE: retention WIN (folded).** Cosine LR + capacity denial retains reservoir-driven recall:
+  lift +0.089 → +0.089 → +0.130 → +0.292, **recall 0.08 → 0.19 → 0.35 → 1.00**, control pinned at 0.000,
+  monotonic, no collapse. First stable retention result; the recipe is deny-the-shortcut-capacity +
+  decay-the-LR. Folded into abstract + battery limitation + site (with single-run / recall-only caveats).
+  Last experiment of the session — nothing after it.
 
 ## arXiv preparation — remaining
 
