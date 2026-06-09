@@ -32,8 +32,11 @@ register pass + internal file-path cleanup; abstract↔contributions↔results c
 
 - **Final coherence read-through (light).** The main register/path/consistency offenders are fixed; a last
   holistic skim for flow + repetition before freezing for arXiv.
-- **Final arXiv packaging.** Confirm metadata (title/author/abstract/category/license), the NeurIPS PDF,
-  and the arXiv source tarball are consistent + complete. (arXiv account + endorsement is the user's step.)
+- **Final arXiv packaging — VERIFIED (2026-06-08).** The live arXiv source tarball is current (includes
+  the #34 retention win), self-contained (paper.tex + paper.tex.body + neurips_2026.sty + figures/), and
+  all 14 figures referenced by the paper resolve; title/author metadata set; PDF builds green. Minor
+  optional cleanup: the tarball ships all `docs/` figures (~50), but the paper uses 14 — harmless bloat
+  (~1.3 MB), not a blocker. **arXiv account + endorsement + category/license selection is the user's step.**
 - **Open user decisions (do NOT act autonomously):** (1) the 12-key capacity point — leave as a documented
   single-seed artifact, or re-run multi-seed for a clean figure (needs GPU, before 6:30); (2) delete the
   stale `feat/realtime-agent-app` branch + the idle `reservoir.installer` process.
