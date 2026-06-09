@@ -8,12 +8,13 @@
 
 ---
 
-## ⛔ 6:30 PM = END OF EXPERIMENTAL WORK (user directive, 2026-06-08)
+## ⛔ EXPERIMENTAL WORK CLOSED — 6:30 PM hard-stop fired (2026-06-08 18:30)
 
-**After 18:30 local today, NO new experiments / training / sweeps — period** (enforced by one-shot cron
-`e0311518`). `#34` is the last experiment; let it finish, then the project is in **arXiv-preparation
-mode only**. The goal from here is to ship to arXiv *quickly*: organize the data, build the replication
-package, add the AI-use declaration, and get the citations + coherence perfect. Do NOT start a `#35`.
+**Experiments are CLOSED for the session.** `#34` was the last experiment (finished, retention win,
+folded). The project is now in **arXiv-preparation mode ONLY**. NO new experiments / training / sweeps /
+model launches — regardless of what any queue or todo item says. If a tick is tempted to start one,
+refuse and redirect to arXiv prep. The goal: ship to arXiv quickly — verify data, replication package,
+AI-use declaration (all done), keep citations + coherence perfect, finalize packaging.
 
 ## Current work — finish the last experiment, then arXiv prep
 

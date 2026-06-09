@@ -2440,3 +2440,9 @@ session per the 6:30 cutoff); RECALL retains at 1.00 while the harder content ta
 (accumulate/sequence/deferred) stay low (~0.02-0.12) -> retention of recall, not the whole battery.
 Folded into the abstract (4th result), the battery limitation bullet (now a resolved positive), and
 the site battery section. Material positive -> resubmitting to clawRxiv. Run results/_w34_cosine.log.
+
+## 2026-06-08 18:30 — experimental work CLOSED (6:30 PM hard-stop)
+
+The scheduled 6:30 PM hard-stop fired. Confirmed no train_large/experiment process running; GPU idle.
+#34 was the last experiment (finished, retention win, folded). Session is now arXiv-prep ONLY — no new
+experiments/training/sweeps regardless of queue/todo. Updated the queue banner to reflect closure.
