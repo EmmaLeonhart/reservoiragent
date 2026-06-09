@@ -2417,3 +2417,11 @@ appendix said "run_agent.bat launches ... (app/server) ... readout_scale", and t
 literal paths. Verified no remaining literature/REVIEW.md, scripts/*.py, src/*, or *.bat references in
 the paper. (The replication package + the site's repro hints legitimately keep commands; the arXiv
 paper itself is now path-clean.)
+
+## 2026-06-08 — queue hygiene: pruned completed arXiv-prep items
+
+Pruned the queue to reflect completed arXiv-prep work (AI-use declaration, replication package,
+citation audit, data audit, register + file-path cleanup, abstract/contributions consistency check —
+all done). Remaining: fold #34 at DONE, a light final coherence skim, final arXiv packaging, and two
+open user decisions (12-key re-run? branch/installer cleanup?). Also verified abstract <->
+contributions <-> results are mutually consistent (no stale claims), no edit needed.

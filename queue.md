@@ -17,38 +17,26 @@ package, add the AI-use declaration, and get the citations + coherence perfect. 
 
 ## Current work — finish the last experiment, then arXiv prep
 
-- **#34 stabilization probe — cosine LR decay (in flight, finishes well before 6:30).** #33 showed the
-  reservoir solution *oscillates* (lift peaks epoch 1 at recall 1.00, then collapses/rebounds), control
-  pinned at 0. `train_large` used a flat LR; `train_battery.py` found a flat LR "overshoots and degrades
-  past its peak". #34 = #33 config + `RESERVOIR_COSINE=1` (cosine decay 5e-4→0 over 6000 steps). Run:
-  `results/_w34_cosine.log`. Fold the verdict into FINDINGS + site; claim retention only if the lift
-  survives the control across epochs. **This is the last experiment — nothing after it.**
+- **#34 stabilization probe — cosine LR decay (in flight, ~epoch 3, finishes before 6:30).** #33's
+  reservoir solution oscillated (peak recall 1.00 @ epoch 1, then collapse) under a flat LR; #34 = #33
+  config + `RESERVOIR_COSINE=1`. Trajectory so far diverges from #33: lift climbs monotonically
+  +0.089 → +0.089 → +0.130 (recall 0.08 → 0.19 → 0.35), control pinned at 0, **no collapse**. Fold the
+  full verdict at DONE into FINDINGS + site; claim a stable lift only if epoch 3 holds ≥ epoch 2 against
+  the control. **This is the last experiment — nothing after it.**
 
-## arXiv preparation (the plan — start now, in parallel with #34 finishing)
+## arXiv preparation — remaining
 
-- **Declaration of AI use (arXiv requirement).** Add an honest "Declaration of AI use" section to
-  FINDINGS (→ PDF + site): this is an AI-agent-driven research project; the agent implemented the code,
-  ran/analyzed the experiments, made the figures, and drafted the manuscript under human direction; all
-  results are from executed code + measured outputs with stateless controls, human-reviewed. **Do first
-  — required and quick.**
-- **Replication script + downloadable replication package (zip).** Build a clear `replication/` with: a
-  single script that reproduces the headline results (GPT-2 cross-pass recall 1.00 vs 0.17; Qwen-1.5B
-  scaling 0.83–1.00), a README with exact commands + environment (the verified flags), pinned deps, and
-  the key result JSONs. Package as a downloadable **zip** linkable from the site + paper. CI builds/ships
-  it (like the arXiv source tarball). Verify the script actually runs (at least the CPU-only parts).
-- **Citations — make them perfect (do repeatedly).** The 16:34 cron `c47ff97f` runs the comprehensive
-  audit; beyond it, keep re-verifying every arXiv ID / author / year / claim-attribution against reality
-  until flawless. Wrong citations on arXiv are permanent. This is high priority and worth multiple passes.
-- **General coherence + organization pass.** Holistic read-through of FINDINGS: flow, no dangling/internal
-  refs, intro↔results↔abstract consistency, remove any residual lab-notebook register, ensure the section
-  order reads as a proper arXiv paper. Tighten; cut repetition.
-- **Organize + verify the data.** Go through `results/` and `docs/` figures: confirm every figure/claim is
-  backed by the correct run's data (watch for a figure regenerated from the wrong run — this kind of
-  mismatch happened before with `crosspass.png`). **The user flagged "a weird mistake that might indicate
-  something with the data is worth replacing" — actively hunt for it during this pass and fix/replace.**
+(Done and removed: AI-use declaration; downloadable replication package; comprehensive citation audit —
+4 agents, no hallucinations, 8 fixes; data audit — found + fixed the 12-key "undertraining" error;
+register pass + internal file-path cleanup; abstract↔contributions↔results consistency verified.)
+
+- **Final coherence read-through (light).** The main register/path/consistency offenders are fixed; a last
+  holistic skim for flow + repetition before freezing for arXiv.
 - **Final arXiv packaging.** Confirm metadata (title/author/abstract/category/license), the NeurIPS PDF,
-  and the arXiv source tarball are consistent and complete. (arXiv account + endorsement is the user's
-  step — not autonomous.)
+  and the arXiv source tarball are consistent + complete. (arXiv account + endorsement is the user's step.)
+- **Open user decisions (do NOT act autonomously):** (1) the 12-key capacity point — leave as a documented
+  single-seed artifact, or re-run multi-seed for a clean figure (needs GPU, before 6:30); (2) delete the
+  stale `feat/realtime-agent-app` branch + the idle `reservoir.installer` process.
 
 ## Grok's reception — addressed (record)
 
