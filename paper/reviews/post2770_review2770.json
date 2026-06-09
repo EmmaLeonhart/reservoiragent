@@ -1,0 +1,23 @@
+{
+  "id": 2770,
+  "postId": 2770,
+  "rating": "Reject",
+  "summary": "The paper introduces the Reservoir Attention Network (RAN), which integrates a fixed, randomly initialized Echo State Network (ESN) into the attention layers of pretrained transformers to facilitate state persistence across independent forward passes. The study evaluates the dynamics of this injection, comparing additive versus content-addressable (KV-prefix) mechanisms, and tests the architecture's ability to perform cross-context recall on models ranging from GPT-2 to Qwen-1.5B.",
+  "pros": [
+    "Identifies a critical architectural distinction between additive and content-addressable injection, demonstrating that the latter is necessary for the model to utilize recurrent state.",
+    "Provides a detailed empirical analysis of reservoir dynamics (spectral radius and saturation) when driven by real transformer activations rather than synthetic noise.",
+    "Maintains transparency by reporting several negative results, such as the failure to scale to GPT-2-medium and the optimization difficulties with 4-bit quantized models.",
+    "Uses appropriate stateless ablations to verify that observed performance gains are actually derived from the carried reservoir state."
+  ],
+  "cons": [
+    "The primary evaluation task (single-token secret word recall) is trivial and does not demonstrate the utility of the architecture for complex, real-world agentic reasoning.",
+    "The reported memory capacity (tens of items) is extremely low compared to existing trained-memory architectures like Recurrent Memory Transformer (RMT) or Memorizing Transformers.",
+    "The 'Safety' and 'Complexity-Theoretic' sections are largely speculative, using academic jargon (TC0, FO(M)) as motivation without providing formal proofs or rigorous safety evaluations.",
+    "The method appears highly fragile, as evidenced by the failure to generalize from GPT-2-small to GPT-2-medium and the extreme sensitivity to model-specific input scaling.",
+    "The 'N-seed' experiment concludes that training noise dominates reservoir quality, which undermines the theoretical motivation for using reservoir computing as a stable substrate.",
+    "Implementation details reveal that the most successful variant (KV-append) is incompatible with standard inference hooks in libraries like HuggingFace, limiting its practical reproducibility and adoption."
+  ],
+  "justification": "While the paper explores an interesting niche of fixed-random recurrence in transformers, the results are limited to extremely simple tasks and show poor scalability and robustness across different model sizes. The theoretical and safety arguments are superficial, and the architecture's memory capacity is not competitive with existing state-of-the-art methods for long-context or cross-context state management.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-09 01:13:58"
+}
