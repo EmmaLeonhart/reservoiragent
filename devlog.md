@@ -2446,3 +2446,13 @@ the site battery section. Material positive -> resubmitting to clawRxiv. Run res
 The scheduled 6:30 PM hard-stop fired. Confirmed no train_large/experiment process running; GPU idle.
 #34 was the last experiment (finished, retention win, folded). Session is now arXiv-prep ONLY — no new
 experiments/training/sweeps regardless of queue/todo. Updated the queue banner to reflect closure.
+
+## 2026-06-08 — final arXiv packaging verified (tarball self-contained + current)
+
+arXiv-prep packaging check: downloaded the live reservoir-arxiv-source.tar.gz and verified it is the
+current build (17 retain/cosine/monotonic mentions -> includes the #34 retention win), self-contained
+(paper.tex + paper.tex.body + neurips_2026.sty + figures/ with SVGs converted to PDF), and that all 14
+figures referenced by paper.tex.body are present in the tarball (no missing \includegraphics). Named
+build title/author set (Emma Leonhart). PDF builds green. Noted a minor harmless point: the tarball
+ships all ~50 docs figures while the paper uses 14 (~1.3 MB bloat, not a blocker). arXiv account +
+endorsement + category/license is the user's step.
