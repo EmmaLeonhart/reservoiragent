@@ -774,12 +774,12 @@ low-level symbolic recall emerged from a reservoir misconfigured in a specific, 
 
 ### The real-time always-alive harness
 
-`run_agent.bat` launches an Electron two-pane app over a Python WebSocket server
-(`app/server`) driving the always-alive engine: the reservoir ticks
+A desktop application — an Electron two-pane front-end over a Python WebSocket server — drives the
+always-alive engine: the reservoir ticks
 continuously (prompted passes on user input, idle ticks otherwise), streams tokens when an
 output gate opens, and the user injects into the live context without pausing it. It runs
 Qwen2.5-1.5B + reservoir. It runs the **untrained substrate** — coherence comes from the base
-model, the reservoir's readout is untrained, and a runtime gain (`readout_scale`) fades the
+model, the reservoir's readout is untrained, and a runtime gain fades the
 reservoir's influence in and out. It demonstrates the real-time stateful loop; it does not
 demonstrate trained behaviour, and is labelled as such in the UI.
 
@@ -802,7 +802,7 @@ self-initiation, silence reach 0.4–1.0); symbolic content tasks do not (recall
 sequence, deferred sit near 0 at scale). Recall reached 100% only at 6 single-token words and
 fell to ~0 by 12 — it was fitting the one regime small enough to fit, not learning recall.
 
-The N-seed reservoir **population** (keep all seeds, recommend the best — `RESERVOIR_AGENTS.md`)
+The N-seed reservoir **population** (keep all seeds, recommend the best)
 adds one positive note: reservoir seeds specialize. On Qwen-1.5B + a 1024-node reservoir, best
 seed mean 0.41, with seed 0 reaching accumulate 0.38 and seed 1 reaching recall 0.31 — no
 single seed strong everywhere, which is the case for preserving the whole population. A

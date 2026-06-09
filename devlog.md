@@ -2408,3 +2408,12 @@ the Safety-section blockquote disclaimer into a plain scoping sentence; "What th
 support" -> "Scope of this result"; "What this does not yet show, stated plainly" -> "Limits of this
 probe"; removed an "earlier write-up read it as" self-reference and trimmed "stated plainly" tics.
 Mirrored to the site. Cons 1-4/6 already-stated limitations. Part of the arXiv coherence/register pass.
+
+## 2026-06-08 — coherence pass: removed remaining internal file/code paths from the paper
+
+arXiv-prep coherence: removed the last leftover internal file/code paths from FINDINGS (the harness
+appendix said "run_agent.bat launches ... (app/server) ... readout_scale", and the N-seed note cited
+"RESERVOIR_AGENTS.md"). Reworded to describe the desktop app / runtime gain / seed population without
+literal paths. Verified no remaining literature/REVIEW.md, scripts/*.py, src/*, or *.bat references in
+the paper. (The replication package + the site's repro hints legitimately keep commands; the arXiv
+paper itself is now path-clean.)
