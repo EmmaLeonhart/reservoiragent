@@ -1,4 +1,4 @@
-% paper.tex — Reservoir Attention Network paper, NeurIPS 2026 submission wrapper.
+% paper.tex: Reservoir Attention Network paper, NeurIPS 2026 submission wrapper.
 %
 % The substantive paper content lives in FINDINGS.md (the single canonical
 % source, kept clean for the GitHub-Pages report build too). The paper-pdf.yml
@@ -18,7 +18,7 @@
 
 \documentclass{article}
 
-% Anonymization switch — set true via -usepretex for the submission build.
+% Anonymization switch; set true via -usepretex for the submission build.
 \makeatletter
 \@ifundefined{ifanon}{\newif\ifanon}{}
 \makeatother
@@ -48,6 +48,15 @@
 \usepackage{enumitem}
 \usepackage{verbatim}
 \usepackage{graphicx}
+% Bound EVERY \includegraphics to the text block (pandoc's standalone-template
+% defaults). The CI pandoc emits bare \includegraphics{...} with no size args and
+% no \pandocbounded wrapper, so without these Gin defaults a PNG whose natural
+% size exceeds \linewidth runs off the right page edge (the cut-off-figures bug).
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
 
 % Map the math-style Unicode used in the body prose onto LaTeX equivalents.
 \usepackage{newunicodechar}

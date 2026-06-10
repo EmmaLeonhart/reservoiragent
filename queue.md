@@ -26,6 +26,10 @@ AI-use declaration (all done), keep citations + coherence perfect, finalize pack
 
 ## arXiv preparation — remaining
 
+- **Re-deliver the arXiv tarball after the em-dash + figure-fix rebuild (2026-06-10).** Em-dash
+  purge and the PDF figure-overflow fix are committed (see devlog); once CI rebuilds green, verify
+  the PDF figures are bounded and download the fresh tarball to the user's Downloads.
+
 (Done and removed: AI-use declaration; downloadable replication package; comprehensive citation audit —
 4 agents, no hallucinations, 8 fixes; data audit — found + fixed the 12-key "undertraining" error;
 register pass + internal file-path cleanup; abstract↔contributions↔results consistency verified.)
