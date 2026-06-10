@@ -2456,3 +2456,20 @@ figures referenced by paper.tex.body are present in the tarball (no missing \inc
 build title/author set (Emma Leonhart). PDF builds green. Noted a minor harmless point: the tarball
 ships all ~50 docs figures while the paper uses 14 (~1.3 MB bloat, not a blocker). arXiv account +
 endorsement + category/license is the user's step.
+
+## 2026-06-10 — User-requested pre-arXiv audit: training/loss code review + fresh citation pass
+
+User asked for a final look before arXiv. (a) **Training + loss code review** — read
+`episode.py` (episode_loss/episode_eval), `battery.py`, `kv_live.py`, `crosspass.py`,
+`train_battery.py`, `train_large.py`, `controlled.py`, `tasks.py`, `rnn_baseline.py`,
+`echo_state.py`, `_arch.py`: **no correctness bugs found**. Loss masking/teacher-forcing,
+gate BCE vs content CE split, stateless controls, cosine LR wiring, ANOVA, and the GRU
+baseline all check out; train/eval are consistent (incl. the per-token state-tick during
+teacher forcing, identical in both paths). All design caveats found are ones the paper
+already documents (closed key set as mechanism-isolating ablation; the emit/silence
+metric bug documented as found-and-fixed; #34 single-run caveat). (b) **Fresh citation
+audit** (web agent, all 24 refs): no hallucinated citations; all arXiv IDs/authors/venues
+real. Three fixes applied to FINDINGS References: Titans year 2024→2025 (arXiv 2501.x),
+added ECAI venue to Singh et al. 2025, added ICLR venue to S4. (Site has no references
+section, so no docs/index.html mirror needed.) (c) Verdict: **arXiv-ready**. Remaining
+(d): deliver the rebuilt arXiv source tarball to the user's Downloads.
