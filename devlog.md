@@ -2473,3 +2473,11 @@ real. Three fixes applied to FINDINGS References: Titans year 2024→2025 (arXiv
 added ECAI venue to Singh et al. 2025, added ICLR venue to S4. (Site has no references
 section, so no docs/index.html mirror needed.) (c) Verdict: **arXiv-ready**. Remaining
 (d): deliver the rebuilt arXiv source tarball to the user's Downloads.
+
+## 2026-06-10 — Pre-arXiv audit (d): tarball delivered
+
+CI rebuilt the site green after the citation fixes; downloaded the fresh
+`reservoir-arxiv-source.tar.gz` (1.29 MB) into the user's Downloads folder and
+verified by extraction that all three reference fixes (Titans 2025, ECAI, ICLR)
+are in `paper.tex.body`. Audit complete; paper is arXiv-ready — account /
+endorsement / category+license selection remains the user's step.

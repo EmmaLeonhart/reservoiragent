@@ -26,10 +26,6 @@ AI-use declaration (all done), keep citations + coherence perfect, finalize pack
 
 ## arXiv preparation — remaining
 
-- **User-requested pre-arXiv audit (2026-06-10) — remaining: deliver tarball.** Code review +
-  citation pass done (see devlog); after CI rebuilds the site, download
-  `reservoir-arxiv-source.tar.gz` into the user's Downloads folder.
-
 (Done and removed: AI-use declaration; downloadable replication package; comprehensive citation audit —
 4 agents, no hallucinations, 8 fixes; data audit — found + fixed the 12-key "undertraining" error;
 register pass + internal file-path cleanup; abstract↔contributions↔results consistency verified.)
