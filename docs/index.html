@@ -3,25 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reservoir Attention Network (RAN) — a transformer with a genuine time axis</title>
+<title>Reservoir Attention Network (RAN): a transformer with a genuine time axis</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,900&display=swap" rel="stylesheet">
-<meta name="description" content="Reservoir Attention Network (RAN): a fixed random reservoir injected into a pretrained transformer's mid-layer attention gives it genuine state between forward passes — a real time axis. The mechanism is demonstrated at GPT-2-small; the scaling boundary above it (recall walls; low-dim timing partially scales) is characterized.">
+<meta name="description" content="Reservoir Attention Network (RAN): a fixed random reservoir injected into a pretrained transformer's mid-layer attention gives it genuine state between forward passes, a real time axis. The mechanism is demonstrated at GPT-2-small; the scaling boundary above it (recall walls; low-dim timing partially scales) is characterized.">
 
 <!-- Social / link previews -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Reservoir Agent">
-<meta property="og:title" content="Reservoir Attention Network (RAN) — a transformer with a genuine time axis">
-<meta property="og:description" content="A fixed random reservoir injected into a pretrained transformer's mid-layer attention, so its state persists across forward passes — not just within a context window. Demonstrated at GPT-2-small; scaling boundary characterized.">
+<meta property="og:title" content="Reservoir Attention Network (RAN): a transformer with a genuine time axis">
+<meta property="og:description" content="A fixed random reservoir injected into a pretrained transformer's mid-layer attention, so its state persists across forward passes, not just within a context window. Demonstrated at GPT-2-small; scaling boundary characterized.">
 <meta property="og:url" content="https://reservoir.emmaleonhart.com/">
 <meta property="og:image" content="https://reservoir.emmaleonhart.com/og-preview.png">
 <meta property="og:image:type" content="image/png">
-<meta property="og:image:alt" content="Reservoir Agent — a transformer with a genuine time axis">
+<meta property="og:image:alt" content="Reservoir Agent: a transformer with a genuine time axis">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Reservoir Agent — a transformer with a genuine time axis">
+<meta name="twitter:title" content="Reservoir Agent: a transformer with a genuine time axis">
 <meta name="twitter:description" content="A fixed random reservoir injected into a pretrained transformer's mid-layer attention, so its state persists across forward passes. Demonstrated at GPT-2-small; scaling boundary characterized.">
 <meta name="twitter:image" content="https://reservoir.emmaleonhart.com/og-preview.png">
 <style>
@@ -183,7 +183,7 @@
   <strong>fixed, randomly-initialized reservoir</strong> into the mid-layer attention
   so its state evolves <em>across</em> passes. We refer to a specific instantiation of
   this architecture as a <strong>Reservoir Agent</strong>. The mechanism is
-  demonstrated &mdash; the injection is non-destructive, the reservoir dynamics are
+  demonstrated: the injection is non-destructive, the reservoir dynamics are
   characterized, and a Reservoir Agent (GPT-2) <strong>recalls information that exists
   only in the carried state</strong> across an otherwise-wiped context. The deciding
   factor is <em>how</em> the reservoir is injected (additive &rarr; ignored;
@@ -192,7 +192,7 @@
   Sizing it to 2048 nodes and matching the input scaling to the model recovers cross-pass recall across
   the <strong>Qwen family</strong>: Qwen-1.5B at scaling 0.1 (0.83&ndash;1.00 vs 0.17 control, reproduced
   across two seeds) and Qwen-0.5B at scaling 0.5 (<strong>1.00 vs 0.17</strong>). Input scaling is the
-  decisive knob &mdash; Qwen-0.5B goes 0.17&rarr;1.00 by changing that one scalar &mdash; so a 500M model
+  decisive knob (Qwen-0.5B goes 0.17&rarr;1.00 by changing that one scalar), so a 500M model
   recovers while GPT-2-medium's 355M (at the two scalings tried) does not: <strong>not a size law</strong>.
   A capacity ceiling persists but in the tens of items (recall 1.00 at 6 keys, ~0.42 at 24, chance by 48), and the separate 8-task
   battery's temporal scores are <em>not</em> reservoir-driven (a stateless ablation matches them). The
@@ -202,18 +202,18 @@
 <div class="question">
   <span class="kicker">Research question</span>
   Can a fixed, randomly-initialized reservoir injected into a pretrained transformer's
-  mid-layer attention give the model genuine state between forward passes — a real time
-  axis — without degrading its base capabilities, and what reservoir-dynamics regime
+  mid-layer attention give the model genuine state between forward passes (a real time
+  axis) without degrading its base capabilities, and what reservoir-dynamics regime
   (spectral radius, size, injection depth) makes that injected state usable signal
   rather than noise?
 </div>
 
 <figure>
-  <img src="diagram-transformer.svg" alt="A standard transformer: within one forward pass, every token attends to every other token through self-attention, then a feed-forward and residual step produces the output. No endogenous state survives between forward passes — the only memory is position within the context window.">
+  <img src="diagram-transformer.svg" alt="A standard transformer: within one forward pass, every token attends to every other token through self-attention, then a feed-forward and residual step produces the output. No endogenous state survives between forward passes; the only memory is position within the context window.">
   <figcaption>
     <strong>The baseline: a standard transformer.</strong> Within one forward pass every
     token attends to every token, then the pass ends. Nothing endogenous survives between
-    passes &mdash; the only memory is position inside the context window, which the
+    passes; the only memory is position inside the context window, which the
     architecture is free to wipe. This is the statelessness the RAN sets out to break.
   </figcaption>
 </figure>
@@ -225,7 +225,7 @@
     attention runs jointly over the token nodes <em>and</em> the reservoir prefix nodes. A
     fixed random reservoir reads the layer activations (<code>W_in</code>, fixed), evolves
     its state, and writes back as an attendable prefix (<code>W_out</code>, trained). The
-    recurrent state <em>r(t) &rarr; r(t+1)</em> is carried to the next forward pass &mdash;
+    recurrent state <em>r(t) &rarr; r(t+1)</em> is carried to the next forward pass,
     surviving the context wipe. That carried state is the genuine time axis the standard
     diagram lacks.
   </figcaption>
@@ -236,8 +236,8 @@
     <strong>The architecture.</strong> Every forward pass is one reservoir tick: at the
     injection layer L<sub>k</sub>, attention runs over the token hidden states <em>and</em>
     the reservoir nodes (extra keys/values). The reservoir reads the attention matrix
-    through fixed <code>W_in</code> and writes its state back through a learned readout —
-    both at the same layer, every pass — so state accumulates across passes
+    through fixed <code>W_in</code> and writes its state back through a learned readout
+    (both at the same layer, every pass), so state accumulates across passes
     (&ldquo;implicit elapsed time&rdquo;). Only the transformer&rsquo;s fine-tune changes;
     reservoir weights are random and fixed, and the best of N seeds is kept.
   </figcaption>
@@ -295,14 +295,14 @@
     <p>
       Whether a fixed random reservoir, injected into a pretrained transformer's
       mid-layer attention, can give it real cross-pass state without breaking the
-      base model — and which reservoir-dynamics regime makes that state useful.
+      base model, and which reservoir-dynamics regime makes that state useful.
     </p>
   </div>
   <div class="pillar">
     <h3>2 &middot; Grounded in the literature</h3>
     <p>
       It relocates the proven reservoir-computing recipe (fix the recurrent weights,
-      train only a readout &mdash; Jaeger&rsquo;s echo state networks, Maass&rsquo;s
+      train only a readout: Jaeger&rsquo;s echo state networks, Maass&rsquo;s
       liquid state machines) into a pretrained transformer, and targets a gap the
       expressivity literature makes precise: a finite-precision transformer is bounded
       to TC&#8304;/FO(M) <em>per forward pass</em>, while state carried <em>across</em>
@@ -321,13 +321,13 @@
       with the ρ ≈ 1 boundary holding (H2); and it enables 100% cross-context recall
       on GPT-2 when injected content-addressably (attended to), proving the time axis
       is usable (H3). The tasks here are deliberately <em>minimal mechanism-isolating
-      probes</em>, not agentic demonstrations — each isolates one variable a stateless
+      probes</em>, not agentic demonstrations: each isolates one variable a stateless
       model structurally cannot handle; complex agentic behaviour at scale is named as
-      future work, not claimed. We also took the agentic layer to scale — an 8-task
-      stateful battery on Qwen-1.5B — and, with controlled ablations, found two things: the
+      future work, not claimed. We also took the agentic layer to scale (an 8-task
+      stateful battery on Qwen-1.5B) and, with controlled ablations, found two things: the
       battery's apparent temporal/agency scores are <em>not</em> reservoir-driven (a stateless
       control matches them), but the <strong>cross-pass content recall does scale to 1.5B once
-      the reservoir is sized up</strong> (0.83&ndash;1.00 vs 0.17 control, reproduced) &mdash; the
+      the reservoir is sized up</strong> (0.83&ndash;1.00 vs 0.17 control, reproduced); the
       earlier "GPT-2-small-specific" wall was an undersized reservoir. A clean decomposition
       isolates the within-battery story: strip the recall component and the low-dimensional <em>timing</em>
       signal substantially trains (emits at the right step), so the battery's emit metric is dominated by
@@ -341,17 +341,17 @@
   <img src="diagram-reservoir-computing.svg" alt="Reservoir computing schematic: a fixed random input matrix projects the input into a fixed random recurrent pool (the reservoir, spectral radius near 1), and only a linear readout is trained.">
   <figcaption>
     <strong>Reservoir computing.</strong> A fixed random W_in projects the input into a fixed random
-    recurrent pool (the reservoir, ρ ≈ 1); only the readout W_out is trained. The RAN relocates this —
+    recurrent pool (the reservoir, ρ ≈ 1); only the readout W_out is trained. The RAN relocates this:
     the reservoir reads/writes a pretrained transformer's mid-layer attention instead of a scalar input.
   </figcaption>
 </figure>
 <figure>
   <img src="diagram-echo-state.svg" alt="Echo state property: after an input impulse arrives, its influence on the reservoir state rises then decays toward zero over subsequent forward passes; the influence of the initial state and the distant past vanishes, so reservoir memory is fading and finite, with capacity growing with reservoir size.">
   <figcaption>
-    <strong>The echo state property &mdash; why a reservoir is usable.</strong> After an input arrives, its
+    <strong>The echo state property: why a reservoir is usable.</strong> After an input arrives, its
     influence on the state decays toward zero over the following passes, and the effect of the initial
-    state and the distant past washes out. Reservoir memory is therefore <em>fading</em> and finite &mdash;
-    its linear memory capacity grows with reservoir size (&le; N) &mdash; which is why reservoir size and
+    state and the distant past washes out. Reservoir memory is therefore <em>fading</em> and finite
+    (its linear memory capacity grows with reservoir size, &le; N), which is why reservoir size and
     leak rate are the levers for how much cross-pass state is carried.
   </figcaption>
 </figure>
@@ -360,11 +360,11 @@
   recurrent weights at random and training only a readout is the echo-state-network (Jaeger, 2001)
   and liquid-state-machine (Maass, 2002) paradigm. Usable behaviour needs the <em>echo state
   property</em> (past influence must fade); the spectral-radius ρ&nbsp;&lt;&nbsp;1 recipe and the
-  "edge of chaos" heuristic are priors, not answers — disputed in the literature — which is why we
+  "edge of chaos" heuristic are priors, not answers (disputed in the literature), which is why we
   measure the regime rather than assume it, and reservoir memory is fading, capacity-bounded by size.
   <strong>The stateless-transformer ceiling</strong>: a finite-precision transformer is, per forward
   pass, in TC&#8304;/FO(M) (Merrill &amp; Sabharwal, 2023; Hahn, 2020); cross-pass state is the
-  documented lever past it, though the known escapes need arbitrary precision — so whether a
+  documented lever past it, though the known escapes need arbitrary precision, so whether a
   finite-precision reservoir lifts the bound is posed as an open question, not asserted.
   <strong>Recurrence-augmented transformers</strong> are the closest prior art, classified on two axes:
 </p>
@@ -389,7 +389,7 @@
     Block-Recurrent Transformer documents the same "model learns to ignore the recurrent state" failure we
     observe. The nearest 2021&ndash;2025 items (Reservoir Transformers, Echo State Transformer, Echo Flow
     Networks, FreezeTST) each differ on at least one of those axes (all trained-from-scratch and
-    within-sequence) — so the combination is novel against the verified prior art, with the caveat that the
+    within-sequence), so the combination is novel against the verified prior art, with the caveat that the
     field moves quickly.
   </figcaption>
 </figure>
@@ -398,8 +398,8 @@
 <p>
   At the neuron level, the mechanism is small: the reservoir nodes simply join the
   attention layer's key/value sequence. The same attention that moves information
-  between token residual streams now also reads from and writes to the reservoir &mdash;
-  via a fixed projection in and a learned readout out &mdash; and unlike the token
+  between token residual streams now also reads from and writes to the reservoir
+  (via a fixed projection in and a learned readout out), and unlike the token
   streams, the reservoir state carries across forward passes.
 </p>
 <figure>
@@ -409,7 +409,7 @@
     the classic residual-stream picture: the attention layer that predicts
     &ldquo;Paris&rdquo; also takes the fixed-random reservoir nodes as extra keys/values
     (read via <code>W_in</code>, written via the learned <code>W_out</code>), and the
-    reservoir state &mdash; unlike the token streams &mdash; persists across passes.
+    reservoir state, unlike the token streams, persists across passes.
   </figcaption>
 </figure>
 
@@ -419,8 +419,8 @@
   stateless transformer is a request&ndash;response handler; the Reservoir Agent is a
   persistent, always-alive process whose reservoir state and context buffer are owned
   by the runtime and never wiped between passes. A scheduler decides when to run a
-  forward pass &mdash; <em>prompted</em> (new input arrives) or <em>unprompted</em> (an
-  idle timer fires) &mdash; and an output gate decides whether to emit or stay silent.
+  forward pass, <em>prompted</em> (new input arrives) or <em>unprompted</em> (an
+  idle timer fires), and an output gate decides whether to emit or stay silent.
   A minimal version of this runtime is built and exercised; forking it onto the real
   Hermes harness (tool-calling + the agentic loop) is the work in progress.
 </p>
@@ -437,14 +437,14 @@
 
 <h2>Motivation and framing (not formal results)</h2>
 <p>
-  Three framing points about the <em>kind</em> of capability, not the level — motivation for
+  Three framing points about the <em>kind</em> of capability, not the level: motivation for
   the design, not results. Full grounding + citations in the literature review.
 </p>
 <div class="pillars">
   <div class="pillar">
     <h3>1 &middot; A genuine time dimension</h3>
     <p>
-      A transformer represents time as token <em>position</em> &mdash; an index, not a
+      A transformer represents time as token <em>position</em>: an index, not a
       dimension it evolves along. r(t) evolves across forward passes and is causally
       downstream of every pass since t=0, decoupled from the context window (it survives
       context truncation). Not positional encoding, not context length.
@@ -454,7 +454,7 @@
     <h3>2 &middot; The expressivity motivation (no result claimed)</h3>
     <p>
       A finite-precision transformer is bounded to TC&#8304;/FO(M) <em>per pass</em> and
-      state carried across steps is the standard lever past it &mdash; this only motivates
+      state carried across steps is the standard lever past it; this only motivates
       <em>why</em> cross-pass state is interesting. We prove no separation, and nothing in
       the results depends on it.
     </p>
@@ -464,7 +464,7 @@
     <p>
       Endogenous state that evolves independently of input is shared with living
       organisms and absent from stateless transformers. No claim about general
-      intelligence &mdash; only that this <em>capacity</em> may be a precondition for
+      intelligence, only that this <em>capacity</em> may be a precondition for
       agentic behaviours (noticing an unresolved thread, estimating elapsed time,
       self-initiating) inaccessible to a stateless model at any capability level.
     </p>
@@ -480,54 +480,54 @@
   core architecture, demonstrates the time axis on GPT-2, and identifies the scaling
   requirements for larger models.
 </p>
-<h3>The agentic layer at scale — and why it splits</h3>
+<h3>The agentic layer at scale, and why it splits</h3>
 <p>
   <strong>An 8-task stateful loss battery.</strong> A later session generalizes cross-pass
-  recall into a battery of eight tasks, each an <em>episode</em> — a fixed sequence of
+  recall into a battery of eight tasks, each an <em>episode</em>: a fixed sequence of
   forward passes with the context wiped at chosen points, so the only bridge between passes
   is the reservoir state. Four are <em>content memory</em> (recall, accumulate, sequence,
   deferred); four are <em>temporal/agency</em> (timed, interrupt, self-initiation, silence).
   A separate gate head decides <em>when</em> to speak independently of <em>what</em> to say.
-  A real-time always-alive Electron app drives Qwen-1.5B + reservoir through this loop live —
+  A real-time always-alive Electron app drives Qwen-1.5B + reservoir through this loop live,
   running the untrained substrate, labelled as such.
 </p>
 <p>
   <strong>The reading after controls.</strong> The battery's temporal scores first
   looked like a clean split (timed / silence high, content near zero), but two controls
-  corrected that. The metric was gameable by simply staying silent — a loss-design bug, since
+  corrected that. The metric was gameable by simply staying silent: a loss-design bug, since
   fixed so the objective scores <em>emitting the right token at the right time</em>. And a
-  stateless ablation — resetting the reservoir every pass — left the temporal scores unchanged,
+  stateless ablation (resetting the reservoir every pass) left the temporal scores unchanged,
   showing they were <em>not</em> reservoir-driven. A clean decomposition (timing without recall)
   then isolated the real picture: low-dimensional <em>timing</em> substantially trains at 1.5B
-  (the model emits at the right step), while high-dimensional content <em>recall</em> does not —
+  (the model emits at the right step), while high-dimensional content <em>recall</em> does not,
   so the battery's emit metric is dominated by recall, the high-dimensional component. (On the
-  clean cross-pass recall task, recall does recover at 1.5B with a 2048-node reservoir &mdash; 0.83&ndash;1.00
+  clean cross-pass recall task, recall does recover at 1.5B with a 2048-node reservoir: 0.83&ndash;1.00
   vs 0.17 control, above; the near-zero here is the battery's smaller down-projected setup plus the
   gate.) Recall is perfect at six single-token words and degrades gracefully with more (a capacity
   ceiling in the tens of items at 1.5B; see the capacity figure below). Even the
   low-dimensional timing gate is not <em>cleanly</em> solved: at balanced weighting it emits at the
   right step (1.00) but over-fires on ~half the silent steps (silence-shut 0.53), and up-weighting
-  the silence supervision to fix that (silence-shut &rarr; 1.00) instead collapses the emit to 0.00
-  &mdash; the two failure modes trade off, the signature of a capacity limit rather than a tuning miss.
+  the silence supervision to fix that (silence-shut &rarr; 1.00) instead collapses the emit to 0.00;
+  the two failure modes trade off, the signature of a capacity limit rather than a tuning miss.
   The same tension dominates the full 8-task battery run progressively at 1.5B. Up-weighting silence
   (weight 2) makes the gate fall into the always-shut attractor; down-weighting it (weight 0.3, with
-  up-weighted emit) flips it to always-open &mdash; but across four epochs <em>either way</em> every
+  up-weighted emit) flips it to always-open, but across four epochs <em>either way</em> every
   emit task stays at 0.00 with +0.00 lift over the stateless control. The gate weight only moves the
-  gate between stuck-open and stuck-shut; the blocker is the content/recall half &mdash; with a
+  gate between stuck-open and stuck-shut; the blocker is the content/recall half: with a
   healthy open gate the model still cannot learn what to emit, and the reservoir contributes nothing
   measurable at this scale.
 </p>
 <p>
-  <strong>Does the recall fix transfer into the battery? Transiently &mdash; found, then abandoned.</strong>
+  <strong>Does the recall fix transfer into the battery? Transiently: found, then abandoned.</strong>
   We re-ran the battery with the recall-winning config (2048 nodes, no projection, scaling 0.1) and a 16-word
   pool <em>within</em> capacity, content-only, at an eval resolution (eval_n=48) fine enough to separate a real
   lift from noise. The per-epoch lift over the stateless control is then <strong>&minus;0.000 &rarr; +0.177 &rarr;
-  +0.000</strong>: at epoch 1 the model genuinely learns a reservoir-driven battery recall &mdash; <strong>recall
+  +0.000</strong>: at epoch 1 the model genuinely learns a reservoir-driven battery recall, <strong>recall
   0.35 with the carried state vs 0.02 (chance) for the wiped-reservoir control</strong>, a large resolved lift,
-  not noise &mdash; but by epoch 2 it <strong>drifts back to a stateless solution</strong> (recall 0.08, control
+  not noise. But by epoch 2 it <strong>drifts back to a stateless solution</strong> (recall 0.08, control
   rises to 0.08 to match). So the integrated battery <em>can</em> use the reservoir for content (epoch 1 proves
   the capacity is there), but the multi-task training does not <em>retain</em> it: the optimizer finds a
-  current-pass / LoRA shortcut and the reservoir solution decays &mdash; a live instance of the
+  current-pass / LoRA shortcut and the reservoir solution decays, a live instance of the
   &ldquo;model learns to ignore the recurrent state&rdquo; failure that motivated content-addressable injection,
   caught within one run. The clean, <em>retained</em> advantage remains the strict-wipe cross-pass task
   (0.83&ndash;1.00 vs 0.17); making the battery <em>hold</em> a reservoir-driven content solution
@@ -540,17 +540,17 @@
   rewards relying on carried state. Run for 4 epochs (3.1&nbsp;h, Qwen2.5-1.5B + an 8192-node
   reservoir), it did <strong>not</strong> prevent the collapse: the mean reservoir lift decayed
   <strong>+0.302 &rarr; +0.094 &rarr; +0.000 &rarr; +0.000</strong> across epochs 0&ndash;3. As before,
-  the stateful model does not get worse &mdash; the stateless control <em>rises to match</em> it
+  the stateful model does not get worse: the stateless control <em>rises to match</em> it
   (0.000 &rarr; 0.062 &rarr; 0.083), so the optimizer still converges to a current-pass solution that
   makes the carried state redundant, even against a loss term built to forbid exactly that. Stable
   retention is unsolved: the first-line stabilization fails, and what would force a multi-task objective
   to keep depending on the reservoir is open. This also bears on a fair reviewer point: because a LoRA
   trains alongside the reservoir, the wiped-state control isolates the reservoir&rsquo;s <em>behavioural</em>
   contribution (it is the LoRA-only path), but not a clean <em>capacity</em> decomposition of fixed reservoir
-  vs trained adapter &mdash; which is exactly why the capacity-constrained probes shrink the adapter to force
+  vs trained adapter, which is exactly why the capacity-constrained probes shrink the adapter to force
   the carried state to carry the load. One reading is worth ruling out: that the reservoir is <em>merely a
   bank of fixed random features the LoRA reads within the current pass</em>. The strict-wipe recall task
-  refutes that &mdash; the context is wiped, so on the recall pass there is no current-pass signal for the
+  refutes that: the context is wiped, so on the recall pass there is no current-pass signal for the
   adapter to exploit; the secret survives only through carried reservoir state (control at chance 0.17 vs
   stateful 1.00), and the capacity-denied run reaches recall 1.00 with the control pinned at 0.000. So the
   carried state, not adapter capacity, does the work; what stays open is the finer bits-per-component split.
@@ -560,33 +560,33 @@
   ran that probe in earnest: shrink the trained adapter to <code>lora_r&nbsp;=&nbsp;4</code> on attention only
   (the regime where the clean cross-pass recall task succeeds), keep the counterfactual penalty, content-only
   (4 epochs, 2.1&nbsp;h, Qwen2.5-1.5B + a 2048-node reservoir). It <em>works</em> at preventing the shortcut:
-  the stateless control stays <strong>pinned at 0.000 across all four epochs</strong> &mdash; it never rises to
+  the stateless control stays <strong>pinned at 0.000 across all four epochs</strong>: it never rises to
   match, so the reservoir is strictly necessary throughout (unlike the aux-only run, where the control caught
   up). But the reservoir solution is then <em>unstable</em>: the lift peaks at epoch&nbsp;1 (recall 1.00, mean
-  lift <strong>+0.339</strong>) and oscillates rather than settling &mdash; <strong>+0.255 &rarr; +0.339 &rarr;
-  +0.062 &rarr; +0.135</strong> over epochs 0&ndash;3 &mdash; so the peak is not held. So the two failure modes
+  lift <strong>+0.339</strong>) and oscillates rather than settling (<strong>+0.255 &rarr; +0.339 &rarr;
+  +0.062 &rarr; +0.135</strong> over epochs 0&ndash;3), so the peak is not held. So the two failure modes
   are distinct: capacity denial removes the stateless-shortcut drift but exposes a training-instability of the
   reservoir solution. Retention needs both fixed.
 </p>
 <p>
-  <strong>Fixing both retains the recall &mdash; the first stable retention result.</strong> The instability in
+  <strong>Fixing both retains the recall: the first stable retention result.</strong> The instability in
   the run above is an overshoot of a <em>flat</em> learning rate (the same pathology the battery loop already
   documents). Adding a <strong>cosine learning-rate decay</strong> to 0 over the run, on top of the capacity
   denial, removes it: the reservoir-driven recall climbs <strong>monotonically</strong> and holds at the converged
-  endpoint &mdash; mean lift <strong>+0.089 &rarr; +0.089 &rarr; +0.130 &rarr; +0.292</strong>, recall
+  endpoint: mean lift <strong>+0.089 &rarr; +0.089 &rarr; +0.130 &rarr; +0.292</strong>, recall
   <strong>0.08 &rarr; 0.19 &rarr; 0.35 &rarr; 1.00</strong>, with the stateless control pinned at 0.000 throughout
   and <strong>no collapse</strong>. So battery retention is achievable, and the recipe is specific: deny the
   stateless shortcut its adapter capacity (so the carried state is the only route) <em>and</em> decay the learning
   rate (so the solution settles instead of overshooting). Two caveats keep it honest: it is a single run
-  (seed-robustness untested), and it is <em>recall</em> that retains at 1.00 &mdash; the harder content tasks
+  (seed-robustness untested), and it is <em>recall</em> that retains at 1.00; the harder content tasks
   (accumulate, sequence, deferred) stay low, so this is retention of the recall capability, not the whole battery.
 </p>
 <figure>
-  <img src="battery_lift_eval48.png" alt="Per-epoch capability mean for the content battery: the reservoir (carried-state) curve rises to ~0.20 at epoch 1 while the stateless control stays near zero, then both fall together to ~0.08 by epoch 2 — the reservoir-driven lift appears at epoch 1 and is lost by epoch 2.">
+  <img src="battery_lift_eval48.png" alt="Per-epoch capability mean for the content battery: the reservoir (carried-state) curve rises to ~0.20 at epoch 1 while the stateless control stays near zero, then both fall together to ~0.08 by epoch 2; the reservoir-driven lift appears at epoch 1 and is lost by epoch 2.">
   <figcaption>
     <strong>Battery content lift, found then abandoned</strong> (Qwen-1.5B, content-only, eval_n=48). The
-    carried-state mean (blue) jumps above the wiped-reservoir control (red, dashed) at epoch 1 &mdash; a +0.177
-    reservoir-driven lift &mdash; then collapses back to the control by epoch 2 as training drifts to a stateless
+    carried-state mean (blue) jumps above the wiped-reservoir control (red, dashed) at epoch 1 (a +0.177
+    reservoir-driven lift), then collapses back to the control by epoch 2 as training drifts to a stateless
     solution. Regenerate with <code>python scripts/plot_epoch_curve.py</code> over the run's index.json.
   </figcaption>
 </figure>
@@ -594,26 +594,26 @@
 <p>
   <strong>The cause is geometric: the reservoir compresses where it should expand.</strong>
   Qwen-1.5B is 28 layers of 1536 neurons; the reservoir reads a 1536-dimensional layer, yet
-  the runs used 512–1024 nodes — <strong>0.3–0.7× the input</strong>. A reservoir is meant to
+  the runs used 512–1024 nodes: <strong>0.3–0.7× the input</strong>. A reservoir is meant to
   project its input into a far higher-dimensional space. Measured effective dimensionality
   <strong>plateaus at ~150–186 regardless of node count</strong> (16× more nodes barely moves
   it), with 74% of cells saturated. Low-dimensional temporal state (a clock, a gate) fits
   inside ~180 usable dimensions; high-dimensional symbolic content needs more. This made
-  reservoir <em>size</em> the prime suspect &mdash; and sizing it up (next) is what recovers recall.
+  reservoir <em>size</em> the prime suspect, and sizing it up (next) is what recovers recall.
 </p>
 <p>
-  <strong>The expansion + capacity tests — necessary, not sufficient.</strong> We expanded the
-  reservoir (a 5.3× run, then 16384 nodes via a fixed down-projection — the correct ESN regime),
+  <strong>The expansion + capacity tests: necessary, not sufficient.</strong> We expanded the
+  reservoir (a 5.3× run, then 16384 nodes via a fixed down-projection, the correct ESN regime),
   added broad LoRA and full backbone unfreezing, and trained far longer (15000 steps), with the
   emit-focused loss (after finding the original temporal metric was gameable by staying silent).
   Symbolic content still did not recover <em>in that battery setup</em> (down-projected, emit-gated) at
-  1.5B &mdash; though the clean cross-pass task does recover with the right config (next). A clean decomposition then isolated why: strip
+  1.5B, though the clean cross-pass task does recover with the right config (next). A clean decomposition then isolated why: strip
   the recall component (timing with a fixed word) and the low-dimensional timing signal
-  substantially trains — so the battery's emit metric (which bundles gating with recall) is
+  substantially trains, so the battery's emit metric (which bundles gating with recall) is
   dominated by <em>high-dimensional recall</em>. That pointed to the right lever, tested next.
 </p>
 <p>
-  <strong>The wall was an undersized reservoir &mdash; recall scales to Qwen-1.5B (verified).</strong>
+  <strong>The wall was an undersized reservoir: recall scales to Qwen-1.5B (verified).</strong>
   Those runs all held the reservoir near the GPT-2 default (512&ndash;1024 nodes, input scaling 0.5).
   Re-running the clean cross-pass recall task with a <strong>2048-node reservoir at input scaling 0.1</strong>
   (the &frac14;&ndash;&frac11;0 regime the dynamics sweep flagged) and 16 prefix tokens recovers recall at
@@ -624,11 +624,11 @@
   seeds, and the control at chance rules out memorization. A <strong>capacity ceiling</strong> persists, but
   in the <em>tens</em> of items, not at six: sweeping items carried gives recall <strong>1.00 at 6 keys,
   ~0.42 at 24 keys</strong> (≈10× the 1/24 chance, control 0.04), and <strong>chance by 48</strong>. The curve
-  is noisy from single 800-step runs (the 12-key point underperforms 24 &mdash; its loss stalled &mdash; so a
+  is noisy from single 800-step runs (the 12-key point underperforms 24 because its loss stalled, so a
   clean curve would need several seeds per point), but recall degrades <em>gracefully</em> into the tens of items
   rather than collapsing past six. Re-running the two non-converged points at 2000 steps separates a real
-  ceiling from undertraining: 48 keys stays at chance (0.04 vs 0.02) even with more training &mdash; the bound
-  is real &mdash; while the 12-key point stays stuck at both budgets (a per-run optimization artifact). So the
+  ceiling from undertraining: 48 keys stays at chance (0.04 vs 0.02) even with more training (the bound
+  is real), while the 12-key point stays stuck at both budgets (a per-run optimization artifact). So the
   reservoir scales both the <em>model</em> it works in and a non-trivial <em>number of items</em> (a few dozen),
   the latter with a real upper bound.
 </p>
@@ -643,41 +643,41 @@
   </figcaption>
 </figure>
 <p>
-  <strong>The decisive knob is input scaling matched to the model &mdash; not size.</strong>
+  <strong>The decisive knob is input scaling matched to the model, not size.</strong>
   <strong>Qwen2.5-0.5B</strong> makes this sharp: with the 2048-node reservoir it is at chance (0.17) at
   input scaling 0.1, but hits <strong>1.00 (vs 0.17 control) at scaling 0.5</strong>. One scalar takes it
-  from no-recall to perfect recall &mdash; smaller models have smaller activations and need more input drive
+  from no-recall to perfect recall: smaller models have smaller activations and need more input drive
   (1.5B recovers at 0.1, 0.5B at 0.5). So recall transfers across the <strong>Qwen family (0.5B and 1.5B)</strong>,
   and a 500M model recovering while GPT-2-medium's 355M does not <em>rules out a size law</em>. But scaling
   isn't a universal rescue: GPT-2-medium was swept across <strong>seven scalings (0.05&ndash;1.0)</strong> and
-  stayed at chance at every one &mdash; a <em>genuine exception</em>, not merely untested scaling (the wide
+  stayed at chance at every one: a <em>genuine exception</em>, not merely untested scaling (the wide
   sweep rules that out). Hermes-3B (4-bit) is also at chance, but 4-bit is a confound
   (bf16 3B + a 2048 reservoir won't fit this 8&nbsp;GB GPU). So recall recovers at GPT-2-small and the Qwen
-  family but not GPT-2-medium &mdash; and since GPT-2-<em>small</em> works while GPT-2-<em>medium</em> doesn't,
+  family but not GPT-2-medium; and since GPT-2-<em>small</em> works while GPT-2-<em>medium</em> doesn't,
   and deep modern Qwen does, the boundary is <strong>model-specific in a way size, depth, and scaling alone
   don't explain</strong>. Matched input scaling is necessary (Qwen-0.5B proves it) but not sufficient
-  (GPT-2-medium has no working scaling) &mdash; what lets a backbone read the prefix at all is the open question.
+  (GPT-2-medium has no working scaling); what lets a backbone read the prefix at all is the open question.
 </p>
 <figure>
-  <img src="crossmodel_recall.png" alt="Bar chart of cross-pass recall (stateful vs wiped control) across five models in size order: GPT-2-small ~1.0 above its 0.17 control, GPT-2-medium at chance, Qwen-0.5B ~1.0, Qwen-1.5B ~1.0, and Hermes-3B (4-bit) at chance — non-monotonic in size.">
+  <img src="crossmodel_recall.png" alt="Bar chart of cross-pass recall (stateful vs wiped control) across five models in size order: GPT-2-small ~1.0 above its 0.17 control, GPT-2-medium at chance, Qwen-0.5B ~1.0, Qwen-1.5B ~1.0, and Hermes-3B (4-bit) at chance; non-monotonic in size.">
   <figcaption>
     <strong>Cross-pass recall by model</strong> (2048-node reservoir, best input scaling per model, 6 keys).
     Carried-state recall (blue) clears its wiped-reservoir control (red) at GPT-2-small, Qwen-0.5B, and
-    Qwen-1.5B, but sits at chance for GPT-2-medium and 4-bit Hermes-3B &mdash; <em>not</em> monotonic in
+    Qwen-1.5B, but sits at chance for GPT-2-medium and 4-bit Hermes-3B: <em>not</em> monotonic in
     size. (Hermes-3B's 4-bit precision is a confound.) Regenerate with
     <code>python scripts/plot_recall_bars.py</code> over the per-model result JSONs.
   </figcaption>
 </figure>
 <p>
   <strong>First result (synthetic-input dynamics sweep).</strong> Driving a 200-unit
-  reservoir across spectral radius ρ ∈ [0.1, 2.0], the echo state property &mdash; the
-  reservoir forgetting its initial condition &mdash; holds cleanly for ρ &lt; 1 and breaks
+  reservoir across spectral radius ρ ∈ [0.1, 2.0], the echo state property (the
+  reservoir forgetting its initial condition) holds cleanly for ρ &lt; 1 and breaks
   sharply at ρ ≈ 1 (gold curve), exactly the edge-of-chaos boundary the classical theory
   predicts, now measured in this injection-oriented setup. Saturation and effective
   dimensionality rise smoothly with ρ. A nuance worth flagging: under unit-scale input
   drive the reservoir forgets its initial state across <em>all</em> ρ (strong input
   enforces the ESP), so the ρ ≈ 1 boundary is the regime that matters for
-  <em>unprompted</em>, input-free passes &mdash; precisely where the agent runs on
+  <em>unprompted</em>, input-free passes, precisely where the agent runs on
   reservoir state alone.
 </p>
 <figure>
@@ -690,12 +690,12 @@
   </figcaption>
 </figure>
 <p>
-  <strong>It holds on real GPT-2 activations &mdash; and H1 holds too.</strong> Driving
+  <strong>It holds on real GPT-2 activations, and H1 holds too.</strong> Driving
   the reservoir with <em>real</em> GPT-2 mid-layer activation streams, the same ρ ≈ 1
   echo-state boundary appears, even more sharply. And the reservoir injects into a
   pretrained GPT-2 block without breaking it: with the readout zeroed, the model&rsquo;s
   next-token logits are identical to vanilla GPT-2 (H1 non-destruction), while a nonzero
-  readout perturbs them and the reservoir state differs after two passes vs one &mdash; a
+  readout perturbs them and the reservoir state differs after two passes vs one: a
   genuine cross-pass time axis. One practical finding: real activations <em>over-drive</em>
   the reservoir (saturation ≈ 0.86 vs &lt; 0.15 on synthetic noise), so the input scaling
   must be tuned down for injection at transformer scale.
@@ -710,19 +710,19 @@
   </figcaption>
 </figure>
 <p>
-  <strong>H3 &mdash; the state is usable: a trained readout reads off history a stateless
+  <strong>H3. The state is usable: a trained readout reads off history a stateless
   model can&rsquo;t.</strong> On a delay-memory task (drive the reservoir with random
   input, train a linear readout to reproduce the input from τ steps ago), the readout on
   the reservoir state recovers the input from <strong>~18 steps back</strong> (R²&gt;0.5;
-  total memory capacity 17.4), while the stateless baseline &mdash; the same readout on the
-  <em>current</em> input &mdash; scores <strong>exactly 0</strong> at every delay ≥ 1. The
+  total memory capacity 17.4), while the stateless baseline (the same readout on the
+  <em>current</em> input) scores <strong>exactly 0</strong> at every delay ≥ 1. The
   answer lives in the carried state, not the input, and a light trained readout makes it
   usable.
 </p>
 <figure>
   <img src="h3_memory.png" alt="Delay-memory recovery R-squared vs delay: the readout on the reservoir state stays near 1 out to delay ~12 and decays through ~23; the stateless baseline drops to zero at delay 1 and stays there.">
   <figcaption>
-    <strong>H3 &mdash; delay memory</strong> (K=200). Recovery R² vs delay for a readout on
+    <strong>H3: delay memory</strong> (K=200). Recovery R² vs delay for a readout on
     the reservoir state vs a stateless baseline. Regenerate with
     <code>python scripts/run.py h3</code>.
   </figcaption>
@@ -730,9 +730,9 @@
 <p>
   <strong>N-seed selection: it works, but you can&rsquo;t shortcut it.</strong> Training
   each of 12 fixed reservoir seeds&rsquo; readout and ranking by memory capacity, the seeds
-  genuinely differ (17.4&ndash;20.7, ~19% spread) &mdash; so keeping the best is worth it.
-  But the plan&rsquo;s open question &mdash; can a cheap <em>untrained</em> dynamics metric
-  predict which seed trains best, to skip training? &mdash; gets a clean <strong>no</strong>
+  genuinely differ (17.4&ndash;20.7, ~19% spread), so keeping the best is worth it.
+  But the plan&rsquo;s open question (can a cheap <em>untrained</em> dynamics metric
+  predict which seed trains best, to skip training?) gets a clean <strong>no</strong>
   for the participation-ratio proxy: no rank correlation with trained performance
   (Spearman ρ = 0.08, p = 0.80). The N-seed training does real work this proxy can&rsquo;t
   pre-empt.
@@ -741,30 +741,30 @@
   <img src="nseed_select.png" alt="Scatter of untrained participation-ratio proxy versus trained memory capacity across 12 reservoir seeds; the points show no trend (Spearman rho 0.08).">
   <figcaption>
     <strong>N-seed pre-selection</strong>. Untrained dynamics proxy vs. trained memory
-    capacity across 12 seeds &mdash; no correlation. Regenerate with
+    capacity across 12 seeds: no correlation. Regenerate with
     <code>python scripts/run.py nseed-select</code>.
   </figcaption>
 </figure>
 <p>
   Training <strong>fixed reservoir seeds end-to-end on the cross-pass task</strong> (GPT-2,
   a hard 250-step budget) gives recall spread all the way from <strong>1.00</strong> to
-  <strong>chance, 0.17</strong> across seeds. The tempting reading &mdash; that this measures
-  reservoir <em>quality</em> &mdash; does <strong>not</strong> survive a check: the two
+  <strong>chance, 0.17</strong> across seeds. The tempting reading, that this measures
+  reservoir <em>quality</em>, does <strong>not</strong> survive a check: the two
   published runs share seed indices, and the <strong>same seed (identical reservoir, same
   setting) lands at very different recall</strong> across them (seed 0: 0.33 vs 1.00; mean
   |&Delta;|&nbsp;&asymp;&nbsp;0.47 over 12 shared seeds). So at this budget the outcome is
   <strong>dominated by training noise</strong> (CUDA non-determinism + under-training), not
-  reservoir quality &mdash; and no untrained metric (&rho;, eigenvalue spread, non-normality,
+  reservoir quality, and no untrained metric (&rho;, eigenvalue spread, non-normality,
   participation ratio, memory capacity) predicts recall (|Spearman|&nbsp;&lt;&nbsp;0.36).
   What it <em>does</em> support: you cannot cheaply pre-filter reservoirs, so you keep the
   whole population and train. Showing some reservoirs are <em>durably</em> better needs a
   controlled rerun (seed the trainable init, deterministic CUDA, average several runs per
-  seed) &mdash; open work.
+  seed); that is open work.
 </p>
 <figure>
   <img src="nseed_trained_spread.png" alt="Bar chart of cross-pass recall across 12 GPT-2 reservoir seeds from a single run, ranked best to worst: three seeds reach 1.0, descending through 0.83, 0.67, 0.5, 0.33 down to two seeds at chance (0.17).">
   <figcaption>
-    <strong>Per-seed recall, one run</strong> (GPT-2, N=12, 250 steps). A wide spread &mdash;
+    <strong>Per-seed recall, one run</strong> (GPT-2, N=12, 250 steps). A wide spread,
     but the same seeds rerun (the N=20 population) land very differently, so at this budget
     the spread is training-noise-dominated, not a clean reservoir-quality ranking (see text).
     Populations published at
@@ -775,14 +775,14 @@
 </figure>
 
 <p>
-  <strong>Controlled test &mdash; at this budget, &ldquo;selection&rdquo; is noise, not
+  <strong>Controlled test: at this budget, &ldquo;selection&rdquo; is noise, not
   signal.</strong> We then controlled the noise: <code>kv_live</code> had a <code>train_seed</code>
-  that was never wired, so the trainable init was uncontrolled &mdash; now it seeds the init, and
+  that was never wired, so the trainable init was uncontrolled; now it seeds the init, and
   a determinism helper makes two runs of the same reservoir with the same <code>train_seed</code>
   bit-identical. Training <strong>6 reservoir seeds &times; 4 runs</strong> (runs vary only by
   init) and running a one-way ANOVA over recall by reservoir seed: the within-seed spread is as
   wide as the between-seed spread (seed 0 alone spans 0.33&ndash;1.00), giving
-  <strong>F = 1.30 (df 5,18), p = 0.31</strong> &mdash; reservoir identity does <em>not</em>
+  <strong>F = 1.30 (df 5,18), p = 0.31</strong>: reservoir identity does <em>not</em>
   explain recall above run-to-run init noise. At 250 steps, which fixed reservoir you drew
   matters less than which init you got; select over <em>runs</em>, not seeds. (A far-longer-budget
   run, where init noise should shrink, is the natural follow-up.)
@@ -792,23 +792,23 @@
   <figcaption>
     <strong>Controlled N-seed selection</strong> (GPT-2, 6 seeds &times; 4 runs, 250 steps,
     seeded init + deterministic kernels). Within-seed run-to-run spread matches the between-seed
-    spread &mdash; ANOVA F=1.30, p=0.31, selection not significant. Regenerate with
+    spread: ANOVA F=1.30, p=0.31, selection not significant. Regenerate with
     <code>python scripts/run.py controlled --n-seeds 6 --runs 4 --steps 250</code>.
   </figcaption>
 </figure>
 
 <p>
-  <strong>Cross-pass recall &mdash; the core claim, demonstrated (the injection design
+  <strong>Cross-pass recall: the core claim, demonstrated (the injection design
   decides everything).</strong> The load-bearing test: show a secret word, <em>wipe the
-  context</em>, recall it on the next pass from carried reservoir state alone &mdash; a task
+  context</em>, recall it on the next pass from carried reservoir state alone, a task
   a stateless model <em>structurally cannot</em> do. The outcome depends sharply on
   <em>how</em> the reservoir is injected. As a single <strong>additive</strong> bias the
-  model ignores it (stateful = stateless = chance, 0.17 &mdash; the documented &ldquo;learns
-  to ignore the recurrent state&rdquo; mode). But injected <strong>content-addressably</strong>
-  &mdash; the reservoir state projected into prefix tokens the model can <em>attend</em> to
-  (the KV-append fix) &mdash; the stateful model reaches <strong>100% recall</strong> while
+  model ignores it (stateful = stateless = chance, 0.17; the documented &ldquo;learns
+  to ignore the recurrent state&rdquo; mode). But injected <strong>content-addressably</strong>,
+  the reservoir state projected into prefix tokens the model can <em>attend</em> to
+  (the KV-append fix), the stateful model reaches <strong>100% recall</strong> while
   the stateless baseline stays at chance. So the agent&rsquo;s statefulness <em>does</em>
-  carry information across independent passes and the model uses it &mdash; <strong>provided
+  carry information across independent passes and the model uses it, <strong>provided
   the reservoir is attended to, not added.</strong>
 </p>
 <figure>
@@ -827,16 +827,16 @@
   currently keys off entropy, but a real agent must decide when to speak. We trained a
   gate on the reservoir state to detect an <strong>unresolved thread</strong> (a trigger
   event in the recent past). The reservoir gate reaches an <strong>F1 of 0.48</strong>
-  (P=0.71, R=0.36) while a stateless gate sits at <strong>F1=0.03</strong> &mdash; the
+  (P=0.71, R=0.36) while a stateless gate sits at <strong>F1=0.03</strong>: the
   carried state lets the model "remember" it has an unresolved thread to address, even
   after the trigger is gone from the input.
 </p>
 
 <p>
-  <strong>Transfer to Hermes 3B — not yet, and well characterized.</strong> The port to
+  <strong>Transfer to Hermes 3B: not yet, and well characterized.</strong> The port to
   <strong>Hermes-3-Llama-3.2-3B</strong> (Llama-3.2-3B) verified the mechanism is
   correctly wired (logits are byte-identical when zeroed, and gradients flow to the
-  injection) &mdash; but the 100% recall result on GPT-2 did <strong>not</strong>
+  injection), but the 100% recall result on GPT-2 did <strong>not</strong>
   transfer to the 3B model in this budget (plateaued at chance, 0.17). This is a
   genuine <strong>optimization / scale difficulty</strong>: the prefix's signal,
   diluted through 28 layers and competing with a 3B instruction-tuned model's strong
@@ -853,11 +853,11 @@
 </figure>
 
 <p>
-  <strong>A trained silence policy &mdash; and why this is hard brain surgery.</strong> A
+  <strong>A trained silence policy, and why this is hard brain surgery.</strong> A
   real agent must sometimes stay silent. On an <em>unresolved-thread</em> task (speak for a
   few passes after a trigger, whose cue is strictly in the past), a gate on the reservoir
-  state reaches <strong>F1 ≈ 0.96</strong>, while a stateless gate collapses to F1 ≈ 0.34
-  &mdash; it cannot see the past trigger, so it can only <em>always speak</em>. A stateless
+  state reaches <strong>F1 ≈ 0.96</strong>, while a stateless gate collapses to F1 ≈ 0.34;
+  it cannot see the past trigger, so it can only <em>always speak</em>. A stateless
   model can&rsquo;t implement selective silence at all; a reservoir-state gate can.
 </p>
 <figure>
@@ -869,13 +869,13 @@
 </figure>
 <p>
   The deeper point (documented in <code>FINDINGS.md</code>): the <em>default</em> should be
-  to <strong>respond</strong> &mdash; with a decayed, near-empty reservoir the base model&rsquo;s
+  to <strong>respond</strong>: with a decayed, near-empty reservoir the base model&rsquo;s
   prior is to speak. Silence should attach to an <em>active, novel</em> reservoir state (a
   condition the base model never saw, and so the natural handle to teach &ldquo;still
   processing, stay silent&rdquo;); and because the echo state property empties the reservoir
   over time, the agent naturally reverts to baseline responding once the activity subsides.
   Teaching an already-trained model this new behavioural axis is aggressive brain surgery
-  &mdash; the same difficulty that kept Hermes recall from bootstrapping &mdash; and it is
+  (the same difficulty that kept Hermes recall from bootstrapping), and it is
   the real, hard frontier this project pushes on.
 </p>
 
@@ -883,8 +883,8 @@
   <strong>The over-saturation is fixable by input scaling.</strong> Sweeping the input
   scaling at ρ = 0.95, saturation is a clean sigmoid: near zero below ≈ 0.05, crossing
   0.5 at ≈ 0.24, while separation and dimensionality stay high. There&rsquo;s a sweet spot
-  around <strong>0.08&ndash;0.24</strong> &mdash; the reservoir is responsive but not
-  pinned &mdash; so real attention activations should be fed at roughly ¼&ndash;⅒ of unit
+  around <strong>0.08&ndash;0.24</strong> (the reservoir is responsive but not
+  pinned), so real attention activations should be fed at roughly ¼&ndash;⅒ of unit
   scale, a concrete injection setting this study contributes.
 </p>
 <figure>
@@ -900,7 +900,7 @@
   <strong>Proof-of-concept: the time axis is behavioural.</strong> Pushing past the
   feasibility scope: running the <em>same</em> prompt after different prior history, with
   the reservoir state carried across the otherwise-independent forward passes, shifts
-  GPT-2&rsquo;s next-token logits by an L2 distance of ≈ 22 &mdash; the same input yields a
+  GPT-2&rsquo;s next-token logits by an L2 distance of ≈ 22: the same input yields a
   different output distribution depending on what came before, which a stateless
   transformer cannot do. A seed-selection proxy (below) ranks fixed-random reservoir
   seeds by their dynamics before any training; the <em>untrained</em> spread across seeds
@@ -918,14 +918,14 @@
 
 <h2>Safety by design</h2>
 <p>
-  <em>This section is secondary &mdash; design motivation plus small synthetic proof-of-concepts that
+  <em>This section is secondary: design motivation plus small synthetic proof-of-concepts that
   fall out of the same statefulness, not core results (those are the injection-design, dynamics, and
   recall-scaling findings above).</em>
 </p>
 <p>
   The project follows a rule: <strong>never introduce a new capability to an AI without
   meaningfully taking its safety into account</strong>. The Reservoir Attention Network adds
-  capability (cross-pass state, autonomous ticks), so it owes safety value back &mdash; and the
+  capability (cross-pass state, autonomous ticks), so it owes safety value back, and the
   value comes from the <em>same</em> feature as the capability, the <strong>fixed</strong>
   reservoir, not a bolt-on. Three properties, each backed by a measured result below rather
   than asserted: lower-latency, durable human override (interruptibility); a cheap, stable
@@ -933,19 +933,19 @@
   idling (reservoir-protected eviction). Limits of this probe: it decodes a
   benign internal clock, not genuine misalignment signatures; the numbers are small-scale on a
   fixed reservoir, not a live agent at the real base-model scale. It is the design intent and a
-  first measured down-payment, not a finished safety case &mdash; which is why the models,
+  first measured down-payment, not a finished safety case, which is why the models,
   training code, and reservoir monitors are released open rather than bolted on later.
 </p>
 
 <p>
-  <strong>A reservoir-state probe reads an internal clock &mdash; linearly, no SAE
+  <strong>A reservoir-state probe reads an internal clock: linearly, no SAE
   (interpretability for safety).</strong> The chat argued the reservoir is a good monitoring
   surface that needs only a simple learned readout, not a sparse autoencoder. We defined a
-  process property a stateless pass can&rsquo;t see &mdash; elapsed passes since the last
-  trigger &mdash; and fit a plain ridge probe: from the reservoir state it reaches
+  process property a stateless pass can&rsquo;t see (elapsed passes since the last
+  trigger) and fit a plain ridge probe: from the reservoir state it reaches
   <strong>R² = 0.99</strong>, vs <strong>0.16</strong> from the instantaneous input. Modelling
   a fine-tuning-like drift on the driving activations, the pre-drift probe degrades
-  <em>gracefully</em> (0.99 &rarr; 0.94 at drift 0.4, 0.82 at 0.8) &mdash; usable across
+  <em>gracefully</em> (0.99 &rarr; 0.94 at drift 0.4, 0.82 at 0.8): usable across
   moderate drift, not invariant, since the reservoir <em>weights</em> are fixed but their
   inputs still move. A cheap, stable place to watch the agent&rsquo;s internal state.
 </p>
@@ -959,12 +959,12 @@
 </figure>
 
 <p>
-  <strong>Interruptibility &mdash; a faster, more durable response to &ldquo;STOP&rdquo;
+  <strong>Interruptibility: a faster, more durable response to &ldquo;STOP&rdquo;
   (a safety property).</strong> A turn-based harness agent only reads input at turn
   boundaries, so an urgent override waits: at a poll period of 8 passes its mean latency is
   3.57 passes, while a per-tick Reservoir Agent&rsquo;s is <strong>0</strong>. This latency half
   is a consequence of <em>sampling frequency</em> (per-tick vs per-turn), not
-  of the reservoir as such &mdash; any per-tick agent gets it. The reservoir-specific, sharper
+  of the reservoir as such; any per-tick agent gets it. The reservoir-specific, sharper
   point is a <em>one-shot</em> burst (the user yells STOP once, then goes quiet): a
   matched-filter monitor on the reservoir state stays detectable for <strong>3 passes
   after</strong> arrival via fading memory, while a stateless monitor catches it on the
@@ -983,15 +983,15 @@
 </figure>
 
 <p>
-  <strong>Blank-tick context burn &mdash; bounded by pinning the reservoir.</strong> An
+  <strong>Blank-tick context burn: bounded by pinning the reservoir.</strong> An
   always-alive agent runs <em>blank ticks</em>: autonomous passes with no user input. Each
   silent tick still appends to the KV cache, so a continuously-running agent burns its
-  context window <em>faster</em> than a turn-based one &mdash; the operational challenge
+  context window <em>faster</em> than a turn-based one, the operational challenge
   raised in the imported Grok chat (<em>&ldquo;context explodes&hellip; a reservoir agent
   gets an input of blank&rdquo;</em>). The fix is StreamingLLM-style eviction (a few
   attention-sink tokens + a recent window, drop the middle) with the reservoir&rsquo;s K/V
-  entries <strong>pinned</strong>, so the persistent time-axis is never what gets dropped
-  &mdash; <em>&ldquo;a really long time of no activity is signal.&rdquo;</em> Over 512 blank
+  entries <strong>pinned</strong>, so the persistent time-axis is never what gets dropped:
+  <em>&ldquo;a really long time of no activity is signal.&rdquo;</em> Over 512 blank
   ticks the vanilla cache grows linearly to 524 positions while the protected policy stays
   bounded at the budget (128), with <strong>all 8 reservoir entries retained on every
   tick</strong>. The policy (<code>reservoir.kv_evict</code>) is pure and CPU-tested;
@@ -1008,11 +1008,11 @@
 
 <h2>Run a reservoir agent locally</h2>
 <p>
-  Every model the project ships is a <strong>reservoir agent</strong> &mdash; a new model
+  Every model the project ships is a <strong>reservoir agent</strong>: a new model
   type, not a vanilla transformer (the fixed reservoir is brain-surgeried in, attended, and
   carries state across passes). They are published, tagged <code>reservoir-agent</code>, on
   the <a href="https://huggingface.co/EmmaLeonhart/reservoir-agent-gpt2-crosspass">Hugging
-  Face Hub</a>, and built in batches where the <em>whole population is kept</em> &mdash; the
+  Face Hub</a>, and built in batches where the <em>whole population is kept</em>: the
   weaker seeds are retained as signal for learning what makes a good reservoir.
 </p>
 <p>
@@ -1035,10 +1035,10 @@ python -m reservoir.installer            # menu -&gt; download -&gt; stateful co
 <h2 id="ai-use">Declaration of AI use</h2>
 <p>
   This work was produced with substantial use of a large language model coding agent (Claude,
-  Anthropic) under human direction &mdash; it implemented the code and experiment harness, ran the
+  Anthropic) under human direction: it implemented the code and experiment harness, ran the
   experiments, analysed the results, made the figures, and drafted this report. The disclosure that
   matters: every quantitative result is the output of <strong>executed code and measured model
-  behaviour</strong>, not text from the language model &mdash; each number comes from a logged run, and
+  behaviour</strong>, not text from the language model; each number comes from a logged run, and
   every cross-pass claim is reported against an explicit stateless / wiped-reservoir control from the
   same run. The human author set the direction and hypotheses, reviewed the code, results, and claims,
   decided what to assert and what to leave open, and is responsible for the content; no result was

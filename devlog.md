@@ -2481,3 +2481,17 @@ CI rebuilt the site green after the citation fixes; downloaded the fresh
 verified by extraction that all three reference fixes (Titans 2025, ECAI, ICLR)
 are in `paper.tex.body`. Audit complete; paper is arXiv-ready — account /
 endorsement / category+license selection remains the user's step.
+
+## 2026-06-10 — Em-dash purge + PDF figure-overflow fix (user requests)
+
+(1) Removed every em-dash from the paper and its surfaces, rewriting each with
+contextually chosen punctuation (two parallel agents; meaning and numbers
+unchanged): FINDINGS.md (249 occurrences), docs/index.html (134, both literal
+and &mdash; entities), README.md (19), paper/paper.tex (2, comments). Verified
+zero remain across all four files; en-dashes in numeric ranges kept.
+(2) Fixed the cut-off figures in the built PDF: the CI pandoc emits bare
+\includegraphics with no size bound (the \pandocbounded shim is never invoked),
+so wide PNGs (crossmodel_recall, h3_memory, battery figures) ran off the right
+page edge. Added graphicx Gin defaults (width=\maxwidth, height=\maxheight,
+keepaspectratio — pandoc's own standalone-template approach) to paper.tex so
+every figure is bounded to the text block regardless of pandoc version.
