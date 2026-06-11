@@ -120,7 +120,7 @@ def cmd_sweep_real(args) -> int:
     fig = ROOT / args.fig
     fig.parent.mkdir(parents=True, exist_ok=True)
     plot_sweep(records, str(fig),
-               title="Reservoir dynamics vs ρ — real GPT-2 mid-layer activations")
+               title="Reservoir dynamics vs ρ: real GPT-2 mid-layer activations")
     print(f"wrote {fig.relative_to(ROOT)}")
 
     healthy = healthy_regime(records)
@@ -209,7 +209,7 @@ def cmd_sweep_scaling(args) -> int:
     print(f"wrote {out.relative_to(ROOT)}")
     figp = ROOT / "docs" / "sweep_scaling.png"
     plot_scaling(records, str(figp),
-                 title=f"Reservoir dynamics vs input scaling — real GPT-2 (ρ={args.rho})")
+                 title=f"Reservoir dynamics vs input scaling: real GPT-2 (ρ={args.rho})")
     print(f"wrote {figp.relative_to(ROOT)}")
 
     healthy = [r for r in records if r["saturation"] < 0.5]
