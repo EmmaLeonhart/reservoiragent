@@ -2509,3 +2509,13 @@ renders stay clean. All other paper/site figures verified em-dash-free.
 Note: tests/test_torch_inject.py::test_finetune_pipeline_reduces_loss failed
 once in the full local suite and passes in isolation (stochastic few-step
 finetune assertion); unrelated to this change set, which is strings-only.
+
+## 2026-06-11 — Em-dash purge complete end-to-end; fixed tarball re-delivered
+
+A PDF text-layer scan caught 4 final em-dashes hiding as XML entities (&#8212;)
+in diagram-ran.svg and diagram-echo-state.svg, which the literal-character grep
+had missed; fixed. Final verification on the live artifacts: the rebuilt
+report.pdf contains ZERO em-dashes across prose and vector-figure text, all
+figures are bounded to the text block (the Gin fix), and the rebuilt
+reservoir-arxiv-source.tar.gz (1.29 MB, em-dash-free, figure fix included) is
+re-delivered to the user's Downloads. The pre-arXiv audit thread is closed.
