@@ -46,7 +46,7 @@
 
   <!-- ===== the reservoir (right) ===== -->
   <circle cx="650" cy="250" r="105" fill="#f6efdc" stroke="#2b2b2b" stroke-width="2.2"/>
-  <text x="650" y="372" text-anchor="middle" font-size="13" fill="#2b2b2b">fixed random reservoir &#8212; state r(t)</text>
+  <text x="650" y="372" text-anchor="middle" font-size="13" fill="#2b2b2b">fixed random reservoir: state r(t)</text>
   <g stroke="#2f6f8f" stroke-width="1.6" fill="none" marker-end="url(#ran-rec)">
     <path d="M600,210 C635,196 680,198 712,214"/>
     <path d="M712,228 C735,255 720,290 686,305"/>
@@ -73,5 +73,5 @@
   <g stroke="#7d5ba6" stroke-width="3" fill="none" marker-end="url(#ran-carry)" stroke-dasharray="2 0">
     <path d="M735,300 C800,340 800,400 700,408 C540,418 360,415 250,418"/>
   </g>
-  <text x="560" y="436" text-anchor="middle" font-size="13" fill="#7d5ba6" font-style="italic">state carried to the next forward pass, r(t) to r(t+1) &#8212; survives the context wipe (the time axis)</text>
+  <text x="560" y="436" text-anchor="middle" font-size="13" fill="#7d5ba6" font-style="italic">state carried to the next forward pass, r(t) to r(t+1): survives the context wipe (the time axis)</text>
 </svg>

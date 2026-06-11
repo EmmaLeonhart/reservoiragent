@@ -8,7 +8,7 @@
 
   <!-- ===== left: the reservoir taking an input impulse ===== -->
   <circle cx="150" cy="200" r="78" fill="#f6efdc" stroke="#2b2b2b" stroke-width="2"/>
-  <text x="150" y="298" text-anchor="middle" font-size="12.5" fill="#2b2b2b">fixed random reservoir &#8212; state r(t)</text>
+  <text x="150" y="298" text-anchor="middle" font-size="12.5" fill="#2b2b2b">fixed random reservoir: state r(t)</text>
   <g fill="#2f6f8f" stroke="#1f4f63" stroke-width="1.2">
     <circle cx="120" cy="172" r="11"/><circle cx="182" cy="170" r="11"/><circle cx="128" cy="226" r="11"/><circle cx="178" cy="228" r="11"/><circle cx="150" cy="200" r="11"/>
   </g>
@@ -45,5 +45,5 @@
 
   <!-- baseline note -->
   <text x="410" y="350" text-anchor="middle" font-size="12" fill="#9e5f12" font-style="italic">echo state property: the influence of the initial state and the distant past vanishes</text>
-  <text x="410" y="368" text-anchor="middle" font-size="12" fill="#9e5f12" font-style="italic">memory is fading and finite &#8212; its capacity grows with reservoir size</text>
+  <text x="410" y="368" text-anchor="middle" font-size="12" fill="#9e5f12" font-style="italic">memory is fading and finite: its capacity grows with reservoir size</text>
 </svg>
