@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%" viewBox="0 0 680 860" role="img" style="max-width: 680px; display: block; margin-inline: auto;">
-<title>Reservoir tick architecture — full attention matrix read per layer pass</title>
+<title>Reservoir tick architecture: full attention matrix read per layer pass</title>
 <desc>At a chosen mid-depth layer, every forward pass writes the complete attention matrix into the reservoir. The reservoir state evolves chaotically across many passes (ticks), and its current state is injected back as additional tokens into that same layer's attention on the next pass.</desc>
 <defs>
   <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
@@ -30,7 +30,7 @@
 </g>
 <line x1="190" y1="196" x2="190" y2="226" class="arr" marker-end="url(#arrow)" stroke="#8a877f"></line>
 
-<!-- Injection layer — highlighted -->
+<!-- Injection layer (highlighted) -->
 <rect x="34" y="226" width="312" height="108" rx="10" stroke="#BA7517" stroke-width="1.5" fill="none" stroke-dasharray="5 3"></rect>
 <text class="ts" fill="#54515a" font-size="11" x="48" y="222" style="fill:#BA7517">injection layer Lk</text>
 
@@ -100,9 +100,9 @@
 <!-- Persistence / long-range accumulation annotation -->
 <rect x="440" y="330" width="200" height="120" rx="8" stroke="#c6c1b6" stroke-width="0.5" fill="#f7f6f3"></rect>
 <text class="ts" fill="#54515a" font-size="11" x="540" y="352" text-anchor="middle" style="fill:#54515a">Accumulates over passes:</text>
-<text class="ts" fill="#54515a" font-size="11" x="540" y="372" text-anchor="middle" style="fill:#54515a">tick 1 — first prompt token</text>
-<text class="ts" fill="#54515a" font-size="11" x="540" y="390" text-anchor="middle" style="fill:#54515a">tick 50 — mid-task state</text>
-<text class="ts" fill="#54515a" font-size="11" x="540" y="408" text-anchor="middle" style="fill:#54515a">tick 100+ — long-range</text>
+<text class="ts" fill="#54515a" font-size="11" x="540" y="372" text-anchor="middle" style="fill:#54515a">tick 1: first prompt token</text>
+<text class="ts" fill="#54515a" font-size="11" x="540" y="390" text-anchor="middle" style="fill:#54515a">tick 50: mid-task state</text>
+<text class="ts" fill="#54515a" font-size="11" x="540" y="408" text-anchor="middle" style="fill:#54515a">tick 100+: long-range</text>
 <text class="ts" fill="#54515a" font-size="11" x="540" y="426" text-anchor="middle" style="fill:#54515a">dependency active</text>
 <text class="ts" fill="#54515a" font-size="11" x="540" y="444" text-anchor="middle" style="fill:#54515a">"implicit elapsed time"</text>
 
@@ -111,10 +111,10 @@
 
 <rect x="40" y="552" width="600" height="120" rx="10" stroke="#d8d4cb" stroke-width="0.5" fill="#f7f6f3"></rect>
 <text class="th" fill="#2d2a26" font-weight="600" font-size="13.5" x="340" y="576" text-anchor="middle" dominant-baseline="central">Ensemble training strategy</text>
-<text class="ts" fill="#54515a" font-size="11" x="340" y="598" text-anchor="middle" dominant-baseline="central">Reservoir weights are random and fixed — only the transformer's fine-tune changes</text>
+<text class="ts" fill="#54515a" font-size="11" x="340" y="598" text-anchor="middle" dominant-baseline="central">Reservoir weights are random and fixed; only the transformer's fine-tune changes</text>
 <text class="ts" fill="#54515a" font-size="11" x="340" y="618" text-anchor="middle" dominant-baseline="central">Run N independent seeds (different reservoir initialisations)</text>
 <text class="ts" fill="#54515a" font-size="11" x="340" y="638" text-anchor="middle" dominant-baseline="central">Evaluate each agent on agentic benchmark suite</text>
-<text class="ts" fill="#54515a" font-size="11" x="340" y="658" text-anchor="middle" dominant-baseline="central">Keep the seed whose dynamics happen to be useful — discard the rest</text>
+<text class="ts" fill="#54515a" font-size="11" x="340" y="658" text-anchor="middle" dominant-baseline="central">Keep the seed whose dynamics happen to be useful; discard the rest</text>
 
 <!-- Legend -->
 <line x1="44" y1="800" x2="72" y2="800" stroke="#BA7517" stroke-width="1.5" stroke-dasharray="5 3"></line>

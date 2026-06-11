@@ -2495,3 +2495,17 @@ so wide PNGs (crossmodel_recall, h3_memory, battery figures) ran off the right
 page edge. Added graphicx Gin defaults (width=\maxwidth, height=\maxheight,
 keepaspectratio — pandoc's own standalone-template approach) to paper.tex so
 every figure is bounded to the text block regardless of pandoc version.
+
+## 2026-06-10 — Em-dashes purged from figures too (SVG text + re-rendered plot PNGs)
+
+The prose purge left em-dashes baked into figure artwork. Fixed the drawn text in
+the three SVG diagrams that had them (architecture, transformer, runtime) and
+re-rendered the four plot PNGs whose titles/labels contained em-dashes
+(crosspass.png, sweep_real.png, sweep_scaling.png, blank_cycle_kv.png) from
+their stored results JSONs via the existing plot functions: identical data, no
+recomputation, no training (experiments stay closed). Title strings in
+scripts/run.py and labels in blank_cycle.py fixed at the source so future
+renders stay clean. All other paper/site figures verified em-dash-free.
+Note: tests/test_torch_inject.py::test_finetune_pipeline_reduces_loss failed
+once in the full local suite and passes in isolation (stochastic few-step
+finetune assertion); unrelated to this change set, which is strings-only.

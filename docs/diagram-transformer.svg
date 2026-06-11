@@ -58,5 +58,5 @@
   <!-- "x N layers" + the key point -->
   <text x="735" y="200" font-size="13" fill="#555" transform="rotate(0)">&#215; N layers</text>
   <text x="120" y="200" font-size="12" fill="#555" text-anchor="end" transform="rotate(-90 60 200)"></text>
-  <text x="410" y="300" text-anchor="middle" font-size="12" fill="#9e5f12" font-style="italic">no state survives between forward passes — only position within the context window</text>
+  <text x="410" y="300" text-anchor="middle" font-size="12" fill="#9e5f12" font-style="italic">no state survives between forward passes; only position within the context window</text>
 </svg>

@@ -71,9 +71,9 @@ def plot_blank_cycle(records: List[Dict[str, int]], path: str, *,
 
     fig, ax = plt.subplots(figsize=(7, 4.2))
     ax.plot(ticks, vanilla, color="#c0392b", lw=2,
-            label="no eviction (vanilla) — linear burn")
+            label="no eviction (vanilla): linear burn")
     ax.plot(ticks, protected, color="#1f6f8b", lw=2,
-            label="reservoir-protected policy — bounded")
+            label="reservoir-protected policy: bounded")
     if records:
         budget = max(protected)
         ax.axhline(budget, color="#1f6f8b", ls=":", lw=1, alpha=0.7)
