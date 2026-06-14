@@ -95,7 +95,7 @@ To be explicit about the boundary of the claims:
 - **The complexity-theory argument is motivation, not a result.** The TC⁰ / FO(M)
  framing explains *why* cross-pass state is the interesting lever; we state plainly that
  there is no proof a finite-precision reservoir lifts the per-pass bound, and we
- treat it as the project's central open theoretical question, not an established finding.
+ treat it as the central open theoretical question, not an established finding.
 - **The GPT-2-medium / 4-bit-3B negatives and the KV-append integration constraint are
  limitations, stated as such.** The cross-pass recall result holds at GPT-2-small and across the
  Qwen family (0.5B, 1.5B) with model-matched input scaling, but not at GPT-2-medium (chance
@@ -164,7 +164,7 @@ into a capable backbone is the more robust design.
 
 ## Related Work
 
-This section is the project's literature review, grounding the work in three bodies of
+This section reviews the prior literature, grounding the work in three bodies of
 prior art. Full citations are in the References.
 
 Reservoir computing. The defining move, fixing the recurrent weights (W_r, W_in) at
@@ -455,7 +455,7 @@ finding.
  reservoir state, made attendable, lets the model recall content that exists *only* in
  the reservoir, something the stateless baseline provably cannot do. (see figure)
 
-This is the project's core claim, demonstrated: the Reservoir Agent's statefulness
+This is the paper's core claim, demonstrated: the Reservoir Agent's statefulness
 *does the desired thing*: it carries information across independent forward passes and
 the model uses it, **provided the reservoir is injected content-addressably (attended
 to), not as an additive bias.** The negative-then-positive arc is the contribution: it
@@ -476,7 +476,7 @@ converges** within 600 steps (loss plateaus ~5.0). So the working regime is robu
 moderate vocabularies and becomes budget-limited as the vocabulary grows: a characterization,
 not a clean capacity ceiling. (see figure)
 
-Transfer to Hermes 3B: not yet, and well diagnosed. The same
+Transfer to Hermes-3B does not yet succeed, and the reason is diagnosed. The same
 content-addressable experiment was run on the real target, Hermes-3-Llama-3.2-3B, across
 four attempts: 4-bit at input scaling 0.5 (300 steps), 4-bit at 0.1 (600 steps),
 bf16 (non-4-bit) at 0.1 with a higher LR 3e-3 (600 steps), and a dedicated
@@ -934,7 +934,7 @@ interruptibility numbers are from a synthetic stream on the echo-state reservoir
 agent under a real harness with its own latencies. And all of it is at small scale on a fixed
 reservoir; the claims for the real target (a DeepSeek/Hermes-scale base) are not yet run. These
 properties are the *design intent* and a first measured step toward it, not a finished
-safety case. The project's release plan (open weights, the training/harness code, and the
+safety case. The release plan (open weights, the training/harness code, and the
 reservoir monitors included rather than bolted on) is the mechanism for others to test and
 extend them.
 
@@ -996,7 +996,7 @@ map is fixed, but its inputs still move, so a very large fine-tune would still e
 is the precise version of "resilient monitoring surface": a stable, low-cost, linear read on an
 internal state that degrades slowly rather than a guarantee.
 
-Together with interruptibility, this is the concrete content behind the project's safety
+Together with interruptibility, this is the concrete content behind the safety
 framing: the same fixed reservoir that gives the agent a usable time-axis also gives an
 operator a low-cost, stable place to watch what the agent is doing. (Reading an *elapsed clock*
 is the decodability demonstration; reading genuine *misalignment* signatures is a much harder,

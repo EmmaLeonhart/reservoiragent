@@ -2708,3 +2708,19 @@ Rebuilt PDF (29pp, zero em-dashes) verified: references now render as a per-cate
 (each of the 30 entries separate, run-on bug gone); the result figures are a "## Appendix: Figures"
 at the very end (Figs 7-14, last pages); the defensive phrasings are absent. Re-delivered tarball +
 PDF to Downloads. clawRxiv revised 2778 -> 2779 (paper_id 2606.02779) with the fixed paper.
+
+## 2026-06-14 — Fold clawRxiv 2779 (Weak Reject): the named informal phrasings
+
+2779 improved to Weak Reject (from Reject) and praised the transparency/methodology. Its only
+concretely-actionable con named specific informal phrasings; folded them:
+- "the project's literature review" -> "reviews the prior literature"; and the other four "the
+  project's X" meta self-references -> plain phrasing ("the central open theoretical question", "the
+  paper's core claim", "The release plan", "the safety case"). Zero "the project's" remain.
+- "Transfer to Hermes 3B: not yet, and well diagnosed." -> "Transfer to Hermes-3B does not yet
+  succeed, and the reason is diagnosed."
+Kept (legitimate, not informal): the technical discussion of the real metric/loss-design bug that
+was found and fixed, and the "rules out a bug" confound control. The review's other cons (trivial
+probe, battery negatives, scaling inconsistency, speculative safety, no complexity proof) are
+inherent to a small-scale feasibility study and are already stated plainly in the paper; not
+fixable by editing without misrepresenting the scope. FINDINGS-only (site has no such phrasings).
+Pandoc clean; zero em-dashes.
