@@ -75,6 +75,64 @@ arXiv endorsement and Discord/community outreach.
 
 ---
 
+## Final external-review editing pass (2026-06-13) — 7 AI peer reviews
+
+Seven external chatbot reviews (Claude, ChatGPT, Meta AI, DeepSeek, Grok, Perplexity, Gemini)
+distilled into `data_lake/external_reviews_2026-06-13.md`. Work top-down; each edit touches
+FINDINGS.md AND docs/index.html in the same commit (paper-and-site-are-one), rebuild + verify,
+push, confirm CI green. Reviewer consensus: paper is submittable; self-contained figures is the
+only true gate. **Verify each substantive claim against `results/` before applying — do not
+blindly accept reviewer framing** (the "abstract contradicts Appendix A" item is a disambiguation,
+NOT a false scaling claim; the probe scaling is real).
+
+**A. Blockers (figures + correctness):**
+- **Self-contained figures.** Confirm the built `docs/report.pdf` embeds every figure; remove/soften
+  the "All figures referenced below are in the accompanying report: https://reservoir.emmaleonhart.com"
+  lines (FINDINGS.md:267-268, :1330) so an arXiv reader is never sent off-site. (Meta, DeepSeek, Grok)
+- **Disambiguate the two "recall" measurements.** Make the abstract/§1 explicit that the secret-word
+  recall *probe* scales to Qwen-1.5B (0.83-1.00 vs 0.17 control) while the 8-task battery's *symbolic
+  content* recall stays at floor except under the deny-capacity+decay-LR recipe — different tasks, so
+  it does not contradict Appendix A. (Gemini, DeepSeek, Perplexity, ChatGPT)
+- **Harmonize the reservoir update equations.** §4 (~line 114) plain form vs §6 (~line 229) leaky-
+  integrator with leak rate `a` undefined earlier — introduce the leak-rate form where it first
+  appears. (Gemini)
+- **Typo `np8` → `n_prefix=8`** (FINDINGS.md:571 table). (Grok)
+- **Verify the Block-Recurrent Transformer quote** is exact; soften to "documents a failure mode
+  where…" if paraphrased. (Meta, ChatGPT)
+- **Spot-check the three 2025 arXiv citations** (2507.02917, 2509.24122, 2508.18130) for
+  publication/revision status. (Claude)
+
+**B. Substantive framing (high consensus):**
+- **Tone down overclaiming** in title/abstract/intro: feasibility study of a *mechanism*, not a
+  general persistent-agency architecture; surface GPT-2-medium + Hermes-3B failures up front. (Perplexity, ChatGPT, Gemini)
+- **Cut / temper the organism analogy** and loaded phrases ("genuine time axis", "organism-like"). (ChatGPT, Meta, Perplexity)
+- **Compress + caveat the complexity-theory (TC⁰/FO(M)) section** — motivation, not result; emphasize
+  "no proof a finite-precision reservoir lifts the per-pass bound". (ChatGPT, Perplexity, Gemini)
+- **Abstract presentation:** break the dense 4-result block into shorter sentences/bullets, lead with
+  the injection finding, stay conservative; remove claims duplicated across Abstract/Contributions/Scope/Results. (Meta, Grok, Perplexity, ChatGPT)
+
+**C. Improvements:**
+- State the GPT-2-medium failure as a genuine non-monotonicity / honest negative. (DeepSeek, Perplexity, ChatGPT)
+- Move the adapter-capacity control (lora_r=4, attention-only) next to the recall claim, not in Limitations. (DeepSeek)
+- Shorten §11 safety ~40%; move the "interruptibility not reservoir-specific" caveat earlier; reframe as a cheap monitoring surface. (DeepSeek)
+- Shorten the Declaration of AI use to 2-3 sentences or move to an appendix. (DeepSeek)
+- Add a limitations sentence on the HF `generate` integration gap (standalone loop works; HF merge is engineering). (Meta, ChatGPT)
+- Temper the single-run battery-retention result with "(multi-seed pending)". (Meta, Grok, ChatGPT)
+- Harmonize input-scaling notation "1/4-1/10" vs "one-quarter to one-tenth". (Meta, ChatGPT)
+- Replace vague "degrading by ~a few dozen" with a concrete figure from the curve. (Meta, ChatGPT)
+- Standardize "content-addressable KV-prefix" vs "KV-append"; define the distinction once early. (Grok, Perplexity)
+- Surface the "why an untrained reservoir?" rationale in the intro. (Meta, ChatGPT)
+- Formally define the experimental tasks before invoking them. (Gemini)
+- Replace dev jargon ("regression test confirming the hook…", "the released code") with academic phrasing. (Gemini)
+- Add a Results summary table of injection variants + scaling configs. (Grok)
+- Remove the empty "## Figures" Section 13 stub (FINDINGS.md:1254) or fill it. (Claude)
+- Fig 13 caption should carry the `eval_n=48` rationale. (Claude)
+
+**D. Mechanical:** page-2 "reproducible" twice; "(flagged in review)" → "intentionally minimal";
+"This project follows a guiding rule…" → "we adopt…"; check the page-13 table column separators. (DeepSeek, Meta, ChatGPT)
+
+---
+
 ## Always last — restart the three crons and summarize
 
 **These two items stay pinned to the tail of the queue at all times.** They are the closing half of the three-cron lifecycle in `CLAUDE.md` § "Autonomous productivity loop":

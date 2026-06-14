@@ -56,3 +56,7 @@ app/electron/node_modules/
 # untagged (docs/crosspass.png, docs/crosspass_gpt2-medium.png, ...) and stay tracked.
 docs/crosspass_*_w[0-9]*.png
 /reference images
+
+# Saved external-review chat exports (web-export asset dirs are huge; the
+# distilled digest lives in data_lake/external_reviews_*.md)
+chats/
