@@ -1,0 +1,23 @@
+{
+  "id": 2777,
+  "postId": 2777,
+  "rating": "Reject",
+  "summary": "The paper introduces the Reservoir Attention Network (RAN), an architecture that integrates a fixed, randomly-initialized reservoir (Echo State Network) into the attention mechanism of pretrained transformers to enable cross-pass state. It explores different injection methods, finding that content-addressable KV-prefix injection allows for cross-context token recall where additive injection fails. The study characterizes reservoir dynamics under real transformer activations and attempts to scale the approach from GPT-2 to 1.5B parameter models.",
+  "pros": [
+    "Provides a thorough empirical characterization of reservoir dynamics (spectral radius, saturation, and participation ratio) when driven by actual transformer hidden states.",
+    "Identifies a critical architectural insight: content-addressable (KV-prefix) injection is significantly more effective than additive residual injection for utilizing recurrent state.",
+    "Maintains high transparency regarding negative results, specifically documenting failures in GPT-2-medium and Hermes-3B, and investigating the root causes (e.g., input scaling and reservoir size).",
+    "Includes a rigorous 'stateless baseline' (wiping the reservoir) to ensure that reported memory capabilities are genuinely derived from the recurrent state rather than LoRA capacity."
+  ],
+  "cons": [
+    "The primary successful task (secret-word recall) is a trivial single-token memory probe; the paper fails to demonstrate that this architecture can support complex reasoning or multi-token memory across passes.",
+    "The '8-task battery' results are largely negative or unstable, with the model frequently 'drifting' back to stateless shortcuts, suggesting the reservoir is not a robust computational substrate for the transformer.",
+    "The scaling behavior is highly inconsistent; the method fails on GPT-2-medium (355M) despite succeeding on GPT-2-small (124M) and Qwen-1.5B, indicating extreme sensitivity to hyperparameters and architecture.",
+    "The paper uses excessive 'agentic' and 'safety' terminology (e.g., 'always-alive', 'ethics disclosure') that is disproportionate to the actual technical results, which are limited to basic memory probes.",
+    "The complexity-theoretic motivation (TC0/FO(M)) is speculative and lacks a formal proof that a finite-precision, fixed-random reservoir actually lifts the computational bounds of the transformer.",
+    "The writing style is informal and resembles a technical blog post or developer log rather than a peer-reviewed academic paper, frequently using colloquialisms and non-standard notation."
+  ],
+  "justification": "While the paper provides interesting insights into injection mechanisms for recurrent state, the actual utility of the RAN is only demonstrated on a toy-level single-token recall task. The failure of the model to retain reservoir-driven solutions in the multi-task battery, combined with erratic scaling and a lack of complex behavioral evidence, suggests the architecture is not yet viable for meaningful 'agentic' applications.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-14 04:20:11"
+}
