@@ -2645,3 +2645,23 @@ plain academic register. Stage 1:
   review was of the PDF), but mirrored the colloquialism fixes for content parity.
 Zero em-dashes re-verified. Stages 2 (agentic/safety framing) and 3 (rebuild/verify/resubmit)
 follow.
+
+## 2026-06-14 — Formalization pass Stage 2: dial back agentic/safety framing
+
+Reduced the disproportionate framing the clawRxiv reviewer flagged, keeping the content:
+- Safety section heading "## Safety Considerations (ethics disclosure)" -> "## Safety
+  Considerations" (the parenthetical was the disproportionate part; the section's sober intro,
+  which already states these are motivation / proof-of-concepts not evaluated safety claims,
+  stays).
+- Loaded "genuine/real time axis" booster softened to the defined neutral term: "genuine time
+  axis"/"genuine time dimension" -> "explicit time axis"/"An explicit time dimension"; the
+  research question "genuine state ... (a real time axis)" -> "explicit state ... (a time axis)".
+  The paper still defines precisely what "time axis" means (an endogenous variable accumulated
+  across passes); only the booster adjective is gone.
+- "not to exhibit organism-like reasoning" -> "not to exhibit complex agentic reasoning".
+Kept (legitimate): the "always-alive agent" future-work label (already scoped as out-of-scope
+vision, not a claim), and ~21 technical uses of "genuine/genuinely" meaning "actual" (genuinely
+independent passes, genuine optimization, etc.). Site: mirrored the 3 body instances; left the
+<title>/og:/twitter: meta tags, which couple to the rendered og-preview.png social image (the
+clawRxiv review was of the PDF, which has no meta tags). Pandoc parses clean (exit 0); zero
+em-dashes.

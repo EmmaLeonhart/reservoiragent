@@ -204,7 +204,7 @@
 <div class="question">
   <span class="kicker">Research question</span>
   Can a fixed, randomly-initialized reservoir injected into a pretrained transformer's
-  mid-layer attention give the model genuine state between forward passes (a real time
+  mid-layer attention give the model explicit state between forward passes (a time
   axis) without degrading its base capabilities, and what reservoir-dynamics regime
   (spectral radius, size, injection depth) makes that injected state usable signal
   rather than noise?
@@ -228,7 +228,7 @@
     fixed random reservoir reads the layer activations (<code>W_in</code>, fixed), evolves
     its state, and writes back as an attendable prefix (<code>W_out</code>, trained). The
     recurrent state <em>r(t) &rarr; r(t+1)</em> is carried to the next forward pass,
-    surviving the context wipe. That carried state is the genuine time axis the standard
+    surviving the context wipe. That carried state is the explicit time axis the standard
     diagram lacks.
   </figcaption>
 </figure>
@@ -444,7 +444,7 @@
 </p>
 <div class="pillars">
   <div class="pillar">
-    <h3>1 &middot; A genuine time dimension</h3>
+    <h3>1 &middot; An explicit time dimension</h3>
     <p>
       A transformer represents time as token <em>position</em>: an index, not a
       dimension it evolves along. r(t) evolves across forward passes and is causally
