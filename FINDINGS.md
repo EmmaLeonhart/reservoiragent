@@ -463,13 +463,13 @@ isolates the injection design as the decisive factor, ruling out the naive varia
 validating the attention-based one. (Demonstrated on GPT-2; the same injection path is
 architecture-agnostic and runs on Hermes via the generalized injection.)
 
-The result is not a 6-word artifact: it holds to ~24 secret words, with a collapse beyond.
-To check the headline is not specific to a tiny vocabulary, we swept the number of single-token
+Recall holds well beyond six words: it extends to ~24 secret words before collapsing. We swept
+the number of single-token
 secret words on GPT-2-small (`crosspass --mode kv --n-keys {12,24,48}`, 600 steps each). Stateful
 recall is 1.00 at 6, 0.58 at 12, 0.92 at 24, and 0.02 (chance) at 48, against a wiped-state
 baseline at chance throughout (0.17 → 0.02 as the vocabulary grows). Two things are true and
-stated as such: the win generalizes well past 6 (0.92 at 24 words, far above the 1/24 chance
-floor), so it is not a cherry-picked vocabulary; but the curve is **non-monotonic and
+stated as such: the effect generalizes well past 6 (0.92 at 24 words, far above the 1/24 chance
+floor) over a swept rather than hand-picked vocabulary; but the curve is **non-monotonic and
 training-noisy at this 600-step budget** (the 12-word run underperforms the 24-word run, a
 run-to-run optimization artifact, not a capacity law), and by **48 words the run no longer
 converges** within 600 steps (loss plateaus ~5.0). So the working regime is robust at small-to-
@@ -536,8 +536,8 @@ coupling-bandwidth limit (more bandwidth hurt); it is the learnability of the
 reservoir-state-to-recall mapping under a frozen backbone. That leaves **unfreezing more of the
 model** (letting the upper layers adapt to read the prefix) as the next lever to test, which we then do below (it also fails).
 
-The wall holds across a different modern architecture (Qwen2.5-0.5B), so it is not a GPT-2
-quirk. Running the same curriculum cross-pass task on Qwen2.5-0.5B-Instruct (a modern,
+The wall holds across a different modern architecture (Qwen2.5-0.5B), so it is not specific to
+GPT-2. Running the same curriculum cross-pass task on Qwen2.5-0.5B-Instruct (a modern,
 instruction-tuned, RoPE/Llama-style model at ~0.5B) also lands at chance (0.17): the
 stateful loss ends a little below the wiped baseline (2.05 vs 2.45), so the carried state
 carries a trace of signal, but not enough to recall the token. Combined with GPT-2-medium
@@ -590,7 +590,7 @@ control:
 Three readings follow. (1) Reservoir size is the lever. Flipping it alone lifts recall off
 chance (0.17→0.33); flipping input scaling or prefix count alone does nothing, and the full 0.83–1.00
 is reservoir size *in combination* with the lower scaling and wider prefix. (2) It reproduces:
-two seeds, 0.83 and 1.00, both against a 0.17 control, so it is not a single-seed fluke; the
+two seeds give 0.83 and 1.00, both against a 0.17 control; the
 control at chance rules out memorization. The down-projection is irrelevant (no projection and a
 256-dim projection both give 0.83). (3) **A capacity ceiling persists, in the tens of items, not
 at six.** Sweeping the number of items carried (Qwen-1.5B, 2048 reservoir, scale 0.1; see figure)
@@ -1031,7 +1031,7 @@ unproven extension, flagged as future work in the Safety-by-Design section and L
  stateless control pinned at 0.000 throughout and no collapse. So battery retention is achievable,
  and the recipe is specific: deny the stateless shortcut its adapter capacity (so the carried state is
  the only route) *and* decay the learning rate (so the solution settles instead of overshooting). Two
- caveats keep this honest: it is a single run (seed-robustness is untested, and further experiments are
+ caveats bound it: it is a single run (seed-robustness is untested, and further experiments are
  out of this session's scope), and it is *recall* that retains at 1.00; the harder content tasks
  (accumulate, sequence, deferred) stay low (≈ 0.02–0.12), so this is retention of the recall capability,
  not of the whole content battery. The always-alive app runs the untrained substrate: harness + live
@@ -1267,26 +1267,6 @@ its learned sparse attention, DeepSeek Sparse Attention, introduced in V3.2 and 
 V4 line), is recorded as project direction for future work; it is not runnable on this hardware (see Limitations).
 
 
-## Figures
-
-![Cross-pass recall on GPT-2-small. With the carried reservoir state the model recalls a secret word after the context is wiped (stateful), while a state-reset baseline stays at chance, the injection-design result.](docs/crosspass.png)
-
-![Reservoir dynamics versus spectral radius on synthetic input. The echo state property (init-forgetting) holds cleanly below ρ ≈ 1 and breaks above it.](docs/sweep_synthetic.png)
-
-![Reservoir dynamics under real transformer activations. Saturation and effective dimensionality versus spectral radius: the regime that the unit-scaled reservoir over-drives.](docs/sweep_real.png)
-
-![Input-scaling sweep on real activations. The healthy band (low saturation, high usable dimensionality) sits at input scaling ≈ 0.08–0.24.](docs/sweep_scaling.png)
-
-![Cross-model cross-pass recall (carried state vs wiped-reservoir control), best input scaling per model. Recall recovers at GPT-2-small and across the Qwen family (0.5B, 1.5B), but is at chance for GPT-2-medium and 4-bit Hermes-3B: not monotonic in size.](docs/crossmodel_recall.png)
-
-![Recall capacity at Qwen-1.5B versus the number of items carried. Perfect at six keys, strong (~0.42, ≈10× chance) at 24, and at chance by 48: graceful degradation into the tens of items.](docs/capacity_qwen15b.png)
-
-![Battery content lift versus epoch (Qwen-1.5B, content-only, eval_n=48, chosen over eval_n=16 so the per-epoch lift resolves above the quantization floor). The carried-state recall lift appears at epoch 1 then collapses as training drifts to a stateless solution, a within-run instance of "the model learns to ignore the recurrent state".](docs/battery_lift_eval48.png)
-
-![H3 delay-memory readout. A linear readout on the reservoir state recovers delayed history that a stateless baseline provably cannot.](docs/h3_memory.png)
-
----
-
 ## Declaration of AI use
 
 This work was produced with substantial use of a large language model coding agent (Claude,
@@ -1305,37 +1285,59 @@ public in the repository, so the process is auditable end to end.
 
 The works the claims above rest on:
 
-Reservoir computing.
-Jaeger, H. (2001). *The "echo state" approach to analysing and training recurrent neural networks.* GMD Report 148.
-Maass, W., Natschläger, T., & Markram, H. (2002). *Real-time computing without stable states (liquid state machines).* Neural Computation 14(11):2531–2560.
-Lukoševičius, M., & Jaeger, H. (2009). *Reservoir computing approaches to recurrent neural network training.* Computer Science Review.
-Köster, F., & Uchida, A. (2025). *Reservoir Computing as a Language Model.* arXiv:2507.15779.
-Shen, S., Baevski, A., Morcos, A. S., Keutzer, K., Auli, M., & Kiela, D. (2021). *Reservoir Transformers.* ACL. arXiv:2012.15045.
-Bendi-Ouis, Y., & Hinaut, X. (2025). *Echo State Transformer: Attention Over Finite Memories.* arXiv:2507.02917.
-Liu, H., & Xu, J. (2025). *Echo Flow Networks.* arXiv:2509.24122.
-Singh, P., Sharma, M., Dey, A., & Raman, B. (2025). *Frozen in Time: Parameter-Efficient Time Series Transformers via Reservoir-Induced Feature Expansion and Fixed Random Dynamics.* ECAI. arXiv:2508.18130.
+*Reservoir computing.*
 
-Transformer expressivity (motivation, not a result here).
-Hahn, M. (2020). *Theoretical Limitations of Self-Attention in Neural Sequence Models.* TACL. arXiv:1906.06755.
-Merrill, W., Sabharwal, A., & Smith, N. A. (2022). *Saturated Transformers are Constant-Depth Threshold Circuits.* TACL. arXiv:2106.16213.
-Merrill, W., & Sabharwal, A. (2023). *The Parallelism Tradeoff: Limitations of Log-Precision Transformers.* TACL. arXiv:2207.00729.
-Pérez, J., Marinković, J., & Barceló, P. (2019). *On the Turing Completeness of Modern Neural Network Architectures.* ICLR. arXiv:1901.03429. (The 2021 JMLR version is titled *Attention is Turing-Complete*; both assume arbitrary precision.)
-Siegelmann, H. T., & Sontag, E. D. (1995). *On the Computational Power of Neural Nets.* Journal of Computer and System Sciences 50(1):132–150 (COLT 1992 precursor).
-Weiss, G., Goldberg, Y., & Yahav, E. (2021). *Thinking Like Transformers (RASP).* ICML. arXiv:2106.06981.
+- Jaeger, H. (2001). *The "echo state" approach to analysing and training recurrent neural networks.* GMD Report 148.
+- Maass, W., Natschläger, T., & Markram, H. (2002). *Real-time computing without stable states (liquid state machines).* Neural Computation 14(11):2531–2560.
+- Lukoševičius, M., & Jaeger, H. (2009). *Reservoir computing approaches to recurrent neural network training.* Computer Science Review.
+- Köster, F., & Uchida, A. (2025). *Reservoir Computing as a Language Model.* arXiv:2507.15779.
+- Shen, S., Baevski, A., Morcos, A. S., Keutzer, K., Auli, M., & Kiela, D. (2021). *Reservoir Transformers.* ACL. arXiv:2012.15045.
+- Bendi-Ouis, Y., & Hinaut, X. (2025). *Echo State Transformer: Attention Over Finite Memories.* arXiv:2507.02917.
+- Liu, H., & Xu, J. (2025). *Echo Flow Networks.* arXiv:2509.24122.
+- Singh, P., Sharma, M., Dey, A., & Raman, B. (2025). *Frozen in Time: Parameter-Efficient Time Series Transformers via Reservoir-Induced Feature Expansion and Fixed Random Dynamics.* ECAI. arXiv:2508.18130.
 
-Recurrence-augmented transformers (all carry state *within* a sequence via *trained* recurrence).
-Dai, Z., et al. (2019). *Transformer-XL.* ACL. arXiv:1901.02860.
-Wu, Y., et al. (2022). *Memorizing Transformers.* ICLR. arXiv:2203.08913.
-Hutchins, D., et al. (2022). *Block-Recurrent Transformers.* NeurIPS. arXiv:2203.07852.
-Bulatov, A., Kuratov, Y., & Burtsev, M. (2022). *Recurrent Memory Transformer.* NeurIPS. arXiv:2207.06881.
-Gu, A., Goel, K., & Ré, C. (2022). *Efficiently Modeling Long Sequences with Structured State Spaces (S4).* ICLR. arXiv:2111.00396.
-Gu, A., & Dao, T. (2023). *Mamba: Linear-Time Sequence Modeling with Selective State Spaces.* arXiv:2312.00752.
-Behrouz, A., Zhong, P., & Mirrokni, V. (2025). *Titans: Learning to Memorize at Test Time.* arXiv:2501.00663.
+*Transformer expressivity (motivation, not a result here).*
 
-KV-cache management / efficient attention.
-Xiao, G., et al. (2023). *Efficient Streaming Language Models with Attention Sinks (StreamingLLM).* arXiv:2309.17453.
-Zhang, Z., et al. (2023). *H2O: Heavy-Hitter Oracle for Efficient Generative Inference.* arXiv:2306.14048.
-DeepSeek-AI (2024). *DeepSeek-V2* (Multi-head Latent Attention). arXiv:2405.04434.
+- Hahn, M. (2020). *Theoretical Limitations of Self-Attention in Neural Sequence Models.* TACL. arXiv:1906.06755.
+- Merrill, W., Sabharwal, A., & Smith, N. A. (2022). *Saturated Transformers are Constant-Depth Threshold Circuits.* TACL. arXiv:2106.16213.
+- Merrill, W., & Sabharwal, A. (2023). *The Parallelism Tradeoff: Limitations of Log-Precision Transformers.* TACL. arXiv:2207.00729.
+- Pérez, J., Marinković, J., & Barceló, P. (2019). *On the Turing Completeness of Modern Neural Network Architectures.* ICLR. arXiv:1901.03429. (The 2021 JMLR version is titled *Attention is Turing-Complete*; both assume arbitrary precision.)
+- Siegelmann, H. T., & Sontag, E. D. (1995). *On the Computational Power of Neural Nets.* Journal of Computer and System Sciences 50(1):132–150 (COLT 1992 precursor).
+- Weiss, G., Goldberg, Y., & Yahav, E. (2021). *Thinking Like Transformers (RASP).* ICML. arXiv:2106.06981.
+
+*Recurrence-augmented transformers (all carry state within a sequence via trained recurrence).*
+
+- Dai, Z., et al. (2019). *Transformer-XL.* ACL. arXiv:1901.02860.
+- Wu, Y., et al. (2022). *Memorizing Transformers.* ICLR. arXiv:2203.08913.
+- Hutchins, D., et al. (2022). *Block-Recurrent Transformers.* NeurIPS. arXiv:2203.07852.
+- Bulatov, A., Kuratov, Y., & Burtsev, M. (2022). *Recurrent Memory Transformer.* NeurIPS. arXiv:2207.06881.
+- Gu, A., Goel, K., & Ré, C. (2022). *Efficiently Modeling Long Sequences with Structured State Spaces (S4).* ICLR. arXiv:2111.00396.
+- Gu, A., & Dao, T. (2023). *Mamba: Linear-Time Sequence Modeling with Selective State Spaces.* arXiv:2312.00752.
+- Behrouz, A., Zhong, P., & Mirrokni, V. (2025). *Titans: Learning to Memorize at Test Time.* arXiv:2501.00663.
+
+*KV-cache management / efficient attention.*
+
+- Xiao, G., et al. (2023). *Efficient Streaming Language Models with Attention Sinks (StreamingLLM).* arXiv:2309.17453.
+- Zhang, Z., et al. (2023). *H2O: Heavy-Hitter Oracle for Efficient Generative Inference.* arXiv:2306.14048.
+- DeepSeek-AI (2024). *DeepSeek-V2* (Multi-head Latent Attention). arXiv:2405.04434.
+
+## Appendix: Figures
+
+![Cross-pass recall on GPT-2-small. With the carried reservoir state the model recalls a secret word after the context is wiped (stateful), while a state-reset baseline stays at chance, the injection-design result.](docs/crosspass.png)
+
+![Reservoir dynamics versus spectral radius on synthetic input. The echo state property (init-forgetting) holds cleanly below ρ ≈ 1 and breaks above it.](docs/sweep_synthetic.png)
+
+![Reservoir dynamics under real transformer activations. Saturation and effective dimensionality versus spectral radius: the regime that the unit-scaled reservoir over-drives.](docs/sweep_real.png)
+
+![Input-scaling sweep on real activations. The healthy band (low saturation, high usable dimensionality) sits at input scaling ≈ 0.08–0.24.](docs/sweep_scaling.png)
+
+![Cross-model cross-pass recall (carried state vs wiped-reservoir control), best input scaling per model. Recall recovers at GPT-2-small and across the Qwen family (0.5B, 1.5B), but is at chance for GPT-2-medium and 4-bit Hermes-3B: not monotonic in size.](docs/crossmodel_recall.png)
+
+![Recall capacity at Qwen-1.5B versus the number of items carried. Perfect at six keys, strong (~0.42, ≈10× chance) at 24, and at chance by 48: graceful degradation into the tens of items.](docs/capacity_qwen15b.png)
+
+![Battery content lift versus epoch (Qwen-1.5B, content-only, eval_n=48, chosen over eval_n=16 so the per-epoch lift resolves above the quantization floor). The carried-state recall lift appears at epoch 1 then collapses as training drifts to a stateless solution, a within-run instance of "the model learns to ignore the recurrent state".](docs/battery_lift_eval48.png)
+
+![H3 delay-memory readout. A linear readout on the reservoir state recovers delayed history that a stateless baseline provably cannot.](docs/h3_memory.png)
 
 ---
 

@@ -2679,3 +2679,25 @@ Completes the user-approved (a) formalization pass.
   formalized paper is now the version under AI review. The scheduled pull-reviews job will fetch
   the 2778 review when it lands.
 Formalization pass complete; the paper is in plain academic register, published green.
+
+## 2026-06-14 — PDF structure + defensive-phrasing fixes (user-reported)
+
+Three FINDINGS.md fixes from user feedback (site verified clean of all three: it weaves citations
+inline, shows figures inline, and lacks the defensive phrasings, so content parity holds with no
+site edit):
+- **References formatting (was a real bug):** the markdown had no blank lines between entries, so
+  pandoc collapsed each category into one run-on wall-of-text paragraph in the PDF. Restructured as
+  a per-category italic label + an itemized list (each of the 30 refs now a separate \item).
+  Content unchanged — the bibliography is comprehensive (30 refs, 5 categories), not too brief; the
+  clawRxiv cons never flagged references, so no citation padding.
+- **Figures relocated:** the 8 result plots were a "## Figures" gallery sandwiched between Appendix
+  F and the Declaration of AI use. Moved to a "## Appendix: Figures" at the very end (after
+  References). No explicit "Figure N" cross-refs in the body, so numbering is unaffected; pandoc
+  parses clean.
+- **Defensive phrasing flattened:** "The result is not a 6-word artifact" -> "Recall holds well
+  beyond six words"; "not a cherry-picked vocabulary" -> "over a swept rather than hand-picked
+  vocabulary"; "not a single-seed fluke" -> "It reproduces" (already states it); "not a GPT-2 quirk"
+  -> "not specific to GPT-2"; "caveats keep this honest" -> "caveats bound it" (dropping the
+  self-congratulatory "honest"). Kept the legitimate confound-ruling controls ("rules out a bug /
+  memorization"), which are proper rigor, not defensiveness.
+Zero em-dashes; pandoc parses clean.
