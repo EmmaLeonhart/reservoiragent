@@ -24,12 +24,15 @@ baseline), whereas re-injecting the same state as content-addressable prefix pse
 upper layers attend to yields 100% cross-context recall (1.00 versus a 0.17 reset-baseline,
 reproducible). Second, the reservoir's edge-of-chaos regime at spectral radius ≈ 1 persists under
 real transformer activations, which over-drive a unit-scaled reservoir and require an input scaling
-of approximately one-quarter to one-tenth. Third, cross-pass recall *scales*: the apparent
-"GPT-2-small-only" boundary reported by prior single-machine attempts was an undersized reservoir
-at an unmatched input scaling. Enlarging the reservoir to 2048 nodes and matching its input scaling
-to the model recovers recall across the Qwen family (Qwen2.5-0.5B and 1.5B; stateful 0.83–1.00
-versus a 0.17 control, reproduced across seeds), with input scaling rather than parameter count as
-the decisive lever and a capacity ceiling of order tens of items. The recovery is model-specific:
+of approximately one-quarter to one-tenth. Third, cross-pass recall *on the single
+secret-word probe scales*: the apparent "GPT-2-small-only" boundary reported by prior single-machine
+attempts was an undersized reservoir at an unmatched input scaling. Enlarging the reservoir to 2048
+nodes and matching its input scaling to the model recovers probe recall across the Qwen family
+(Qwen2.5-0.5B and 1.5B; stateful 0.83–1.00 versus a 0.17 control, reproduced across seeds), with
+input scaling rather than parameter count as the decisive lever and a capacity ceiling of order tens
+of items. This single-probe recall is a different measurement from the eight-task battery's
+*symbolic content* recall (Result 4), which stays at the floor at 1.5B except under the retention
+recipe; the two should not be conflated. The recovery is model-specific:
 GPT-2-medium (355M) fails across a seven-point scaling sweep, so matched scaling is necessary but
 not sufficient. Fourth, an eight-task stateful "battery" separates two cases: its temporal/agency
 metrics are matched by a stateless ablation (not reservoir-driven), whereas its content recall *can*
@@ -48,10 +51,12 @@ with controlled negatives that bound them and a training recipe under which batt
 - **Reservoir dynamics characterized on real transformer activations.** The edge-of-chaos regime at
   spectral radius ≈ 1 persists, and real activations require an input scaling of ≈ ¼–⅒ to avoid
   saturation.
-- **Cross-pass recall scales to a modern 1.5B model.** Sizing the reservoir up and matching its input
-  scaling recovers recall across the Qwen family (0.83–1.00 vs 0.17 control, reproduced); input
-  scaling, not parameter count, is the decisive lever, and the prior "GPT-2-small-only" wall was an
-  undersized reservoir.
+- **Cross-pass recall (the secret-word probe) scales to a modern 1.5B model.** Sizing the reservoir up
+  and matching its input scaling recovers single-probe recall across the Qwen family (0.83–1.00 vs 0.17
+  control, reproduced); input scaling, not parameter count, is the decisive lever, and the prior
+  "GPT-2-small-only" wall was an undersized reservoir. (The multi-task battery's *symbolic content*
+  recall is a separate, harder setting that stays at the floor at 1.5B (see the controlled negatives
+  below and Appendix A) and is not what this result measures.)
 - **Controlled negatives that bound the contribution.** A model-specific recovery boundary
   (GPT-2-medium fails across a scaling sweep), a capacity ceiling of order tens of items, and a
   stateless ablation showing the agentic battery's temporal metrics are not reservoir-driven.
@@ -111,10 +116,13 @@ projection W_in and writes its state back through a learned readout W_out (both 
 same layer, every pass), so the reservoir state accumulates a history of the model's
 own attention dynamics across passes. The reservoir update is
 
- r(t) = tanh( W_r · r(t−1) + W_in · x(t) )
+ r(t) = (1 − a)·r(t−1) + a·tanh( W_r · r(t−1) + W_in · x(t) )
 
-with W_r a fixed random sparse matrix scaled to a target spectral radius, W_in fixed
-random, and W_out (plus light upper-layer LoRA) the only trained parameters. The lower
+a leaky-integrator update with leak rate a ∈ (0, 1] (the plain form r(t) = tanh(·) is
+the special case a = 1; this leaky form is the one used in the dynamics sweeps), with
+W_r a fixed random sparse matrix scaled to a target spectral radius, W_in fixed random,
+and W_out (plus light upper-layer LoRA) the only trained parameters. The leak rate and
+reservoir size are the two levers for how much cross-pass state is carried. The lower
 layers are frozen. Because the reservoir state is decoupled from the context window, it
 persists across genuinely independent forward passes, including unprompted ticks.
 
@@ -263,9 +271,6 @@ regardless of its capability level.
  i.e. the architecture degrades gracefully to vanilla behaviour.
 
 ## Results
-
-*All figures referenced below are in the accompanying report:
-<https://reservoir.emmaleonhart.com>.*
 
 ### H1: the reservoir injects without breaking the base model
 
@@ -568,7 +573,7 @@ control:
 
 | config (Qwen-1.5B, 6 keys, 800 steps) | stateful | control |
 |---|---|---|
-| prior default: 512 nodes, np8, scaling 0.5 | 0.17 | 0.17 |
+| prior default: 512 nodes, n_prefix=8, scaling 0.5 | 0.17 | 0.17 |
 | + input scaling 0.1 only | 0.17 | 0.17 |
 | + 16 prefix tokens only | 0.17 | 0.17 |
 | **+ 2048-node reservoir only** | **0.33** | 0.17 |
