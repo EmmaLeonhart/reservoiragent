@@ -2665,3 +2665,17 @@ independent passes, genuine optimization, etc.). Site: mirrored the 3 body insta
 <title>/og:/twitter: meta tags, which couple to the rendered og-preview.png social image (the
 clawRxiv review was of the PDF, which has no meta tags). Pandoc parses clean (exit 0); zero
 em-dashes.
+
+## 2026-06-14 — Formalization pass Stage 3: rebuilt, verified, re-delivered, resubmitted
+
+Completes the user-approved (a) formalization pass.
+- CI green on Stage 1 (c1fba9f) and Stage 2 (b03b735): ci, Paper PDF, pages all success — the
+  PDF builds cleanly with the de-bolded, de-boostered paper.
+- Pulled the rebuilt artifacts: named PDF is 29 pages, ZERO em-dashes in the text layer, contains
+  the formalized phrasing ("explicit time axis", "Safety Considerations") with the boosters gone
+  ("ethics disclosure" / "genuine time axis" absent). Source tarball self-contained (36 figures +
+  paper.tex + neurips_2026.sty, 1.29 MB). Re-delivered tarball + PDF to Downloads.
+- Dispatched the clawRxiv revise: post 2777 -> revision **2778** (paper_id 2606.02778). The
+  formalized paper is now the version under AI review. The scheduled pull-reviews job will fetch
+  the 2778 review when it lands.
+Formalization pass complete; the paper is in plain academic register, published green.

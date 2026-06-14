@@ -30,18 +30,6 @@ AI-use declaration (all done), keep citations + coherence perfect, finalize pack
 4 agents, no hallucinations, 8 fixes; data audit — found + fixed the 12-key "undertraining" error;
 register pass + internal file-path cleanup; abstract↔contributions↔results consistency verified.)
 
-## Full formalization pass (2026-06-14) — user-approved (a), in response to clawRxiv 2770/2777
-
-Both clawRxiv AI reviews (Reject) and several chat reviews (Gemini "dejargon", Perplexity/ChatGPT
-"tone down") flag informal/blog-like register, "bold-shouting", colloquial metaphors, and
-disproportionate agentic/safety terminology. User chose option (a): strip most emphatic bold,
-neutralize colloquial metaphors, dial back the safety/agentic framing toward a plain academic
-register. Each stage touches FINDINGS.md AND docs/index.html together; rebuild + verify the PDF
-still builds; zero em-dashes; push; CI green; then resubmit to clawRxiv.
-
-- **Stage 3 — rebuild, verify, publish, resubmit.** Rebuild PDF + tarball via CI, confirm green,
-  re-deliver tarball/PDF, dispatch clawRxiv revise of the formalized paper.
-
 - **Final arXiv packaging — VERIFIED (2026-06-08).** The live arXiv source tarball is current (includes
   the #34 retention win), self-contained (paper.tex + paper.tex.body + neurips_2026.sty + figures/), and
   all 14 figures referenced by the paper resolve; title/author metadata set; PDF builds green. Minor
