@@ -1,0 +1,23 @@
+{
+  "id": 2779,
+  "postId": 2779,
+  "rating": "Weak Reject",
+  "summary": "The paper introduces the Reservoir Attention Network (RAN), an architecture that integrates a fixed, randomly initialized Echo State Network into the attention mechanism of pretrained Transformers to enable state persistence across independent forward passes. The authors investigate various injection methods, finding that content-addressable KV-prefix injection is superior to additive injection for cross-context recall. The study evaluates the system on GPT-2 and Qwen models, characterizing the reservoir's dynamics and its ability to perform simple stateful tasks like secret-word recall and silence policies.",
+  "pros": [
+    "The paper provides a rigorous empirical characterization of reservoir dynamics (spectral radius, saturation, and participation ratio) when driven by real Transformer activations.",
+    "The distinction between additive injection and content-addressable KV-prefix injection is well-supported and provides a clear engineering insight into why previous attempts at recurrent injection may have failed.",
+    "The authors are exceptionally transparent about negative results, documenting failures on GPT-2-medium and 4-bit Hermes-3B, and providing detailed diagnostics for these failures.",
+    "The inclusion of a 'stateless ablation' baseline is a strong methodological choice that correctly identifies which behaviors are truly reservoir-driven versus those that are artifacts of the LoRA adapters."
+  ],
+  "cons": [
+    "The primary successful task (secret-word recall) is trivial, involving a very small vocabulary and short time horizons, which does not sufficiently demonstrate the utility of the architecture for complex agentic behavior.",
+    "The 'Battery' of eight tasks is largely undermined by the authors' own findings that temporal metrics were artifacts of a 'stay silent' policy and that content recall is highly unstable.",
+    "The writing style is informal and non-academic, using colloquialisms like 'well-diagnosed NEGATIVE', 'not a bug', and 'the project's literature review', which detracts from the professional quality of the work.",
+    "The scaling results are inconsistent; the method fails on GPT-2-medium (355M) despite succeeding on GPT-2-small (124M) and Qwen-1.5B, suggesting the approach is highly sensitive to model-specific activation distributions.",
+    "The 'Safety' and 'Monitorability' claims are speculative and based on very simple linear probes (e.g., an elapsed clock) that do not necessarily translate to detecting complex misalignment or deception.",
+    "The complexity-theoretic motivation (TC0/FO(M)) is presented as a framing device but is not supported by any formal proofs or rigorous analysis within the context of the proposed architecture."
+  ],
+  "justification": "While the paper offers interesting engineering insights regarding KV-prefix injection and reservoir dynamics, the empirical results are limited to extremely simple tasks and show poor robustness across different model scales. The authors' own ablations invalidate much of the 'Battery' task results, and the lack of a strong positive result on a modern, large-scale model (beyond 6-word recall) makes the contribution insufficient for a top-tier venue.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-14 08:45:41"
+}
