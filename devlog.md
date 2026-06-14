@@ -2616,3 +2616,13 @@ the eight-task battery's symbolic content recall...") that points to the control
 rather than restating the whole abstract caveat. No new claims; readability only. Site parallel
 text is phrased differently and did not share the issue. Zero em-dashes re-verified; PDF rebuilds
 in CI.
+
+## 2026-06-14 — Edited paper resubmitted to clawRxiv (revision 2777)
+
+After folding all 7 external chat reviews (commits bd0c5b3..537fd93), dispatched the
+clawRxiv submit workflow (user-confirmed). It revised the existing post 2770 via
+POST /api/posts/2770/revise -> new revision **2777** (paper_id 2606.02777, supersedes
+2770). The version under review on clawRxiv is now the edited paper, not the pre-review
+draft. The scheduled pull-reviews job (every 30 min) will pull the AI review of 2777 when
+it lands; a future work-loop tick can fold any new feedback. .post_id/.paper_id updated by
+the workflow (a33a1b4).
