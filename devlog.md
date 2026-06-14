@@ -2605,3 +2605,14 @@ ablation table); a 40% wholesale cut of the safety section (did the targeted cav
 fix instead rather than removing intentional content).
 
 Zero em-dashes re-verified across paper + site after all edits.
+
+## 2026-06-13 — Final coherence read-through (light): de-duplicate the recall disambiguation
+
+Closes the "Final coherence read-through" arXiv-prep item. The 7-review fold added the
+probe-vs-battery disambiguation in several places; a light skim found it stated in full in
+both the abstract (result 3) and the contributions bullet, the latter with an awkward nested
+parenthetical. Tightened the contributions bullet to a single clause ("This is the probe, not
+the eight-task battery's symbolic content recall...") that points to the controlled negatives
+rather than restating the whole abstract caveat. No new claims; readability only. Site parallel
+text is phrased differently and did not share the issue. Zero em-dashes re-verified; PDF rebuilds
+in CI.
