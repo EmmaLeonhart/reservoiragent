@@ -58,8 +58,9 @@ with controlled negatives that bound them and a training recipe under which batt
   recall is a separate, harder setting that stays at the floor at 1.5B (see the controlled negatives
   below and Appendix A) and is not what this result measures.)
 - **Controlled negatives that bound the contribution.** A model-specific recovery boundary
-  (GPT-2-medium fails across a scaling sweep), a capacity ceiling of order tens of items, and a
-  stateless ablation showing the agentic battery's temporal metrics are not reservoir-driven.
+  (GPT-2-medium fails across a seven-point scaling sweep, and 4-bit Hermes-3B does not converge), a
+  capacity ceiling of order tens of items, and a stateless ablation showing the agentic battery's
+  temporal metrics are not reservoir-driven.
 
 ## Research Question
 
@@ -247,14 +248,14 @@ state is the standard lever past it; this only motivates *why* cross-pass state 
 and we prove no separation and nothing below depends on it (full discussion and citations in the
 References).
 
-**3 · The organism analogy (one paragraph, bounded).** The reservoir introduces
-endogenous state that evolves independently of external input, a property shared with
-living organisms and absent from stateless transformers. No claim about general
-intelligence is made or implied. The claim is structural: this architecture has a
-capacity for organism-like state evolution, and that capacity may be a precondition for
-certain classes of genuinely agentic behaviour (noticing an unresolved thread,
-estimating elapsed time, self-initiating) that are inaccessible to a stateless model
-regardless of its capability level.
+**3 · Endogenous state (a bounded structural analogy).** The reservoir introduces
+endogenous state that evolves independently of external input. This is a structural
+property, not a capability claim: a stateless transformer carries no variable that
+persists across independent passes, whereas this architecture does. That persistent
+variable is a *precondition* for the simple stateful behaviours this paper probes
+(noticing an unresolved thread, estimating elapsed time, self-initiating), which a
+stateless model cannot represent regardless of its capability level. We make no claim
+about general intelligence, and we draw no analogy beyond this structural one.
 
 ## Method
 
