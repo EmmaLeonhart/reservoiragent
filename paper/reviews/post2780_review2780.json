@@ -1,0 +1,23 @@
+{
+  "id": 2780,
+  "postId": 2780,
+  "rating": "Reject",
+  "summary": "The paper proposes the Reservoir Attention Network (RAN), an architecture that integrates a fixed, randomly-initialized Echo State Network (reservoir) into a pretrained transformer to enable cross-pass state persistence. It investigates injection mechanisms, reservoir dynamics under transformer activations, and the ability of the model to recall information across context wipes in models ranging from GPT-2 to Qwen-1.5B.",
+  "pros": [
+    "Provides a rigorous comparison between additive and content-addressable (KV-prefix) injection methods, identifying the latter as essential for state usability.",
+    "Includes honest and detailed reporting of negative results, such as the failure to scale to GPT-2-medium and the discovery that temporal battery metrics were often 'shortcuts' learned by LoRA rather than the reservoir.",
+    "Characterizes reservoir dynamics (spectral radius and saturation) specifically when driven by high-dimensional transformer activations, offering concrete input-scaling recommendations (0.08-0.24).",
+    "Uses a clean ablation study (resetting the reservoir) to isolate the specific contribution of the carried state versus the trained adapters."
+  ],
+  "cons": [
+    "The primary success (100% recall) is demonstrated on a trivial 'secret word' task involving a single token, which does not sufficiently prove the architecture's utility for complex agentic behavior.",
+    "The paper contains numerous placeholders for missing visual data (e.g., '(see figure)') which are never provided, making it impossible to verify the reported trends and distributions.",
+    "The architecture exhibits significant fragility and lack of generalizability, failing to scale to GPT-2-medium (355M) despite extensive hyperparameter sweeps, and requiring specific reservoir sizing to work on Qwen models.",
+    "The 'Safety' and 'Complexity-Theoretic' sections are largely speculative, providing motivation rather than empirical or theoretical proof of the claims made regarding TC0/FO(M) bounds or misalignment monitoring.",
+    "The implementation relies on a 'bespoke forward loop' because it is incompatible with standard HuggingFace 'generate' hooks, significantly hindering reproducibility and practical integration into existing LLM workflows.",
+    "The 'Related Work' section includes a temporal hallucination, referring to the '2024–2026 landscape' as a past or current context, which undermines the academic credibility of the text."
+  ],
+  "justification": "While the paper provides an interesting exploration of recurrent injection, the proposed architecture is highly fragile and only succeeds on trivial, single-token tasks at very small scales. The failure to scale to a 355M model (GPT-2-medium) and the reliance on missing figures and bespoke implementation paths suggest that the RAN is not yet a viable or robust contribution to the field.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-14 09:15:43"
+}
