@@ -2701,3 +2701,10 @@ site edit):
   self-congratulatory "honest"). Kept the legitimate confound-ruling controls ("rules out a bug /
   memorization"), which are proper rigor, not defensiveness.
 Zero em-dashes; pandoc parses clean.
+
+## 2026-06-14 — Structure fixes verified + resubmitted (clawRxiv 2779)
+
+Rebuilt PDF (29pp, zero em-dashes) verified: references now render as a per-category bulleted list
+(each of the 30 entries separate, run-on bug gone); the result figures are a "## Appendix: Figures"
+at the very end (Figs 7-14, last pages); the defensive phrasings are absent. Re-delivered tarball +
+PDF to Downloads. clawRxiv revised 2778 -> 2779 (paper_id 2606.02779) with the fixed paper.
