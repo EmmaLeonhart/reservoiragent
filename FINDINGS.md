@@ -5,7 +5,10 @@ injects a fixed, randomly-initialized reservoir into the mid-layer attention of 
 transformer to carry state across forward passes. Experiments span GPT-2 (124M, 355M) to
 Qwen2.5 (0.5B, 1.5B) on a single consumer GPU. The tasks are minimal probes chosen to isolate
 individual mechanisms; the broader always-alive agent vision is treated throughout as
-compute-limited future work, not a claim of this paper.
+compute-limited future work, not a claim of this paper. The reservoir is left *untrained*
+(fixed random) by design: this isolates whether untrained recurrent dynamics alone suffice to
+carry usable cross-pass state, leaving trained recurrence as a complementary, more expensive
+direction.
 
 ## Abstract
 
@@ -49,7 +52,7 @@ with controlled negatives that bound them and a training recipe under which batt
   KV-prefix injection yields 100% cross-context recall on GPT-2-small (1.00 vs a 0.17 wiped-reservoir
   control, reproducible).
 - **Reservoir dynamics characterized on real transformer activations.** The edge-of-chaos regime at
-  spectral radius ≈ 1 persists, and real activations require an input scaling of ≈ ¼–⅒ to avoid
+  spectral radius ≈ 1 persists, and real activations require an input scaling of approximately one-quarter to one-tenth to avoid
   saturation.
 - **Cross-pass recall (the secret-word probe) scales to a modern 1.5B model.** Sizing the reservoir up
   and matching its input scaling recovers single-probe recall across the Qwen family (0.83–1.00 vs 0.17
@@ -280,9 +283,9 @@ reservoir and its state is written back into the residual stream (`h' = h + W_ou
 
 - **Non-destruction (a wiring sanity check, not a finding).** With the readout `W_out = 0`
  the injected model's next-token logits are *identical* to vanilla GPT-2 (`allclose`,
- atol 1e-5). This is trivially true by construction; we report it only as a regression test
- confirming the hook is correctly placed and the graph is intact (it has caught misplacement
- bugs in practice).
+ atol 1e-5). This is trivially true by construction; we report it only as a wiring check: with the readout zeroed,
+ the injected path reduces to the identity, which confirms the hook is placed at the intended
+ layer and the computation graph is intact.
 - **The injection is live.** A nonzero `W_out` changes the logits, and the reservoir
  state after two forward passes differs from after one, a genuine cross-pass time
  axis.
@@ -398,7 +401,7 @@ Sweeping spectral radius ρ ∈ [0.1, 2.0] (see figures):
  effective dimensionality stay high. There is a sweet spot around **input scaling
  0.08–0.24** where the reservoir is *not* over-saturated (saturation 0.08–0.49) yet
  still strongly responsive (separation 1.03–1.26, PR ≈ 0.39·K). So real attention
- activations should be fed at roughly **¼–⅒ of unit scale**, not 1.0; this is a concrete
+ activations should be fed at roughly **one-quarter to one-tenth of unit scale**, not 1.0; this is a concrete
  injection setting this study contributes.
 
 
@@ -442,6 +445,9 @@ finding.**
  recurrent state" failure mode, reproduced.** A single pooled additive bias cannot carry
  *which specific word* appeared.
 
+- *Terminology:* we use **KV-append** and **KV-prefix** interchangeably for the same
+ injection: the reservoir state is appended to the attention key/value cache as a
+ content-addressable prefix that the upper layers query.
 - **Content-addressable (KV-append) injection → works, decisively.** When instead the
  reservoir state is projected into prefix pseudo-tokens the model can **attend** to
  (the KV-prefix path), the stateful model reaches **100% cross-context recall
@@ -568,7 +574,7 @@ temporal/agency behaviours do scale to Qwen-1.5B, as above.)
 **The wall was an undersized reservoir: cross-pass recall scales to Qwen-1.5B (verified).** The
 five interventions above all held two parameters at their GPT-2 defaults: the **reservoir size**
 (512 nodes) and the **input scaling** (0.5). Sizing the reservoir to **2048 nodes** at **input
-scaling 0.1** (the ¼–⅒ regime the dynamics sweep identified for large activations), with 16 prefix
+scaling 0.1** (the one-quarter-to-one-tenth regime the dynamics sweep identified for large activations), with 16 prefix
 tokens, **recovers cross-pass recall at Qwen-1.5B**. The full result, all with a wiped-reservoir
 control:
 
@@ -578,8 +584,8 @@ control:
 | + input scaling 0.1 only | 0.17 | 0.17 |
 | + 16 prefix tokens only | 0.17 | 0.17 |
 | **+ 2048-node reservoir only** | **0.33** | 0.17 |
-| **full: 2048, np16, scaling 0.1 (seed 0)** | **0.83** | 0.17 |
-| **full: 2048, np16, scaling 0.1 (seed 1, reproduction)** | **1.00** | 0.17 |
+| **full: 2048, n_prefix=16, scaling 0.1 (seed 0)** | **0.83** | 0.17 |
+| **full: 2048, n_prefix=16, scaling 0.1 (seed 1, reproduction)** | **1.00** | 0.17 |
 
 Three readings follow. (1) **Reservoir size is the lever.** Flipping it alone lifts recall off
 chance (0.17→0.33); flipping input scaling or prefix count alone does nothing, and the full 0.83–1.00
@@ -598,7 +604,8 @@ non-converged points at **2000 steps** (vs 800) separates a real ceiling from un
 not a step-budget artifact), while the 12-key point stays **stuck (0.17, loss ~2.7)** at both
 budgets, confirming it is a per-run optimization artifact rather than a capacity point. So the
 reservoir scales both the *model* it works in and a non-trivial *number of items* (tens), the
-latter with a real upper bound around a few dozen items. The earlier "resists every fix short of much greater scale" reading was wrong because
+latter with a real upper bound in the tens of items (recall is perfect at 6 keys, ~0.42 at 24,
+and falls to chance by 48). The earlier "resists every fix short of much greater scale" reading was wrong because
 it never sized the reservoir up: the
 single-machine lever that moves the 1.5B wall is reservoir size.
 
@@ -892,9 +899,12 @@ from the same cross-pass statefulness, not core results or evaluated safety clai
 contributions remain the injection-design finding, the dynamics characterization, and the
 recall-scaling result above. The interruptibility and monitoring demonstrations are CPU-scale and
 synthetic, and are presented as motivation for why persistent state bears on controllability, not as
-safety evaluations.
+safety evaluations. In particular, the lower-latency interruptibility below is a property of any
+per-tick agent loop, not of the reservoir specifically; what *is* reservoir-specific is the cheap,
+fixed-size monitoring surface the carried state exposes, and this section reports measurements of
+that surface.
 
-This project follows a guiding rule: **never introduce a new capability to an
+We adopt a guiding rule: **never introduce a new capability to an
 AI without meaningfully taking its safety into account**; capability work is acceptable only
 when paired with concrete improvements in controllability, monitorability, or risk reduction.
 The Reservoir Attention Network adds capability (genuine cross-pass state, autonomous ticks,
@@ -1026,11 +1036,11 @@ unproven extension, flagged as future work in the Safety-by-Design section and L
  (accumulate, sequence, deferred) stay low (≈ 0.02–0.12), so this is retention of the recall capability,
  not of the whole content battery. The always-alive app runs the untrained substrate: harness + live
  dynamics, not a trained policy.
-- **The recall demonstration is a minimal probe** (flagged in review): a single secret token from a
- small vocabulary (6 words at 100%, degrading by ~a few dozen). It cleanly proves *that* usable
+- **The recall demonstration is a minimal probe** (intentionally so): a single secret token from a
+ small vocabulary (recall perfect at 6 keys, ~0.42 at 24, chance by 48). It cleanly proves *that* usable
  cross-pass state exists, but not its utility for multi-token, large-vocabulary, or long-horizon
  memory; that scaling of the *task* (not the model) is untested and open.
-- **Capacity is small relative to trained-memory architectures, by design** (flagged in review). The
+- **Capacity is small relative to trained-memory architectures, by design**. The
  tens-of-items ceiling is far below what trained-memory transformers reach (Recurrent Memory
  Transformer, Memorizing Transformers store and retrieve over far longer spans). That gap is expected:
  those architectures *train* their memory, whereas the RAN's memory is a *fixed-random* reservoir with
@@ -1046,7 +1056,7 @@ unproven extension, flagged as future work in the Safety-by-Design section and L
  HuggingFace attention path is a documented integration blocker** (their `generate` exposes no
  hook to append external key/value entries), left for a focused future item rather than a fragile
  patch of attention internals. This is a
- **reproducibility limitation** (flagged in review): the variant that delivers the 100%
+ **reproducibility limitation**: the variant that delivers the 100%
  recall result runs through a bespoke path, not stock HF attention, so
  reproducing it requires that path rather than a standard `transformers` model.
 - Input scaling for real-activation injection has now been **characterized** (sweet
@@ -1055,7 +1065,7 @@ unproven extension, flagged as future work in the Safety-by-Design section and L
 - The novelty claim is provisional: the reservoir-×-transformer and always-on-agent
  literatures were not yet verification-complete at the time of writing; a citation-checked
  follow-up precedes any hard novelty claim.
-- **Reservoir vs adapter: behavioural isolation, not a capacity decomposition** (flagged in review).
+- **Reservoir vs adapter: behavioural isolation, not a capacity decomposition**.
  Because a light LoRA is trained alongside the reservoir, the design isolates the reservoir's
  *behavioural* contribution (the wiped-reservoir control is the LoRA-only path, so the
  stateful-minus-control lift is what the carried state adds), but it does **not** decompose the
@@ -1271,7 +1281,7 @@ V4 line), is recorded as project direction for future work; it is not runnable o
 
 ![Recall capacity at Qwen-1.5B versus the number of items carried. Perfect at six keys, strong (~0.42, ≈10× chance) at 24, and at chance by 48: graceful degradation into the tens of items.](docs/capacity_qwen15b.png)
 
-![Battery content lift versus epoch (Qwen-1.5B, content-only, eval_n=48). The carried-state recall lift appears at epoch 1 then collapses as training drifts to a stateless solution, a within-run instance of "the model learns to ignore the recurrent state".](docs/battery_lift_eval48.png)
+![Battery content lift versus epoch (Qwen-1.5B, content-only, eval_n=48, chosen over eval_n=16 so the per-epoch lift resolves above the quantization floor). The carried-state recall lift appears at epoch 1 then collapses as training drifts to a stateless solution, a within-run instance of "the model learns to ignore the recurrent state".](docs/battery_lift_eval48.png)
 
 ![H3 delay-memory readout. A linear readout on the reservoir state recovers delayed history that a stateless baseline provably cannot.](docs/h3_memory.png)
 
@@ -1280,17 +1290,14 @@ V4 line), is recorded as project direction for future work; it is not runnable o
 ## Declaration of AI use
 
 This work was produced with substantial use of a large language model coding agent (Claude,
-Anthropic) operating under human direction. The agent implemented the reservoir-injection code and
-experiment harness, executed the experiments, analysed the results, generated the figures, and drafted
-and revised this manuscript. The division of labour is the relevant disclosure: every quantitative
-result reported here is the output of **executed code and measured model behaviour**, not text produced
-by the language model; each capability number comes from a logged run, and every cross-pass claim is
+Anthropic) under human direction: the agent implemented the reservoir-injection code and harness, ran
+the experiments, generated the figures, and drafted and revised this manuscript. The relevant
+disclosure is the division of labour: every quantitative result here is the output of **executed code
+and measured model behaviour**, not text produced by the language model, and every cross-pass claim is
 reported against an explicit stateless / wiped-reservoir control computed in the same run. The human
-author set the research direction and hypotheses, reviewed the code, results, and claims, decided what
-to assert and what to leave open, and is responsible for the content. The agent's autonomy was
-procedural (running the queue of experiments and edits) rather than evidentiary; no result was accepted
-on the model's say-so without a measured run behind it. The project's tooling, prompts, and commit
-history are public in the repository, so the process is auditable end to end.
+author set the direction and hypotheses, reviewed the code, results, and claims, decided what to assert
+and what to leave open, and is responsible for the content. The tooling, prompts, and commit history are
+public in the repository, so the process is auditable end to end.
 
 ---
 

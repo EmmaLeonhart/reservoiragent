@@ -587,8 +587,8 @@
 <figure>
   <img src="battery_lift_eval48.png" alt="Per-epoch capability mean for the content battery: the reservoir (carried-state) curve rises to ~0.20 at epoch 1 while the stateless control stays near zero, then both fall together to ~0.08 by epoch 2; the reservoir-driven lift appears at epoch 1 and is lost by epoch 2.">
   <figcaption>
-    <strong>Battery content lift, found then abandoned</strong> (Qwen-1.5B, content-only, eval_n=48). The
-    carried-state mean (blue) jumps above the wiped-reservoir control (red, dashed) at epoch 1 (a +0.177
+    <strong>Battery content lift, found then abandoned</strong> (Qwen-1.5B, content-only, eval_n=48, chosen over eval_n=16 so the lift resolves above the
+    quantization floor). The carried-state mean (blue) jumps above the wiped-reservoir control (red, dashed) at epoch 1 (a +0.177
     reservoir-driven lift), then collapses back to the control by epoch 2 as training drifts to a stateless
     solution. Regenerate with <code>python scripts/plot_epoch_curve.py</code> over the run's index.json.
   </figcaption>
@@ -632,7 +632,7 @@
   rather than collapsing past six. Re-running the two non-converged points at 2000 steps separates a real
   ceiling from undertraining: 48 keys stays at chance (0.04 vs 0.02) even with more training (the bound
   is real), while the 12-key point stays stuck at both budgets (a per-run optimization artifact). So the
-  reservoir scales both the <em>model</em> it works in and a non-trivial <em>number of items</em> (a few dozen),
+  reservoir scales both the <em>model</em> it works in and a non-trivial <em>number of items</em> (in the tens: perfect at 6 keys, ~0.42 at 24, chance by 48),
   the latter with a real upper bound.
 </p>
 <figure>
@@ -887,7 +887,7 @@
   scaling at ρ = 0.95, saturation is a clean sigmoid: near zero below ≈ 0.05, crossing
   0.5 at ≈ 0.24, while separation and dimensionality stay high. There&rsquo;s a sweet spot
   around <strong>0.08&ndash;0.24</strong> (the reservoir is responsive but not
-  pinned), so real attention activations should be fed at roughly ¼&ndash;⅒ of unit
+  pinned), so real attention activations should be fed at roughly one-quarter to one-tenth of unit
   scale, a concrete injection setting this study contributes.
 </p>
 <figure>

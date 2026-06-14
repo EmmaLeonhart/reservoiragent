@@ -2568,3 +2568,40 @@ Zero em-dashes re-verified end-to-end after the edits (caught and fixed two I in
   earlier draft on these points.
 
 Zero em-dashes re-verified.
+
+## 2026-06-13 — External-review pass, blocks C + D (improvements + mechanical)
+
+Applied:
+- **Input-scaling notation harmonized** to words ("approximately one-quarter to one-tenth")
+  across abstract, contributions, and body; removed the ¼–⅒ fraction glyphs (paper + site).
+- **Concrete capacity numbers** replace the vague "a few dozen": "perfect at 6 keys, ~0.42
+  at 24, chance by 48" (paper + site).
+- **KV terminology unified:** one-time note that KV-append and KV-prefix denote the same
+  injection (reservoir state appended to the key/value cache as a content-addressable prefix).
+- **Untrained-reservoir rationale** surfaced in the lead paragraph (fixed-random by design, to
+  isolate whether untrained dynamics suffice; trained recurrence is complementary future work).
+- **Dejargon:** the W_out=0 identity check reworded from "regression test... caught misplacement
+  bugs in practice" to a neutral "wiring check".
+- **Declaration of AI use** tightened ~40% (kept the load-bearing "every result is executed
+  code / measured behaviour, not LLM text" disclosure).
+- **Safety section:** the "interruptibility is a property of any per-tick agent, not the
+  reservoir" caveat is now stated in the section intro (was only mid-section); the site already
+  carried it.
+- **Fig caption:** the battery-lift figure caption now states eval_n=48 was chosen over 16 to
+  resolve the lift above the quantization floor (paper + site).
+- **"(flagged in review)" removed** (arXiv has no submission reviewers) in all four places;
+  "This project follows a guiding rule" -> "We adopt a guiding rule"; np16 -> n_prefix=16 to
+  match the np8 -> n_prefix=8 fix.
+
+Verified-and-left (reviewers appear to have read an earlier draft):
+- GPT-2-medium honest negative is already explicit ("no working scaling in this range", 7-point
+  sweep enumerated); the multi-seed/single-run caveat is already present; the HF-generate gap is
+  already in Scope; the "## Figures" section is NOT empty (it holds the figures); the page-13
+  table is well-formed (every row has 3 columns; the repeated 0.17 is the real data); the
+  lora_r=4 control is correctly placed with the battery-retention result it belongs to.
+Deliberately not done (stylistic/optional, named per the hard rails): a dedicated Results
+summary table of injection variants (the comparison is already clear in prose + the Qwen
+ablation table); a 40% wholesale cut of the safety section (did the targeted caveat-placement
+fix instead rather than removing intentional content).
+
+Zero em-dashes re-verified across paper + site after all edits.

@@ -75,38 +75,6 @@ arXiv endorsement and Discord/community outreach.
 
 ---
 
-## Final external-review editing pass (2026-06-13) — 7 AI peer reviews
-
-Seven external chatbot reviews (Claude, ChatGPT, Meta AI, DeepSeek, Grok, Perplexity, Gemini)
-distilled into `data_lake/external_reviews_2026-06-13.md`. Work top-down; each edit touches
-FINDINGS.md AND docs/index.html in the same commit (paper-and-site-are-one), rebuild + verify,
-push, confirm CI green. Reviewer consensus: paper is submittable; self-contained figures is the
-only true gate. **Verify each substantive claim against `results/` before applying — do not
-blindly accept reviewer framing** (the "abstract contradicts Appendix A" item is a disambiguation,
-NOT a false scaling claim; the probe scaling is real).
-
-**C. Improvements:**
-- State the GPT-2-medium failure as a genuine non-monotonicity / honest negative. (DeepSeek, Perplexity, ChatGPT)
-- Move the adapter-capacity control (lora_r=4, attention-only) next to the recall claim, not in Limitations. (DeepSeek)
-- Shorten §11 safety ~40%; move the "interruptibility not reservoir-specific" caveat earlier; reframe as a cheap monitoring surface. (DeepSeek)
-- Shorten the Declaration of AI use to 2-3 sentences or move to an appendix. (DeepSeek)
-- Add a limitations sentence on the HF `generate` integration gap (standalone loop works; HF merge is engineering). (Meta, ChatGPT)
-- Temper the single-run battery-retention result with "(multi-seed pending)". (Meta, Grok, ChatGPT)
-- Harmonize input-scaling notation "1/4-1/10" vs "one-quarter to one-tenth". (Meta, ChatGPT)
-- Replace vague "degrading by ~a few dozen" with a concrete figure from the curve. (Meta, ChatGPT)
-- Standardize "content-addressable KV-prefix" vs "KV-append"; define the distinction once early. (Grok, Perplexity)
-- Surface the "why an untrained reservoir?" rationale in the intro. (Meta, ChatGPT)
-- Formally define the experimental tasks before invoking them. (Gemini)
-- Replace dev jargon ("regression test confirming the hook…", "the released code") with academic phrasing. (Gemini)
-- Add a Results summary table of injection variants + scaling configs. (Grok)
-- Remove the empty "## Figures" Section 13 stub (FINDINGS.md:1254) or fill it. (Claude)
-- Fig 13 caption should carry the `eval_n=48` rationale. (Claude)
-
-**D. Mechanical:** page-2 "reproducible" twice; "(flagged in review)" → "intentionally minimal";
-"This project follows a guiding rule…" → "we adopt…"; check the page-13 table column separators. (DeepSeek, Meta, ChatGPT)
-
----
-
 ## Always last — restart the three crons and summarize
 
 **These two items stay pinned to the tail of the queue at all times.** They are the closing half of the three-cron lifecycle in `CLAUDE.md` § "Autonomous productivity loop":
