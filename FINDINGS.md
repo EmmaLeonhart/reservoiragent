@@ -57,9 +57,9 @@ with controlled negatives that bound them and a training recipe under which batt
 - **Cross-pass recall (the secret-word probe) scales to a modern 1.5B model.** Sizing the reservoir up
   and matching its input scaling recovers single-probe recall across the Qwen family (0.83–1.00 vs 0.17
   control, reproduced); input scaling, not parameter count, is the decisive lever, and the prior
-  "GPT-2-small-only" wall was an undersized reservoir. (The multi-task battery's *symbolic content*
-  recall is a separate, harder setting that stays at the floor at 1.5B (see the controlled negatives
-  below and Appendix A) and is not what this result measures.)
+  "GPT-2-small-only" wall was an undersized reservoir. This is the probe, not the eight-task battery's
+  *symbolic content* recall, which is a separate, harder setting that stays at the floor at 1.5B (see the
+  controlled negatives below).
 - **Controlled negatives that bound the contribution.** A model-specific recovery boundary
   (GPT-2-medium fails across a seven-point scaling sweep, and 4-bit Hermes-3B does not converge), a
   capacity ceiling of order tens of items, and a stateless ablation showing the agentic battery's

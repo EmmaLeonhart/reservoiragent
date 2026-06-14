@@ -30,8 +30,6 @@ AI-use declaration (all done), keep citations + coherence perfect, finalize pack
 4 agents, no hallucinations, 8 fixes; data audit — found + fixed the 12-key "undertraining" error;
 register pass + internal file-path cleanup; abstract↔contributions↔results consistency verified.)
 
-- **Final coherence read-through (light).** The main register/path/consistency offenders are fixed; a last
-  holistic skim for flow + repetition before freezing for arXiv.
 - **Final arXiv packaging — VERIFIED (2026-06-08).** The live arXiv source tarball is current (includes
   the #34 retention win), self-contained (paper.tex + paper.tex.body + neurips_2026.sty + figures/), and
   all 14 figures referenced by the paper resolve; title/author metadata set; PDF builds green. Minor
