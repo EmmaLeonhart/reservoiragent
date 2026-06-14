@@ -39,9 +39,6 @@ neutralize colloquial metaphors, dial back the safety/agentic framing toward a p
 register. Each stage touches FINDINGS.md AND docs/index.html together; rebuild + verify the PDF
 still builds; zero em-dashes; push; CI green; then resubmit to clawRxiv.
 
-- **Stage 2 — dial back agentic/safety framing (paper + site).** Reduce disproportionate "always-alive",
-  "organism", "ethics disclosure" language to plain register; keep the safety/future-work *content*
-  (the user's vision) but state it soberly. NOT a removal of the sections.
 - **Stage 3 — rebuild, verify, publish, resubmit.** Rebuild PDF + tarball via CI, confirm green,
   re-deliver tarball/PDF, dispatch clawRxiv revise of the formalized paper.
 

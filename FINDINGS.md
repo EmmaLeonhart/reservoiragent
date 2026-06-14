@@ -68,7 +68,7 @@ with controlled negatives that bound them and a training recipe under which batt
 ## Research Question
 
 Can a fixed, randomly-initialized reservoir injected into a pretrained transformer's
-mid-layer attention give the model genuine state between forward passes (a real
+mid-layer attention give the model explicit state between forward passes (a
 time axis) without degrading its base capabilities, and what reservoir-dynamics
 regime (spectral radius, reservoir size, injection depth) makes that injected state
 usable signal rather than noise?
@@ -90,7 +90,7 @@ To be explicit about the boundary of the claims:
  Secret-word recall and the trigger-based silence policy are intentionally the
  *simplest* tasks that a stateless model structurally cannot do; their job is to
  isolate one variable (does carried state become usable signal, and under which
- injection design), not to exhibit organism-like reasoning. We make no claim of
+ injection design), not to exhibit complex agentic reasoning. We make no claim of
  complex agentic behaviour at this scale; that is named as future work, not shown here.
 - **The complexity-theory argument is motivation, not a result.** The TC⁰ / FO(M)
  framing explains *why* cross-pass state is the interesting lever; we state plainly that
@@ -142,7 +142,7 @@ attention layer. The reservoir sits beside the model as a fixed recurrent pool; 
 the layer's attention activations through the fixed projection W_in, updates its own state
 r(t), and writes that state back as attendable key/value prefix nodes through the trained
 readout W_out. The recurrent state r(t) → r(t+1) is the part that survives a context wipe:
-the genuine time axis the standard diagram lacks.
+the explicit time axis the standard diagram lacks.
 
 ![The Reservoir Attention Network: at a mid-depth injection layer the attention runs jointly over the token nodes and reservoir prefix nodes. A fixed random reservoir reads the layer activations through W_in, evolves its state, and writes back as a learned prefix (W_out); its state r(t) is carried to the next forward pass, surviving the context wipe.](docs/diagram-ran.svg)
 
@@ -235,7 +235,7 @@ the 2024–2026 landscape moves quickly and a verified absence is not a proof of
 Three framing points, stated at the level of *kind* of capability, not level of capability:
 motivation for the design, not results. Grounding and citations are given in the References.
 
-**1 · A genuine time dimension.** A standard transformer represents time as token
+**1 · An explicit time dimension.** A standard transformer represents time as token
 *position*: an index into a sequence, not a dimension the model evolves along. With
 the reservoir, the state r(t) evolves continuously across forward passes:
 r(t) = (1−a)·r(t−1) + a·tanh(W_r·r(t−1) + W_in·x(t)), so r at pass N is causally
@@ -892,7 +892,7 @@ step 200, mean drops to 0.321) and higher rank gives nothing, so more readout ca
 missing piece; the path to content at this scale is budget/scale, consistent with the
 GPT-2-small-only cross-pass result.
 
-## Safety Considerations (ethics disclosure)
+## Safety Considerations
 
 The results in this section are design motivation and small synthetic proof-of-concepts that follow
 from the same cross-pass statefulness, not core results or evaluated safety claims. The core
