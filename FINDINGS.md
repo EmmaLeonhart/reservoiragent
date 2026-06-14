@@ -1055,7 +1055,7 @@ unproven extension, flagged as future work in the Safety-by-Design section and L
  reservoir nodes as extra attention keys/values); the latter is implemented and
  unit-tested in isolation with a clean H1 *masking* property, but wiring it into the stock
  HuggingFace attention path is a documented integration blocker (their `generate` exposes no
- hook to append external key/value entries), left for a focused future item rather than a fragile
+ hook to append external key/value entries), left as future work rather than a fragile
  patch of attention internals. This is a
  reproducibility limitation: the variant that delivers the 100%
  recall result runs through a bespoke path, not stock HF attention, so
@@ -1175,8 +1175,7 @@ injection, the always-alive harness, the trained readout, and this fine-tune pip
 ### Appendix D. Porting to a 3B Model
 
 The GPT-2 work validated the mechanisms; this phase moves to the smallest Hermes:
-NousResearch/Hermes-3-Llama-3.2-3B (Llama-3.2, the architecture the project actually
-wants, already agent-fine-tuned).
+NousResearch/Hermes-3-Llama-3.2-3B (Llama-3.2, the architecture this work ultimately targets, already agent-fine-tuned).
 
 - **(A) Injection generalized to the Llama architecture.** The injection was GPT-2-only
  (`transformer.h`); the architecture-adaptation layer now locates decoder blocks across families
@@ -1307,9 +1306,9 @@ The works the claims above rest on:
 
 *Recurrence-augmented transformers (all carry state within a sequence via trained recurrence).*
 
-- Dai, Z., et al. (2019). *Transformer-XL.* ACL. arXiv:1901.02860.
-- Wu, Y., et al. (2022). *Memorizing Transformers.* ICLR. arXiv:2203.08913.
-- Hutchins, D., et al. (2022). *Block-Recurrent Transformers.* NeurIPS. arXiv:2203.07852.
+- Dai, Z., Yang, Z., Yang, Y., Carbonell, J., Le, Q. V., & Salakhutdinov, R. (2019). *Transformer-XL: Attentive Language Models Beyond a Fixed-Length Context.* ACL. arXiv:1901.02860.
+- Wu, Y., Rabe, M. N., Hutchins, D., & Szegedy, C. (2022). *Memorizing Transformers.* ICLR. arXiv:2203.08913.
+- Hutchins, D., Schlag, I., Wu, Y., Dyer, E., & Neyshabur, B. (2022). *Block-Recurrent Transformers.* NeurIPS. arXiv:2203.07852.
 - Bulatov, A., Kuratov, Y., & Burtsev, M. (2022). *Recurrent Memory Transformer.* NeurIPS. arXiv:2207.06881.
 - Gu, A., Goel, K., & Ré, C. (2022). *Efficiently Modeling Long Sequences with Structured State Spaces (S4).* ICLR. arXiv:2111.00396.
 - Gu, A., & Dao, T. (2023). *Mamba: Linear-Time Sequence Modeling with Selective State Spaces.* arXiv:2312.00752.
@@ -1317,8 +1316,8 @@ The works the claims above rest on:
 
 *KV-cache management / efficient attention.*
 
-- Xiao, G., et al. (2023). *Efficient Streaming Language Models with Attention Sinks (StreamingLLM).* arXiv:2309.17453.
-- Zhang, Z., et al. (2023). *H2O: Heavy-Hitter Oracle for Efficient Generative Inference.* arXiv:2306.14048.
+- Xiao, G., Tian, Y., Chen, B., Han, S., & Lewis, M. (2023). *Efficient Streaming Language Models with Attention Sinks (StreamingLLM).* arXiv:2309.17453.
+- Zhang, Z., Sheng, Y., Zhou, T., Chen, T., Zheng, L., Cai, R., Song, Z., Tian, Y., Ré, C., Barrett, C., Wang, Z., & Chen, B. (2023). *H2O: Heavy-Hitter Oracle for Efficient Generative Inference of Large Language Models.* arXiv:2306.14048.
 - DeepSeek-AI (2024). *DeepSeek-V2* (Multi-head Latent Attention). arXiv:2405.04434.
 
 ## Appendix: Figures

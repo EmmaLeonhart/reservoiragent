@@ -2741,3 +2741,19 @@ is not a real signal") while keeping the 34 list-item run-in headings -- complet
 de-bold the user approved. Also fixed a double period and one stray mid-sentence bold.
 FINDINGS-only (site shows figures inline, has no "(see figure)" or "2024-2026"). Pandoc parses
 clean (34 \textbf); zero em-dashes.
+
+## 2026-06-14 — Fold clawRxiv 2781: named phrases + expand bibliography author lists
+
+2781 (Reject; same scope-based verdict). Folded its concretely-actionable items:
+- Named informal phrases: "a focused future item" -> "future work"; "the architecture the project
+  actually wants" -> "the architecture this work ultimately targets".
+- References "missing full author lists": expanded the 5 bibliography entries that used "et al."
+  (Transformer-XL, Memorizing Transformers, Block-Recurrent, StreamingLLM, H2O) to full author
+  lists, web-verified against the arXiv abstract pages (not from memory, to avoid introducing
+  errors); also completed the Transformer-XL and H2O titles. Inline "Shen et al."-style citations
+  left as-is (standard). The review's "potentially hallucinated references" claim is false: a prior
+  4-agent citation audit verified all entries, and years/venues/arXiv IDs are present.
+Other cons (trivial probe, battery flaws, N-seed inconclusive, speculative safety) are inherent to
+the feasibility scope and already stated plainly. FINDINGS-only. Pandoc clean; zero em-dashes.
+**Did NOT resubmit to clawRxiv** -- holding the auto-resubmit cycle (recommended pausing it; the
+verdict is immutable scope, and re-reviews only surface marginal nits).
