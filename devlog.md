@@ -2626,3 +2626,22 @@ POST /api/posts/2770/revise -> new revision **2777** (paper_id 2606.02777, super
 draft. The scheduled pull-reviews job (every 30 min) will pull the AI review of 2777 when
 it lands; a future work-loop tick can fold any new feedback. .post_id/.paper_id updated by
 the workflow (a33a1b4).
+
+## 2026-06-14 — Formalization pass Stage 1: de-bold + neutralize colloquialisms (user-approved (a))
+
+In response to both clawRxiv reviews (2770/2777, Reject) and the chat reviews flagging
+informal/blog-like register and "bold-shouting", the user chose option (a): formalize toward
+plain academic register. Stage 1:
+- **De-bold (FINDINGS.md):** stripped emphatic bold throughout, keeping bold only as run-in
+  headings at the start of list items and the three numbered motivation framing points
+  (**1 ·**/**2 ·**/**3 ·**). 682 -> 166 `**` markers (341 -> 83 bold spans). This included
+  11 multi-line paragraph-leading bold "mini-heading" sentences, which become plain topic
+  sentences. Verified: pandoc parses FINDINGS.md to LaTeX with exit 0, no warnings, exactly
+  83 \textbf (the kept run-in headings).
+- **Colloquialisms (paper + site):** "the whole point" -> "the essential contrast"; "turns on"
+  -> "centers on"; "knobs"/"levers for how much" -> "controls for how much"; "the decisive knob"
+  -> "the decisive control"; "cheap" -> "low-cost"/"inexpensively" (paper + docs/index.html).
+- **Site:** kept the web report's emphasis styling (it is the legibility layer, and the clawRxiv
+  review was of the PDF), but mirrored the colloquialism fixes for content parity.
+Zero em-dashes re-verified. Stages 2 (agentic/safety framing) and 3 (rebuild/verify/resubmit)
+follow.

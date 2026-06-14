@@ -192,7 +192,7 @@
   Sizing it to 2048 nodes and matching the input scaling to the model recovers cross-pass recall on the
   <strong>secret-word probe</strong> across the <strong>Qwen family</strong>: Qwen-1.5B at scaling 0.1 (0.83&ndash;1.00 vs 0.17 control, reproduced
   across two seeds) and Qwen-0.5B at scaling 0.5 (<strong>1.00 vs 0.17</strong>). Input scaling is the
-  decisive knob (Qwen-0.5B goes 0.17&rarr;1.00 by changing that one scalar), so a 500M model
+  decisive control (Qwen-0.5B goes 0.17&rarr;1.00 by changing that one scalar), so a 500M model
   recovers while GPT-2-medium's 355M (at the two scalings tried) does not: <strong>not a size law</strong>.
   A capacity ceiling persists but in the tens of items (recall 1.00 at 6 keys, ~0.42 at 24, chance by 48), and the separate 8-task
   battery's temporal scores are <em>not</em> reservoir-driven (a stateless ablation matches them), and
@@ -354,7 +354,7 @@
     influence on the state decays toward zero over the following passes, and the effect of the initial
     state and the distant past washes out. Reservoir memory is therefore <em>fading</em> and finite
     (its linear memory capacity grows with reservoir size, &le; N), which is why reservoir size and
-    leak rate are the levers for how much cross-pass state is carried.
+    leak rate are the controls for how much cross-pass state is carried.
   </figcaption>
 </figure>
 <p>
@@ -646,7 +646,7 @@
   </figcaption>
 </figure>
 <p>
-  <strong>The decisive knob is input scaling matched to the model, not size.</strong>
+  <strong>The decisive control is input scaling matched to the model, not size.</strong>
   <strong>Qwen2.5-0.5B</strong> makes this sharp: with the 2048-node reservoir it is at chance (0.17) at
   input scaling 0.1, but hits <strong>1.00 (vs 0.17 control) at scaling 0.5</strong>. One scalar takes it
   from no-recall to perfect recall: smaller models have smaller activations and need more input drive
@@ -734,7 +734,7 @@
   <strong>N-seed selection: it works, but you can&rsquo;t shortcut it.</strong> Training
   each of 12 fixed reservoir seeds&rsquo; readout and ranking by memory capacity, the seeds
   genuinely differ (17.4&ndash;20.7, ~19% spread), so keeping the best is worth it.
-  But the plan&rsquo;s open question (can a cheap <em>untrained</em> dynamics metric
+  But the plan&rsquo;s open question (can a low-cost <em>untrained</em> dynamics metric
   predict which seed trains best, to skip training?) gets a clean <strong>no</strong>
   for the participation-ratio proxy: no rank correlation with trained performance
   (Spearman ρ = 0.08, p = 0.80). The N-seed training does real work this proxy can&rsquo;t
@@ -759,7 +759,7 @@
   <strong>dominated by training noise</strong> (CUDA non-determinism + under-training), not
   reservoir quality, and no untrained metric (&rho;, eigenvalue spread, non-normality,
   participation ratio, memory capacity) predicts recall (|Spearman|&nbsp;&lt;&nbsp;0.36).
-  What it <em>does</em> support: you cannot cheaply pre-filter reservoirs, so you keep the
+  What it <em>does</em> support: you cannot inexpensively pre-filter reservoirs, so you keep the
   whole population and train. Showing some reservoirs are <em>durably</em> better needs a
   controlled rerun (seed the trainable init, deterministic CUDA, average several runs per
   seed); that is open work.
@@ -931,7 +931,7 @@
   capability (cross-pass state, autonomous ticks), so it owes safety value back, and the
   value comes from the <em>same</em> feature as the capability, the <strong>fixed</strong>
   reservoir, not a bolt-on. Three properties, each backed by a measured result below rather
-  than asserted: lower-latency, durable human override (interruptibility); a cheap, stable
+  than asserted: lower-latency, durable human override (interruptibility); a low-cost, stable
   monitoring surface (a linear reservoir-state probe); and bounded context under autonomous
   idling (reservoir-protected eviction). Limits of this probe: it decodes a
   benign internal clock, not genuine misalignment signatures; the numbers are small-scale on a
@@ -950,7 +950,7 @@
   a fine-tuning-like drift on the driving activations, the pre-drift probe degrades
   <em>gracefully</em> (0.99 &rarr; 0.94 at drift 0.4, 0.82 at 0.8): usable across
   moderate drift, not invariant, since the reservoir <em>weights</em> are fixed but their
-  inputs still move. A cheap, stable place to watch the agent&rsquo;s internal state.
+  inputs still move. A low-cost, stable place to watch the agent&rsquo;s internal state.
 </p>
 <figure>
   <img src="probe.png" alt="Two panels. Left: bar chart of probe R-squared for decoding elapsed-since-trigger, reservoir state at 0.99 versus stateless input at 0.16. Right: a line of R-squared versus fine-tuning-like input drift, starting near 0.99 and curving gently down to about 0.82 at drift 0.8.">
