@@ -2547,3 +2547,24 @@ data_lake/external_reviews_2026-06-13.md). Blocker-level items:
   ECAI 2025 and already carries the ECAI venue in the references.
 
 Zero em-dashes re-verified end-to-end after the edits (caught and fixed two I introduced).
+
+## 2026-06-13 — External-review pass, block B (framing)
+
+- **Organism analogy tempered** (paper §Motivation + site): retitled "The organism
+  analogy" → "Endogenous state (a bounded structural analogy)"; removed the loaded
+  "living organisms" / "organism-like" / "genuinely agentic" phrasing while keeping the
+  legitimate structural point (a stateless transformer carries no cross-pass variable;
+  this architecture does, which is a precondition for the simple stateful probes).
+- **Hermes-3B surfaced up front:** added "4-bit Hermes-3B does not converge" to the
+  abstract's controlled-negatives contribution bullet so both negatives (GPT-2-medium,
+  Hermes-3B) are visible without reading to the limitations.
+- **Verified already-addressed (no change):** the title and intro are already framed as a
+  "feasibility and dynamics study" with the always-alive vision named as future work, not
+  a claim; the complexity-theoretic section is already labeled "motivation, not result"
+  ("one sentence; no result claimed", "we prove no separation"), and the Scope section
+  already states there is no proof a finite-precision reservoir lifts the per-pass bound.
+  The abstract is standard arXiv prose and the Contributions bullets already provide the
+  scannable view, so no de-densification was forced. Reviewers appear to have read an
+  earlier draft on these points.
+
+Zero em-dashes re-verified.

@@ -85,15 +85,6 @@ only true gate. **Verify each substantive claim against `results/` before applyi
 blindly accept reviewer framing** (the "abstract contradicts Appendix A" item is a disambiguation,
 NOT a false scaling claim; the probe scaling is real).
 
-**B. Substantive framing (high consensus):**
-- **Tone down overclaiming** in title/abstract/intro: feasibility study of a *mechanism*, not a
-  general persistent-agency architecture; surface GPT-2-medium + Hermes-3B failures up front. (Perplexity, ChatGPT, Gemini)
-- **Cut / temper the organism analogy** and loaded phrases ("genuine time axis", "organism-like"). (ChatGPT, Meta, Perplexity)
-- **Compress + caveat the complexity-theory (TC⁰/FO(M)) section** — motivation, not result; emphasize
-  "no proof a finite-precision reservoir lifts the per-pass bound". (ChatGPT, Perplexity, Gemini)
-- **Abstract presentation:** break the dense 4-result block into shorter sentences/bullets, lead with
-  the injection finding, stay conservative; remove claims duplicated across Abstract/Contributions/Scope/Results. (Meta, Grok, Perplexity, ChatGPT)
-
 **C. Improvements:**
 - State the GPT-2-medium failure as a genuine non-monotonicity / honest negative. (DeepSeek, Perplexity, ChatGPT)
 - Move the adapter-capacity control (lora_r=4, attention-only) next to the recall claim, not in Limitations. (DeepSeek)
