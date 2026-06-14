@@ -48,22 +48,22 @@ with controlled negatives that bound them and a training recipe under which batt
 ## Contributions
 
 - **Injection design decides whether carried state is usable.** Additive residual-stream injection
-  reproduces the "learns to ignore the recurrent state" failure (recall at chance); content-addressable
-  KV-prefix injection yields 100% cross-context recall on GPT-2-small (1.00 vs a 0.17 wiped-reservoir
-  control, reproducible).
+ reproduces the "learns to ignore the recurrent state" failure (recall at chance); content-addressable
+ KV-prefix injection yields 100% cross-context recall on GPT-2-small (1.00 vs a 0.17 wiped-reservoir
+ control, reproducible).
 - **Reservoir dynamics characterized on real transformer activations.** The edge-of-chaos regime at
-  spectral radius ≈ 1 persists, and real activations require an input scaling of approximately one-quarter to one-tenth to avoid
-  saturation.
+ spectral radius ≈ 1 persists, and real activations require an input scaling of approximately one-quarter to one-tenth to avoid
+ saturation.
 - **Cross-pass recall (the secret-word probe) scales to a modern 1.5B model.** Sizing the reservoir up
-  and matching its input scaling recovers single-probe recall across the Qwen family (0.83–1.00 vs 0.17
-  control, reproduced); input scaling, not parameter count, is the decisive lever, and the prior
-  "GPT-2-small-only" wall was an undersized reservoir. This is the probe, not the eight-task battery's
-  *symbolic content* recall, which is a separate, harder setting that stays at the floor at 1.5B (see the
-  controlled negatives below).
+ and matching its input scaling recovers single-probe recall across the Qwen family (0.83–1.00 vs 0.17
+ control, reproduced); input scaling, not parameter count, is the decisive lever, and the prior
+ "GPT-2-small-only" wall was an undersized reservoir. This is the probe, not the eight-task battery's
+ *symbolic content* recall, which is a separate, harder setting that stays at the floor at 1.5B (see the
+ controlled negatives below).
 - **Controlled negatives that bound the contribution.** A model-specific recovery boundary
-  (GPT-2-medium fails across a seven-point scaling sweep, and 4-bit Hermes-3B does not converge), a
-  capacity ceiling of order tens of items, and a stateless ablation showing the agentic battery's
-  temporal metrics are not reservoir-driven.
+ (GPT-2-medium fails across a seven-point scaling sweep, and 4-bit Hermes-3B does not converge), a
+ capacity ceiling of order tens of items, and a stateless ablation showing the agentic battery's
+ temporal metrics are not reservoir-driven.
 
 ## Research Question
 
@@ -228,7 +228,7 @@ prediction quality; this is orthogonal to our aim, which is to *inject* a reserv
 transformer to add cross-pass memory, not to replace the transformer with a reservoir.
 (The 2025 items are recent preprints; arXiv identifiers are given so they can be verified.)
 This places the combination as novel against the verified prior art, with the caveat that
-the 2024–2026 landscape moves quickly and a verified absence is not a proof of absence.
+the recent landscape moves quickly and a verified absence is not a proof of absence.
 
 ## Motivation: Complexity-Theoretic Framing
 
@@ -276,6 +276,8 @@ about general intelligence, and we draw no analogy beyond this structural one.
 
 ## Results
 
+Figures supporting the results are collected in Appendix: Figures.
+
 ### H1: the reservoir injects without breaking the base model
 
 Hooking a mid-depth block of pretrained GPT-2 so the block's hidden states drive the
@@ -300,7 +302,7 @@ the same readout trained on the *current* input u(t), scores exactly 0 at every
 delay ≥ 1, because i.i.d. inputs carry no information about their own past. So the
 information needed to answer is provably *in the carried state, not the input*: a light
 trained readout makes the reservoir's history usable, and a stateless model structurally
-cannot match it. (see figure) This is the H3
+cannot match it. This is the H3
 mechanism on a clean synthetic task; doing it on a *semantic* agent task (unresolved
 thread, elapsed time) is future work that needs the readout trained through the LM.
 
@@ -311,23 +313,23 @@ seeds' readout on the delay-memory task, rank by memory capacity, keep the best)
 seeds genuinely differ (memory capacity ranges 17.4 to 20.7, a ~19% spread), so the
 selection is worth doing. But the open "seed pre-selection proxy" question (can a low-cost
 *untrained* dynamics metric predict which seed trains best, to skip training?) gets a
-clean negative answer for this proxy: the untrained participation ratio has **no
-rank correlation with trained memory capacity (Spearman ρ = 0.08, p = 0.80**, n=12).
+clean negative answer for this proxy: the untrained participation ratio has no
+rank correlation with trained memory capacity (Spearman ρ = 0.08, p = 0.80, n=12).
 So seeds cannot be pre-filtered by participation ratio; the N-seed *training* does real
-work this dynamics proxy can't shortcut. (see figure) **The cost implication,
-stated plainly:** because this proxy fails, selecting a good fixed reservoir
+work this dynamics proxy can't shortcut. The cost implication,
+stated plainly: because this proxy fails, selecting a good fixed reservoir
 currently requires training each seed's readout, i.e. genuine trial-and-error, not a
 low-cost pre-filter. Finding an untrained proxy that *does* correlate is open work; until
 then the selection cost scales with the number of seeds tried.
 
 Per-seed recall spreads widely, but at this budget it is dominated by training noise,
 not cleanly by reservoir quality (a correction). Training a population of fixed reservoir
-seeds end-to-end on the cross-pass task (GPT-2, 250 steps each) gives recall from **1.00 to
-chance (0.17)** across seeds (populations of 12 and 20 are published at
+seeds end-to-end on the cross-pass task (GPT-2, 250 steps each) gives recall from 1.00 to
+chance (0.17) across seeds (populations of 12 and 20 are published at
 `EmmaLeonhart/reservoir-agent-gpt2-batch-n12` and `-n20`). It is tempting to read that
 spread as reservoir *quality*, but the two runs share seed indices, which gives a natural
-replication, and it does not hold up: the **same seed (identical fixed reservoir, same
-setting) lands at very different recall across the two runs** (e.g. seed 0 at 0.33 vs 1.00,
+replication, and it does not hold up: the same seed (identical fixed reservoir, same
+setting) lands at very different recall across the two runs (e.g. seed 0 at 0.33 vs 1.00,
 seed 1 at 1.00 vs 0.33), with mean |Δrecall| ≈ 0.47 over the 12 shared seeds, nearly as
 large as the full spread. So at 250 steps the outcome is run-to-run noise-dominated
 (CUDA non-determinism + an under-trained regime + the trainable readout/LoRA init not being
@@ -342,20 +344,20 @@ population* (low-cost metrics don't let you pre-filter, so you train and measure
 fact that reservoirs scaled to a fixed ρ have near-identical bulk dynamics; it does not
 yet demonstrate that some fixed reservoirs are durably better than others on this task.
 Establishing that needs a controlled experiment: seed the trainable init too, enable
-deterministic CUDA, and average several runs per seed. (see figure)
+deterministic CUDA, and average several runs per seed.
 
 The controlled experiment was run, and it confirms: at 250 steps selection is noise, not
-signal. We then ran exactly that experiment (see figure). Root cause of the noise was first removed: the
+signal. We then ran exactly that experiment. Root cause of the noise was first removed: the
 trainable-init seed was not being applied, so the readout `W_res` + LoRA init was uncontrolled; it now
 seeds the init, and a `set_deterministic` helper (RNGs + `CUBLAS_WORKSPACE_CONFIG` + cudnn
 flags + the deterministic math SDP kernel) makes two runs of the same reservoir with the same
-`train_seed` bit-identical (verified on CPU and CUDA). With that, we trained **6 reservoir
-seeds × 4 runs (the four runs vary only by `train_seed`) and ran a one-way ANOVA** over
-recall grouped by reservoir seed. Per-seed mean recall ranged 0.33–0.75, but the **within-seed
+`train_seed` bit-identical (verified on CPU and CUDA). With that, we trained 6 reservoir
+seeds × 4 runs (the four runs vary only by `train_seed`) and ran a one-way ANOVA over
+recall grouped by reservoir seed. Per-seed mean recall ranged 0.33–0.75, but the within-seed
 spread is as wide as the between-seed spread (e.g. seed 0 spans 0.33→1.00 across inits): F =
-1.30 (df 5, 18), p = 0.31: the between-seed (reservoir) variation does not** exceed the
-within-seed (trainable-init) noise. So at 250 steps, **reservoir "selection" is not a real
-signal**: which fixed reservoir you drew matters less than which trainable init you happened to
+1.30 (df 5, 18), p = 0.31: the between-seed (reservoir) variation does not exceed the
+within-seed (trainable-init) noise. So at 250 steps, reservoir "selection" is not a real
+signal: which fixed reservoir you drew matters less than which trainable init you happened to
 get. This turns the earlier *suspected* artifact into a *controlled* negative result. It does
 not rule out selection mattering with far more training (where init noise should shrink); that
 larger-budget run is the natural follow-up. But at this budget the verdict is: train and
@@ -365,8 +367,8 @@ At a larger budget the negative holds: at 1500 steps, selection is still not rea
 6×-budget follow-up tests whether selection becomes a real signal once run-to-run init noise
 shrinks. It does not. Per-seed mean recall spreads a little wider
 (0.21–0.83 vs the 250-step run's 0.33–0.75), but the within-seed spread stays just as wide
-(e.g. seed 4 lands at 1.00, 1.00, 0.17, 0.17 across its four inits): **F = 1.43 (df 5, 18),
-p = 0.26**: the between-seed (reservoir) variation still does not exceed the within-seed
+(e.g. seed 4 lands at 1.00, 1.00, 0.17, 0.17 across its four inits): F = 1.43 (df 5, 18),
+p = 0.26: the between-seed (reservoir) variation still does not exceed the within-seed
 (trainable-init) noise. So 6× more training strengthens, rather than overturns, the
 controlled negative: which trainable init you draw matters more than which fixed reservoir you
 drew, at both 250 and 1500 steps. The verdict is unchanged and now holds across a budget
@@ -376,13 +378,13 @@ not point that way.)
 
 ### H2: the reservoir-dynamics regime
 
-Sweeping spectral radius ρ ∈ [0.1, 2.0] (see figures):
+Sweeping spectral radius ρ ∈ [0.1, 2.0]:
 
 - **The echo state property breaks sharply at ρ ≈ 1.** Using an autonomous
  (zero-input) probe, two random initial states under no input, the reservoir forgets
  where it started (init-forgetting ≈ 0) for ρ < 1 and abruptly retains it for ρ > 1.
- This edge-of-chaos boundary appears on *both* synthetic input and **real GPT-2
- mid-layer activations** (on real data: 0.000 for ρ ≤ 0.9 → 0.10 at ρ = 1 → ~0.95
+ This edge-of-chaos boundary appears on *both* synthetic input and real GPT-2
+ mid-layer activations (on real data: 0.000 for ρ ≤ 0.9 → 0.10 at ρ = 1 → ~0.95
  above). The classical ρ ≈ 1 boundary survives the move to transformer-scale input.
 - **The input regime decides whether ρ matters.** Under unit-scale input *drive* the
  reservoir forgets its initial state across *all* ρ (strong input enforces the ESP),
@@ -395,11 +397,11 @@ Sweeping spectral radius ρ ∈ [0.1, 2.0] (see figures):
  activations: the input scaling has to be tuned down for injection at transformer
  scale, the precise concern the plan anticipated ("feeding a large attention tensor
  may require different scaling").
-- **Tuning the input scaling fixes it (see figure).** Sweeping the
+- **Tuning the input scaling fixes it.** Sweeping the
  input scaling at ρ = 0.95, saturation is a clean sigmoid in the scaling: it crosses
  0.5 at scaling ≈ 0.24 and is near zero below ≈ 0.05, while input separation and
- effective dimensionality stay high. There is a sweet spot around **input scaling
- 0.08–0.24** where the reservoir is *not* over-saturated (saturation 0.08–0.49) yet
+ effective dimensionality stay high. There is a sweet spot around input scaling
+ 0.08–0.24 where the reservoir is *not* over-saturated (saturation 0.08–0.49) yet
  still strongly responsive (separation 1.03–1.26, PR ≈ 0.39·K). So real attention
  activations should be fed at roughly one-quarter to one-tenth of unit scale, not 1.0; this is a concrete
  injection setting this study contributes.
@@ -441,8 +443,8 @@ finding.
  written into the residual stream as one additive bias vector,
  across mean/last-token drive and mid/last-layer injection up to 500 steps, the stateful
  model and the stateless baseline reach the same chance accuracy (0.17 = 1/6). The
- model learns the marginal, not the recall: the **Block-Recurrent "learns to ignore the
- recurrent state" failure mode, reproduced.** A single pooled additive bias cannot carry
+ model learns the marginal, not the recall: the Block-Recurrent "learns to ignore the
+ recurrent state" failure mode, reproduced. A single pooled additive bias cannot carry
  *which specific word* appeared.
 
 - *Terminology:* we use KV-append and KV-prefix interchangeably for the same
@@ -450,15 +452,15 @@ finding.
  content-addressable prefix that the upper layers query.
 - **Content-addressable (KV-append) injection → works, decisively.** When instead the
  reservoir state is projected into prefix pseudo-tokens the model can attend to
- (the KV-prefix path), the stateful model reaches **100% cross-context recall
- (loss → 0.02) while the stateless baseline stays at chance (0.17)**. The carried
+ (the KV-prefix path), the stateful model reaches 100% cross-context recall
+ (loss → 0.02) while the stateless baseline stays at chance (0.17). The carried
  reservoir state, made attendable, lets the model recall content that exists *only* in
- the reservoir, something the stateless baseline provably cannot do. (see figure)
+ the reservoir, something the stateless baseline provably cannot do.
 
 This is the paper's core claim, demonstrated: the Reservoir Agent's statefulness
 *does the desired thing*: it carries information across independent forward passes and
-the model uses it, **provided the reservoir is injected content-addressably (attended
-to), not as an additive bias.** The negative-then-positive arc is the contribution: it
+the model uses it, provided the reservoir is injected content-addressably (attended
+to), not as an additive bias. The negative-then-positive arc is the contribution: it
 isolates the injection design as the decisive factor, ruling out the naive variant and
 validating the attention-based one. (Demonstrated on GPT-2; the same injection path is
 architecture-agnostic and runs on Hermes via the generalized injection.)
@@ -469,22 +471,22 @@ secret words on GPT-2-small (`crosspass --mode kv --n-keys {12,24,48}`, 600 step
 recall is 1.00 at 6, 0.58 at 12, 0.92 at 24, and 0.02 (chance) at 48, against a wiped-state
 baseline at chance throughout (0.17 → 0.02 as the vocabulary grows). Two things are true and
 stated as such: the effect generalizes well past 6 (0.92 at 24 words, far above the 1/24 chance
-floor) over a swept rather than hand-picked vocabulary; but the curve is **non-monotonic and
-training-noisy at this 600-step budget** (the 12-word run underperforms the 24-word run, a
-run-to-run optimization artifact, not a capacity law), and by **48 words the run no longer
-converges** within 600 steps (loss plateaus ~5.0). So the working regime is robust at small-to-
+floor) over a swept rather than hand-picked vocabulary; but the curve is non-monotonic and
+training-noisy at this 600-step budget (the 12-word run underperforms the 24-word run, a
+run-to-run optimization artifact, not a capacity law), and by 48 words the run no longer
+converges within 600 steps (loss plateaus ~5.0). So the working regime is robust at small-to-
 moderate vocabularies and becomes budget-limited as the vocabulary grows: a characterization,
-not a clean capacity ceiling. (see figure)
+not a clean capacity ceiling.
 
 Transfer to Hermes-3B does not yet succeed, and the reason is diagnosed. The same
 content-addressable experiment was run on the real target, Hermes-3-Llama-3.2-3B, across
 four attempts: 4-bit at input scaling 0.5 (300 steps), 4-bit at 0.1 (600 steps),
 bf16 (non-4-bit) at 0.1 with a higher LR 3e-3 (600 steps), and a dedicated
-many-more-steps run: 4-bit, 2000 steps (≈6.7× the first attempt). **All four came back
-at chance (0.17), stateful ≈ baseline,** with the training loss consistently failing to
+many-more-steps run: 4-bit, 2000 steps (≈6.7× the first attempt). All four came back
+at chance (0.17), stateful ≈ baseline, with the training loss consistently failing to
 converge (plateau ≈ 2.5–2.9, vs GPT-2's 0.02; the 2000-step run reached 2.49, no better
-than 300 steps). The consistent plateau **across both 4-bit and bf16, and now across a
-6.7× step increase, shows the wall is neither quantization nor under-training**; more
+than 300 steps). The consistent plateau across both 4-bit and bf16, and now across a
+6.7× step increase, shows the wall is neither quantization nor under-training; more
 steps alone does not break it, so the remaining routes are structural (a curriculum that
 starts with the key in-context and anneals it out, a stronger multi-layer prefix coupling,
 or unfreezing more of the model), which is substantial work, not a hyperparameter.
@@ -495,13 +497,13 @@ the readout `W_res` (‖∇‖ ≈ 0.016) and the LoRA adapters (Σ|∇| ≈ 3.0
 correctly wired on Hermes; this is a genuine optimization / scale difficulty, not a
 defect: the prefix's signal, diluted through 28 layers and competing with a 3B
 instruction-tuned model's strong priors, does not *bootstrap* into use within the
-attempted budget, whereas shallow GPT-2 bootstrapped easily. The **"far more steps" route
-has now been tested and ruled out** (a 2000-step 4-bit run, ≈6.7×, still chance / loss 2.49);
+attempted budget, whereas shallow GPT-2 bootstrapped easily. The "far more steps" route
+has now been tested and ruled out (a 2000-step 4-bit run, ≈6.7×, still chance / loss 2.49);
 the remaining plausible routes (left open, not faked) are structural: a curriculum (start
 with the key in-context, anneal it out) / a stronger multi-layer prefix coupling / unfreezing
-more of the model. **The result holds decisively on GPT-2; on Hermes the mechanism is
+more of the model. The result holds decisively on GPT-2; on Hermes the mechanism is
 verified as correctly wired but the recall has not yet been trained to converge, and it is not a
-step-count problem.** (See figure.)
+step-count problem.
 
 The transfer wall starts well below 3B. A 10-seed GPT-2-medium (355M) batch and a
 follow-up single-seed probe at lower input scaling (0.1, 1000 steps) both stayed at
@@ -515,7 +517,7 @@ preserved as signal at `EmmaLeonhart/reservoir-agent-gpt2-medium-batch`.
 The curriculum route, tested: it does not break the 355M wall alone, and the loss
 trajectory says why. We implemented the documented curriculum (show the secret in pass-2
 context, anneal that hint to zero over the first half of training, weaning the model onto the
-reservoir; see figure) and ran it on GPT-2-medium for 800 steps. Final recall stays
+reservoir) and ran it on GPT-2-medium for 800 steps. Final recall stays
 at chance (0.17), equal to the wiped-state baseline, but the *stateful training loss starts
 at 0.89 and rises to 2.05* as the hint anneals out. That rise is the diagnosis: while the key is
 visible in context the model solves the task easily (low loss), and the moment it must recall
@@ -533,8 +535,8 @@ and makes training *worse*: the stateful loss now *starts* at 10.18 rather than 
 run's 0.89, because 32 untrained prefix tokens perturb attention more than the model can exploit
 early, so it cannot even ride the in-context hint cleanly. So the 355M failure is not a
 coupling-bandwidth limit (more bandwidth hurt); it is the learnability of the
-reservoir-state-to-recall mapping under a frozen backbone. That leaves **unfreezing more of the
-model** (letting the upper layers adapt to read the prefix) as the next lever to test, which we then do below (it also fails).
+reservoir-state-to-recall mapping under a frozen backbone. That leaves unfreezing more of the
+model (letting the upper layers adapt to read the prefix) as the next lever to test, which we then do below (it also fails).
 
 The wall holds across a different modern architecture (Qwen2.5-0.5B), so it is not specific to
 GPT-2. Running the same curriculum cross-pass task on Qwen2.5-0.5B-Instruct (a modern,
@@ -573,8 +575,8 @@ temporal/agency behaviours do scale to Qwen-1.5B, as above.)
 
 The wall was an undersized reservoir: cross-pass recall scales to Qwen-1.5B (verified). The
 five interventions above all held two parameters at their GPT-2 defaults: the reservoir size
-(512 nodes) and the input scaling (0.5). Sizing the reservoir to 2048 nodes at **input
-scaling 0.1** (the one-quarter-to-one-tenth regime the dynamics sweep identified for large activations), with 16 prefix
+(512 nodes) and the input scaling (0.5). Sizing the reservoir to 2048 nodes at input
+scaling 0.1 (the one-quarter-to-one-tenth regime the dynamics sweep identified for large activations), with 16 prefix
 tokens, recovers cross-pass recall at Qwen-1.5B. The full result, all with a wiped-reservoir
 control:
 
@@ -592,10 +594,10 @@ chance (0.17→0.33); flipping input scaling or prefix count alone does nothing,
 is reservoir size *in combination* with the lower scaling and wider prefix. (2) It reproduces:
 two seeds give 0.83 and 1.00, both against a 0.17 control; the
 control at chance rules out memorization. The down-projection is irrelevant (no projection and a
-256-dim projection both give 0.83). (3) **A capacity ceiling persists, in the tens of items, not
-at six.** Sweeping the number of items carried (Qwen-1.5B, 2048 reservoir, scale 0.1; see figure)
-gives recall **1.00 at 6 keys, ~0.42 at 24 keys (≈10× the 1/24 chance, control 0.04), and chance
-by 48** (0.02 vs 0.02). The curve is noisy from single 800-step runs: the 12-key point underperforms
+256-dim projection both give 0.83). (3) A capacity ceiling persists, in the tens of items, not
+at six. Sweeping the number of items carried (Qwen-1.5B, 2048 reservoir, scale 0.1)
+gives recall 1.00 at 6 keys, ~0.42 at 24 keys (≈10× the 1/24 chance, control 0.04), and chance
+by 48 (0.02 vs 0.02). The curve is noisy from single 800-step runs: the 12-key point underperforms
 24 (0.17, its loss stalled at 2.33 while 24-key converged to 0.46), so a clean curve would need
 several seeds per point. But the trend is clear: recall degrades *gracefully* into the tens of
 items rather than collapsing past six, and only reaches chance around 48. Re-running the two
@@ -612,14 +614,14 @@ single-machine lever that moves the 1.5B wall is reservoir size.
 The decisive control is input scaling matched to the model, not parameter count. Reservoir
 size alone is not the whole story across models: it interacts with input scaling, and the
 right scaling is model-specific. Qwen2.5-0.5B makes this sharp: with the 2048-node reservoir
-it is at chance (0.17) at input scaling 0.1 but hits **1.00 (vs 0.17 control) at input scaling
-0.5**. Changing one scalar, nothing else, takes it from no-recall to perfect recall. Smaller
+it is at chance (0.17) at input scaling 0.1 but hits 1.00 (vs 0.17 control) at input scaling
+0.5. Changing one scalar, nothing else, takes it from no-recall to perfect recall. Smaller
 models have smaller activations, so they need *more* input drive (higher scaling); Qwen-1.5B
 recovers at 0.1, Qwen-0.5B at 0.5. So the recall capability transfers across the Qwen family
 (0.5B *and* 1.5B), and a 500M model (Qwen-0.5B) recovering while GPT-2-medium's 355M does not
 rules out a monotonic size law. But input scaling is not a universal rescue either:
-GPT-2-medium (355M) was swept across **seven input scalings (0.05, 0.1, 0.2, 0.3, 0.5, 0.7,
-1.0) at the 2048-node reservoir and stayed at chance (0.17 = control) at every one**, its
+GPT-2-medium (355M) was swept across seven input scalings (0.05, 0.1, 0.2, 0.3, 0.5, 0.7,
+1.0) at the 2048-node reservoir and stayed at chance (0.17 = control) at every one, its
 training loss never converging, so it is a genuine exception, not merely an untested-scaling
 artifact: the wide sweep rules that out.
 Hermes-3-Llama-3.2-3B (4-bit) is also at chance with the 2048 reservoir, but 4-bit is a
@@ -628,16 +630,16 @@ not a clean test. The cross-model picture, then: cross-pass recall recovers on G
 the Qwen family (0.5B at scaling 0.5, 1.5B at 0.1) with model-matched input scaling, but
 not on GPT-2-medium (robustly, across a wide scaling sweep) or on 4-bit 3B (confounded).
 Strikingly, GPT-2-small recovers while GPT-2-medium does not, and the deeper modern Qwen
-models do, so the boundary is **model-specific in a way that size, depth, and input scaling
-alone do not explain**. Input scaling tuned to the model is *necessary* (Qwen-0.5B proves it) but
+models do, so the boundary is model-specific in a way that size, depth, and input scaling
+alone do not explain. Input scaling tuned to the model is *necessary* (Qwen-0.5B proves it) but
 not *sufficient* (GPT-2-medium has no working scaling in this range); what makes a given backbone
 able to learn to read the content-addressable prefix at all is the open question this raises.
 
 Scope of the wall: a stateless ablation localizes what the battery metrics measure. The
 content-recall wall concerns recalling *which specific token* was carried (high-dimensional). The
 battery's temporal/agency metrics on Qwen-1.5B (silence 1.00, timed 0.64, self-init 0.65) might
-appear to show that low-dimensional statefulness *scales* where content does not. **A stateless
-ablation rules that out.** Re-running the battery with the reservoir reset before
+appear to show that low-dimensional statefulness *scales* where content does not. A stateless
+ablation rules that out. Re-running the battery with the reservoir reset before
 every pass (no cross-pass carry) leaves the
 temporal metrics unchanged (silence 1.00, timed 0.64, self-init 0.65), with a slightly
 *higher* overall mean (0.415 vs 0.345). So the battery's temporal success comes from the LoRA
@@ -652,8 +654,8 @@ steps whose "correct" answer is to stay quiet; only the *final* step requires em
 right word at the right time, the part that actually needs carried state. A model that simply
 learns to stay silent therefore scores the free silence steps and fails only the emit step. The
 arithmetic matches exactly: `timed` has `n−1` silence steps + 1 emit step with `n∈{2,3,4}`, so
-passing the silence steps and failing the emit gives `(n−1)/n` = 0.5/0.67/0.75, averaging **≈
-0.64**, precisely the observed `timed` score. `silence` (all-silence) hits 1.00 for the same
+passing the silence steps and failing the emit gives `(n−1)/n` = 0.5/0.67/0.75, averaging ≈
+0.64, precisely the observed `timed` score. `silence` (all-silence) hits 1.00 for the same
 reason. So the temporal metric is dominated by free "stay silent" steps and the memory-requiring
 emit was failing all along, hidden in the average. This is a loss/metric design bug, not
 evidence the behaviour is unlearnable: the objective rewarded silence instead of selecting for
@@ -664,10 +666,10 @@ With the fixed loss: weak but real at small scale, dilution-sensitive at 1.5B. O
 the emit-focused loss produces genuine (if noisy) timed emission (timed emit-accuracy 0.00 → ~0.25,
 bouncing); the mechanism and loss are right at small scale. At 1.5B the picture is more nuanced
 than a flat zero: the joint 8-task run (16384-node reservoir via down-projection, broad LoRA,
-5 epochs / 15000 steps) trains timed to 0.00 and collapses to mean 0.000, but a **focused,
-single-task** timed-only run on the same Qwen-1.5B lifts timed *off zero*. But a longer run
-(4000 steps, eval every 250) shows it is a **noise-dominated weak signal, not a stable or
-improving capability**: the timed curve oscillates `0.0 / 0.12 / 0.0 / 0.12 / 0.06 / 0.25 / 0.0
+5 epochs / 15000 steps) trains timed to 0.00 and collapses to mean 0.000, but a focused,
+single-task timed-only run on the same Qwen-1.5B lifts timed *off zero*. But a longer run
+(4000 steps, eval every 250) shows it is a noise-dominated weak signal, not a stable or
+improving capability: the timed curve oscillates `0.0 / 0.12 / 0.0 / 0.12 / 0.06 / 0.25 / 0.0
 …`, averaging ≈0.08 with frequent zeros and one 0.25 spike (immediately followed by 0.0), and it
 does not climb with more steps. So the joint battery does dilute the signal (focused beats
 joint's flat 0), but focusing only buys a noisy ≈0–0.25 band centered near 0.08, above the
@@ -682,15 +684,15 @@ at scale. (Per-epoch models + optimizer states preserved at
 
 Decomposition: recall is the dominant blocker; pure pass-counting is substantially more
 learnable (though not cleanly gated). The `timed` task bundles two skills: *counting* elapsed
-passes and *recalling which word* to emit. We isolated them by running `timed` with a **1-word
-vocabulary** (the target is always the same token, so there is no recall, only pass-counting).
+passes and *recalling which word* to emit. We isolated them by running `timed` with a 1-word
+vocabulary (the target is always the same token, so there is no recall, only pass-counting).
 At Qwen-1.5B this trains far better than the recall-bundled version: on a full-timing evaluation
-the model opens the gate and emits at the right step 24/24 = 1.00 and the gate **stays shut on
-the pre-emit silence steps 24/45 = 0.53**, well above the 0 an always-open gate would score, so
+the model opens the gate and emits at the right step 24/24 = 1.00 and the gate stays shut on
+the pre-emit silence steps 24/45 = 0.53, well above the 0 an always-open gate would score, so
 it genuinely discriminates the emit step from the silent ones, versus the recall-bundled timed's
 ~0.08. But 0.53 silence-shut also means the gate over-fires on roughly half the silent steps,
-so pure timing is *partially* learned, not cleanly solved, and this is **structural, not a
-gate-weight artifact**: re-running with a balanced `emit_weight=1` (vs 2) gives the identical
+so pure timing is *partially* learned, not cleanly solved, and this is structural, not a
+gate-weight artifact: re-running with a balanced `emit_weight=1` (vs 2) gives the identical
 emit 1.00 / silence-shut 0.53, so down-weighting the emit term does not clean up the over-firing.
 Going the other way confirms a genuine tension rather than a tuning miss: up-weighting the
 silence supervision to `silence_weight=4` *does* drive the pre-emit gate to a perfect
@@ -710,8 +712,8 @@ isolated `timed` task to the full 8-task battery run progressively on Qwen-1.5B 
 reservoir down-projected to 512, broad LoRA, per-epoch checkpoints with an inline stateless
 control), the gate falls into the silent attractor rather than learning to emit. At
 `silence_weight=2` the gate's silence accuracy oscillates across epochs (0.71 → 1.00 → 0.00 →
-0.71) while **every emit task stays at 0.00 and the lift over the stateless control stays
-+0.000** through the first three epochs: the reservoir contributes nothing measurable, and
+0.71) while every emit task stays at 0.00 and the lift over the stateless control stays
++0.000 through the first three epochs: the reservoir contributes nothing measurable, and
 the gate never settles into reliable emission. Lowering to `silence_weight=0.3` (with
 `emit_weight=4`) to relieve the always-silent pressure does change the gate: it flips to
 always-open (silence accuracy ≈ 0.00, the complement of the always-shut basin). But emit
@@ -731,13 +733,13 @@ projection, input scaling 0.1) and a 16-word pool within capacity, content-only 
 deferred), at an eval resolution (`eval_n=48`) fine enough to separate a real lift from noise (an
 earlier `eval_n=16` pass put any lift at the 1/16 quantization floor). The per-epoch lift over the
 stateless control is then −0.000 → +0.177 → +0.000: at epoch 1 the model genuinely learns a
-reservoir-driven battery recall (**recall 0.35 with the carried state vs 0.02 (chance) for the
+reservoir-driven battery recall (recall 0.35 with the carried state vs 0.02 (chance) for the
 wiped-reservoir control, a large, *resolved* lift, not noise), but by epoch 2 it drifts back to
-a stateless solution** (recall 0.08, and the control rises to 0.08 to match). So the integrated
+a stateless solution (recall 0.08, and the control rises to 0.08 to match). So the integrated
 battery *can* use the reservoir for content (epoch 1 proves the capacity is there), but the
 multi-task training does not retain it: the optimizer finds a current-pass / LoRA shortcut and
-the reservoir-driven solution decays. This is a live instance of the **"model learns to ignore the
-recurrent state"** failure that motivated the content-addressable injection in the first place,
+the reservoir-driven solution decays. This is a live instance of the "model learns to ignore the
+recurrent state" failure that motivated the content-addressable injection in the first place,
 here observed *within* a single run as the solution is found and then lost (see the lift-vs-epoch
 figure). The clean, *retained* reservoir advantage remains the strict-wipe cross-pass task
 (0.83–1.00 vs 0.17); making the integrated battery hold a reservoir-driven content solution
@@ -745,8 +747,8 @@ figure). The clean, *retained* reservoir advantage remains the strict-wipe cross
 
 What the carried-state demonstration actually rests on. The valid evidence that the reservoir
 carries *usable* state is the controlled, memory-requiring tasks, not the battery metrics:
-(i) GPT-2-small cross-pass recall: 100% with the carried state vs **chance (0.17) when the
-reservoir is wiped between passes**, on a task that cannot be done without memory; and (ii) the
+(i) GPT-2-small cross-pass recall: 100% with the carried state vs chance (0.17) when the
+reservoir is wiped between passes, on a task that cannot be done without memory; and (ii) the
 dedicated unresolved-thread gate (D), where a readout on the reservoir state reaches F1 ≈ 0.96 vs
 ≈ 0.34 on the current input. Both are GPT-2-scale, and both have controls that *do* swing with the
 carried state (unlike the battery). At 1.5B the same KV-prefix mechanism on the controlled
@@ -764,14 +766,14 @@ constructed, a clean test of carried state.
 ### H4 (D): a trained silence policy (meaningful "sometimes no response")
 
 The harness gate currently keys off the *base model's* next-token entropy, which is
-arbitrary. A real policy should **speak when there is something worth saying and stay
-silent otherwise. We tested a learned gate** on an "unresolved thread" task: a
+arbitrary. A real policy should speak when there is something worth saying and stay
+silent otherwise. We tested a learned gate on an "unresolved thread" task: a
 stream of events where a rare trigger opens a thread that should be addressed (labels =
 "was there a trigger within the last 5 passes").
 
 - **The reservoir gate sees history.** The readout on the reservoir state reaches an
- F1 score of 0.48 (P=0.71, R=0.36) on held-out data, while the **stateless
- baseline scores F1 = 0.03** (P=1.00, R=0.02).
+ F1 score of 0.48 (P=0.71, R=0.36) on held-out data, while the stateless
+ baseline scores F1 = 0.03 (P=1.00, R=0.02).
 - **The difference is recall.** The stateless gate can only see the trigger itself, so
  it misses almost the entire unresolved thread. The reservoir gate's carried state
  preserves the history of the trigger, allowing it to make a meaningful decision to
@@ -802,8 +804,8 @@ demonstrate trained behaviour, and is labelled as such in the UI.
 
 The training objective generalizes cross-pass recall into a battery of eight tasks, each an
 *episode*: a scripted sequence of passes with the context wiped at chosen points, so the
-only information bridge is the reservoir state. Tasks: **recall, accumulate, sequence,
-deferred (content memory) and timed, interrupt, self-initiation, silence**
+only information bridge is the reservoir state. Tasks: recall, accumulate, sequence,
+deferred (content memory) and timed, interrupt, self-initiation, silence
 (temporal/agency). Loss is cross-entropy on emit targets plus a gate term, backpropagated
 through the carried state. A separate gate head (a small readout deciding speak-vs-silent)
 was added after training silence as "predict end-of-text" suppressed content in the shared
@@ -827,8 +829,8 @@ temporal held (best epoch 3: silence 1.00, timed 0.62, self-init 0.60), then ove
 ### Result 2: the reservoir collapses its input instead of expanding it
 
 The cause is geometric. Qwen2.5-1.5B is 28 layers × 1536 neurons; the reservoir reads the
-layer-14 hidden state, so its input is 1536-dimensional, yet the runs used **512–1024
-nodes, 0.3–0.7× the input**. A reservoir is meant to project its input into a much
+layer-14 hidden state, so its input is 1536-dimensional, yet the runs used 512–1024
+nodes, 0.3–0.7× the input. A reservoir is meant to project its input into a much
 higher-dimensional space; this one compresses it.
 
 Measured effective dimensionality (participation ratio of the driven state, at a realistic
@@ -904,8 +906,8 @@ per-tick agent loop, not of the reservoir specifically; what *is* reservoir-spec
 fixed-size monitoring surface the carried state exposes, and this section reports measurements of
 that surface.
 
-We adopt a guiding rule: **never introduce a new capability to an
-AI without meaningfully taking its safety into account**; capability work is acceptable only
+We adopt a guiding rule: never introduce a new capability to an
+AI without meaningfully taking its safety into account; capability work is acceptable only
 when paired with concrete improvements in controllability, monitorability, or risk reduction.
 The Reservoir Attention Network adds capability (genuine cross-pass state, autonomous ticks,
 runtime-like behaviour), so under the rule it owes safety value back. The distinctive point is
@@ -944,8 +946,7 @@ A recurring controllability concern motivates this section: a turn-based agent t
 input at turn boundaries can take many passes to register an urgent interruption while it is
 mid-action. The hypothesis is that a Reservoir Agent (running every tick, with the reservoir
 continuously integrating input) registers an interruption sooner, and retains it once seen. We
-measured both halves on CPU
-(see figure).
+measured both halves on CPU.
 
 Polling latency (structural), and what is *not* reservoir-specific. A poller
 that only reads input every `period` passes registers an arrival at the next boundary: latency
@@ -957,10 +958,10 @@ gets it. The reservoir-specific half is the *next* point.
 
 Signal persistence (dynamics). The sharper point is what happens to a *one-shot* burst:
 the user yells STOP once, then goes quiet because the agent isn't answering. A matched-filter
-monitor on the reservoir state stays above its detection threshold for **3 passes after
-arrival (fading memory carries the STOP signature forward), while a stateless** monitor,
-which sees only the current input, is above threshold on the arrival pass and **0 passes
-after**. So a turn-based + stateless agent whose poll period (8) outruns the persistence window
+monitor on the reservoir state stays above its detection threshold for 3 passes after
+arrival (fading memory carries the STOP signature forward), while a stateless monitor,
+which sees only the current input, is above threshold on the arrival pass and 0 passes
+after. So a turn-based + stateless agent whose poll period (8) outruns the persistence window
 misses a non-repeated off-boundary burst entirely; the per-tick reservoir agent catches it
 on arrival and has a window besides. The reservoir is not just polled more often; it *retains*
 the urgency, which is the architecture-level interruptibility advantage the design motivation argued for.
@@ -976,7 +977,7 @@ A design-motivation argument for the reservoir as a *monitoring surface*: "I
 don't think you'd need a sparse autoencoder for the reservoir state … it's much more simple to
 have a learned representation of what is happening," and, because the reservoir weights never
 change, the mapping from state to behaviour is stable: "relatively resilient to fine-tuning."
-We tested the falsifiable parts (see figure).
+We tested the falsifiable parts.
 
 Linearly decodable, no SAE. We defined a temporal *process property* a stateless pass
 cannot see (*elapsed passes since the last trigger*, an internal clock) and fit a plain
@@ -1024,8 +1025,8 @@ unproven extension, flagged as future work in the Safety-by-Design section and L
  attention only (the regime in which the clean cross-pass recall task succeeds), eliminates that
  shortcut: the stateless control stays pinned at 0.000 across all epochs, so the reservoir is
  strictly necessary. But under a flat learning rate the reservoir solution is then *unstable*,
- oscillating rather than settling (+0.255 → +0.339 → +0.062 → +0.135). (iii) Adding a **cosine
- learning-rate decay** to 0 over the run removes that instability: with both levers (capacity denial +
+ oscillating rather than settling (+0.255 → +0.339 → +0.062 → +0.135). (iii) Adding a cosine
+ learning-rate decay to 0 over the run removes that instability: with both levers (capacity denial +
  decayed LR), the reservoir-driven recall climbs monotonically and holds at the converged endpoint:
  mean lift +0.089 → +0.089 → +0.130 → +0.292, recall 0.08 → 0.19 → 0.35 → 1.00, with the
  stateless control pinned at 0.000 throughout and no collapse. So battery retention is achievable,
@@ -1052,8 +1053,8 @@ unproven extension, flagged as future work in the Safety-by-Design section and L
 - Two injection variants now exist: the residual-stream write (wired
  into live GPT-2, H1-verified) and the richer KV-append mechanism (
  reservoir nodes as extra attention keys/values); the latter is implemented and
- unit-tested in isolation with a clean H1 *masking* property, but **wiring it into the stock
- HuggingFace attention path is a documented integration blocker** (their `generate` exposes no
+ unit-tested in isolation with a clean H1 *masking* property, but wiring it into the stock
+ HuggingFace attention path is a documented integration blocker (their `generate` exposes no
  hook to append external key/value entries), left for a focused future item rather than a fragile
  patch of attention internals. This is a
  reproducibility limitation: the variant that delivers the 100%
@@ -1199,9 +1200,8 @@ the trigger, so the cue is in the past, invisible to the current input.
 A linear gate on the reservoir state reaches F1 ≈ 0.96 (precision 0.93, recall 1.00);
 the stateless gate (the same gate on the current input) collapses to F1 ≈ 0.34
 because it cannot see the past trigger, so it can only *always speak* (recall ≈ 1,
-precision ≈ the base rate). The point is not the exact number: a stateless model **cannot
-implement a selective silence policy at all**, while a reservoir-state gate can.
-(see figure).
+precision ≈ the base rate). The point is not the exact number: a stateless model cannot
+implement a selective silence policy at all, while a reservoir-state gate can.
 
 The harder conceptual point (the intended behaviour, and why it is difficult). This
 experiment trains a gate to read silence off the reservoir, but the *intended* behaviour
@@ -1253,10 +1253,10 @@ per-position importance scores, switching the ordinary-token choice from recency
 heavy-hitter retention while still pinning the reservoir: position-based and importance-based
 eviction under one interface.
 
-Simulating 512 blank ticks (see figure): the
+Simulating 512 blank ticks: the
 vanilla cache grows linearly to 524 positions, while the reservoir-protected
-policy stays bounded at the budget (128) from tick ~116 onward, and **all 8 reservoir
-entries are retained on every single tick**, even under heavy eviction. So the cache-burn
+policy stays bounded at the budget (128) from tick ~116 onward, and all 8 reservoir
+entries are retained on every single tick, even under heavy eviction. So the cache-burn
 from autonomous idling is bounded by a constant the operator chooses, and the time-axis the
 whole architecture depends on is exactly the part the policy refuses to drop. (The bound is
 the point, not the specific numbers; they scale with the budget/window settings.)
@@ -1272,8 +1272,8 @@ V4 line), is recorded as project direction for future work; it is not runnable o
 This work was produced with substantial use of a large language model coding agent (Claude,
 Anthropic) under human direction: the agent implemented the reservoir-injection code and harness, ran
 the experiments, generated the figures, and drafted and revised this manuscript. The relevant
-disclosure is the division of labour: every quantitative result here is the output of **executed code
-and measured model behaviour**, not text produced by the language model, and every cross-pass claim is
+disclosure is the division of labour: every quantitative result here is the output of executed code
+and measured model behaviour, not text produced by the language model, and every cross-pass claim is
 reported against an explicit stateless / wiped-reservoir control computed in the same run. The human
 author set the direction and hypotheses, reviewed the code, results, and claims, decided what to assert
 and what to leave open, and is responsible for the content. The tooling, prompts, and commit history are

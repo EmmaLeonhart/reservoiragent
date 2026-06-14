@@ -2724,3 +2724,20 @@ probe, battery negatives, scaling inconsistency, speculative safety, no complexi
 inherent to a small-scale feasibility study and are already stated plainly in the paper; not
 fixable by editing without misrepresenting the scope. FINDINGS-only (site has no such phrasings).
 Pandoc clean; zero em-dashes.
+
+## 2026-06-14 — Fold clawRxiv 2780: dangling figure refs, date phrasing, finish de-bold
+
+2780 (Reject; the AI ratings are noisy, bouncing Reject/Weak-Reject) named two concrete issues:
+- **Dangling "(see figure)" pointers** ("placeholders never provided"). With the figures now in an
+  appendix, the 14 inline "(see figure)" parentheticals dangled (and several pointed to website-only
+  plots not in the PDF at all). Removed them all and added one pointer at the top of Results:
+  "Figures supporting the results are collected in Appendix: Figures." The body already reports every
+  number, so nothing substantive is lost.
+- **"2024-2026 landscape"** flagged as an odd temporal reference -> "the recent landscape".
+While fixing the "(see figure)" near these spans, found that the first de-bold pass had missed
+multi-line / mid-sentence emphatic bolds (their `**` wrapped across lines). A robust full-text
+de-bold removed 48 such emphatic spans (e.g. "100% cross-context recall...", "reservoir 'selection'
+is not a real signal") while keeping the 34 list-item run-in headings -- completing the option-(a)
+de-bold the user approved. Also fixed a double period and one stray mid-sentence bold.
+FINDINGS-only (site shows figures inline, has no "(see figure)" or "2024-2026"). Pandoc parses
+clean (34 \textbf); zero em-dashes.
