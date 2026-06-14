@@ -85,23 +85,6 @@ only true gate. **Verify each substantive claim against `results/` before applyi
 blindly accept reviewer framing** (the "abstract contradicts Appendix A" item is a disambiguation,
 NOT a false scaling claim; the probe scaling is real).
 
-**A. Blockers (figures + correctness):**
-- **Self-contained figures.** Confirm the built `docs/report.pdf` embeds every figure; remove/soften
-  the "All figures referenced below are in the accompanying report: https://reservoir.emmaleonhart.com"
-  lines (FINDINGS.md:267-268, :1330) so an arXiv reader is never sent off-site. (Meta, DeepSeek, Grok)
-- **Disambiguate the two "recall" measurements.** Make the abstract/§1 explicit that the secret-word
-  recall *probe* scales to Qwen-1.5B (0.83-1.00 vs 0.17 control) while the 8-task battery's *symbolic
-  content* recall stays at floor except under the deny-capacity+decay-LR recipe — different tasks, so
-  it does not contradict Appendix A. (Gemini, DeepSeek, Perplexity, ChatGPT)
-- **Harmonize the reservoir update equations.** §4 (~line 114) plain form vs §6 (~line 229) leaky-
-  integrator with leak rate `a` undefined earlier — introduce the leak-rate form where it first
-  appears. (Gemini)
-- **Typo `np8` → `n_prefix=8`** (FINDINGS.md:571 table). (Grok)
-- **Verify the Block-Recurrent Transformer quote** is exact; soften to "documents a failure mode
-  where…" if paraphrased. (Meta, ChatGPT)
-- **Spot-check the three 2025 arXiv citations** (2507.02917, 2509.24122, 2508.18130) for
-  publication/revision status. (Claude)
-
 **B. Substantive framing (high consensus):**
 - **Tone down overclaiming** in title/abstract/intro: feasibility study of a *mechanism*, not a
   general persistent-agency architecture; surface GPT-2-medium + Hermes-3B failures up front. (Perplexity, ChatGPT, Gemini)

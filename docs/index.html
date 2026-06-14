@@ -189,13 +189,15 @@
   factor is <em>how</em> the reservoir is injected (additive &rarr; ignored;
   content-addressable &rarr; 100% recall, with a wiped-state control). And it <strong>scales</strong>:
   the earlier "GPT-2-small only" wall was an <em>undersized reservoir at the wrong input scaling</em>.
-  Sizing it to 2048 nodes and matching the input scaling to the model recovers cross-pass recall across
-  the <strong>Qwen family</strong>: Qwen-1.5B at scaling 0.1 (0.83&ndash;1.00 vs 0.17 control, reproduced
+  Sizing it to 2048 nodes and matching the input scaling to the model recovers cross-pass recall on the
+  <strong>secret-word probe</strong> across the <strong>Qwen family</strong>: Qwen-1.5B at scaling 0.1 (0.83&ndash;1.00 vs 0.17 control, reproduced
   across two seeds) and Qwen-0.5B at scaling 0.5 (<strong>1.00 vs 0.17</strong>). Input scaling is the
   decisive knob (Qwen-0.5B goes 0.17&rarr;1.00 by changing that one scalar), so a 500M model
   recovers while GPT-2-medium's 355M (at the two scalings tried) does not: <strong>not a size law</strong>.
   A capacity ceiling persists but in the tens of items (recall 1.00 at 6 keys, ~0.42 at 24, chance by 48), and the separate 8-task
-  battery's temporal scores are <em>not</em> reservoir-driven (a stateless ablation matches them). The
+  battery's temporal scores are <em>not</em> reservoir-driven (a stateless ablation matches them), and
+  its <em>symbolic content</em> recall is a separate, harder measurement that stays at the floor at 1.5B
+  except under the retention recipe (not to be conflated with the secret-word probe recall above). The
   contribution is the injection-design result plus this scaling result.
 </p>
 

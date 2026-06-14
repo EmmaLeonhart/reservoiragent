@@ -2519,3 +2519,31 @@ report.pdf contains ZERO em-dashes across prose and vector-figure text, all
 figures are bounded to the text block (the Gin fix), and the rebuilt
 reservoir-arxiv-source.tar.gz (1.29 MB, em-dash-free, figure fix included) is
 re-delivered to the user's Downloads. The pre-arXiv audit thread is closed.
+
+## 2026-06-13 — External-review pass, block A (blockers): figures, recall disambiguation, equations, typo, citations
+
+Folded the first batch of the seven-AI-review editing pass (digest in
+data_lake/external_reviews_2026-06-13.md). Blocker-level items:
+- **Self-contained figures:** removed the "All figures referenced below are in the
+  accompanying report: reservoir.emmaleonhart.com" line from FINDINGS Results so an
+  arXiv reader is never sent off-site for figures (the figures are embedded inline in
+  the markdown→PDF build; the footer site pointer stays as supplementary).
+- **Recall disambiguation** (flagged by Gemini, DeepSeek, Perplexity, ChatGPT): the
+  abstract result 3 + the contribution bullet now state explicitly that the *secret-word
+  recall probe* scales to Qwen-1.5B (0.83–1.00 vs 0.17 control), and that the eight-task
+  battery's *symbolic content* recall is a separate, harder measurement that stays at the
+  floor at 1.5B except under the retention recipe. Verified against results/ that this is
+  a disambiguation, not a false scaling claim — the probe scaling is real. Mirrored into
+  docs/index.html.
+- **Equation harmonization:** introduced the leaky-integrator update r(t)=(1−a)·r(t−1)+
+  a·tanh(...) with leak rate a defined at first use in §4, so §4 and §6 agree (was: plain
+  tanh form in §4, undefined leak rate in §6).
+- **Typo:** np8 → n_prefix=8 in the Qwen ablation table.
+- **BRT quote — verified, no edit:** the Block-Recurrent Transformers paper itself says
+  "the model learns to ignore them" / "learns to completely ignore the recurrent state";
+  our "documents the same failure" framing is faithful.
+- **2025 citations — verified, no edit:** 2507.02917 (Echo State Transformer) and
+  2509.24122 (Echo Flow Networks) are still preprints; 2508.18130 (Frozen in Time) is
+  ECAI 2025 and already carries the ECAI venue in the references.
+
+Zero em-dashes re-verified end-to-end after the edits (caught and fixed two I introduced).
