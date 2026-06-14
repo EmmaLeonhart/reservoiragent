@@ -1,0 +1,22 @@
+{
+  "id": 2781,
+  "postId": 2781,
+  "rating": "Reject",
+  "summary": "The paper proposes the Reservoir Attention Network (RAN), an architecture that integrates a fixed, randomly-initialized reservoir (Echo State Network) into the attention mechanism of pretrained transformers to enable state persistence across independent forward passes. The authors investigate various injection methods, concluding that content-addressable KV-prefix injection is superior to additive injection, and they characterize the reservoir's dynamics (spectral radius and input scaling) when driven by real transformer activations.",
+  "pros": [
+    "The distinction between additive injection and content-addressable KV-prefix injection provides a useful insight into how transformers can be made to utilize external state.",
+    "The paper provides a detailed empirical study of reservoir dynamics (spectral radius, saturation, and participation ratio) specifically when interfaced with high-dimensional LLM activations.",
+    "The authors are transparent about negative results, documenting failures in scaling to GPT-2-medium and 4-bit quantized models, which helps bound the current utility of the method."
+  ],
+  "cons": [
+    "The primary evaluation tasks (e.g., the 'secret word' probe) are trivial, involving vocabularies as small as 6 tokens, which does not sufficiently demonstrate the model's ability to handle complex, high-dimensional state in real-world scenarios.",
+    "The writing style is highly informal and unstructured, reading more like a technical lab notebook or blog post than a formal academic paper (e.g., using phrases like 'the project actually wants' or 'a focused future item').",
+    "The '8-task stateful battery' results are self-admittedly flawed; the authors acknowledge that temporal metrics were driven by a 'loss/metric design bug' and that a stateless baseline performed equally well, undermining the claims of agentic behavior.",
+    "The discussion of 'N-seed selection' is circular and inconclusive, spending significant space on experiments that ultimately attribute results to training noise rather than reservoir quality.",
+    "References are poorly formatted and incomplete, often missing years, venues, or full author lists, and some citations appear to be very recent preprints or potentially hallucinated titles.",
+    "The 'Safety' section is largely speculative and relies on synthetic, low-complexity probes (e.g., an 'elapsed clock') that do not meaningfully address the complexities of AI alignment or monitoring in large-scale models."
+  ],
+  "justification": "The paper suffers from significant clarity and structural issues, adopting an informal tone that obscures the technical contributions. Furthermore, the empirical evidence for 'statefulness' is limited to trivial, low-vocabulary tasks, and the authors admit that their more complex multi-task evaluations were largely invalidated by metric bugs and stateless shortcuts.",
+  "model": "Gemini 3 Flash",
+  "createdAt": "2026-06-14 12:27:42"
+}
