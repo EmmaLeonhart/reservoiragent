@@ -73,6 +73,28 @@ arXiv endorsement and Discord/community outreach.
 
 ---
 
+## Paper — two internal contradictions found in a 2026-06-21 review (need Emma's run data)
+
+These are real and need the author's call against the actual experiment output; do
+NOT guess the numbers (hard rule: real numbers only).
+
+1. **Gate-D (unresolved-thread) F1 is reported two different ways.** `FINDINGS.md`
+   line ~752 (summary) and lines ~1199-1201 (Appendix E) say reservoir **F1 ≈ 0.96
+   (P=0.93, R=1.00)** vs stateless **≈ 0.34** (stateless = "always speak", recall≈1).
+   But the main result section lines ~773-775 say reservoir **F1 = 0.48 (P=0.71,
+   R=0.36)** vs stateless **F1 = 0.03 (P=1.00, R=0.02)** (stateless = misses the
+   thread, recall≈0). Same experiment, but they disagree on both the reservoir number
+   AND the stateless behavior. Resolve to the real run output and make all three
+   locations agree. Results are gitignored, so the canonical numbers aren't in the
+   repo — re-run or read the run log.
+2. **KV-append vs KV-prefix terminology contradicts itself.** Line ~450 says "we use
+   KV-append and KV-prefix interchangeably for the same injection," but lines ~104,
+   ~1054, and ~1132 (Appendix A "not done") treat **KV-append** as a *distinct,
+   not-done* richer variant (true KV-cache append, which HF `generate` won't expose a
+   hook for) vs the **KV-prefix** path that was actually run. Pick one usage: either
+   they're the same (then drop the "KV-append not done" bullet at line ~1132), or
+   they're distinct (then fix line ~450 and use the names consistently throughout).
+
 ## Always last — restart the three crons and summarize
 
 **These two items stay pinned to the tail of the queue at all times.** They are the closing half of the three-cron lifecycle in `CLAUDE.md` § "Autonomous productivity loop":

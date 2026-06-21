@@ -67,7 +67,7 @@
   <g stroke="#c0392b" stroke-width="2.6" fill="none" marker-end="url(#ran-out)">
     <path d="M560,205 C520,180 500,185 482,189"/>
   </g>
-  <text x="540" y="158" text-anchor="middle" font-size="12.5" fill="#c0392b" font-style="italic">write as prefix (W_out, trained)</text>
+  <text x="540" y="140" text-anchor="middle" font-size="12.5" fill="#c0392b" font-style="italic">write as prefix (W_out, trained)</text>
 
   <!-- carried state across passes -->
   <g stroke="#7d5ba6" stroke-width="3" fill="none" marker-end="url(#ran-carry)" stroke-dasharray="2 0">

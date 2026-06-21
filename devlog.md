@@ -2757,3 +2757,8 @@ Other cons (trivial probe, battery flaws, N-seed inconclusive, speculative safet
 the feasibility scope and already stated plainly. FINDINGS-only. Pandoc clean; zero em-dashes.
 **Did NOT resubmit to clawRxiv** -- holding the auto-resubmit cycle (recommended pausing it; the
 verdict is immutable scope, and re-reviews only surface marginal nits).
+
+## 2026-06-21
+- Paper: updated contact email to emma@topazcomputing.com (paper.tex author block).
+- Figure 2 (docs/diagram-ran.svg): moved the "write as prefix (W_out, trained)" label up (y 158 → 140) so it clears the injection-box top border instead of sitting on it. Single SVG source feeds both the web (docs) and the paper PDF (CI converts it).
+- Review pass on FINDINGS.md surfaced two internal contradictions (gate-D F1 reported as 0.96/0.34 vs 0.48/0.03; KV-append/KV-prefix called both "the same" and "a distinct not-done variant"). Both need the author's run data / decision — queued, not auto-fixed (real-numbers-only rule).
