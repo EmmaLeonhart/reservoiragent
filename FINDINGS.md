@@ -100,11 +100,13 @@ To be explicit about the boundary of the claims:
  limitations, stated as such.** The cross-pass recall result holds at GPT-2-small and across the
  Qwen family (0.5B, 1.5B) with model-matched input scaling, but not at GPT-2-medium (chance
  across a seven-point scaling sweep) or 4-bit Hermes-3B (injection verified as correctly wired but
- non-converging; 4-bit is a confound and a clean bf16 3B test does not fit this GPU). The most effective
- injection variant (KV-append) is a standard key/value prefix, but HuggingFace's
- `generate` does not expose a hook for appending external KV entries, so our results use a
- bespoke forward loop; this is an integration constraint, not a difference in method, and
- the implementation is open. Neither limitation is hidden; both bound the contribution.
+ non-converging; 4-bit is a confound and a clean bf16 3B test does not fit this GPU). The injection
+ variant that runs (KV-prefix) prepends the reservoir state as attendable pseudo-tokens; the richer
+ strict mid-layer KV-append (appending reservoir rows directly into a layer's K/V) is not wired into
+ the live model because HuggingFace's `generate` exposes no hook for appending external KV entries, so
+ our results use a bespoke forward loop with the KV-prefix path; this is an integration constraint, not
+ a difference in the conclusion, and the implementation is open. Neither limitation is hidden; both
+ bound the contribution.
 - **The contribution is the injection-design finding.** What this study *does*
  establish, decisively and reproducibly on GPT-2, is that how the reservoir is
  injected is the deciding factor: additive injection is ignored (chance recall), while
@@ -447,10 +449,14 @@ finding.
  recurrent state" failure mode, reproduced. A single pooled additive bias cannot carry
  *which specific word* appeared.
 
-- *Terminology:* we use KV-append and KV-prefix interchangeably for the same
- injection: the reservoir state is appended to the attention key/value cache as a
- content-addressable prefix that the upper layers query.
-- **Content-addressable (KV-append) injection → works, decisively.** When instead the
+- *Terminology:* the variant that runs here is **KV-prefix** — the reservoir state is
+ projected into a handful of prefix pseudo-tokens prepended to the sequence, which the
+ model attends to content-addressably at every layer. This is distinct from a strict
+ mid-layer **KV-append** (appending reservoir-derived key/value rows directly into a
+ layer's K/V tensors), which is implemented and unit-tested in isolation but *not* wired
+ into the live model — HuggingFace `generate` exposes no hook for it (see Appendix A).
+ The cross-pass recall results below come from the KV-prefix path.
+- **Content-addressable (KV-prefix) injection → works, decisively.** When instead the
  reservoir state is projected into prefix pseudo-tokens the model can attend to
  (the KV-prefix path), the stateful model reaches 100% cross-context recall
  (loss → 0.02) while the stateless baseline stays at chance (0.17). The carried
@@ -772,12 +778,15 @@ stream of events where a rare trigger opens a thread that should be addressed (l
 "was there a trigger within the last 5 passes").
 
 - **The reservoir gate sees history.** The readout on the reservoir state reaches an
- F1 score of 0.48 (P=0.71, R=0.36) on held-out data, while the stateless
- baseline scores F1 = 0.03 (P=1.00, R=0.02).
-- **The difference is recall.** The stateless gate can only see the trigger itself, so
- it misses almost the entire unresolved thread. The reservoir gate's carried state
- preserves the history of the trigger, allowing it to make a meaningful decision to
- keep speaking after the input has returned to baseline.
+ F1 score of 0.96 (P=0.93, R=1.00) on held-out data, while the stateless
+ baseline scores F1 = 0.34 (P=0.20, R=0.97). The pattern is stable across seeds
+ 0–2 (reservoir F1 0.96–0.99, stateless F1 0.34–0.45; canonical config K=300,
+ T=4000, speak-window=5, ρ=0.9, input-scaling=0.5, seed 0).
+- **The difference is precision.** The stateless gate can only see the current input,
+ not the past trigger, so it cannot tell when a thread is open; it degenerates to
+ speaking almost everywhere (recall ≈ 1, precision ≈ the base rate). The reservoir
+ gate's carried state preserves the history of the trigger, letting it speak
+ selectively during the unresolved thread and fall silent once it is resolved.
 
 
 
@@ -1050,14 +1059,16 @@ unproven extension, flagged as future work in the Safety-by-Design section and L
  the capacity (larger/structured reservoirs, or learned recurrence) is separate future work.
 - Small-scale only in this study; the agentic claims (H3/H4) and the full runtime are
  out of scope and compute-limited.
-- Two injection variants now exist: the residual-stream write (wired
- into live GPT-2, H1-verified) and the richer KV-append mechanism (
- reservoir nodes as extra attention keys/values); the latter is implemented and
- unit-tested in isolation with a clean H1 *masking* property, but wiring it into the stock
- HuggingFace attention path is a documented integration blocker (their `generate` exposes no
- hook to append external key/value entries), left as future work rather than a fragile
- patch of attention internals. This is a
- reproducibility limitation: the variant that delivers the 100%
+- Three injection paths now exist: the additive **residual-stream write** (wired
+ into live GPT-2, H1-verified, but ignored — chance recall); the **KV-prefix** path
+ actually run for the recall results (reservoir state projected into attendable prefix
+ pseudo-tokens via `inputs_embeds`); and the richer strict mid-layer **KV-append**
+ (reservoir nodes appended as extra attention keys/values inside a layer). The strict
+ KV-append variant is implemented and unit-tested in isolation with a clean H1 *masking*
+ property, but wiring it into the stock HuggingFace attention path is a documented
+ integration blocker (their `generate` exposes no hook to append external key/value
+ entries), left as future work rather than a fragile patch of attention internals. This
+ is a reproducibility limitation: the KV-prefix variant that delivers the 100%
  recall result runs through a bespoke path, not stock HF attention, so
  reproducing it requires that path rather than a standard `transformers` model.
 - Input scaling for real-activation injection has now been characterized (sweet
@@ -1129,8 +1140,9 @@ Not done (compute-limited):
  pipeline or benchmark suite here; only the *dynamics* proxy was run.
 - A productionized always-alive runtime (pass scheduler, idle timer, output
  confidence gate): only the two-pass state-carry was demonstrated.
-- The KV-append injection (reservoir nodes as extra keys/values the upper layers
- attend to) and agent-scale (Hermes) models: beyond local compute here.
+- The strict mid-layer KV-append injection (reservoir rows appended directly into a
+ layer's keys/values the upper layers attend to) and agent-scale (Hermes) models:
+ beyond local compute here.
 
 ### Appendix B. The Always-Alive Runtime
 

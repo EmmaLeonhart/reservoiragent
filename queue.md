@@ -16,12 +16,6 @@ model launches — regardless of what any queue or todo item says. If a tick is 
 refuse and redirect to arXiv prep. The goal: ship to arXiv quickly — verify data, replication package,
 AI-use declaration (all done), keep citations + coherence perfect, finalize packaging.
 
-> **ONE authorized exception (Emma, 2026-06-21):** the single `python scripts/run.py silence` run in
-> "Fix 1" below is permitted. It is a **correctness/verification re-run** to resolve a paper
-> contradiction (the gate-D F1 is printed two different ways), NOT new exploratory work — it launches no
-> new training and changes no claims, it just reproduces an existing reported number so the paper can be
-> made self-consistent. This exception covers ONLY that one command; everything else stays frozen.
-
 ## Current work — finish the last experiment, then arXiv prep
 
 - **#34 — DONE: retention WIN (folded).** Cosine LR + capacity denial retains reservoir-driven recall:
@@ -78,74 +72,6 @@ arXiv endorsement and Discord/community outreach.
   together; resubmit to clawRxiv when material; fold reviews as they arrive.
 
 ---
-
-## Paper — two internal contradictions found in a 2026-06-21 review (run in a separate session)
-
-Both are real. Hard rule: **real numbers only — do NOT guess the F1s; get them from
-an actual run.** Concrete test-and-fix steps below.
-
-### Fix 1 — Gate-D (unresolved-thread) F1 is reported two different ways
-
-**The conflict.** Same experiment, two disagreeing number sets in `FINDINGS.md`:
-- line ~752 (cross-pass summary) and lines ~1199-1201 (Appendix E): reservoir
-  **F1 ≈ 0.96 (P=0.93, R=1.00)** vs stateless **≈ 0.34**; stateless described as
-  *"always speak"* (recall ≈ 1).
-- lines ~773-775 (the main "unresolved thread" result section): reservoir
-  **F1 = 0.48 (P=0.71, R=0.36)** vs stateless **F1 = 0.03 (P=1.00, R=0.02)**;
-  stateless described as *missing the thread* (recall ≈ 0.02).
-
-They disagree on the reservoir number AND on the stateless baseline's behavior — two
-different runs pasted into different sections.
-
-**Steps (this is the ONE run authorized above; nothing else unfreezes):**
-1. Run the canonical config (it matches the paper text "within the last 5 passes"):
-   ```
-   python scripts/run.py silence
-   ```
-   Defaults (`scripts/run.py` ~789-796): `--K 300 --T 4000 --speak-window 5 --rho 0.9
-   --input-scaling 0.5 --seed 0`. Run it as-is.
-2. Read the authoritative numbers from the file it writes:
-   **`results/silence_gate.json`** (gitignored — that's why the number isn't in the
-   repo). Use `reservoir_gate` and `stateless_gate` → `precision`/`recall`/`f1`.
-3. (Optional, recommended) re-run with `--seed 1 --seed 2` (a few seeds); if the F1
-   moves, report mean ± range instead of one cherry-picked seed.
-4. Overwrite the numbers to match that run in **all** of: line ~752 (summary),
-   lines ~773-775 (main section), lines ~1199-1201 (Appendix E), and the
-   `docs/silence.png` caption + any figure-caption mention.
-5. Make the *stateless-baseline description* match the run: if real stateless
-   recall ≈ 1 → "always speaks"; if ≈ 0 → "misses the thread." Only one is true; the
-   two sections currently claim opposite failure modes. Note the seed/config in text.
-6. Rebuild check: the paper PDF builds from `FINDINGS.md` via `paper-pdf.yml`; just
-   commit + push and let CI rebuild. Delete this Fix-1 block from the queue and add a
-   `devlog.md` entry in the same commit.
-
-### Fix 2 — KV-append vs KV-prefix terminology (no run needed; code settles it)
-
-**The conflict.** Line ~450 says "we use KV-append and KV-prefix interchangeably for
-the same injection," but lines ~104, ~1054, and ~1132 (Appendix A "not done") treat
-**KV-append** as a distinct, *not-done* richer variant.
-
-**The source code already decides it** (no experiment): strict mid-layer KV-append is
-NOT implemented; the prefix path is what ran.
-- `src/reservoir/kv_inject.py:85` — "Wiring KV-append into a live HF GPT-2
-  (transformers 5.4) is deliberately NOT done this [way]" (no hook to append KV rows
-  to `key_states/value_states` mid-layer).
-- `src/reservoir/kv_live.py:9-14` — the path used is "project the reservoir state into
-  a handful of **prefix** [tokens]… not the strict mid-layer KV-append."
-
-So the "not done" bullets (104/1054/1132) are CORRECT; line ~450's "interchangeably /
-the same injection" is the wrong line.
-
-**Steps:**
-1. Rewrite line ~450: do NOT call them the same. State that the **strict mid-layer
-   KV-append** (reservoir rows appended to the layer's K/V) is not done — HF `generate`
-   exposes no hook for it — and the **KV-prefix** path (state → prefix pseudo-tokens)
-   is the robust equivalent that was actually run and yields the cross-pass recall.
-2. Audit every mention and use the two names consistently for those two distinct
-   things: lines ~52, ~99-111, ~427, ~450-455, ~1054-1058, ~1132.
-3. Keep the Appendix A "KV-append not done" bullet (it's correct).
-4. Commit + push (CI rebuilds the PDF); delete this Fix-2 block + add a `devlog.md`
-   entry in the same commit.
 
 ## Always last — restart the three crons and summarize
 

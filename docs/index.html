@@ -809,7 +809,7 @@
   model ignores it (stateful = stateless = chance, 0.17; the documented &ldquo;learns
   to ignore the recurrent state&rdquo; mode). But injected <strong>content-addressably</strong>,
   the reservoir state projected into prefix tokens the model can <em>attend</em> to
-  (the KV-append fix), the stateful model reaches <strong>100% recall</strong> while
+  (the KV-prefix path), the stateful model reaches <strong>100% recall</strong> while
   the stateless baseline stays at chance. So the agent&rsquo;s statefulness <em>does</em>
   carry information across independent passes and the model uses it, <strong>provided
   the reservoir is attended to, not added.</strong>
@@ -829,10 +829,14 @@
   <strong>Trained silence: meaningful "sometimes no response".</strong> The harness
   currently keys off entropy, but a real agent must decide when to speak. We trained a
   gate on the reservoir state to detect an <strong>unresolved thread</strong> (a trigger
-  event in the recent past). The reservoir gate reaches an <strong>F1 of 0.48</strong>
-  (P=0.71, R=0.36) while a stateless gate sits at <strong>F1=0.03</strong>: the
-  carried state lets the model "remember" it has an unresolved thread to address, even
-  after the trigger is gone from the input.
+  event in the recent past). The reservoir gate reaches an <strong>F1 of 0.96</strong>
+  (P=0.93, R=1.00) while a stateless gate sits at <strong>F1=0.34</strong>
+  (P=0.20, R=0.97): lacking memory, the stateless gate cannot tell when a thread is
+  open, so it degenerates to speaking almost everywhere (high recall, precision near the
+  base rate). The carried state lets the model "remember" it has an unresolved thread to
+  address — speaking selectively during the thread and falling silent once it is
+  resolved — even after the trigger is gone from the input. (Stable across seeds 0–2:
+  reservoir F1 0.96–0.99, stateless F1 0.34–0.45.)
 </p>
 
 <p>
