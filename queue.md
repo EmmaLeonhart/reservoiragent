@@ -73,27 +73,72 @@ arXiv endorsement and Discord/community outreach.
 
 ---
 
-## Paper — two internal contradictions found in a 2026-06-21 review (need Emma's run data)
+## Paper — two internal contradictions found in a 2026-06-21 review (run in a separate session)
 
-These are real and need the author's call against the actual experiment output; do
-NOT guess the numbers (hard rule: real numbers only).
+Both are real. Hard rule: **real numbers only — do NOT guess the F1s; get them from
+an actual run.** Concrete test-and-fix steps below.
 
-1. **Gate-D (unresolved-thread) F1 is reported two different ways.** `FINDINGS.md`
-   line ~752 (summary) and lines ~1199-1201 (Appendix E) say reservoir **F1 ≈ 0.96
-   (P=0.93, R=1.00)** vs stateless **≈ 0.34** (stateless = "always speak", recall≈1).
-   But the main result section lines ~773-775 say reservoir **F1 = 0.48 (P=0.71,
-   R=0.36)** vs stateless **F1 = 0.03 (P=1.00, R=0.02)** (stateless = misses the
-   thread, recall≈0). Same experiment, but they disagree on both the reservoir number
-   AND the stateless behavior. Resolve to the real run output and make all three
-   locations agree. Results are gitignored, so the canonical numbers aren't in the
-   repo — re-run or read the run log.
-2. **KV-append vs KV-prefix terminology contradicts itself.** Line ~450 says "we use
-   KV-append and KV-prefix interchangeably for the same injection," but lines ~104,
-   ~1054, and ~1132 (Appendix A "not done") treat **KV-append** as a *distinct,
-   not-done* richer variant (true KV-cache append, which HF `generate` won't expose a
-   hook for) vs the **KV-prefix** path that was actually run. Pick one usage: either
-   they're the same (then drop the "KV-append not done" bullet at line ~1132), or
-   they're distinct (then fix line ~450 and use the names consistently throughout).
+### Fix 1 — Gate-D (unresolved-thread) F1 is reported two different ways
+
+**The conflict.** Same experiment, two disagreeing number sets in `FINDINGS.md`:
+- line ~752 (cross-pass summary) and lines ~1199-1201 (Appendix E): reservoir
+  **F1 ≈ 0.96 (P=0.93, R=1.00)** vs stateless **≈ 0.34**, and characterizes the
+  stateless gate as *"always speak"* (recall ≈ 1).
+- lines ~773-775 (the main "unresolved thread" result section): reservoir
+  **F1 = 0.48 (P=0.71, R=0.36)** vs stateless **F1 = 0.03 (P=1.00, R=0.02)**, and
+  characterizes the stateless gate as *missing the thread* (recall ≈ 0.02).
+These disagree on both the reservoir number and the stateless baseline's behavior,
+so they're two different runs/configs that got pasted into different sections.
+
+**How to test (get the canonical numbers).** The experiment is the `silence`
+subcommand:
+```
+python scripts/run.py silence
+```
+Defaults (`scripts/run.py` ~789-796): `--K 300 --T 4000 --speak-window 5 --rho 0.9
+--input-scaling 0.5 --seed 0`. `speak-window 5` matches the paper text ("within the
+last 5 passes"), so the default config IS the paper config — run it as-is. It calls
+`reservoir.silence.evaluate_silence_gate`, prints `P/R/F1` for `reservoir_gate` and
+`stateless_gate` + the speak base rate, and writes the canonical values to
+**`results/silence_gate.json`** (gitignored — that's why the number isn't in the
+repo) plus the figure `docs/silence.png`. Read `results/silence_gate.json` for the
+authoritative `precision`/`recall`/`f1`.
+
+**How to fix.** Take the numbers from `results/silence_gate.json` (one run, one
+seed) and make ALL of these agree to them:
+- line ~752 (summary), lines ~773-775 (main section), lines ~1199-1201 (Appendix E),
+  and the `docs/silence.png` caption / any figure-caption mention.
+- Also make the *stateless-baseline description* consistent with what the run shows
+  — if the real stateless gate has recall ≈ 1 it's "always speaks"; if recall ≈ 0 it
+  "misses the thread." Right now the two sections describe opposite failure modes;
+  only one is true. Record the seed + config in the text so it's reproducible.
+- If runs vary seed-to-seed, run a few seeds and report mean (± range), then use that
+  everywhere rather than a single cherry-picked seed.
+
+### Fix 2 — KV-append vs KV-prefix terminology (the code already resolves this)
+
+**The conflict.** Line ~450 says "we use KV-append and KV-prefix interchangeably for
+the same injection," but lines ~104, ~1054, and ~1132 (Appendix A "not done") treat
+**KV-append** as a distinct, *not-done* richer variant.
+
+**No experiment needed — the source code settles it.** Strict mid-layer KV-append is
+NOT implemented; the prefix path is what actually ran:
+- `src/reservoir/kv_inject.py:85` — "Wiring KV-append into a live HF GPT-2
+  (transformers 5.4) is deliberately NOT done this [way]" (no hook to append KV rows
+  to `key_states/value_states` mid-layer).
+- `src/reservoir/kv_live.py:9-14` — the path used is "project the reservoir state into
+  a handful of **prefix** [tokens]… not the strict mid-layer KV-append."
+
+So the "not done" bullets (104/1054/1132) are the CORRECT statements, and line ~450's
+"interchangeably / the same injection" is the wrong/loose one.
+
+**How to fix.** Correct line ~450: don't call them the same. State it precisely —
+the **strict mid-layer KV-append** (reservoir rows appended to the layer's K/V) is
+not done because HF `generate` exposes no hook for it; the **KV-prefix** path (state
+projected to prefix pseudo-tokens) is the robust equivalent that was actually run and
+that yields the cross-pass recall. Then use the two names consistently for those two
+distinct things throughout (audit every "KV-append"/"KV-prefix" mention: ~52, ~99-111,
+~427, ~450-455, ~1054-1058, ~1132). Keep the Appendix A "KV-append not done" bullet.
 
 ## Always last — restart the three crons and summarize
 
